@@ -1,11 +1,10 @@
-	<svg viewBox="-10 -10 90 60">
-			<polyline points="0,0 20,40 40,0 60,40 80,0"stroke="red" fill="transparent" stroke-width="1" filter="url(#f1)"/>
-			<polyline points="10,20 20,0 30,20 50,20 60,0 70,20"stroke="blue" fill="transparent" stroke-width="1" filter="url(#f1)"/>
-			<defs>
-				<filter id="f1" x="0" y="0">
-				  <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
-				  <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-				</filter>
-			</defs>
-		</svg>
-	
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 90 60">
+    <polyline points="0,0 20,40 40,0 60,40 80,0" stroke="red" fill="transparent" stroke-width="1" filter="url(#f1)"/>
+    <polyline points="10,20 20,0 30,20 50,20 60,0 70,20" stroke="blue" fill="transparent" stroke-width="1" filter="url(#f1)"/>
+    <defs>
+        <filter id="f1" x="0" y="0">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+            <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+        </filter>
+    </defs>
+</svg>
