@@ -1,4 +1,5 @@
 const _Links = [
+
     "https://classic.minecraft.net/",
     "http://eelslap.com/",
     "https://alwaysjudgeabookbyitscover.com/",
