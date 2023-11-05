@@ -1,6 +1,8 @@
 const _Links = [
-    "https://di.se", 
-    "https://aftonbladet.se",
+
+    "https://classic.minecraft.net/",
+    "http://eelslap.com/",
+    "https://alwaysjudgeabookbyitscover.com/",
 ]; 
 
 
