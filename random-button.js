@@ -45,7 +45,9 @@ const _Links = [
     "https://ncs.io",
     "https://dogeminer2.com",
     "https://framesynthesis.com/drivingsimulator/maps/",
-    "http://www.flashbynight.com/drench/"
+    "http://www.flashbynight.com/drench/",
+    "https://www.linerider.com/",
+    "https://www.shredsauce.com/"
 ]; 
 
 
