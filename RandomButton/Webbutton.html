@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>Algot's web-buttton</title>
+		<link rel="icon" href="https://www.algot.fun/logosmall.png">
+		<link rel="stylesheet" href="Webbutton.css">
+	</head>
+	<script type="module">
+		import randomButton from "./random-button.js";
+		//"load" event körs när sidan laddats klart 
+		window.addEventListener("load", (event) => {
+			//setup random button
+			randomButton("btn-random");
+		});
+	</script>
+	<body>
+		<center>
+			<button id="btn-random">Random site</button>
+		</center>
+	</body>
+</html>
