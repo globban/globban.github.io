@@ -1,15 +1,8 @@
 h1 {
 	font-size: 3em;
-	color: #000000;
 	text-shadow: 2px 6px 8px rgb(255, 0, 0);
 }
 
-body {
-	background: linear-gradient(90deg, rgb(4, 0, 83) 0%, rgba(0, 0, 0, 1) 50%, rgb(92, 0, 0) 100%);
-	color: rgb(255, 0, 0);
-	animation-name: bganim;
-	animation-duration: 4s;
-}
 
 a:visited {
 	color: rgb(0, 255, 0);
@@ -31,7 +24,6 @@ a:hover {
 }
 
 h2 {
-	color: rgb(0, 0, 0);
 	text-shadow: 1px 3px 4px rgb(25, 0, 255);
 	font-size: 3em;
 }
@@ -41,14 +33,7 @@ h3 {
 	font-size: 2rem;
 }
 
-div.sticky {
-	position: -webkit-sticky;
-	position: sticky;
-	bottom: 0;
-	padding: 5em 0 1em 2em;
-	size: 0.1em;
 
-}
 
 div.sticky a {
 	color: rgb(255, 0, 0);
@@ -57,3 +42,20 @@ div.sticky a {
 div.sticky a:hover {
 	color: rgb(0, 0, 255);
 }
+body {
+	padding: 25px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	
+  }
+  
+  .dark-mode {
+	background-color: rgb(255, 255, 255);
+	color: rgb(0, 0, 0);
+  }
+
+  button {
+	border-radius: 1cm;
+	background-color:white ;
+	width: 3cm;
+  }
