@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>Algot's Clicker game</title>
+		<link rel="stylesheet" href="index.css">
+		<script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+		<script type="module">
+			import initScoreHandler from "./ClickerScore/clicker-score.js";
+			initScoreHandler("clickerButton", "currentScore","highScore");
+
+			window.addEventListener("load", (event) => {
+				const modeButton = document.getElementById("modeButton");
+				modeButton.addEventListener("click", () => {
+					var element = document.body;
+					element.classList.toggle("dark-mode");
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<button id="modeButton">Toggle light mode</button>
+		<div>
+			<h1>Clicker Game</h1>
+			<button id="clickerButton"><h1>Click!</h1></button>
+			<h2>your score: <span id="currentScore"></span></h2> 
+			<h2>highscore: <span id="highScore"></span></h2> 
+		</div>
+		
+	</body>
+</html>

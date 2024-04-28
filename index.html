@@ -1,22 +1,30 @@
 <html>
-<head>
+	<head>
 		<title>Algot's web-workshop</title>
-		<script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
 		<link rel="icon" href="https://www.algot.fun/logosmall.png">
 		<link rel="stylesheet" href="index.css">
+		<script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+		<script type="module">
+			window.addEventListener("load", (event) => {
+				const modeButton = document.getElementById("modeButton");
+				modeButton.addEventListener("click", () => {
+					var element = document.body;
+					element.classList.toggle("dark-mode");
+				});
+			});
+		</script>
 	</head>
 	<body>
 		<h1>Welcome to Algot's web-workshop  <i class="fa-solid fa-face-smile fa-sm"></i></h3>
-			<button onclick="myFunction()">Toggle light mode</button>
-			<img style="height:25em" src="logo.svg"/>
+		<img style="height:25em" src="logo.svg"/>
+		<button id="modeButton">Toggle light mode</button>
 		<h2>Algot.fun</h2>
 		<a href= "/RandomButton/Webbutton.html"><img src="link pictures/random button.jpg" style="width: 5em;"></a>		
         <a href= "/MC.html"><img src="link pictures/MINECRAFT SERVER.jpg" style="width: 5em;"></a>
 		<h2>links</h2>
-    <a href="https://classic.minecraft.net/"><img src="link pictures/minecraft.jpg" style="width: 3em;" ></a>
-	  <a href="http://eelslap.com/" ><img src="link pictures/fish slap.jpg" style="width: 3em;" ></a>
-      
-	  <a href="https://alwaysjudgeabookbyitscover.com/"><img src="link pictures/fun books.jpg" style="width: 3em;"></a>
+    	<a href="https://classic.minecraft.net/"><img src="link pictures/minecraft.jpg" style="width: 3em;" ></a>
+	  	<a href="http://eelslap.com/" ><img src="link pictures/fish slap.jpg" style="width: 3em;" ></a>
+		<a href="https://alwaysjudgeabookbyitscover.com/"><img src="link pictures/fun books.jpg" style="width: 3em;"></a>
 		<a href="https://cat-bounce.com/"><img src="link pictures/cat bounce.jpg" style="width: 3em;"></a>
 		<a href="https://theuselessweb.com/"><img src="link pictures/uselessweb.jpg" style="width: 3em;"></a>
 		<a href="https://oimo.io"><img src="link pictures/oimoio.jpg" style="width: 3em;"></a>
@@ -60,14 +68,8 @@
 		<a href="https://dogeminer2.com"><img src="link pictures/doge miner.jpg" style="width: 3em;"></a>
 		<a href="https://framesynthesis.com/drivingsimulator/maps/"><img src="link pictures/earth drive.jpg" style="width: 3em;"></a>      
 		<a href="http://www.flashbynight.com/drench/"><img src="link pictures/wrldsimplstgame.jpg" style="width: 3em;"></a>        
-    <a href="https://www.linerider.com/"><img src="link pictures/Line rider.jpg" style="width: 3em;"></a>
-    <a href="https://www.shredsauce.com/"><img src="link pictures/shredsauce.jpg" style="width: 3em;"></a>
-	<a href="https://mtsl.dk/csgo/"><img src="link pictures/case clicker.jpg" style="width: 3em;"></a>
-	<script>
-		function myFunction() {
-		   var element = document.body;
-		   element.classList.toggle("dark-mode");
-		}
-		</script>
+		<a href="https://www.linerider.com/"><img src="link pictures/Line rider.jpg" style="width: 3em;"></a>
+		<a href="https://www.shredsauce.com/"><img src="link pictures/shredsauce.jpg" style="width: 3em;"></a>
+		<a href="https://mtsl.dk/csgo/"><img src="link pictures/case clicker.jpg" style="width: 3em;"></a>
 	</body>
 </html>
