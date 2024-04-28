@@ -57,5 +57,6 @@ body {
   button {
 	border-radius: 1cm;
 	background-color:white ;
-	width: 3cm;
+	/* width: 5cm; */
+	padding: 1em 2em;
   }
