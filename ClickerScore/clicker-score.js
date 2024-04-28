@@ -44,5 +44,7 @@ export default async function initScoreHandler(clickButtonId, currentScoreDivId,
             await storeHighScore(currentScore);
             document.getElementById(highScoreDivId).innerHTML = currentScore;
         }
+
+        document.getElementById(highScoreDivId).innerHTML = Number(await getHighScore());
     });
 }
