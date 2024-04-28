@@ -1,0 +1,25 @@
+button {
+	background: linear-gradient(90deg, rgb(92, 0, 0) 0%, rgba(0,0,0,1) 50%, rgb(0, 0, 83) 100%);
+	color: white;
+	padding: 100px 320px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 50px;
+}
+           
+button:hover {
+	color: rgb(0, 255, 0);
+}
+
+a { 
+	color:blue;
+	margin-right: 2em;
+	font-size: 6.5em;
+	font-style: bold;
+}
+
+body {
+	background: linear-gradient(90deg, rgb(4, 0, 83) 0%, rgba(0,0,0,1) 50%, rgb(92, 0, 0) 100%);
+	color:rgb(255, 0, 0);
+}

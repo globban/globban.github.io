@@ -1,0 +1,61 @@
+h1 {
+	font-size: 3em;
+	text-shadow: 2px 6px 8px rgb(255, 0, 0);
+}
+
+
+a:visited {
+	color: rgb(0, 255, 0);
+	text-shadow: 1px 3px 4px rgb(25, 0, 255);
+}
+
+a {
+	color: blue;
+	margin-right: 0.2em;
+	font-size: 6.5em;
+	font-style: bold;
+}
+
+a:hover {
+	color: rgba(0, 255, 0, 0);
+	margin-right: 0.1em;
+	text-shadow: 1px 3px 4px rgb(25, 0, 255);
+	margin-left: 0.1em;
+}
+
+h2 {
+	text-shadow: 1px 3px 4px rgb(25, 0, 255);
+	font-size: 3em;
+}
+
+h3 {
+	color: rgba(150, 0, 0, 0);
+	font-size: 2rem;
+}
+
+
+
+div.sticky a {
+	color: rgb(255, 0, 0);
+}
+
+div.sticky a:hover {
+	color: rgb(0, 0, 255);
+}
+body {
+	padding: 25px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	
+  }
+  
+  .dark-mode {
+	background-color: rgb(255, 255, 255);
+	color: rgb(0, 0, 0);
+  }
+
+  button {
+	border-radius: 1cm;
+	background-color:white ;
+	width: 3cm;
+  }
