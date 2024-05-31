@@ -1,27 +1,37 @@
+/* Add a black background color to the top navigation */
+.topnav {
+	background-color: #333;
+	overflow: hidden;
+  }
+  
+  /* Style the links inside the navigation bar */
+  .topnav a {
+	float: left;
+	color: #ffee00;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+
+  }
+  
+  /* Change the color of links on hover */
+  .topnav a:hover {
+	background-color: yellow;
+	color: black;
+  }
+  
+  /* Add a color to the active/current link */
+  .topnav a.active {
+	background-color: yellow;
+	color: rgb(0, 0, 0);
+  }
+
 h1 {
 	font-size: 3em;
-	text-shadow: 2px 6px 8px rgb(255, 0, 0);
+	text-shadow: 2px 6px 8px yellow;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
-
-a:visited {
-	color: rgb(0, 255, 0);
-	text-shadow: 1px 3px 4px rgb(25, 0, 255);
-}
-
-a {
-	color: blue;
-	margin-right: 0.2em;
-	font-size: 6.5em;
-	font-style: bold;
-}
-
-a:hover {
-	color: rgba(0, 255, 0, 0);
-	margin-right: 0.1em;
-	text-shadow: 1px 3px 4px rgb(25, 0, 255);
-	margin-left: 0.1em;
-}
 
 h2 {
 	text-shadow: 1px 3px 4px rgb(25, 0, 255);
@@ -34,29 +44,27 @@ h3 {
 }
 
 
-
-div.sticky a {
-	color: rgb(255, 0, 0);
-}
-
-div.sticky a:hover {
-	color: rgb(0, 0, 255);
-}
-
 body {
 	padding: 25px;
-	background-color: rgb(0, 0, 0);
+	background: background-color: #000000;
+	opacity: 1;
+	background-image: radial-gradient(#1f1f1f 1.4000000000000001px, #000000 1.4000000000000001px);
+	background-size: 28px 28px;
 	color: rgb(255, 255, 255);
 }
+
+
   
 .dark-mode {
-	background-color: rgb(255, 255, 255);
-	color: rgb(0, 0, 0);
+	background-color: #000000;
+opacity: 1;
+background: radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent), radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent) 40px 40px, linear-gradient(#1f1f1f 3.2px, transparent 3.2px) 0 -1.6px, linear-gradient(90deg, #1f1f1f 3.2px, #000000 3.2px) -1.6px 0;
+background-size: 80px 80px, 80px 80px, 40px 40px, 40px 40px;
 }
 
 button {
 	border-radius: 1.5em;
-	background-color:white ;
+	background-color:rgb(94, 94, 94) ;
 	padding: 1em 2em;
 }
  
@@ -71,3 +79,14 @@ button {
 	}
 	 
 }
+
+a img {
+	width:15em;
+}
+
+#content { 
+	width: 60%; margin: 0 auto 0 auto; 
+}
+
+body{text-align:center;}
+.wrapper{width:80%;margin:0 auto;text-align:left;}
