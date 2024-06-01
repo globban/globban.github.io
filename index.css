@@ -45,7 +45,6 @@ h3 {
 
 
 body {
-	padding: 25px;
 	background: background-color: #000000;
 	opacity: 1;
 	background-image: radial-gradient(#1f1f1f 1.4000000000000001px, #000000 1.4000000000000001px);
@@ -64,8 +63,9 @@ background-size: 80px 80px, 80px 80px, 40px 40px, 40px 40px;
 
 button {
 	border-radius: 1.5em;
-	background-color:rgb(94, 94, 94) ;
+	background-color:rgb(48, 48, 48) ;
 	padding: 1em 2em;
+	border-color: #ffee00;
 }
  
 
