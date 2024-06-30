@@ -2,6 +2,7 @@
 	<head>
 		<title>Algot's web-buttton</title>
 		<link rel="icon" href="https://www.algot.fun/logosmall.png">
+		<link rel="stylesheet" href="index.css">
 	</head>
 	<script type="module">
 		import randomButton from "./random-button.js";
@@ -11,63 +12,6 @@
 			randomButton("btn-random");
 		});
 	</script>
-	<style>
-       body {
-	background-color: #000000;
-	opacity: 1;
-	background-image: radial-gradient(#1f1f1f 1.4000000000000001px, #000000 1.4000000000000001px);
-	background-size: 28px 28px;
-	color: rgb(255, 255, 255);
-    }
-    /* Add a black background color to the top navigation */
-.topnav {
-	background-color: #333;
-	overflow: hidden;
-  }
-  
-  /* Style the links inside the navigation bar */
-  .topnav a {
-	float: left;
-	color: #ffee00;
-	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  }
-  
-  /* Change the color of links on hover */
-  .topnav a:hover {
-	background-color: yellow;
-	color: black;
-  }
-  
-  /* Add a color to the active/current link */
-  .topnav a.active {
-	background-color: yellow;
-	color: rgb(0, 0, 0);
-  }
-
-h1 {
-	font-size: 3em;
-	text-shadow: 2px 6px 8px yellow;
-	font-family: Arial, Helvetica, sans-serif;
-    color: white;
-}
-
-button {
-	border-radius: 1.5em;
-	background-color:rgb(48, 48, 48) ;
-	padding: 1em 2em;
-	border-color: #ffee00;
-}
-
-#content { 
-	width: 60%; margin: 0 auto 0 auto; 
-}
-
-body{text-align:center;}
-.wrapper{width:80%;margin:0 auto;text-align:left;}
-	</style>
 	<body>
 	<div class="topnav">
 			<a class="active" href="/index.html">Home</a>
@@ -77,10 +21,11 @@ body{text-align:center;}
 			<a href="/MC.html">MC server</a>
 			<a href="/stickman.html">stickman hook</a>
 		  </div>
-		  
-		  
+		  <div class="toprgb"></div>
+		  <div class="blur toprgb"></div>
+		  <div class="blur toprgb"></div>
 		  <h1>Take me to a random website</h1>
-		 <img style="height:13em" src="logo.svg"/>
+		 <img style="height:13em; padding-bottom: 5em;" src="logo.svg"/>
 		  <div id="content">
 				<button id="btn-random"><h1>please</h1></button>
 	        </div>

@@ -1,13 +1,15 @@
 /* Add a black background color to the top navigation */
 .topnav {
-	background-color: #333;
+	background-color: #202020;
 	overflow: hidden;
+	position: sticky;
+	padding: 20px 20px;
   }
   
   /* Style the links inside the navigation bar */
   .topnav a {
-	float: left;
-	color: #ffee00;
+	float: center;
+	color: #ffffff;
 	text-align: center;
 	padding: 14px 16px;
 	text-decoration: none;
@@ -17,26 +19,29 @@
   
   /* Change the color of links on hover */
   .topnav a:hover {
-	background-color: yellow;
+	background-color: rgb(255, 255, 255);
 	color: black;
   }
   
   /* Add a color to the active/current link */
   .topnav a.active {
-	background-color: yellow;
+	background-color: rgb(255, 255, 255);
 	color: rgb(0, 0, 0);
+  }
+
+  .toprgb {
+	height: 4px;
+	width: 100vw;
+	background-image: linear-gradient(to right, red, yellow, rgb(0, 255, 0), rgb(33, 33, 255), rgb(122, 0, 255), red);
+  }
+  
+  .blur {
+	filter: blur(8px);
   }
 
 h1 {
 	font-size: 3em;
-	text-shadow: 2px 6px 8px yellow;
 	font-family: Arial, Helvetica, sans-serif;
-}
-
-
-h2 {
-	text-shadow: 1px 3px 4px rgb(25, 0, 255);
-	font-size: 3em;
 }
 
 h3 {
@@ -46,27 +51,32 @@ h3 {
 
 
 body {
-	background: background-color: #000000;
+	background: #000000;
 	opacity: 1;
 	background-image: radial-gradient(#1f1f1f 1.4000000000000001px, #000000 1.4000000000000001px);
 	background-size: 28px 28px;
 	color: rgb(255, 255, 255);
+	width: 100%;
+	overflow-y:auto;
+	overflow-x: hidden;
 }
 
 
   
 .dark-mode {
-	background-color: #000000;
+background-color: #000000;
 opacity: 1;
-background: radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent), radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent) 40px 40px, linear-gradient(#1f1f1f 3.2px, transparent 3.2px) 0 -1.6px, linear-gradient(90deg, #1f1f1f 3.2px, #000000 3.2px) -1.6px 0;
-background-size: 80px 80px, 80px 80px, 40px 40px, 40px 40px;
+background: radial-gradient(#ededed 1.4000000000000001px, #ffffff 1.4000000000000001px);
+background-size: 28px 28px;
+
 }
 
 button {
 	border-radius: 1.5em;
-	background-color:rgb(48, 48, 48) ;
+	background-color:rgb(45, 45, 45) ;
 	padding: 1em 2em;
-	border-color: #ffee00;
+	border-color: #ffffff;
+	box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
 }
  
 
@@ -83,6 +93,15 @@ button {
 
 a img {
 	width:15em;
+	
+	padding: 0.3em;
+}
+
+a img:hover {
+	animation-name: button ;
+	animation-duration: 100s;
+	animation-direction: forwards;
+	border-radius: 0.5em;
 }
 
 #content { 
@@ -91,3 +110,16 @@ a img {
 
 body{text-align:center;}
 .wrapper{width:80%;margin:0 auto;text-align:left;}
+
+@keyframes button{
+    0% {
+		box-shadow: rgba(72, 135, 202, 0) 0 0 30px 10px;
+	}
+
+	1% {
+		box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
+	}
+	100% {
+		box-shadow: rgba(255, 255, 255, 1) 0 0 30px 11px;
+	}
+}
