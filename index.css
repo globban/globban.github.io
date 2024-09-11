@@ -3,7 +3,7 @@
 	background-color: #202020;
 	overflow: hidden;
 	position: sticky;
-	padding: 20px 20px;
+	padding: 16px 17px;
   }
   
   /* Style the links inside the navigation bar */
@@ -11,7 +11,8 @@
 	float: center;
 	color: #ffffff;
 	text-align: center;
-	padding: 14px 16px;
+	padding-right: 1em;
+	padding-left: 1em;
 	text-decoration: none;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 
@@ -61,15 +62,6 @@ body {
 	overflow-x: hidden;
 }
 
-
-  
-.dark-mode {
-background-color: #000000;
-opacity: 1;
-background: radial-gradient(#ededed 1.4000000000000001px, #ffffff 1.4000000000000001px);
-background-size: 28px 28px;
-
-}
 
 button {
 	border-radius: 1.5em;
