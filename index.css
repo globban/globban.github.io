@@ -34,10 +34,12 @@
 	height: 4px;
 	width: 100vw;
 	background-image: linear-gradient(to right, red, yellow, rgb(0, 255, 0), rgb(33, 33, 255), rgb(122, 0, 255), red);
+	/*background-image: linear-gradient(to right, red, red, white, red, white, red, white);*/
   }
+
   
   .blur {
-	filter: blur(8px);
+	filter: blur(4px);
   }
 
 h1 {
@@ -84,9 +86,10 @@ button {
 }
 
 a img {
-	width:15em;
-	
+	width:14%;
+	border-radius: 0.65em;
 	padding: 0.3em;
+	border: #000000;
 }
 
 a img:hover {
