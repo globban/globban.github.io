@@ -2,6 +2,7 @@
 	<head>
 		<title>clock</title>
 		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
+      <link rel="stylesheet" href="index.css">
 		<script>function add_zero(digit)
             {
                if(digit < 10)
@@ -29,44 +30,25 @@
             
             setInterval(clock, 1000);
 
-            function darkmode() {
-               var element = document.body;
-               element.classList.toggle("dark-mode");
-               
-            }              
 	    </script>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
             body
             {
-              background-image: url("data:image/png;base64,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");
+              font-size:6em ;
                color: white;
                font-family: "Press Start 2P";
-               font-size: 60pt;
-               height: 100vh;
-               user-select: none;
-              background-repeat: no-repeat;
-              background-size: cover;
-              backdrop-filter: blur(0,5px);
-              overflow-y: hidden;
-              padding: 0px 0px;
+               overflow-y: hidden;
             }
-
-            .dark-mode {
-              background-image: url("/0099.png");
-              color: white;
-            }
-
-            button {
-               padding: auto;
-            }
+            
+            
 
             #clock
             {
               align-items: center;
                display: flex;
-               height: 100%;
+               height: 99%;
                justify-content: center;
                text-align: center;
                
@@ -77,9 +59,12 @@
         </style>
     </head>
 	<body>
+              <div class="toprgb"></div>
+              <div class="blur toprgb"></div>
               <div id="clock">
                
                 <span id="digits"></span>
             </div>
-            <button onclick="darkmode()">switch</button>
+            <div class="blur toprgb"></div>
+            <div class="toprgb"></div>
 	</body>
