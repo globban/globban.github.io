@@ -33,7 +33,7 @@
   .toprgb {
 	height: 4px;
 	width: 100vw;
-	background-image: linear-gradient(to right, red, yellow, rgb(0, 255, 0), rgb(33, 33, 255), rgb(122, 0, 255), red);
+	background-image: linear-gradient(to right, #0ff, #00f, #f0f, #f00, #ff0, #85ff00, #0ff);
 	/*background-image: linear-gradient(to right, red, red, white, red, white, red, white);*/
   }
 
