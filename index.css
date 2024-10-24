@@ -56,7 +56,7 @@ h3 {
 body {
 	background: #000000;
 	opacity: 1;
-	background-image: radial-gradient(#1f1f1f 1.4000000000000001px, #000000 1.4000000000000001px);
+	background-image: radial-gradient(#292929 1.4000000000000001px, #000000 1.4000000000000001px);
 	background-size: 28px 28px;
 	color: rgb(255, 255, 255);
 	width: 100%;
@@ -90,31 +90,36 @@ a img {
 	border-radius: 0.65em;
 	padding: 0.3em;
 	border: #000000;
+	animation: in 1s;
 }
 
 a img:hover {
-	animation-name: button ;
-	animation-duration: 100s;
 	animation-direction: forwards;
 	border-radius: 0.5em;
+	animation: out 1s;
 }
 
-#content { 
-	width: 60%; margin: 0 auto 0 auto; 
-}
+
 
 body{text-align:center;}
 .wrapper{width:80%;margin:0 auto;text-align:left;}
 
-@keyframes button{
+@keyframes  out{
     0% {
 		box-shadow: rgba(72, 135, 202, 0) 0 0 30px 10px;
 	}
 
-	1% {
-		box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
-	}
 	100% {
 		box-shadow: rgba(255, 255, 255, 1) 0 0 30px 11px;
+	}
+}
+
+@keyframes  in{
+    0% {
+		box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
+	}
+
+	100% {
+		box-shadow: rgba(72, 135, 202, 0) 0 0 30px 10px;
 	}
 }
