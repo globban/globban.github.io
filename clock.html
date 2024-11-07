@@ -30,6 +30,11 @@
             
             setInterval(clock, 1000);
 
+            function myFunction()
+            {
+               window.location.href = "https://www.algot.fun/"
+            }
+
 	    </script>
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -53,7 +58,7 @@
                text-align: center;
                
             }
-
+             
             
 
         </style>
@@ -62,9 +67,8 @@
               <div class="toprgb"></div>
               <div class="blur toprgb"></div>
               <div class="blur toprgb"></div>
-              <div id="clock">
-               
-                <span id="digits"></span>
+              <div id="clock" onclick="myFunction()">
+               <span id="digits" ></span>
             </div>
             <div class="blur toprgb"></div>
             <div class="blur toprgb"></div>
