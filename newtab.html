@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>new tab</title>
+		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
+      <link rel="stylesheet" href="index.css">
+    </head>
+    <script>
+        setInterval(showTime, 1000);
+
+// Defining showTime funcion
+function showTime() {
+    // Getting current time and date
+    let time = new Date();
+    let hour = time.getHours();
+    let min = time.getMinutes();
+    am_pm = "NAH";
+    hour =
+        hour < 10 ? "0" + hour : hour;
+    min = min < 10 ? "0" + min : min;
+    let currentTime =
+        hour +
+        ":" +
+        min
+    // Displaying the time
+    document.getElementById(
+        "clock"
+    ).innerHTML = currentTime;
+}
+
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        .center
+        {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        input {
+            padding-right:15em;
+            padding-top: 1em;
+            padding-bottom: 1em;
+            background-color: rgb(255, 255, 255);
+            color: #000000;
+            border-image: linear-gradient(to right, #0ff, #00f );
+            box-shadow: none;
+            border-width: 5px;
+            border-image-slice: 1;
+            font-size: 1em;
+            position: absolute;
+            transform: translate(-14.1em, 0px );
+        }
+
+        .toprgb {
+            background-image: linear-gradient(to right, #0ff, #00f, #0ff ) ;
+        }
+
+
+        #clock {
+            font-size: 10em;
+            font-family: "Press Start 2P";
+            transform: translate( 0px, -1em );
+        }
+
+        body {
+            background-image: url('/bmw.jpg') ;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+    </style>
+	<body onload="showTime()">
+              <div class="toprgb" style="position: absolute; top: 0px;"></div>
+              <div class="blur toprgb"></div>
+              <div class="center">
+                <div id="clock"></div>
+                <div class="blur">
+                <input>
+                </div>   
+                </form>
+                <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
+                    <input name="sitesearch" type="hidden">
+                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something" required="false"  type="text" style="position: 0 0;">
+        </div>
+            <div class="toprgb blur" style="position: absolute; bottom: 8px;"></div>
+            <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
+	</body>
