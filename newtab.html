@@ -3,10 +3,11 @@
 		<title>new tab</title>
 		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
       <link rel="stylesheet" href="index.css">
+      <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
     </head>
     <script>
         setInterval(showTime, 1000);
-
+        
 // Defining showTime funcion
 function showTime() {
     // Getting current time and date
@@ -25,7 +26,34 @@ function showTime() {
     document.getElementById(
         "clock"
     ).innerHTML = currentTime;
+
 }
+var colorPicker = new iro.ColorPicker('#picker');
+
+colorPicker.on('color:change', function(color) {
+    // Select all elements with the class 'my-class'
+let elements = document.querySelectorAll('.toprgb');
+
+
+// Loop through all the elements and change their background color
+elements.forEach(function(element) {
+    element.style.backgroundColor = color.hexString;
+    let inputElement = document.querySelector('input[type="text"]');
+
+// Change the border color
+inputElement.style.borderColor = color.hexString; // You can use any valid color
+});
+
+});function myFunction() {
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "block") {
+    x.style.display = "none";
+  } else {
+    x.style.display = "block";
+  }
+}
+
+
 
     </script>
     <style>
@@ -39,19 +67,21 @@ function showTime() {
             transform: translate(-50%, -50%);
         }
 
-        input {
+        input[type=text] {
             padding-right:15em;
             padding-top: 1em;
             padding-bottom: 1em;
             padding-left: 1em;
             background-color: rgb(255, 255, 255);
             box-shadow: none;
-            border-width: 0px;
+            border-width: 10px;
             border-image-slice: 1;
             font-size: 1em;
             position: absolute;
             transform: translate(-14.1em, 10em );
-            border-radius: 50px;
+            border-radius: 50   px;
+            margin: 0.4rem;
+            border-radius: 40px;
         }
 
         form {
@@ -59,7 +89,8 @@ function showTime() {
         }
 
         .toprgb {
-            background-image: linear-gradient(to right, #0ff, #00f, #0ff ) ;
+            background-color: rgb(255, 255, 255);
+            background-image: none;
         }
 
 
@@ -70,9 +101,6 @@ function showTime() {
         }
 
         body {
-            background-image: url('/bmw.jpg') ;
-            background-repeat: no-repeat;
-            background-size: cover;
             overflow: hidden;
         }
 
@@ -81,6 +109,11 @@ function showTime() {
             padding-top: 1em;
          }
 
+         button {
+            box-shadow: none;
+            background-color: black;
+            color: white;
+         }
         
     </style>
 	<body onload="showTime()">
@@ -89,13 +122,20 @@ function showTime() {
               <div class="center">
                 <div id="clock"></div>
                 <div class="blur">
-                <input>
+                <input type="text" style=" transform: translate( -14.7em, 9.4em  ); background-color: black;">
                 </div>   
-                </form>
+                
                 <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
                     <input name="sitesearch" type="hidden">
-                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something" required="false"  type="text" style="position: 0 0;">
-        </div>
+                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something"   type="text" style="position: absolute; border-width: 0px;">
+        </div></form>
+        <div id="myDIV">
+            
+          
+        <div class="" id="picker" style="position: absolute; bottom: 100px;"></div>
+        
+            </div>
+            <button onclick="myFunction()" style="position: absolute; bottom: 20px; left: 10px;">hide/show</button>
             <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
             <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
 	</body>
