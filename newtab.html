@@ -43,15 +43,19 @@ function showTime() {
             padding-right:15em;
             padding-top: 1em;
             padding-bottom: 1em;
+            padding-left: 1em;
             background-color: rgb(255, 255, 255);
-            color: #000000;
-            border-image: linear-gradient(to right, #0ff, #00f );
             box-shadow: none;
-            border-width: 5px;
+            border-width: 0px;
             border-image-slice: 1;
             font-size: 1em;
             position: absolute;
-            transform: translate(-14.1em, 0px );
+            transform: translate(-14.1em, 10em );
+            border-radius: 50px;
+        }
+
+        form {
+            border-radius: 40px;
         }
 
         .toprgb {
@@ -60,7 +64,7 @@ function showTime() {
 
 
         #clock {
-            font-size: 10vw;
+            font-size: 6vw;
             font-family: "Press Start 2P";
             transform: translate( 0px, -1em );
         }
@@ -69,12 +73,19 @@ function showTime() {
             background-image: url('/bmw.jpg') ;
             background-repeat: no-repeat;
             background-size: cover;
+            overflow: hidden;
         }
+
+        .blur {
+	        filter: blur(8px);
+            padding-top: 1em;
+         }
+
         
     </style>
 	<body onload="showTime()">
               <div class="toprgb" style="position: absolute; top: 0px;"></div>
-              <div class="blur toprgb"></div>
+              <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
               <div class="center">
                 <div id="clock"></div>
                 <div class="blur">
@@ -85,6 +96,6 @@ function showTime() {
                     <input name="sitesearch" type="hidden">
                     <input autocomplete="on" class="form-control search" name="q" placeholder="type something" required="false"  type="text" style="position: 0 0;">
         </div>
-            <div class="toprgb blur" style="position: absolute; bottom: 8px;"></div>
+            <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
             <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
 	</body>
