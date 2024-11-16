@@ -1,11 +1,174 @@
-<html>
-	<head>
-		<title>new tab</title>
-		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
-      <link rel="stylesheet" href="index.css">
-      <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Newtab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image" href="/logosmall.svg">
+    <style>
+       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+       
+       .center
+        {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .container {
+            position: absolute; left: 20px; bottom: 100px;;
+            align-items: center;
+            background-color: #6e6e6e6c;
+            border-radius: 1em;
+        }
+
+        input[type=text] {
+            padding-right:15em;
+            padding-top: 1em;
+            padding-bottom: 1em;
+            padding-left: 1em;
+            background-color: rgb(255, 255, 255);
+            box-shadow: none;
+            border-width: 10px;
+            font-size: 1em;
+            position: absolute;
+            transform: translate(-14.1em, 10em );
+            border-radius: 50px;
+            margin: 0.4rem;
+            border-radius: 40px;
+        }
+
+        form {
+            border-radius: 40px;
+        }
+
+        .toprgb {
+            background-color: rgb(0, 0, 0);
+            background-image: none;
+        }
+
+
+        #clock {
+            font-size: 6vw;
+            font-family: "Press Start 2P";
+            transform: translate( 0px, -1em );
+        }
+
+
+        .blur {
+	        filter: blur(8px);
+            padding-top: 1em;
+         }
+
+         button {
+            box-shadow: none;
+            background-color: black;
+            color: white;
+         }
+
+         body {
+            margin: 0;
+      font-family: 'Arial', sans-serif;
+      transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            color: #ffffff;
+        }    
+    </style>
+</head>
+<body>
+        <div class="toprgb" style="position: absolute; top: 0px;"></div>
+              <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
+              
+              <div class="center">
+                <div id="clock"></div>
+                
+                <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
+                    <input name="sitesearch" type="hidden">
+                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something"   type="text" style="position: absolute; border-width: 0px;">
+        </div></form>
+    <div id="myDIV">
+    <div class="container">
+        <h1>Background</h1>
+        
+        <input type="file" id="uploadImage" accept="image/*">
+        <h1>Neon color</h1>
+        <input type="color" id="colorPicker">
+        </div>
+        
+    </div>
+
+    
+    
+        
+            </div>
+            <button onclick="myFunction()" style="position: absolute; bottom: 20px; left: 10px;"><i class="fa-solid fa-pen"></i></button>
+            <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
+            <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
+
     <script>
+
+        //-----------------------------custom background------------------------------------------
+         // Function to apply the background image
+    function applyBackground(image) {
+      if (image) {
+        document.body.style.backgroundImage = image;
+        try {
+          // Remove the old image before saving the new one
+          localStorage.removeItem("backgroundImage");
+          localStorage.setItem("backgroundImage", image); // Save in localStorage
+        } catch (e) {
+          alert('Image is too large to store in localStorage.');
+        }
+      } else {
+        document.body.style.backgroundImage = ""; // Clear background
+        localStorage.removeItem("backgroundImage"); // Clear from storage
+      }
+    }
+
+    // Handle image upload
+    document.getElementById("uploadImage").addEventListener("change", function () {
+      const file = this.files[0];
+      if (file) {
+        // Check the size of the image (in bytes)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+          alert("File is too large. Please select an image smaller than 5MB.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const imageDataUrl = `url('${e.target.result}')`;
+          applyBackground(imageDataUrl); // Apply and save the uploaded image
+        };
+        reader.readAsDataURL(file); // Convert file to data URL
+      }
+    });
+
+    // Restore background on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedImage = localStorage.getItem("backgroundImage");
+      if (savedImage) {
+        document.body.style.backgroundImage = savedImage;
+      }
+    });
+
+        //----------------------------other code--------------------------------------------
         setInterval(showTime, 1000);
         
 // Defining showTime funcion
@@ -28,114 +191,62 @@ function showTime() {
     ).innerHTML = currentTime;
 
 }
-var colorPicker = new iro.ColorPicker('#picker');
-
-colorPicker.on('color:change', function(color) {
-    // Select all elements with the class 'my-class'
-let elements = document.querySelectorAll('.toprgb');
 
 
-// Loop through all the elements and change their background color
-elements.forEach(function(element) {
-    element.style.backgroundColor = color.hexString;
-    let inputElement = document.querySelector('input[type="text"]');
-
-// Change the border color
-inputElement.style.borderColor = color.hexString; // You can use any valid color
-});
-
-});function myFunction() {
+function myFunction() {
   var x = document.getElementById("myDIV");
-  if (x.style.display === "block") {
-    x.style.display = "none";
-  } else {
+  if (x.style.display === "none") {
     x.style.display = "block";
+  } else {
+    x.style.display = "none";
   }
 }
 
+// Function to set a cookie
+function setCookie(name, value, days) {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000)); // Cookie expires in 'days'
+      document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+    }
 
+    // Function to get a cookie by name
+    function getCookie(name) {
+      const cookieArr = document.cookie.split(";");
+      for (let i = 0; i < cookieArr.length; i++) {
+        let cookie = cookieArr[i].trim();
+        if (cookie.startsWith(name + "=")) {
+          return cookie.substring(name.length + 1);
+        }
+      }
+      return null; // Return null if cookie is not found
+    }
 
+    // Apply color to the specified CSS class
+    function applyColor(className, color) {
+      const elements = document.querySelectorAll(`.toprgb`);
+      elements.forEach(element => {
+        element.style.backgroundColor = color;
+      });
+    }
+
+    // Event listener for color picker
+    document.getElementById("colorPicker").addEventListener("input", function() {
+      const selectedColor = this.value;
+      applyColor("color-box", selectedColor); // Apply to color-box class
+      applyColor("text-box", selectedColor);  // Apply to text-box class (for demonstration)
+      setCookie("boxColor", selectedColor, 7); // Save color in cookie for 7 days
+    });
+
+    // Load the color from the cookie on page load
+    window.onload = function() {
+      const savedColor = getCookie("boxColor");
+      if (savedColor) {
+        applyColor("color-box", savedColor); // Apply saved color to color-box class
+        applyColor("text-box", savedColor);  // Apply saved color to text-box class (for demonstration)
+        document.getElementById("colorPicker").value = savedColor; // Set the picker to the saved color
+      }
+    }
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
-        .center
-        {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
 
-        input[type=text] {
-            padding-right:15em;
-            padding-top: 1em;
-            padding-bottom: 1em;
-            padding-left: 1em;
-            background-color: rgb(255, 255, 255);
-            box-shadow: none;
-            border-width: 10px;
-            border-image-slice: 1;
-            font-size: 1em;
-            position: absolute;
-            transform: translate(-14.1em, 10em );
-            border-radius: 50   px;
-            margin: 0.4rem;
-            border-radius: 40px;
-        }
-
-        form {
-            border-radius: 40px;
-        }
-
-        .toprgb {
-            background-color: rgb(255, 255, 255);
-            background-image: none;
-        }
-
-
-        #clock {
-            font-size: 6vw;
-            font-family: "Press Start 2P";
-            transform: translate( 0px, -1em );
-        }
-
-        body {
-            overflow: hidden;
-        }
-
-        .blur {
-	        filter: blur(8px);
-            padding-top: 1em;
-         }
-
-         button {
-            box-shadow: none;
-            background-color: black;
-            color: white;
-         }
-        
-    </style>
-	<body onload="showTime()">
-              <div class="toprgb" style="position: absolute; top: 0px;"></div>
-              <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
-              <div class="center">
-                <div id="clock"></div>
-                <div class="blur">
-                <input type="text" style=" transform: translate( -14.7em, 9.4em  ); background-color: black;">
-                </div>   
-                
-                <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
-                    <input name="sitesearch" type="hidden">
-                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something"   type="text" style="position: absolute; border-width: 0px;">
-        </div></form>
-        <div id="myDIV">
-            
-          
-        <div class="" id="picker" style="position: absolute; bottom: 100px;"></div>
-        
-            </div>
-            <button onclick="myFunction()" style="position: absolute; bottom: 20px; left: 10px;">hide/show</button>
-            <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
-            <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
-	</body>
+</body>
+</html>
