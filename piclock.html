@@ -1,84 +1,250 @@
-<html>
-	<head>
-		<title>pi-clock</title>
-		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
-      <link rel="stylesheet" href="index.css">
-		<script>function add_zero(digit)
-            {
-               if(digit < 10)
-               {
-                  digit = "0" + digit;
-               }
-               else
-               {
-                  digit = digit.toString();
-               }
-               
-               return digit
-            }
-            
-            function clock()
-            {
-               const now = new Date();
-               
-               let hours = now.getHours();
-               let minutes = now.getMinutes();
-               let seconds = now.getSeconds();
-               
-               document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes);
-            }
-            
-            setInterval(clock, 1000);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pi-clock</title>
+  <link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: "Press Start 2P", monospace;
+      background: black;
+      color: white;
+      overflow: hidden;
+    }
 
-	    </script>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    #clock {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 15vw; /* Adapt font size to viewport width */
+      z-index: 1;
+    }
 
-            body
-            {
-              font-size:30vh ;
-               color: white;
-               font-family: "Press Start 2P";
-               overflow-y: hidden;
-            }
-            
-            
+    #c {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
 
-            #clock
-            {
-              align-items: center;
-               display: flex;
-               height: 98.5%;
-               justify-content: center;
-               text-align: center;
-               
-            }
+    #settings-menu {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 1em;
+      border-radius: 8px;
+      font-size: 2vw; /* Adapt font size to viewport width */
+      z-index: 10;
+      display: none; /* Hidden by default */
+    }
 
-            .toprgb {
-               background-image: linear-gradient(to right,yellow, rgb(255, 0, 255));
-               animation-name: none;
-               background-size: 100%;
-               position: absolute;
-            }
-             
-            .blur {
-               filter: blur(10px);
-            }
+    #settings-menu label {
+      display: block;
+      margin-bottom: 0.5em;
+    }
 
-        </style>
-    </head>
-	<body>
-              <div class="toprgb" style="top: 0px;"></div>
-              <div class="blur toprgb"></div>
-              <div class="blur toprgb"></div>
-              <div class="blur toprgb"></div>
-              <div id="clock">
-               <span id="digits" ></span>
-            </div>
-            <div class="blur toprgb"></div>
-            <div class="blur toprgb"></div>
-            <div class="blur toprgb"></div>
-            <div class="blur toprgb"></div>
-            <div class="toprgb" style="bottom: 0px;"></div>
-	</body>
+    #settings-menu input {
+      margin-bottom: 1em;
+      width: 100%;
+    }
+
+    #menu-toggle {
+      position: absolute;
+      top: 5%;
+      right: 5%;
+      background: #33333300;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 0.5em 1em;
+      font-size: 2vw;
+      cursor: pointer;
+      z-index: 11;
+    }
+
+    /* Responsive Design for Smaller Screens */
+    @media (max-width: 600px) {
+      #settings-menu {
+        font-size: 3vw;
+        padding: 0.5em;
+      }
+
+      #menu-toggle {
+        font-size: 3vw;
+        padding: 0.3em 0.5em;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <div id="clock">
+    <span id="digits"></span>
+  </div>
+  <canvas id="c"></canvas>
+
+  <!-- Toggle Button -->
+  <button id="menu-toggle">Menu</button>
+
+  <!-- Settings Menu -->
+  <div id="settings-menu">
+    <label for="matrixColor">Matrix Color:</label>
+    <input type="color" id="matrixColor" value="#7D34FD">
+
+    <label for="rainBow">Rainbow Effect:</label>
+    <input type="checkbox" id="rainBow" checked>
+
+    <label for="matrixspeed">Matrix Speed:</label>
+    <input type="range" id="matrixspeed" min="10" max="100" step="10" value="50">
+  </div>
+
+  <script>
+    var root = {
+      wavecolor: {
+        r: 125,
+        g: 52,
+        b: 253
+      },
+      rainbowSpeed: 0.2,
+      rainbow: true,
+      matrixspeed: 25
+    };
+
+    var c = document.getElementById("c");
+    var ctx = c.getContext("2d");
+
+    // Canvas auto-sizing
+    function resizeCanvas() {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Matrix effect configuration
+    var konkani = "゠アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレワヰヱヲンヺ・ーヽヿ0123456789";
+    var characters = konkani.split("");
+    var font_size = 10;
+    var columns = c.width / font_size;
+    var drops = [];
+    for (var x = 0; x < columns; x++) drops[x] = 1;
+
+    var lastTime = 0; // For controlling animation frequency
+    var animationFrameId = null;
+
+    function draw(timestamp) {
+      if (timestamp - lastTime < (1000 / root.matrixspeed)) {
+        animationFrameId = requestAnimationFrame(draw); // Keep the animation going
+        return;
+      }
+      lastTime = timestamp;
+
+      ctx.fillStyle = "rgba(0,0,0, 0.05)";
+      ctx.fillRect(0, 0, c.width, c.height);
+
+      ctx.font = font_size + "px arial";
+
+      for (var i = 0; i < drops.length; i++) {
+        var text = characters[Math.floor(Math.random() * characters.length)];
+        if (root.rainbow) {
+          let hue = (i / drops.length) * 360;
+          ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        } else {
+          ctx.fillStyle = `rgb(${root.wavecolor.r},${root.wavecolor.g},${root.wavecolor.b})`;
+        }
+        ctx.fillText(text, i * font_size, drops[i] * font_size);
+
+        drops[i]++;
+        if (drops[i] * font_size > c.height && Math.random() > 0.975) drops[i] = 0;
+      }
+
+      animationFrameId = requestAnimationFrame(draw); // Request next animation frame
+    }
+
+    // Start animation
+    requestAnimationFrame(draw);
+
+    function livelyPropertyListener(name, val) {
+      switch (name) {
+        case "matrixColor":
+          root.wavecolor = hexToRgb(val);
+          break;
+        case "rainBow":
+          root.rainbow = val;
+          break;
+        case "rainbowSpeed":
+          root.rainbowSpeed = val / 100;
+          break;
+      }
+    }
+
+    function hexToRgb(hex) {
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result
+        ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+          }
+        : null;
+    }
+
+    function add_zero(digit) {
+      return digit < 10 ? "0" + digit : digit.toString();
+    }
+
+    function clock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      document.getElementById("digits").innerHTML =
+        add_zero(hours) + ":" + add_zero(minutes);
+    }
+
+    setInterval(clock, 1000);
+
+    // Toggle menu visibility
+    const menuToggle = document.getElementById("menu-toggle");
+    const settingsMenu = document.getElementById("settings-menu");
+
+    menuToggle.addEventListener("click", () => {
+      settingsMenu.style.display =
+        settingsMenu.style.display === "none" || settingsMenu.style.display === ""
+          ? "block"
+          : "none";
+    });
+
+    // Event listeners for settings menu
+    document.getElementById("matrixColor").addEventListener("input", (e) => {
+      root.wavecolor = hexToRgb(e.target.value);
+    });
+    document.getElementById("rainBow").addEventListener("change", (e) => {
+      root.rainbow = e.target.checked;
+    });
+    document.getElementById("rainbowSpeed").addEventListener("input", (e) => {
+      root.rainbowSpeed = parseFloat(e.target.value);
+    });
+
+    // Matrix speed control update
+    document.getElementById("matrixspeed").addEventListener("input", (e) => {
+      root.matrixspeed = Math.max(10, Math.min(100, parseInt(e.target.value, 10)));
+      cancelAnimationFrame(animationFrameId); // Cancel the current animation frame
+      requestAnimationFrame(draw); // Start a new animation loop with updated speed
+    });
+  </script>
+</body>
+</html>
