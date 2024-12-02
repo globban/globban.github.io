@@ -12,8 +12,8 @@
     body {
       margin: 0;
       font-family: "Press Start 2P", monospace;
-      background: black;
-      color: white;
+      background: rgb(32, 32, 32);
+      color: rgb(0, 0, 0);
       overflow: hidden;
     }
 
@@ -29,7 +29,43 @@
       height: 100%;
       font-size: 15vw; /* Adapt font size to viewport width */
       z-index: 1;
+      text-shadow: #ffffff;
+      text-shadow: 1em;
+      
     }
+
+    .glow {
+  font-size: 80px;
+  color: #fff;
+  text-align: center;
+  animation: glow 10s infinite forwards;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60000, 0 0 40px #e60000, 0 0 50px #e60000, 0 0 60px #e60000, 0 0 70px #e60000;
+  }
+
+  13% {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e2e600, 0 0 40px #e6e200, 0 0 50px #d7e600, 0 0 60px #d9ff00, 0 0 70px #e2e600;
+  }
+  
+  25% {
+    text-shadow: 0 0 10px #fff, 0 0 20px #ffffff, 0 0 30px #26ff12, 0 0 40px #25ff11, 0 0 50px #157e00, 0 0 60px #047a00, 0 0 70px #005504;
+  }
+
+  50% {
+     text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #00dee6, 0 0 40px #00dee6, 0 0 50px #00cbe6, 0 0 60px #00dee6, 0 0 70px #00dee6;
+  }
+
+  75% {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #9d00e6, 0 0 40px #a500e6, 0 0 50px #c000e6, 0 0 60px #9200e6, 0 0 70px #8a00e6;
+  }
+
+  100% {
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60000, 0 0 40px #e60000, 0 0 50px #e60000, 0 0 60px #e60000, 0 0 70px #e60000;
+  }
+}
 
     #c {
       position: absolute;
@@ -67,7 +103,7 @@
       top: 5%;
       right: 5%;
       background: #33333300;
-      color: white;
+      color: rgba(255, 255, 255, 0.116);
       border: none;
       border-radius: 5px;
       padding: 0.5em 1em;
@@ -92,10 +128,10 @@
   </style>
 </head>
 <body>
-  <div id="clock">
+  <div id="clock" class="glow">
     <span id="digits"></span>
   </div>
-  <canvas id="c"></canvas>
+  <canvas id="c" ></canvas>
 
   <!-- Toggle Button -->
   <button id="menu-toggle">Menu</button>
@@ -134,11 +170,11 @@
     }
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
-
+    
     // Matrix effect configuration
     var konkani = "゠アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレワヰヱヲンヺ・ーヽヿ0123456789";
     var characters = konkani.split("");
-    var font_size = 10;
+    var font_size = 50;
     var columns = c.width / font_size;
     var drops = [];
     for (var x = 0; x < columns; x++) drops[x] = 1;
@@ -245,6 +281,7 @@
       cancelAnimationFrame(animationFrameId); // Cancel the current animation frame
       requestAnimationFrame(draw); // Start a new animation loop with updated speed
     });
+    
   </script>
 </body>
 </html>
