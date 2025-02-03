@@ -25,7 +25,7 @@
                let minutes = now.getMinutes();
                let seconds = now.getSeconds();
                
-               document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes) + ":" + add_zero(seconds);
+               document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes)+ ":" + add_zero(seconds) ;
             }
             
             setInterval(clock, 1000);
@@ -37,14 +37,19 @@
 
 	    </script>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+            @import url('https://fonts.cdnfonts.com/css/lcd');
 
             body
             {
-              font-size:6em ;
+              font-size:10em ;
                color: white;
-               font-family: "Press Start 2P";
+               font-family: "LCDMono2";
+               font-weight: 300;
                overflow-y: hidden;
+            }
+
+            .toprgb {
+               background: blueviolet;
             }
             
             
@@ -55,8 +60,7 @@
                display: flex;
                height: 96.5%;
                justify-content: center;
-               text-align: center;
-               
+               text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #9d00e6, 0 0 40px #a500e6, 0 0 50px #c000e6, 0 0 60px #9200e6, 0 0 70px #8a00e6;
             }
              
             
@@ -67,7 +71,7 @@
               <div class="toprgb"></div>
               <div class="blur toprgb"></div>
               <div class="blur toprgb"></div>
-              <div id="clock" onclick="myFunction()">
+              <div id="clock">
                <span id="digits" ></span>
             </div>
             <div class="blur toprgb"></div>
