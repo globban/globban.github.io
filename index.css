@@ -74,7 +74,7 @@ button {
 	background-color:rgb(45, 45, 45) ;
 	padding: 1em 2em;
 	border-color: #ffffff;
-	box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
+	text-shadow: rgb(255, 255, 255) 0 0 30px 10px;
 }
  
 
@@ -89,44 +89,81 @@ button {
 	 
 }
 
-a img {
-	width:14%;
-	border-radius: 0.65em;
-	padding: 0.3em;
-	border: #000000;
-	animation: in 1s;
+
+
+.text-cards {
+    display: grid; /* Use grid layout */
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Flexible columns */
+    gap: 20px; /* Spacing between items */
+    padding: 20px; /* Padding around the container */
+	overflow: hidden; 
+  text-overflow: ellipsis;
+  font-size:calc(15px);
 }
 
-a img:hover {
-	animation-direction: forwards;
-	border-radius: 0.5em;
-	animation: out 1s;
+/* General styling for text elements within the container */
+.text-cards > * {
+    background: #000000;
+    border: 3px solid;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    transition: transform 1s ease;
+	border: 5px solid;
 }
 
 
+.text-cards > *:hover {
+    transform: translateY(-10px); /* Slight raise on hover */
+}
+
+
+/* Styling for headings and paragraphs inside the cards */
+.text-cards a, .text-cards p {
+    margin: 0;
+    color: #ffffff;
+	text-decoration: none;
+	
+	font-weight: 700;
+	text-align:left;
+	text-overflow: hidden;
+	padding: 30px 70px 75px 300px;
+	white-space: wrap;
+}
+
+.text-cards p {
+    color: #666; /* Slightly lighter text for paragraphs */
+}
+
+.text-cards a {
+    border: 5px solid transparent;
+    border-radius: 10px;
+    position: relative;
+	display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+padding: 10px;
+font-size: 3em;
+}
+
+.text-cards a::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #2b65ff, #8000ff);
+    background-size: 100% 100%;
+    z-index: -1;
+    border-radius: 15px;
+    filter: blur(10px);
+    animation: glow-animation 3s infinite linear;
+}
 
 body{text-align:center;}
 .wrapper{width:80%;margin:0 auto;text-align:left;}
-
-@keyframes  out{
-    0% {
-		box-shadow: rgba(72, 135, 202, 0) 0 0 30px 10px;
-	}
-
-	100% {
-		box-shadow: rgba(255, 255, 255, 1) 0 0 30px 11px;
-	}
-}
-
-@keyframes  in{
-    0% {
-		box-shadow: rgb(255, 255, 255) 0 0 30px 10px;
-	}
-
-	100% {
-		box-shadow: rgba(72, 135, 202, 0) 0 0 30px 10px;
-	}
-}
 
 
 @keyframes AnimationName {
