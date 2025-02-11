@@ -1,4 +1,9 @@
 {
+  "start_url": "https://algot.fun",
+  "dir": "auto",
+  "lang": "en",
+  "orientation": "any",
+  "display": "fullscreen",
   "name": "Algots web-workshop",
   "theme_color": "#000000",
   "background_color": "#000000",
