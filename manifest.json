@@ -1,11 +1,27 @@
 {
-  "start_url": "https://algot.fun",
-  "dir": "auto",
-  "lang": "en",
-  "orientation": "any",
-  "display": "fullscreen",
-  "name": "Algots web-workshop",
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "short_name": "Algot.fun"
+"name": "Algot.fun",
+"short_name": "Algot.fun",
+"start_url": "/",
+"display": "fullscreen",
+"description": "",
+"lang": "English",
+"dir": "auto",
+"theme_color": "#000000",
+"background_color": "#000000",
+"orientation": "any",
+"icons": [
+    {
+        "src": "",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+    },
+    {
+        "src": "",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+    }
+],
+"prefer_related_applications": false
 }
