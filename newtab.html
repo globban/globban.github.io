@@ -65,14 +65,14 @@
 
          button {
             box-shadow: none;
-            background-color: black;
-            color: white;
+            background-color: rgba(0, 0, 0, 0);
+            color: rgba(255, 255, 255);
+            border: none;
          }
 
          body {
             margin: 0;
       font-family: 'Arial', sans-serif;
-      transition: background-image 0.5s ease-in-out, background-color 0.5s ease-in-out;
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -82,6 +82,7 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      background-image: url(windows\ dark.jpg);
         }
         
         h1 {
@@ -90,18 +91,18 @@
         }    
     </style>
 </head>
-<body>
+<body onload="myFunction()">
         <div class="toprgb" style="position: absolute; top: 0px;"></div>
               <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
               
               <div class="center">
-                    <div id="clock"></div>
+                    <div id="clock">00:00</div>
                 
                 <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
                     <input name="sitesearch" type="hidden">
                     <input autocomplete="on" class="form-control search" name="q" placeholder="type something"   type="text" style="position: absolute; border-width: 0px;">
         </div></form>
-    <div id="myDIV">
+    <div id="myDIV" style="display: none;">
     <div class="container">
         <h1>Background</h1>
         

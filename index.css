@@ -63,7 +63,7 @@ body {
 	background-size: 28px 28px;
 	color: rgb(255, 255, 255);
 	width: 100%;
-	overflow-y:auto;
+	overflow-y: show;
 	overflow-x: hidden;
 }
 
@@ -108,27 +108,29 @@ button {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-family: Arial, sans-serif;
-    transition: transform 1s ease;
+    transition: all 1s ease;
 	border: 5px solid;
+	
 }
 
 
 .text-cards > *:hover {
-    transform: translateY(-10px); /* Slight raise on hover */
+    transform: translateY(-10px);
+	transition: all 1s ease;
 }
 
 
 /* Styling for headings and paragraphs inside the cards */
 .text-cards a, .text-cards p {
     margin: 0;
-    color: #ffffff;
+    color:#fff ;
 	text-decoration: none;
-	
 	font-weight: 700;
 	text-align:left;
 	text-overflow: hidden;
 	padding: 30px 70px 75px 300px;
 	white-space: wrap;
+	transition: all 1s ease;
 }
 
 .text-cards p {
@@ -154,17 +156,23 @@ font-size: 3em;
     left: -5px;
     right: -5px;
     bottom: -5px;
-    background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #47ff00, #00ffee, #2b65ff, #8000ff);
-    background-size: 100% 100%;
+    background: linear-gradient(to right, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%) ;;
+    background-size: 400% 400%;
     z-index: -1;
     border-radius: 15px;
-    filter: blur(10px);
-    animation: glow-animation 3s infinite linear;
+    filter: blur(7px);
+    animation: 30s infinite linear;
+	animation-name:linkrgb;
 }
 
 body{text-align:center;}
 .wrapper{width:80%;margin:0 auto;text-align:left;}
 
+
+@keyframes linkrgb {
+	0%{background-position:0% 100%}
+	100%{background-position:400% 50%}
+}
 
 @keyframes AnimationName {
 	0%{background-position:0% 50%}

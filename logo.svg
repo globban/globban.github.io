@@ -16,4 +16,7 @@
             <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
         </filter>
     </defs>
+    <style>
+    svg:hover path {stroke: #da25e7;}
+  </style>
 </svg>
