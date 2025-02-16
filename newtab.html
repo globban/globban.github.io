@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,10 +9,24 @@
     <link rel="stylesheet" href="index.css">
     <link rel="icon" type="image" href="/logosmall.svg">
     <style>
-       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-       
-       .center
-        {
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-image 0.5s ease; /* Smooth transition for background change */
+        }
+
+        .center {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -19,235 +34,136 @@
         }
 
         .container {
-            position: absolute; left: 20px; bottom: 100px;;
+            position: absolute;
+            left: 20px;
+            bottom: 100px;
             align-items: center;
-            background-color: #6e6e6e6c;
+            background-color: rgba(110, 110, 110, 0.68);
             border-radius: 1em;
+            padding: 1em; /* Added padding for better spacing */
         }
 
         input[type=text] {
-            padding-right:15em;
-            padding-top: 1em;
-            padding-bottom: 1em;
-            padding-left: 1em;
+            padding: 1em 15em 1em 1em;
             background-color: rgb(255, 255, 255);
             box-shadow: none;
-            border-width: 10px;
+            border-width: 1px;
             font-size: 1em;
-            position: absolute;
-            transform: translate(-14.1em, 10em );
             border-radius: 50px;
             margin: 0.4rem;
-            border-radius: 40px;
-        }
-
-        form {
-            border-radius: 40px;
+            position: absolute;
+            transform: translate(-14.1em, 10em);
         }
 
         .toprgb {
-            background-color: rgb(0, 0, 0);
-            background-image: none;
+            background: linear-gradient(90deg, var(--gradient-start, #000000), var(--gradient-end, #000000));
         }
-
 
         #clock {
             font-size: 6vw;
             font-family: "Press Start 2P";
-            transform: translate( 0px, -1em );
+            transform: translate(0px, -1em);
         }
 
-
         .blur {
-	        filter: blur(8px);
+            filter: blur(8px);
             padding-top: 1em;
-         }
+        }
 
-         button {
+        button {
             box-shadow: none;
             background-color: rgba(0, 0, 0, 0);
             color: rgba(255, 255, 255);
             border: none;
-         }
-
-         body {
-            margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: #fff;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      background-image: url(windows\ dark.jpg);
         }
-        
+
         h1 {
             font-size: 2rem;
             color: #ffffff;
-        }    
+        }
     </style>
 </head>
-<body onload="myFunction()">
-        <div class="toprgb" style="position: absolute; top: 0px;"></div>
-              <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
-              
-              <div class="center">
-                    <div id="clock">00:00</div>
-                
-                <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_blank">
-                    <input name="sitesearch" type="hidden">
-                    <input autocomplete="on" class="form-control search" name="q" placeholder="type something"   type="text" style="position: absolute; border-width: 0px;">
-        </div></form>
-    <div id="myDIV" style="display: none;">
-    <div class="container">
-        <h1>Background</h1>
-        
-        <input type="file" id="uploadImage" accept="image/*">
-        <h1>Neon color</h1>
-        <input type="color" id="colorPicker">
-        </div>
-        
+<body onload="init(), showTime()">
+    <div class="toprgb" style="position: absolute; top: 0;"></div>
+    <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
+
+    <div class="center">
+        <div id="clock">00:00</div>
+        <form action="https://www.google.com/search" class="searchform" method="get" target="_self">
+            <input autocomplete="off" class="form-control search" name="q" placeholder="type something" type="text">
+        </form>
     </div>
 
-    
-    
-        
-            </div>
-            <button onclick="myFunction()" style="position: absolute; bottom: 20px; left: 10px;"><i class="fa-solid fa-pen"></i></button>
-            <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
-            <div class="toprgb" style="position: absolute; bottom: 0px;"></div>
+    <div id="myDIV" style="display: none;">
+        <div class="container">
+            <h1>Background</h1>
+            <input type="file" id="uploadImage" accept="image/*" aria-label="Upload background image">
+            <h1>Neon Gradient</h1>
+            <label for="startColor">Start Color:</label>
+            <input type="color" id="startColor" aria-label="Select start color">
+            <label for="endColor">End Color:</label>
+            <input type="color" id="endColor" aria-label="Select end color">
+        </div>
+    </div>
+
+    <button onclick="myFunction()" aria-label="Toggle customization menu" style="position: absolute; bottom: 20px; left: 10px;">
+        <i class="fa-solid fa-pen"></i>
+    </button>
+    <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
+    <div class="toprgb" style="position: absolute; bottom: 0;"></div>
 
     <script>
-
-        //-----------------------------custom background------------------------------------------
-         // Function to apply the background image
-    function applyBackground(image) {
-      if (image) {
-        document.body.style.backgroundImage = image;
-        try {
-          // Remove the old image before saving the new one
-          localStorage.removeItem("backgroundImage");
-          localStorage.setItem("backgroundImage", image); // Save in localStorage
-        } catch (e) {
-          alert('Image is too large to store in localStorage.');
-        }
-      } else {
-        document.body.style.backgroundImage = ""; // Clear background
-        localStorage.removeItem("backgroundImage"); // Clear from storage
-      }
-    }
-
-    // Handle image upload
-    document.getElementById("uploadImage").addEventListener("change", function () {
-      const file = this.files[0];
-      if (file) {
-        // Check the size of the image (in bytes)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-          alert("File is too large. Please select an image smaller than 5MB.");
-          return;
+        function applyGradient(startColor, endColor) {
+            document.documentElement.style.setProperty('--gradient-start', startColor);
+            document.documentElement.style.setProperty('--gradient-end', endColor);
+            localStorage.setItem('gradientStart', startColor);
+            localStorage.setItem('gradientEnd', endColor);
         }
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const imageDataUrl = `url('${e.target.result}')`;
-          applyBackground(imageDataUrl); // Apply and save the uploaded image
-        };
-        reader.readAsDataURL(file); // Convert file to data URL
-      }
-    });
+        function init() {
+            const savedStart = localStorage.getItem('gradientStart') || '#ff00ff';
+            const savedEnd = localStorage.getItem('gradientEnd') || '#00ffff';
+            const savedBackgroundImage = localStorage.getItem('backgroundImage') || 'url(windows/dark.jpg)';
+            applyGradient(savedStart, savedEnd);
+            document.getElementById('startColor').value = savedStart;
+            document.getElementById('endColor').value = savedEnd;
+            document.body.style.backgroundImage = savedBackgroundImage;
+        }
 
-    // Restore background on page load
-    window.addEventListener("DOMContentLoaded", () => {
-      const savedImage = localStorage.getItem("backgroundImage");
-      if (savedImage) {
-        document.body.style.backgroundImage = savedImage;
-      }
-    });
+        document.getElementById('startColor').addEventListener('input', function() {
+            applyGradient(this.value, document.getElementById('endColor').value);
+        });
 
-        //----------------------------other code--------------------------------------------
+        document.getElementById('endColor').addEventListener('input', function() {
+            applyGradient(document.getElementById('startColor').value, this.value);
+        });
+
+        document.getElementById('uploadImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                    localStorage.setItem('backgroundImage', `url(${e.target.result})`); // Save background image to localStorage
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         setInterval(showTime, 1000);
-        
-// Defining showTime funcion
-function showTime() {
-    // Getting current time and date
-    let time = new Date();
-    let hour = time.getHours();
-    let min = time.getMinutes();
-    am_pm = "NAH";
-    hour =
-        hour < 10 ? "0" + hour : hour;
-    min = min < 10 ? "0" + min : min;
-    let currentTime =
-        hour +
-        ":" +
-        min
-    // Displaying the time
-    document.getElementById(
-        "clock"
-    ).innerHTML = currentTime;
-
-}
-
-
-function myFunction() {
-  var x = document.getElementById("myDIV");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-
-// Function to set a cookie
-function setCookie(name, value, days) {
-      const expires = new Date();
-      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000)); // Cookie expires in 'days'
-      document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
-    }
-
-    // Function to get a cookie by name
-    function getCookie(name) {
-      const cookieArr = document.cookie.split(";");
-      for (let i = 0; i < cookieArr.length; i++) {
-        let cookie = cookieArr[i].trim();
-        if (cookie.startsWith(name + "=")) {
-          return cookie.substring(name.length + 1);
+        function showTime() {
+            let time = new Date();
+            let hour = time.getHours();
+            let min = time.getMinutes();
+            hour = hour < 10 ? "0" + hour : hour;
+            min = min < 10 ? "0" + min : min;
+            document.getElementById("clock").innerHTML = hour + ":" + min;
         }
-      }
-      return null; // Return null if cookie is not found
-    }
 
-    // Apply color to the specified CSS class
-    function applyColor(className, color) {
-      const elements = document.querySelectorAll(`.toprgb`);
-      elements.forEach(element => {
-        element.style.backgroundColor = color;
-      });
-    }
-
-    // Event listener for color picker
-    document.getElementById("colorPicker").addEventListener("input", function() {
-      const selectedColor = this.value;
-      applyColor("color-box", selectedColor); // Apply to color-box class
-      applyColor("text-box", selectedColor);  // Apply to text-box class (for demonstration)
-      setCookie("boxColor", selectedColor, 7); // Save color in cookie for 7 days
-    });
-
-    // Load the color from the cookie on page load
-    window.onload = function() {
-      const savedColor = getCookie("boxColor");
-      if (savedColor) {
-        applyColor("color-box", savedColor); // Apply saved color to color-box class
-        applyColor("text-box", savedColor);  // Apply saved color to text-box class (for demonstration)
-        document.getElementById("colorPicker").value = savedColor; // Set the picker to the saved color
-      }
-    }
+        function myFunction() {
+            var x = document.getElementById("myDIV");
+            x.style.display = (x.style.display === "none") ? "block" : "none";
+        }
     </script>
-
 </body>
 </html>
