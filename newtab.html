@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="index.css">
-    <link rel="icon" type="image" href="/logosmall.svg">
+        
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -113,6 +112,7 @@
     <div class="toprgb" style="position: absolute; bottom: 0;"></div>
 
     <script>
+        // Apply the gradient settings to the document
         function applyGradient(startColor, endColor) {
             document.documentElement.style.setProperty('--gradient-start', startColor);
             document.documentElement.style.setProperty('--gradient-end', endColor);
@@ -120,16 +120,24 @@
             localStorage.setItem('gradientEnd', endColor);
         }
 
+        // Initialize the page with settings from localStorage
         function init() {
             const savedStart = localStorage.getItem('gradientStart') || '#ff00ff';
             const savedEnd = localStorage.getItem('gradientEnd') || '#00ffff';
-            const savedBackgroundImage = localStorage.getItem('backgroundImage') || 'url(windows/dark.jpg)';
+            const savedBackgroundImage = localStorage.getItem('backgroundImage');
+            
+            // Apply the gradient and background settings from localStorage
             applyGradient(savedStart, savedEnd);
             document.getElementById('startColor').value = savedStart;
             document.getElementById('endColor').value = savedEnd;
-            document.body.style.backgroundImage = savedBackgroundImage;
+
+            // Apply saved background image if available
+            if (savedBackgroundImage) {
+                document.body.style.backgroundImage = savedBackgroundImage;
+            }
         }
 
+        // Event listeners for color changes
         document.getElementById('startColor').addEventListener('input', function() {
             applyGradient(this.value, document.getElementById('endColor').value);
         });
@@ -138,6 +146,7 @@
             applyGradient(document.getElementById('startColor').value, this.value);
         });
 
+        // Handle background image upload
         document.getElementById('uploadImage').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -150,6 +159,7 @@
             }
         });
 
+        // Show time on the page
         setInterval(showTime, 1000);
         function showTime() {
             let time = new Date();
@@ -160,6 +170,7 @@
             document.getElementById("clock").innerHTML = hour + ":" + min;
         }
 
+        // Toggle visibility of the customization menu
         function myFunction() {
             var x = document.getElementById("myDIV");
             x.style.display = (x.style.display === "none") ? "block" : "none";
