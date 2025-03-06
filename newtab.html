@@ -9,6 +9,13 @@
         
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        @import url('https://fonts.cdnfonts.com/css/lcd');
 
         body {
             margin: 0;
@@ -22,7 +29,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            transition: background-image 0.5s ease; /* Smooth transition for background change */
+            transition: background-image 0.5s ease;
         }
 
         .center {
@@ -39,7 +46,7 @@
             align-items: center;
             background-color: rgba(110, 110, 110, 0.68);
             border-radius: 1em;
-            padding: 1em; /* Added padding for better spacing */
+            padding: 1em;
         }
 
         input[type=text] {
@@ -55,13 +62,28 @@
         }
 
         .toprgb {
-            background: linear-gradient(90deg, var(--gradient-start, #000000), var(--gradient-end, #000000));
+            background: linear-gradient(90deg, var(--gradient-start, #000000), var(--gradient-end, #000000), var(--gradient-start, #000000));
+            background-size: 200%;
+            animation-name: rgb;
+        }
+
+        @keyframes rgb {
+            0% { background-position-x: 0%;}
+            100% { background-position-x: 200%;}
         }
 
         #clock {
             font-size: 6vw;
             font-family: "Press Start 2P";
             transform: translate(0px, -1em);
+            color: var(--clock-color, #ffffff);
+            text-shadow: 0 0 10px var(--glow-color, #9d00e6), 
+                         0 0 20px var(--glow-color, #9d00e6), 
+                         0 0 30px var(--glow-color, #9d00e6), 
+                         0 0 40px var(--glow-color, #a500e6), 
+                         0 0 50px var(--glow-color, #c000e6), 
+                         0 0 60px var(--glow-color, #9200e6), 
+                         0 0 70px var(--glow-color, #8a00e6);
         }
 
         .blur {
@@ -82,12 +104,12 @@
         }
     </style>
 </head>
-<body onload="init(), showTime()">
+<body onload="init()">
     <div class="toprgb" style="position: absolute; top: 0;"></div>
     <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
 
     <div class="center">
-        <div id="clock">00:00</div>
+        <div id="clock" style="font-weight: 300; font-size: 15em;">00:00</div>
     </div>
 
     <div id="myDIV" style="display: none;">
@@ -99,6 +121,24 @@
             <input type="color" id="startColor" aria-label="Select start color">
             <label for="endColor">End Color:</label>
             <input type="color" id="endColor" aria-label="Select end color">
+            <h1>Clock Color</h1>
+            <input type="color" id="clockColor" aria-label="Select clock color">
+            <h1>Clock Glow Color</h1>
+            <input type="color" id="glowColor" aria-label="Select glow color">
+            <h1>Glow Alpha</h1>
+            <input type="range" id="glowAlpha" min="0" max="1" step="0.01" value="1" aria-label="Select glow opacity">
+            <h1>Clock Font</h1>
+            <select id="clockFont">
+                <option value="Press Start 2P">Press Start 2P</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Courier Prime">Courier Prime</option>
+                <option value="Lobster">Lobster</option>
+                <option value="Oswald">Oswald</option>
+                <option value="Bangers">Bangers</option>
+                <option value="Pacifico">Pacifico</option>
+                <option value="Monospace">Monospace</option>
+                <option value="LCDMono2">lcd</option>
+            </select>
         </div>
     </div>
 
@@ -109,7 +149,36 @@
     <div class="toprgb" style="position: absolute; bottom: 0;"></div>
 
     <script>
-        // Apply the gradient settings to the document
+        function init() {
+            // Retrieve saved settings from localStorage
+            const savedStart = localStorage.getItem('gradientStart') || '#ff00ff';
+            const savedEnd = localStorage.getItem('gradientEnd') || '#00ffff';
+            const savedBackgroundImage = localStorage.getItem('backgroundImage');
+            const savedClockColor = localStorage.getItem('clockColor') || '#ffffff';
+            const savedClockFont = localStorage.getItem('clockFont') || 'Press Start 2P';
+            const savedGlowColor = localStorage.getItem('glowColor') || '#9d00e6';
+            const savedGlowAlpha = localStorage.getItem('glowAlpha') || 1;
+
+            // Apply the retrieved settings
+            applyGradient(savedStart, savedEnd);
+            document.getElementById('startColor').value = savedStart;
+            document.getElementById('endColor').value = savedEnd;
+
+            if (savedBackgroundImage) {
+                document.body.style.backgroundImage = `url(${savedBackgroundImage})`;
+            }
+
+            document.documentElement.style.setProperty('--clock-color', savedClockColor);
+            document.getElementById('clockColor').value = savedClockColor;
+
+            document.getElementById('clockFont').value = savedClockFont;
+            document.getElementById('clock').style.fontFamily = savedClockFont;
+
+            document.getElementById('glowColor').value = savedGlowColor;
+            document.getElementById('glowAlpha').value = savedGlowAlpha;
+            updateGlowEffect(savedGlowColor, savedGlowAlpha);
+        }
+
         function applyGradient(startColor, endColor) {
             document.documentElement.style.setProperty('--gradient-start', startColor);
             document.documentElement.style.setProperty('--gradient-end', endColor);
@@ -117,59 +186,81 @@
             localStorage.setItem('gradientEnd', endColor);
         }
 
-        // Initialize the page with settings from localStorage
-        function init() {
-            const savedStart = localStorage.getItem('gradientStart') || '#ff00ff';
-            const savedEnd = localStorage.getItem('gradientEnd') || '#00ffff';
-            const savedBackgroundImage = localStorage.getItem('backgroundImage');
-            
-            // Apply the gradient and background settings from localStorage
-            applyGradient(savedStart, savedEnd);
-            document.getElementById('startColor').value = savedStart;
-            document.getElementById('endColor').value = savedEnd;
-
-            // Apply saved background image if available
-            if (savedBackgroundImage) {
-                document.body.style.backgroundImage = savedBackgroundImage;
-            }
+        function updateGlowEffect(color, alpha) {
+            const glowColor = `rgba(${hexToRgb(color)}, ${alpha})`;
+            document.documentElement.style.setProperty('--glow-color', glowColor);
+            localStorage.setItem('glowColor', color);
+            localStorage.setItem('glowAlpha', alpha);
         }
 
-        // Event listeners for color changes
-        document.getElementById('startColor').addEventListener('input', function() {
-            applyGradient(this.value, document.getElementById('endColor').value);
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Debugging: Log current background and settings
+            console.log("Current background image:", localStorage.getItem('backgroundImage'));
+
+            document.getElementById('clockColor').addEventListener('input', function() {
+                document.documentElement.style.setProperty('--clock-color', this.value);
+                localStorage.setItem('clockColor', this.value);
+            });
+
+            document.getElementById('startColor').addEventListener('input', function() {
+                applyGradient(this.value, document.getElementById('endColor').value);
+            });
+
+            document.getElementById('endColor').addEventListener('input', function() {
+                applyGradient(document.getElementById('startColor').value, this.value);
+            });
+
+            document.getElementById('clockFont').addEventListener('change', function() {
+                const selectedFont = this.value;
+                document.getElementById('clock').style.fontFamily = selectedFont;
+                localStorage.setItem('clockFont', selectedFont);
+            });
+
+            document.getElementById('uploadImage').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageUrl = e.target.result;
+                        console.log("Uploaded image URL:", imageUrl);
+                        document.body.style.backgroundImage = `url(${imageUrl})`;
+                        localStorage.setItem('backgroundImage', imageUrl);  // Store only the image URL
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('glowColor').addEventListener('input', function() {
+                const glowColor = this.value;
+                const glowAlpha = document.getElementById('glowAlpha').value;
+                updateGlowEffect(glowColor, glowAlpha);
+            });
+
+            document.getElementById('glowAlpha').addEventListener('input', function() {
+                const glowColor = document.getElementById('glowColor').value;
+                updateGlowEffect(glowColor, this.value);
+            });
+
+            setInterval(showTime, 1000);
+            showTime();
         });
 
-        document.getElementById('endColor').addEventListener('input', function() {
-            applyGradient(document.getElementById('startColor').value, this.value);
-        });
-
-        // Handle background image upload
-        document.getElementById('uploadImage').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.body.style.backgroundImage = `url(${e.target.result})`;
-                    localStorage.setItem('backgroundImage', `url(${e.target.result})`); // Save background image to localStorage
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Show time on the page
-        setInterval(showTime, 1000);
         function showTime() {
-            let time = new Date();
-            let hour = time.getHours();
-            let min = time.getMinutes();
-            hour = hour < 10 ? "0" + hour : hour;
-            min = min < 10 ? "0" + min : min;
-            document.getElementById("clock").innerHTML = hour + ":" + min;
+            const time = new Date();
+            const hour = String(time.getHours()).padStart(2, '0');
+            const min = String(time.getMinutes()).padStart(2, '0');
+            document.getElementById("clock").textContent = `${hour}:${min}`;
         }
 
-        // Toggle visibility of the customization menu
         function myFunction() {
-            var x = document.getElementById("myDIV");
+            const x = document.getElementById("myDIV");
             x.style.display = (x.style.display === "none") ? "block" : "none";
         }
     </script>
