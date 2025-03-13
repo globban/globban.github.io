@@ -76,7 +76,6 @@
         #clock {
             font-size: 6vw;
             font-family: "Press Start 2P";
-            transform: translate(0px, -1em);
             color: var(--clock-color, #ffffff);
             text-shadow: 0 0 10px var(--glow-color, #9d00e6), 
                          0 0 20px var(--glow-color, #9d00e6), 
@@ -85,6 +84,9 @@
                          0 0 50px var(--glow-color, #c000e6), 
                          0 0 60px var(--glow-color, #9200e6), 
                          0 0 70px var(--glow-color, #8a00e6);
+            cursor: grab;
+            user-select: none;
+            position:absolute;
         }
 
         .blur {
@@ -110,9 +112,7 @@
     <div class="toprgb" style="position: absolute; top: 0;"></div>
     <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
 
-    <div class="center">
         <div id="clock" style="font-weight: 300; font-size: 15em;">00:00</div>
-    </div>
 
     <div id="myDIV" style="display: none;">
         <div class="container">
@@ -160,6 +160,7 @@
             const savedClockFont = localStorage.getItem('clockFont') || 'Press Start 2P';
             const savedGlowColor = localStorage.getItem('glowColor') || '#9d00e6';
             const savedGlowAlpha = localStorage.getItem('glowAlpha') || 1;
+            loadClockPosition();
 
             // Apply the retrieved settings
             applyGradient(savedStart, savedEnd);
@@ -264,6 +265,51 @@
         function myFunction() {
             const x = document.getElementById("myDIV");
             x.style.display = (x.style.display === "none") ? "block" : "none";
+        }
+
+        function loadClockPosition() {
+            const clock = document.getElementById("clock");
+            const savedX = localStorage.getItem("clockX");
+            const savedY = localStorage.getItem("clockY");
+            if (savedX && savedY) {
+                clock.style.left = `${savedX}px`;
+                clock.style.top = `${savedY}px`;
+                clock.style.transform = "translate(0, 0)";
+            } else {
+                clock.style.left = "50%";
+                clock.style.top = "50%";
+                clock.style.transform = "translate(-50%, -50%)";
+            }
+            makeClockDraggable(clock);
+        }
+
+        function makeClockDraggable(element) {
+            let offsetX = 0, offsetY = 0, isDragging = false;
+            
+            element.addEventListener("mousedown", (e) => {
+                isDragging = true;
+                offsetX = e.clientX - element.getBoundingClientRect().left;
+                offsetY = e.clientY - element.getBoundingClientRect().top;
+                element.style.cursor = "grabbing";
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (!isDragging) return;
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                element.style.left = `${x}px`;
+                element.style.top = `${y}px`;
+                element.style.transform = "translate(0, 0)";
+            });
+
+            document.addEventListener("mouseup", () => {
+                if (isDragging) {
+                    localStorage.setItem("clockX", element.offsetLeft);
+                    localStorage.setItem("clockY", element.offsetTop);
+                    isDragging = false;
+                    element.style.cursor = "grab";
+                }
+            });
         }
     </script>
 </body>
