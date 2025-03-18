@@ -5,14 +5,14 @@
 		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
 		<link rel="stylesheet" href="index.css">
 	</head>
-	<body>
+	<body onload="color()">
 		<div class="topnav">
-			<a class="active" href="/index.html">Home</a>
-			<a href="/Links.html">Links</a>
-			<a href="/clicker.html">clicker</a>
-			<a href="/Webbutton.html">Webbutton</a>
-			<a href="/MC.html">MC server</a>
-			<a href="/clock.html">clock</a>
+			<a  href="/index.html">Home</a>
+				<a class="active" href="/Links.html">Links</a>
+				<a href="/clicker.html">clicker</a>
+				<a href="/Webbutton.html">Random</a>
+				<a href="/clock.html">clock</a>
+				<a href="/visits.html">Chat</a>
 		  </div>
 		  <div class="toprgb"></div>
 		  <div class="blur toprgb"></div>
@@ -59,7 +59,7 @@
 		<a href="https://www.geoguessr.com/">geoguessr</a>
 		<a href="https://www.thetruesize.com/">true size of</a>
 		<a href="https://neal.fun/space-elevator/">space elevator</a>
-		<a href="https://neal.fun/wonders-of-street-view/">wonders of street view</a>
+		<a href="https://neal.fun/wonders-of-street-view/">street view</a>
 		<a href="https://neal.fun/perfect-circle/">draw perfect circle</a>
 		<a href="https://neal.fun/design-the-next-iphone/">design next iphone</a>
 		<a href="https://neal.fun/absurd-trolley-problems/">trolley problems</a>
@@ -78,4 +78,12 @@
 		<a href="https://shredsauce.com/">Shredsauce</a>
 		</div>
 	</body>
+	<script>
+		window.onload = function() {
+            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+            document.documentElement.style.setProperty('--text-color', savedTextColor);
+            document.getElementById('textColor').value = savedTextColor;
+        };
+		
+	</script>
 </html>

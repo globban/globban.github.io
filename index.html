@@ -1,28 +1,74 @@
-<html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Algot's web-workshop</title>
-		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
-	<script>navigator.serviceWorker.register("service-worker.js")</script> 
-	<link rel="manifest" href="manifest.json" />	<link rel="stylesheet" href="index.css">
-	</head>
-	<body>
-			<div class="topnav">
-				<a class="active" href="/index.html">Home</a>
-				<a href="/Links.html">Links</a>
-				<a href="/clicker.html">clicker</a>
-				<a href="/Webbutton.html">Webbutton</a>
-				<a href="/MC.html">MC server</a>
-				<a href="/clock.html">clock</a>
-			  </div>
-			  <div class="toprgb"></div>
-			  <div class="blur toprgb"></div>
-			  <div class="blur toprgb"></div>
-			  
-		<h1>Welcome to Algot's web-workshop</h3>
-		<img style="width:50%" src="logo.svg"/>
-		<p></p>
-		<a href="/visits" style=" border-color: #fff; border: 0.3em; color: #ffffff; background-color: rgba(0, 0, 0, 0);"><h1>Chat</h1></a>
-		<a href="/algot.newtab.zip" download style="color: #fff; background-color: rgb(0, 0, 0); font-size: 0.5em; border-radius: 4px; position: absolute; bottom: 10px;left: 10px; padding-left: 10px; padding-right: 10px;"><h1>download the algot.newtab extension</h1></a>
-		<div></div>
-		</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Algot's Web Workshop</title>
+    <link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("service-worker.js").catch(console.error);
+        }
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        :root {
+            --text-color: #ffffff;
+        }
+        body {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body onload="applyColors()">
+    <!-- Navigation -->
+    <div class="topnav">
+        <a class="active" href="/index.html">Home</a>
+        <a href="/Links.html">Links</a>
+        <a href="/clicker.html">clicker</a>
+        <a href="/Webbutton.html">Random</a>
+        <a href="/clock.html">clock</a>
+        <a href="/visits.html">Chat</a>
+    </div>
+
+    <div class="toprgb"></div>
+    <div class="blur toprgb"></div>
+    <div class="blur toprgb"></div>
+
+    <!-- Main Content -->
+    <h1>Welcome to Algot's Web Workshop</h1>
+    <img style="width:50%" src="logo.svg" alt="Logo">
+    
+    <p></p>
+
+    <!-- Download Button -->
+    <a href="/algot.newtab.zip" download 
+       style="color: #fff; background-color: rgb(0, 0, 0); font-size: 0.5em; 
+              border-radius: 4px; position: absolute; bottom: 10px; left: 10px; 
+              padding: 10px;">
+        <h1>Newtab</h1>
+    </a>
+
+    <!-- Color Picker -->
+    <input type="color" id="textColor" value="#ffffff">
+
+    <script>
+        function applyColors() {
+            const textColor = document.getElementById('textColor').value;
+            document.documentElement.style.setProperty('--text-color', textColor);
+            localStorage.setItem('textColor', textColor);
+        }
+
+        window.onload = function() {
+            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+            document.documentElement.style.setProperty('--text-color', savedTextColor);
+            document.getElementById('textColor').value = savedTextColor;
+        };
+
+        document.getElementById('textColor').addEventListener('input', applyColors);
+    </script>
+</body>
+</html>

@@ -35,25 +35,15 @@
                window.location.href = "https://www.algot.fun/"
             }
 
+            window.onload = function() {
+            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+            document.documentElement.style.setProperty('--text-color', savedTextColor);
+            document.getElementById('textColor').value = savedTextColor;
+        };
 	    </script>
         <style>
             @import url('https://fonts.cdnfonts.com/css/lcd');
 
-            body
-            {
-              font-size:10em ;
-               color: white;
-               font-family: "LCDMono2";
-               font-weight: 300;
-               overflow-y: hidden;
-               background-image: url(/windows\ dark.jpg) ;
-               background-repeat: no-repeat;
-               background-size: cover;
-            }
-
-            .toprgb {
-               background: blueviolet;
-            }
             
             
 
@@ -63,14 +53,30 @@
                display: flex;
                height: 96.5%;
                justify-content: center;
-               text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #9d00e6, 0 0 40px #a500e6, 0 0 50px #c000e6, 0 0 60px #9200e6, 0 0 70px #8a00e6;
+               font-size: 10vw;
+               text-shadow: 0 0 20px #ffffff;
+               font-family: 'Courier New', Courier, monospace;
             }
              
+            body {
+               overflow-y: hidden;
+            }
             
 
         </style>
     </head>
 	<body>
+      <div class="topnav">
+         <a href="/index.html">Home</a>
+         <a href="/Links.html">Links</a>
+         <a href="/clicker.html">clicker</a>
+         <a href="/Webbutton.html">Random</a>
+         <a class="active" href="/clock.html">clock</a>
+         <a href="/visits.html">Chat</a>
+        </div>
+        <div class="toprgb"></div>
+        <div class="blur toprgb"></div>
+        <div class="blur toprgb"></div>
               <div id="clock">
                <span id="digits" ></span>
             </div>

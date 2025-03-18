@@ -1,180 +1,212 @@
 /* Add a black background color to the top navigation */
 .topnav {
-	background-color: #202020;
-	overflow: hidden;
-	position: sticky;
-	padding: 16px 17px;
-  }
-  
-  /* Style the links inside the navigation bar */
-  .topnav a {
-	float: center;
-	color: #ffffff;
-	text-align: center;
-	padding-right: 1em;
-	padding-left: 1em;
-	text-decoration: none;
+    background-color: #141414;
+    overflow: hidden;
+    position: sticky;
+    padding: 16px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+    color: #ffffff;
+    text-align: center;
+    padding: 0.8em 1em;
+    text-decoration: none;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    transition: 0.3s ease;
+}
 
-  }
-  
-  /* Change the color of links on hover */
-  .topnav a:hover {
-	background-color: rgb(255, 255, 255);
-	color: black;
-  }
-  
-  /* Add a color to the active/current link */
-  .topnav a.active {
-	background-color: rgb(255, 255, 255);
-	color: rgb(0, 0, 0);
-  }
+/* Change the color of links on hover */
+.topnav a:hover {
+    background-color: #181818;
+    color: rgb(255, 255, 255);
+	border-color: var(--text-color);
+	border-width: 3px;
+    border-radius: 12px;
+    border-style:dotted ;
+}
 
-  .toprgb {
-	height: 4px;
-	width: 100vw;
-	background:linear-gradient(to right, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%) ;
-    background-size: 200% 200%;
+/* Active/current link styling */
+.topnav a.active {
+    background-color: #181818;
+    color: #ffffff;
+	border-color: var(--text-color);
+	border-width: 3px;
+	border-radius: 12px;
+	border-style: ridge;
+}
 
-    animation: AnimationName 3s  infinite linear ;
-	animation-fill-mode: forwards;
-  }
+/* RGB gradient bar */
+.toprgb {
+    height: 4px;
+    width: 100vw;
+    background: var(--text-color);
+	position: sticky;
+	top: 4.6em;
+}
 
-  
-  .blur {
-	filter: blur(8px);
-  }
+/* Text blur effect */
+.blur {
+    filter: blur(8px);
+}
 
+/* Headings */
 h1 {
-	font-size: 3em;
-	font-family: Arial, Helvetica, sans-serif;
+    font-size: 4em;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 h3 {
-	color: rgba(150, 0, 0, 0);
-	font-size: 2rem;
+    color: rgba(150, 0, 0, 0);
+    font-size: 2rem;
 }
 
-
+/* Body styling */
 body {
-	background: #000000;
-	opacity: 1;
-	background-image: radial-gradient(#292929 1.4000000000000001px, #000000 1.4000000000000001px);
-	background-size: 28px 28px;
-	color: rgb(255, 255, 255);
-	width: 100%;
-	overflow-y: show;
-	overflow-x: hidden;
+    background: #000;
+    background-image: radial-gradient(#292929 1.4px, #000 1.4px);
+    background-size: 28px 28px;
+    color: #fff;
+    width: 100%;
+    overflow-x: hidden;
+    text-align: center;
 }
 
-
-
+/* Button styles */
 button {
-	border-radius: 1.5em;
-	background-color:rgb(45, 45, 45) ;
-	padding: 1em 2em;
-	border-color: #ffffff;
-	text-shadow: rgb(255, 255, 255) 0 0 30px 10px;
+    border-radius: 1.5em;
+    background-color: #2d2d2d;
+    padding: 1em 2em;
+    border: 2px solid #ffffff;
+    color: #fff;
+    transition: 0.3s ease;
 }
- 
+
+button:hover {
+    background-color: #ffffff;
+    color: #000;
+}
 
 @media (max-width: 500px) {
-	button {
-		border-radius: 0.25em;
-		background-color:rgb(255, 255, 255);
-		color:rgb(0, 0, 0);
-		padding: 1em 3em;
-		font-size: 1.4em;
-	}
-	 
+    button {
+        border-radius: 0.25em;
+        background-color: #fff;
+        color: #000;
+        padding: 1em 3em;
+        font-size: 1.4em;
+    }
 }
 
-
-
+/* Text cards container */
 .text-cards {
-    display: grid; /* Use grid layout */
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Flexible columns */
-    gap: 20px; /* Spacing between items */
-    padding: 20px; /* Padding around the container */
-	overflow: hidden; 
-  text-overflow: ellipsis;
-  font-size:calc(15px);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    text-align: left;
 }
 
 /* General styling for text elements within the container */
 .text-cards > * {
-    background: #000000;
-    border: 3px solid;
+    background: #000;
+    border: 3px solid #fff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px var(--text-color);
     font-family: Arial, sans-serif;
-    transition: all 1s ease;
-	border: 5px solid;
+    transition: all 0.5s ease;
+    padding: 20px;
 	
 }
 
-
-.text-cards > *:hover {
-    transform: translateY(-10px);
-	transition: all 1s ease;
+:root {
+    --text-color: #ffffff;
 }
 
+.text-cards > *:hover {
+    transform: translateY(-5px);
+	background-color: var(--text-color);
+}
 
-/* Styling for headings and paragraphs inside the cards */
-.text-cards a, .text-cards p {
+/* Styling for links and paragraphs inside text cards */
+.text-cards a,
+.text-cards p {
     margin: 0;
-    color:#fff ;
-	text-decoration: none;
-	font-weight: 700;
-	text-align:left;
-	text-overflow: hidden;
-	padding: 30px 70px 75px 300px;
-	white-space: wrap;
-	transition: all 1s ease;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    padding: 15px;
+    white-space: normal;
+	
 }
 
 .text-cards p {
-    color: #666; /* Slightly lighter text for paragraphs */
+    color: #bbb;
 }
 
+/* Gradient border effect for links */
 .text-cards a {
-    border: 5px solid transparent;
-    border-radius: 10px;
     position: relative;
-	display: flex;
-align-items: center;
-justify-content: center;
-text-align: center;
-padding: 10px;
-font-size: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    font-size: 2em;
+    border-color: var(--text-color);
+    border-radius: 10px;
+    transition: all 0.5s ease;
+    border-width: 1px;
 }
 
 .text-cards a::before {
     content: "";
     position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    background: linear-gradient(to right, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%) ;;
-    background-size: 400% 400%;
     z-index: -1;
     border-radius: 15px;
-    filter: blur(7px);
-    animation: 30s infinite linear;
-	animation-name:linkrgb;
+	overflow: hidden;
+    background-color: #000;
 }
 
-body{text-align:center;}
-.wrapper{width:80%;margin:0 auto;text-align:left;}
-
-
-@keyframes linkrgb {
-	0%{background-position:0% 100%}
-	100%{background-position:400% 50%}
+html, body {
+    margin: 0;
+    padding: 0;
 }
 
-@keyframes AnimationName {
-	0%{background-position:0% 50%}
-	100%{background-position:200% 50%}
+/* Hide scrollbar but allow scrolling */
+::-webkit-scrollbar {
+    display: none;
+}
+
+.topnav {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+
+/* Ensures the content can still be scrolled */
+body {
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+
+
+/* Container styles */
+.wrapper {
+    width: 80%;
+    margin: 0 auto;
+    text-align: left;
+}
+
+
+
+@keyframes rgbAnimation {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
 }

@@ -6,7 +6,6 @@
     <title>Newtab</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="index.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -66,6 +65,10 @@
             background: linear-gradient(90deg, var(--gradient-start, #000000), var(--gradient-end, #000000), var(--gradient-start, #000000));
             background-size: 200%;
             animation-name: rgb;
+            animation-duration: 30s;
+            animation-fill-mode: forwards;
+            height: 4px;
+            width: 100vw;
         }
 
         @keyframes rgb {
@@ -93,6 +96,7 @@
             filter: blur(8px);
             padding-top: 1em;
         }
+
 
         button {
             box-shadow: none;

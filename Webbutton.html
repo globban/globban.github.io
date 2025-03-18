@@ -11,15 +11,20 @@
 			//setup random button
 			randomButton("btn-random");
 		});
+		window.onload = function() {
+            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+            document.documentElement.style.setProperty('--text-color', savedTextColor);
+            document.getElementById('textColor').value = savedTextColor;
+        };
 	</script>
 	<body>
 	<div class="topnav">
-			<a class="active" href="/index.html">Home</a>
-			<a href="/Links.html">Links</a>
-			<a href="/clicker.html">clicker</a>
-			<a href="/Webbutton.html">Webbutton</a>
-			<a href="/MC.html">MC server</a>
-			<a href="/clock.html">clock</a>
+		<a href="/index.html">Home</a>
+		<a href="/Links.html">Links</a>
+		<a href="/clicker.html">clicker</a>
+		<a class="active" href="/Webbutton.html">Random</a>
+		<a href="/clock.html">clock</a>
+		<a href="/visits.html">Chat</a>
 		  </div>
 		  <div class="toprgb"></div>
 		  <div class="blur toprgb"></div>
