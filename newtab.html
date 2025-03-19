@@ -14,7 +14,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-        @import url('https://fonts.cdnfonts.com/css/lcd');
 
     body {
       margin: 0;
@@ -45,9 +44,26 @@
       bottom: 100px;
       background-color: rgba(110, 110, 110, 0.68);
       border-radius: 1em;
+      height: 60vh;
+      overflow: scroll;
+      overflow-x: hidden;
       padding: 1em;
+      font-size: 1vh;
     }
 
+    ::-webkit-scrollbar {
+      width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.658);
+  border-radius: 10px;
+}
     input[type="text"] {
       padding: 1em 15em 1em 1em;
       background-color: rgb(255, 255, 255);
@@ -122,27 +138,39 @@
     #calendarContainer {
       display: none;
       position: absolute;
-      top: 50%;
-      left: 50%;
       /* Remove transform once dragging begins */
       background-color: rgba(0, 0, 0, 0.7);
       padding: 1em;
       border-radius: 10px;
       color: white;
       cursor: grab;
+      user-select: none;
     }
 
     #calendar td.current-day {
       background-color: white;
       color: black;
+      user-select: none;
     }
+
+    #hour {
+  color: var(--hour-color, #ff0000); /* Default red */
+}
+
+#minute {
+  color: var(--minute-color, #00ff00); /* Default green */
+}
+
   </style>
 </head>
 <body onload="init()">
   <div class="toprgb" style="position: absolute; top: 0;"></div>
   <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
 
-  <div id="clock" style="font-weight: 300; font-size: 15em;">00:00</div>
+  <div id="clock">
+    <span id="hour" style="color: #ffffff;">00</span>:<span id="minute" style="color: #ffffff;">00</span>
+  </div>
+  
 
   <div id="myDIV" style="display: none;">
     <div class="container">
@@ -154,8 +182,14 @@
       <label for="endColor">End Color:</label>
       <input type="color" id="endColor" aria-label="Select end color" />
       <button id="toggleTopRGB" aria-label="Toggle top gradient" style="position: relative;">Toggle Top RGB</button>
-      <h1>Clock Color</h1>
+      <h1>Colon Color</h1>
       <input type="color" id="clockColor" aria-label="Select clock color" />
+      <h1>Hour Color</h1>
+<input type="color" id="hourColor" aria-label="Select hour color" />
+
+<h1>Minute Color</h1>
+<input type="color" id="minuteColor" aria-label="Select minute color" />
+
       <h1>Clock Glow Color</h1>
       <input type="color" id="glowColor" aria-label="Select glow color" />
       <h1>Glow Alpha</h1>
@@ -174,11 +208,14 @@
       <h1>Calendar</h1>
       <button onclick="toggleCalendar()" aria-label="Toggle calendar">Toggle Calendar</button>
       <h1>Clock Size</h1>
-      <input type="range" id="clockSizeInput" min="2" max="20" value="6" step="0.1" />
+      <input type="range" id="clockSizeInput" min="0" max="20" value="6" step="0.1" />
+      <h1>Calendar Size</h1>
+      <input type="range" id="calendarSizeInput" min="0.2" max="5" step="0.1" value="1">
+
     </div>
   </div>
 
-  <div id="calendarContainer">
+  <div id="calendarContainer" style="width: fit-content;">
     <h1>Calendar</h1>
     <div id="calendar"></div>
   </div>
@@ -190,6 +227,21 @@
   <div class="toprgb" style="position: absolute; bottom: 0;"></div>
 
   <script>
+
+function keepElementInBounds(element) {
+  const rect = element.getBoundingClientRect();
+  const maxX = window.innerWidth - rect.width;
+  const maxY = window.innerHeight - rect.height;
+
+  let x = Math.max(0, Math.min(element.offsetLeft, maxX));
+  let y = Math.max(0, Math.min(element.offsetTop, maxY));
+
+  element.style.left = `${x}px`;
+  element.style.top = `${y}px`;
+}
+
+// Call this after setting positions
+  
     // ---------- Initialization & Settings ----------
     function init() {
   const savedStart = localStorage.getItem('gradientStart') || '#ff00ff';
@@ -210,6 +262,7 @@
   if (savedBackgroundImage) {
     document.body.style.backgroundImage = `url(${savedBackgroundImage})`;
   }
+  
 
   document.documentElement.style.setProperty('--clock-color', savedClockColor);
   document.getElementById('clockColor').value = savedClockColor;
@@ -320,12 +373,40 @@
       showTime();
     });
 
+    document.addEventListener('DOMContentLoaded', () => {
+  // Load saved colors
+  const savedHourColor = localStorage.getItem('hourColor') || '#ff0000';
+  const savedMinuteColor = localStorage.getItem('minuteColor') || '#00ff00';
+
+  document.getElementById('hour').style.color = savedHourColor;
+  document.getElementById('minute').style.color = savedMinuteColor;
+
+  document.getElementById('hourColor').value = savedHourColor;
+  document.getElementById('minuteColor').value = savedMinuteColor;
+
+  // Event listeners to change colors dynamically
+  document.getElementById('hourColor').addEventListener('input', function() {
+    document.getElementById('hour').style.color = this.value;
+    localStorage.setItem('hourColor', this.value);
+  });
+
+  document.getElementById('minuteColor').addEventListener('input', function() {
+    document.getElementById('minute').style.color = this.value;
+    localStorage.setItem('minuteColor', this.value);
+  });
+});
+
+
     function showTime() {
-      const time = new Date();
-      const hour = String(time.getHours()).padStart(2, '0');
-      const min = String(time.getMinutes()).padStart(2, '0');
-      document.getElementById("clock").textContent = `${hour}:${min}`;
-    }
+  const time = new Date();
+  const hour = String(time.getHours()).padStart(2, '0');
+  const min = String(time.getMinutes()).padStart(2, '0');
+
+  document.getElementById("hour").textContent = hour;
+  document.getElementById("minute").textContent = min;
+}
+setInterval(showTime, 1000);
+showTime(); // Call initially to display immediately
 
     function myFunction() {
       const x = document.getElementById("myDIV");
@@ -365,6 +446,8 @@
         localStorage.setItem("clockX", document.getElementById("clock").offsetLeft);
         localStorage.setItem("clockY", document.getElementById("clock").offsetTop);
         document.body.style.cursor = "grab";
+        keepElementInBounds(document.getElementById("clock"));
+        
       }
     });
 
@@ -375,28 +458,30 @@
     calendarContainer.addEventListener("mousedown", (e) => {
       isCalendarDragging = true;
       // Remove transform so dragging works correctly
-      calendarContainer.style.transform = "none";
       calendarOffsetX = e.clientX - calendarContainer.getBoundingClientRect().left;
       calendarOffsetY = e.clientY - calendarContainer.getBoundingClientRect().top;
       document.body.style.cursor = "grabbing";
     });
 
     document.addEventListener("mousemove", (e) => {
-      if (isCalendarDragging) {
-        calendarContainer.style.left = `${e.clientX - calendarOffsetX}px`;
-        calendarContainer.style.top = `${e.clientY - calendarOffsetY}px`;
-      }
-    });
+  if (isCalendarDragging) {
+    calendarContainer.style.left = `${e.clientX - calendarOffsetX}px`;
+    calendarContainer.style.top = `${e.clientY - calendarOffsetY}px`;
+  }
+});
 
-    document.addEventListener("mouseup", () => {
-      if (isCalendarDragging) {
-        isCalendarDragging = false;
-        document.body.style.cursor = "default";
-        localStorage.setItem("calendarX", document.getElementById("calendarContainer").offsetLeft);
-        localStorage.setItem("calendarY", document.getElementById("calendarContainer").offsetTop);
-        console.log("pos", [document.getElementById("calendarContainer").offsetLeft, document.getElementById("calendarContainer").offsetTop])
-      }
-    });
+document.addEventListener("mouseup", () => {
+  if (isCalendarDragging) {
+    isCalendarDragging = false;
+    document.body.style.cursor = "default";
+    
+    // Save position and size
+    localStorage.setItem("calendarX", calendarContainer.offsetLeft);
+    localStorage.setItem("calendarY", calendarContainer.offsetTop);
+    localStorage.setItem("calendarWidth", calendarContainer.offsetWidth);
+    localStorage.setItem("calendarHeight", calendarContainer.offsetHeight);
+  }
+});
 
     // ---------- Calendar Toggle & Render ----------
     function toggleCalendar() {
@@ -452,6 +537,21 @@
   document.getElementById('clock').style.fontSize = fontSize;
   localStorage.setItem('clockFontSize', this.value); // Save the clock size to localStorage
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialize calendar size from localStorage
+    const savedCalendarSize = localStorage.getItem('calendarSize') || '1';
+    document.getElementById('calendarContainer').style.transform = `scale(${savedCalendarSize})`;
+    document.getElementById('calendarSizeInput').value = savedCalendarSize;
+
+    // Event listener for resizing the calendar
+    document.getElementById('calendarSizeInput').addEventListener('input', function () {
+        const newSize = this.value;
+        document.getElementById('calendarContainer').style.transform = `scale(${newSize})`;
+        localStorage.setItem('calendarSize', newSize);
+    });
+});
+
   </script>
 </body>
 </html>
