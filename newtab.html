@@ -5,6 +5,7 @@
   <title>Newtab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+  <script src='https://unpkg.com/trianglify@^4/dist/trianglify.bundle.js'></script>
   <!-- Import fonts: Press Start 2P from Google and LCD from cdnfonts -->
   <style>
     @import url('https://fonts.cdnfonts.com/css/lcd');
@@ -161,16 +162,87 @@
   color: var(--minute-color, #00ff00); /* Default green */
 }
 
+#trianglify {
+  display: none;
+  
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f5f5f5;
+}
+
+.container {
+    text-align: center;
+}
+
+.google-apps-btn {
+    display: grid;
+    grid-template-columns: repeat(3, 10px);
+    grid-template-rows: repeat(3, 10px);
+    gap: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    top: 2vh;
+    right: 2vw;
+    position:absolute;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    border-color: #000000;
+    border-width: 3px;
+    border-style: solid;
+}
+
+.apps-menu {
+    display: none;
+    background-color: rgba(77, 77, 77, 0.39);
+    border: 1px solid #000000;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 10vh;
+    right: 2vw;
+    border-radius: 1em;
+}
+
+.apps-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.apps-menu ul li {
+    padding: 8px 0;
+}
+
+.apps-menu ul li a {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.apps-menu ul li a:hover {
+    text-decoration: underline;
+}
+
+
   </style>
 </head>
 <body onload="init()">
   <div class="toprgb" style="position: absolute; top: 0;"></div>
   <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
 
-  <div id="clock"  style="font-weight: 300;">
+  <div id="clock"  style="font-weight: 300; display: none;">
     <span id="hour" style="color: #ffffff;">00</span>:<span id="minute" style="color: #ffffff; ">00</span>
   </div>
-  
 
   <div id="myDIV" style="display: none;">
     <div class="container">
@@ -211,7 +283,8 @@
       <input type="range" id="clockSizeInput" min="0" max="20" value="6" step="0.1" />
       <h1>Calendar Size</h1>
       <input type="range" id="calendarSizeInput" min="0.2" max="5" step="0.1" value="1">
-
+      <h1>Reset</h1>
+      <button onclick="reset()">RESET</button>
     </div>
   </div>
 
@@ -220,24 +293,46 @@
     <div id="calendar"></div>
   </div>
 
+  <div class="con">
+    <div class="google-apps-btn" onclick="toggleMenu()">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div id="appsMenu" class="apps-menu">
+        <ul>
+            <li><a href="https://mail.google.com/">Gmail</a></li>
+            <li><a href="https://www.youtube.com/">YouTube</a></li>
+            <li><a href="https://drive.google.com/">Google Drive</a></li>
+            <li><a href="https://www.google.com/maps">Google Maps</a></li>
+            <li><a href="https://docs.google.com/">Google Docs</a></li>
+            <li><a href="https://classroom.google.com/">Google Classroom</a></li>
+            <li><a href="https://slides.google.com/">Google Slides</a></li>
+            <li><a href="https://algot.fun">Algot.fun</a></li> <!-- Added your website -->
+        </ul>
+    </div>
+</div>
+
   <button onclick="myFunction()" aria-label="Toggle customization menu" style="position: absolute; bottom: 20px; left: 10px;">
     <i class="fa-solid fa-pen"></i>
   </button>
   <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
   <div class="toprgb" style="position: absolute; bottom: 0;"></div>
-
   <script>
 
-function keepElementInBounds(element) {
-  const rect = element.getBoundingClientRect();
-  const maxX = window.innerWidth - rect.width;
-  const maxY = window.innerHeight - rect.height;
+    function reset() {
+      localStorage.clear();
+    }
 
-  let x = Math.max(0, Math.min(element.offsetLeft, maxX));
-  let y = Math.max(0, Math.min(element.offsetTop, maxY));
-
-  element.style.left = `${x}px`;
-  element.style.top = `${y}px`;
+function toggleMenu() {
+    const menu = document.getElementById('appsMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
 // Call this after setting positions
@@ -287,6 +382,7 @@ function keepElementInBounds(element) {
   } else {
     document.getElementById('calendarContainer').style.display = 'none';
   }
+  document.getElementById('clock').style.display = 'block';
 }
 
 
