@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <meta charset="UTF-8" />
   <title>Newtab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,7 +23,7 @@
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      color: #fff;
+      color: #ffffff;
       height: 100vh;
       display: flex;
       justify-content: center;
@@ -106,13 +107,13 @@
       /* When using LCD, set font-family accordingly */
       font-family: "Press Start 2P", "LCD", sans-serif;
       color: var(--clock-color, #ffffff);
-      text-shadow: 0 0 10px var(--glow-color, #9d00e6),
-        0 0 20px var(--glow-color, #9d00e6),
-        0 0 30px var(--glow-color, #9d00e6),
-        0 0 40px var(--glow-color, #a500e6),
-        0 0 50px var(--glow-color, #c000e6),
-        0 0 60px var(--glow-color, #9200e6),
-        0 0 70px var(--glow-color, #8a00e6);
+      text-shadow: 0 0 10px var(--glow-color, #ffffff),
+        0 0 20px var(--glow-color, #ffffff),
+        0 0 30px var(--glow-color, #ffffff),
+        0 0 40px var(--glow-color, #ffffff),
+        0 0 50px var(--glow-color, #ffffff),
+        0 0 60px var(--glow-color, #ffffff),
+        0 0 70px var(--glow-color, #ffffff);
       cursor: grab;
       user-select: none;
       position: absolute;
@@ -125,8 +126,8 @@
 
     button {
       box-shadow: none;
-      background-color: rgba(0, 0, 0, 0);
-      color: rgba(255, 255, 255, 1);
+      background-color: rgb(255, 255, 255);
+      color: rgb(0, 0, 0);
       border: none;
       cursor: pointer;
     }
@@ -155,11 +156,11 @@
     }
 
     #hour {
-  color: var(--hour-color, #ff0000); /* Default red */
+  color: var(--hour-color, #ffffff); /* Default red */
 }
 
 #minute {
-  color: var(--minute-color, #00ff00); /* Default green */
+  color: var(--minute-color, #ff00d4); /* Default green */
 }
 
 #trianglify {
@@ -174,7 +175,8 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f5f5f5;
+    background-color: #000000;
+    background-image: url("windows\ dark.jpg");
 }
 
 .container {
@@ -199,7 +201,7 @@ body {
     background-color: #ffffff;
     border-radius: 50%;
     border-color: #000000;
-    border-width: 3px;
+    border-width: 2px;
     border-style: solid;
 }
 
@@ -210,7 +212,7 @@ body {
     padding: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: absolute;
-    top: 10vh;
+    top: 7vh;
     right: 2vw;
     border-radius: 1em;
 }
@@ -249,9 +251,7 @@ body {
       <h1>Background</h1>
       <input type="file" id="uploadImage" accept="image/*" aria-label="Upload background image" />
       <h1>Neon Gradient</h1>
-      <label for="startColor">Start Color:</label>
       <input type="color" id="startColor" aria-label="Select start color" />
-      <label for="endColor">End Color:</label>
       <input type="color" id="endColor" aria-label="Select end color" />
       <button id="toggleTopRGB" aria-label="Toggle top gradient" style="position: relative;">Toggle Top RGB</button>
       <h1>Colon Color</h1>
@@ -293,6 +293,12 @@ body {
     <div id="calendar"></div>
   </div>
 
+  <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_self">
+    <input type="hidden">
+    <input autocomplete="off" class="form-control search" name="q" placeholder="Search" required="required"  type="text" autofocus
+    style="border: #000000; box-shadow: 3px 3px 3px grey; outline: none;">
+    </form>
+
   <div class="con">
     <div class="google-apps-btn" onclick="toggleMenu()">
         <div class="dot"></div>
@@ -307,19 +313,20 @@ body {
     </div>
     <div id="appsMenu" class="apps-menu">
         <ul>
-            <li><a href="https://mail.google.com/">Gmail</a></li>
-            <li><a href="https://www.youtube.com/">YouTube</a></li>
-            <li><a href="https://drive.google.com/">Google Drive</a></li>
-            <li><a href="https://www.google.com/maps">Google Maps</a></li>
-            <li><a href="https://docs.google.com/">Google Docs</a></li>
-            <li><a href="https://classroom.google.com/">Google Classroom</a></li>
-            <li><a href="https://slides.google.com/">Google Slides</a></li>
-            <li><a href="https://algot.fun">Algot.fun</a></li> <!-- Added your website -->
+          <li><a href="https://mail.google.com/"><i class="fas fa-envelope"></i> Gmail</a></li>
+          <li><a href="https://www.youtube.com/"><i class="fab fa-youtube"></i> YouTube</a></li>
+          <li><a href="https://drive.google.com/"><i class="fab fa-google-drive"></i> Drive</a></li>
+          <li><a href="https://www.google.com/maps"><i class="fas fa-map-marker-alt"></i> Maps</a></li>
+          <li><a href="https://docs.google.com/"><i class="fas fa-file-alt"></i> Docs</a></li>
+          <li><a href="https://classroom.google.com/"><i class="fas fa-chalkboard-teacher"></i> Classroom</a></li>
+          <li><a href="https://slides.google.com/"><i class="fas fa-file-powerpoint"></i> Slides</a></li>
+          <li><a href="https://algot.fun"><i class="fas fa-code"></i> Algot.fun</a></li>
+          <li><a href="https://chatgpt.com/"><i class="fas fa-comments"></i> ChatGPT</a></li>
         </ul>
     </div>
 </div>
 
-  <button onclick="myFunction()" aria-label="Toggle customization menu" style="position: absolute; bottom: 20px; left: 10px;">
+  <button onclick="myFunction()" aria-label="Toggle customization menu" style="position: absolute; bottom: 20px; left: 10px; color:#ffffff;background-color: #00000000;">
     <i class="fa-solid fa-pen"></i>
   </button>
   <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
@@ -328,6 +335,7 @@ body {
 
     function reset() {
       localStorage.clear();
+      location.reload()
     }
 
 function toggleMenu() {
@@ -343,8 +351,8 @@ function toggleMenu() {
   const savedEnd = localStorage.getItem('gradientEnd') || '#00ffff';
   const savedBackgroundImage = localStorage.getItem('backgroundImage');
   const savedClockColor = localStorage.getItem('clockColor') || '#ffffff';
-  const savedClockFont = localStorage.getItem('clockFont') || 'Press Start 2P';
-  const savedGlowColor = localStorage.getItem('glowColor') || '#9d00e6';
+  const savedClockFont = localStorage.getItem('clockFont') ;
+  const savedGlowColor = localStorage.getItem('glowColor') || '#ff00f0';
   const savedGlowAlpha = localStorage.getItem('glowAlpha') || 1;
   const savedClockSize = localStorage.getItem('clockFontSize') || 6; // Get saved clock size (default to 6)
 
@@ -355,7 +363,7 @@ function toggleMenu() {
   document.getElementById('endColor').value = savedEnd;
 
   if (savedBackgroundImage) {
-    document.body.style.backgroundImage = `url(${savedBackgroundImage})`;
+    document.body.style.backgroundImage = `url(${savedBackgroundImage})` || 'none';
   }
   
 
@@ -471,8 +479,8 @@ function toggleMenu() {
 
     document.addEventListener('DOMContentLoaded', () => {
   // Load saved colors
-  const savedHourColor = localStorage.getItem('hourColor') || '#ff0000';
-  const savedMinuteColor = localStorage.getItem('minuteColor') || '#00ff00';
+  const savedHourColor = localStorage.getItem('hourColor') || '#ffffff';
+  const savedMinuteColor = localStorage.getItem('minuteColor') || '#ff00f0';
 
   document.getElementById('hour').style.color = savedHourColor;
   document.getElementById('minute').style.color = savedMinuteColor;
@@ -512,8 +520,8 @@ showTime(); // Call initially to display immediately
     // ---------- Clock Drag Functionality ----------
     function loadClockPosition() {
       const clock = document.getElementById("clock");
-      const savedX = localStorage.getItem("clockX");
-      const savedY = localStorage.getItem("clockY");
+      const savedX = localStorage.getItem("clockX") || '50';
+      const savedY = localStorage.getItem("clockY") || '50';
       if (savedX && savedY) {
         clock.style.left = savedX + "px";
         clock.style.top = savedY + "px";
