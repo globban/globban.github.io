@@ -1,74 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Algot's Web Workshop</title>
     <link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
-    
-    <!-- Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register("service-worker.js").catch(console.error);
-        }
-    </script>
-
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="index.css">
     <style>
-        :root {
-            --text-color: #ffffff;
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+
+        h1 {
+            color: rgb(255, 255, 255);
+            text-align: center;
+            font-family: Orbitron;
+            font-size: 9em;
+            text-shadow: 0 0 10px var(--glow-color, #ffffff),
+                0 0 20px var(--glow-color);
+            animation-name: fade;
+            animation-iteration-count: 1;
+            animation-delay: 0s;
+            animation-duration: 4s;
         }
+
+        :root {
+            --glow-color: rgb(255, 255, 255);
+        }
+
+
+        @keyframes fade {
+            0% {
+                color: rgba(255, 255, 255, 0);
+                text-shadow: none;
+            }
+            100% {
+                color: rgb(255, 255, 255);
+            }
+
+        }
+
         body {
-            color: var(--text-color);
+            background-color: #000;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 99%;
+            background-color: #000;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+
+        .icon {
+            top: 1cm;
+            right: 1cm;
+            color: #fff;
+            position: absolute;
+            font-size: 4em;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .icon :hover {
+            color: #999;
+            transition: ease;
+        }
+
+        #menu {
+            display: none;
+            opacity: 0;
+            width: 10em;
+            height: auto;
+            background-color: #1b1b1b;
+            position: absolute;
+            top: 0.7cm;
+            right: 0.5cm;
+            z-index: 0;
+            padding: 1em;
+            list-style: none;
+            transition: opacity 0.5s;
+        }
+
+        a {
+            color: #fff;
+            font-family: orbitron;
+            display: list-item;
+            padding-top: 1em;
+            text-decoration: none;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
 </head>
-<body onload="applyColors()">
-    <!-- Navigation -->
-    <div class="topnav">
-        <a class="active" href="/index.html">Home</a>
-        <a href="/Links.html">Links</a>
-        <a href="/clicker.html">clicker</a>
-        <a href="/Webbutton.html">Random</a>
-        <a href="/clock.html">clock</a>
-        <a href="/visits.html">Chat</a>
+
+<body>
+    <div id="particles-js"></div>
+    <div class="icon" onclick="menu()"><i class="fas fa-bars"></i></div>
+    <div id="menu">
+        <a href="/visits.html"><i class="fas fa-comment"></i> Chat</a>
+        <a href="/Links.html"><i class="fas fa-link"></i> Links</a>
+        <a href="/clicker.html"><i class="fas fa-computer-mouse"></i> Clicker</a>
+        <a href="/Webbutton.html"><i class="fas fa-dice"></i> Random</a>
+        <a href="/EXTRACT.zip" download><i class="fas fa-download"></i> Newtab 2.0</a>
+        <a href="/drift.html"><i class="fas fa-car"></i> Drift</a>
     </div>
-
-    <div class="toprgb"></div>
-    <div class="blur toprgb"></div>
-    <div class="blur toprgb"></div>
-
-    <!-- Main Content -->
-    <h1>Welcome to Algot's Web Workshop</h1>
-    <img style="width:50%" src="logo.svg" alt="Logo">
-    
-    <p></p>
-
-    <!-- Download Button -->
-    <a href="/EXTRACT.zip" download 
-       style="color: #fff; background-color: rgb(0, 0, 0); font-size: 0.5em; 
-              border-radius: 4px; position: absolute; bottom: 10px; left: 10px; 
-              padding: 10px;">
-        <h1>Newtab 2.0</h1>
-    </a>
-
-    <!-- Color Picker -->
-    <input type="color" id="textColor" value="#ffffff">
-
-    <script>
-        function applyColors() {
-            const textColor = document.getElementById('textColor').value;
-            document.documentElement.style.setProperty('--text-color', textColor);
-            localStorage.setItem('textColor', textColor);
-        }
-
-        window.onload = function() {
-            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-            document.documentElement.style.setProperty('--text-color', savedTextColor);
-            document.getElementById('textColor').value = savedTextColor;
-        };
-
-        document.getElementById('textColor').addEventListener('input', applyColors);
-    </script>
+    <div class="center">
+        <h1 class="glow">Welcome to algot's web workshop 2.0</h1>
+    </div>
 </body>
+<script>
+    particlesJS('particles-js', {
+        "particles": {
+            "number": { "value": 100 },
+            "size": { "value": 3 },
+            "move": { "speed": 2 },
+            "color": { "value": "#ff90ff" },
+            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
+            
+        }
+    });
+
+    function menu() {
+    let menuElement = document.getElementById('menu');
+    
+    if (menuElement.style.opacity === '0' || menuElement.style.opacity === '') {
+        menuElement.style.opacity = '1';  // Show menu
+        menuElement.style.display = 'block';
+    } else {
+        menuElement.style.opacity = '0';  // Hide menu
+        menuElement.style.display = 'none';
+    }
+}
+
+</script>
+
+
 </html>

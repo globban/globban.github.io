@@ -62,7 +62,7 @@ export default function randomButton(buttonId) {
         console.log("log", [randomIndex, _Links[randomIndex]]);
         
         //open site in new tab/window
-        window.open(_Links[randomIndex], "_blank");
+        window.open(_Links[randomIndex], "_self");
         
         //change URL of current window
         //window.location.replace(_Links[randomIndex]);

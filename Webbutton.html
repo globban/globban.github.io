@@ -2,7 +2,7 @@
 	<head>
 		<title>Algot's web-buttton</title>
 		<link rel="icon" href="https://www.algot.fun/logosmall.png">
-		<link rel="stylesheet" href="index.css">
+		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 	</head>
 	<script type="module">
 		import randomButton from "./random-button.js";
@@ -17,28 +17,69 @@
             document.getElementById('textColor').value = savedTextColor;
         };
 	</script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+		body {
+			background-color: black;
+			color: white;
+			text-align: center;
+			overflow-x: hidden;
+		}
+		.center {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			text-align: center;
+			align-items: center;
+		}
+
+		h1 {
+			font-family: orbitron;
+			font-size: 5em;
+			text-shadow: 0px 0px 10px #fff;
+		}
+
+		button {
+			padding: 0em 4em;
+			transition: all 0.5s;
+		}
+
+		button:hover {
+			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
+			transition: all 0.5s;
+		}
+
+		#particles-js {
+            position: absolute;
+            width: 100%;
+            height: 99%;
+            background-color: #000;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+	</style>
 	<body>
-	<div class="topnav">
-		<a href="/index.html">Home</a>
-		<a href="/Links.html">Links</a>
-		<a href="/clicker.html">clicker</a>
-		<a class="active" href="/Webbutton.html">Random</a>
-		<a href="/clock.html">clock</a>
-		<a href="/visits.html">Chat</a>
-		  </div>
-		  <div class="toprgb"></div>
-		  <div class="blur toprgb"></div>
-		  <div class="blur toprgb"></div>
+		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; right: 1em; top: 1em; cursor: pointer;"><img src="/arrow-right-solid.svg"></div>
+		<div id="particles-js"></div>
+		<div id="center"></div>
 		  <h1>Take me to a random website</h1>
-		 <img style="height:13em; padding-bottom: 5em;" src="logo.svg"/>
-		  <div id="content">
+		 <img src="logo.svg" style="height: 20em;"/>
+		  
 				<button id="btn-random"><h1>please</h1></button>
 	        </div>
-
-
-	
-	
-		  
-		
 	</body>
+	
+	<script>
+		particlesJS('particles-js', {
+			"particles": {
+				"number": { "value": 100 },
+				"size": { "value": 3 },
+				"move": { "speed": 2 },
+				"color": { "value": "#ff90ff" },
+				"line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" }
+			}
+		});
+	</script>
 </html>

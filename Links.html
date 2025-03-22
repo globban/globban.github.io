@@ -1,89 +1,204 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Algot's web-workshop</title>
-		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
-		<link rel="stylesheet" href="index.css">
-	</head>
-	<body onload="color()">
-		<div class="topnav">
-			<a  href="/index.html">Home</a>
-				<a class="active" href="/Links.html">Links</a>
-				<a href="/clicker.html">clicker</a>
-				<a href="/Webbutton.html">Random</a>
-				<a href="/clock.html">clock</a>
-				<a href="/visits.html">Chat</a>
-		  </div>
-		  <div class="toprgb"></div>
-		  <div class="blur toprgb"></div>
-		  <div class="blur toprgb"></div>
-		<img style="width:45%; padding-top: 1.25em; padding-bottom: 1.25em;" src="logo.svg"/>
-		<div class="text-cards">
-		<a href="https://mtsl.dk/csgo/">Case clicker</a>
-		<a href="https://neal.fun/infinite-craft/">infinite craft</a>
-		<a href="https://www.whatbeatsrock.com/">what beats rock</a>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Algot's web-workshop</title>
+	<link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
+	<style>
+		body {
+			background-color: #000000;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			margin: 0;
+			padding: 0;
+		}
+
+		img {
+			max-width: 100%;
+			height: auto;
+		}
+
+		.text-cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(10vw, 100vw));
+			gap: 20px;
+			width: calc(100vw - 60px);
+			align-items: center;
+			margin: 20px 0;
+		}
+
+		/* General styling for items within the container */
+		.text-cards > * {
+			background: #000;
+			border: 3px solid #fff;
+			border-radius: 10px;
+			box-shadow: 0 4px 8px var(--text-color);
+			font-family: Arial, sans-serif;
+			transition: all 0.5s ease;
+			padding: 20px;
+		}
+
+		:root {
+			--text-color: #5900ff;
+		}
+
+		.text-cards > *:hover {
+			transform: translateY(-5px);
+			background-color: var(--text-color);
+		}
+
+		/* Styling for links and paragraphs inside text cards */
+		.text-cards a,
+		.text-cards p {
+			margin: 0;
+			color: #fff;
+			text-decoration: none;
+			font-weight: 700;
+			/* Prevent text wrapping */
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			padding: 15px;
+			height: fit-content;
+			width: fit-content;
+		}
+
+		.text-cards p {
+			color: #bbb;
+		}
+
+		/* Gradient border effect for links */
+		.text-cards a {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			padding: 10px;
+			font-size: 2em;
+			border-color: var(--text-color);
+			border-radius: 10px;
+			transition: all 0.5s ease;
+			border-width: 1px;
+		}
+
+		.text-cards a::before {
+			content: "";
+			position: absolute;
+			z-index: -1;
+			border-radius: 15px;
+			overflow: hidden;
+			background-color: #000;
+		}
+
+		/* Hide scrollbar but allow scrolling */
+		::-webkit-scrollbar {
+			display: none;
+		}
+
+		h2 {
+			color: #fff;
+			width: calc(25vw - 100px);
+		}
+
+		#particles-js {
+            position: absolute;
+            width: 100%;
+            height: 160%;
+            background-color: #000;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+	</style>
+	<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+<body>
+	<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; right: 1em; top: 1em; cursor: pointer; z-index: 999;"><img src="/arrow-right-solid.svg"></div>
+	<div id="particles-js"></div>
+	<div class="text-cards">
+		<img style="width:45%;" src="logo.svg" alt="Logo"/>
+		<h2>🎮 Online Games</h2>
+		<a href="https://agar.io/">Agar.io</a>
+		<a href="/bloxd.html">BloxD</a>
+		<a href="https://mtsl.dk/csgo/">Case Clicker</a>
+		<a href="https://orteil.dashnet.org/cookieclicker/">Cookie Clicker</a>
+		<a href="https://dogeminer2.com">Dogeminer 2</a>
+		<a href="/drift.html">Drift</a>
+		<a href="https://totaljerkface.com/happy_wheels.tjf">Happy Wheels</a>
+		<a href="https://neal.fun/infinite-craft/">Infinite Craft</a>
+		<a href="https://classic.minecraft.net/">Minecraft Classic</a>
+		<a href="https://oimo.io">Oimo.io</a>
+		<a href="https://kodub.itch.io/polytrack">Polytrack</a>
 		<a href="https://sandtris.com/">Sandtris</a>
-		<a href="https://agar.io/">agar.io</a>
-		<a href="/drift.html">drift</a>
-		<a href="/bloxd.html">bloxd</a>
-		<a href="https://poki.com"  >Poki</a>
-		<a href="https://maxwellcat.world"> Cat world</a>
-		<a href="https://bongo.cat"> bongo cat</a>
-		<a href="https://classic.minecraft.net/">minecraft</a>
-	  	<a href="http://eelslap.com/" >eelslap</a>
-		<a href="https://alwaysjudgeabookbyitscover.com/">Books</a>
-		<a href="https://cat-bounce.com/">cat bounce</a>
-		<a href="https://theuselessweb.com/">useless web</a>
-		<a href="https://oimo.io"> oimo.io</a>
-		<a href="https://thisissand.com">sand</a>
-		<a href="https://www.crazygames.com">crazygames</a>
-		<a href="https://totaljerkface.com/happy_wheels.tjf">happy wheels</a>
-		<a href="https://orteil.dashnet.org/cookieclicker/">cookie clicker</a>
-		<a href="https://www.coolmathgames.com">coolmathgames</a>
-		<a href="https://itch.io">itch.io</a>
-		<a href="https://coolbackgrounds.io"> css backgrounds</a>
-		<a href="https://labs.openai.com">openai</a>
-		<a href="https://libraryofbabel.info">Everything</a>
-		<a href="https://starblast.io">starblast</a>
-		<a href="https://2050.earth">2050 earth</a>
-		<a href="https://autodraw.com">auto draw</a>
-		<a href="https://googlefeud.com">google feud</a>
-        <a href="https://kodub.itch.io/polytrack">polytrack</a>
-		<a href="https://classicreload.com">classic reload</a>
-		<a href="https://noclip.website">No clip</a>
- 		<a href="https://www.spend-elon-fortune.com">spend elons fortune</a>
-		<a href="https://mecabricks.com">Mecabricks</a>
-		<a href="https://geekprank.com/hacker/">hackertyper</a>
-		<a href="https://quickdraw.withgoogle.com">draw with google</a>
-		<a href="https://unsplash.com">unsplash</a>
-		<a href="https://www.geoguessr.com/">geoguessr</a>
-		<a href="https://www.thetruesize.com/">true size of</a>
-		<a href="https://neal.fun/space-elevator/">space elevator</a>
-		<a href="https://neal.fun/wonders-of-street-view/">street view</a>
-		<a href="https://neal.fun/perfect-circle/">draw perfect circle</a>
-		<a href="https://neal.fun/design-the-next-iphone/">design next iphone</a>
-		<a href="https://neal.fun/absurd-trolley-problems/">trolley problems</a>
-		<a href="https://neal.fun/deep-sea/">deep sea</a>
-		<a href="https://neal.fun/life-stats/">life stats</a>
-		<a href="https://neal.fun/size-of-space/"> size of space</a>
-		<a href="https://neal.fun/logos-from-memory/">draw logos</a>
-		<a href="https://neal.fun/speed/">speed</a>
-		<a href="https://neal.fun/auction-game/">guess the price</a>
-		<a href="https://neal.fun/asteroid-launcher/">asteroid launcher</a>
-		<a href="https://ncs.io">NCS</a>
-		<a href="https://dogeminer2.com">dogeminer 2</a>
-		<a href="https://framesynthesis.com/drivingsimulator/maps/">google maps drive</a>      
-		<a href="http://www.flashbynight.com/drench/">Drench</a>        
+		<a href="https://starblast.io">Starblast</a>
+	</div>
+	<div class="text-cards" style="position: absolute; left: 50vw;">
+		<h2>🔥 Classic & Flash Games</h2>
+		<a href="http://www.flashbynight.com/drench/">Drench</a>
+		<a href="http://eelslap.com/">Eelslap</a>
 		<a href="https://www.linerider.com/">Linerider</a>
+		<a href="https://mecabricks.com">Mecabricks</a>
 		<a href="https://shredsauce.com/">Shredsauce</a>
-		</div>
-	</body>
-	<script>
-		window.onload = function() {
-            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-            document.documentElement.style.setProperty('--text-color', savedTextColor);
-            document.getElementById('textColor').value = savedTextColor;
-        };
-		
-	</script>
+		<a href="https://classicreload.com">Classic Reload</a>
+		<a href="https://poki.com">Poki</a>
+		<a href="https://www.crazygames.com">Crazy Games</a>
+		<a href="https://www.coolmathgames.com">Cool Math Games</a>
+	
+		<h2>🎨 Creative & Drawing</h2>
+		<a href="https://autodraw.com">Auto Draw</a>
+		<a href="https://neal.fun/logos-from-memory/">Draw Logos</a>
+		<a href="https://neal.fun/perfect-circle/">Draw Perfect Circle</a>
+		<a href="https://quickdraw.withgoogle.com">Draw with Google</a>
+		<a href="https://coolbackgrounds.io">Cool Backgrounds</a>
+		<a href="https://unsplash.com">Unsplash</a>
+	
+		<h2>🌍 Exploration & Geography</h2>
+		<a href="https://framesynthesis.com/drivingsimulator/maps/">Google Maps Drive</a>
+		<a href="https://www.geoguessr.com/">GeoGuessr</a>
+		<a href="https://www.thetruesize.com/">The True Size Of</a>
+		<a href="https://neal.fun/wonders-of-street-view/">Street View Wonders</a>
+		<a href="https://neal.fun/size-of-space/">Size of Space</a>
+		<a href="https://neal.fun/deep-sea/">Deep Sea</a>
+	</div>
+	<div class="text-cards" style="position: absolute; left: 75vw;">
+		<h2>🤔 Fun & Challenges</h2>
+		<a href="https://alwaysjudgeabookbyitscover.com/">Judge a Book</a>
+		<a href="https://neal.fun/auction-game/">Auction Game</a>
+		<a href="https://neal.fun/asteroid-launcher/">Asteroid Launcher</a>
+		<a href="https://googlefeud.com">Google Feud</a>
+		<a href="https://geekprank.com/hacker/">Hackertyper</a>
+		<a href="https://neal.fun/speed/">Speed</a>
+		<a href="https://www.spend-elon-fortune.com">Spend Elon's Fortune</a>
+		<a href="https://neal.fun/absurd-trolley-problems/">Trolley Problems</a>
+	
+		<h2>📚 Knowledge & Experiments</h2>
+		<a href="https://2050.earth">2050 Earth</a>
+		<a href="https://libraryofbabel.info">Library of Babel</a>
+		<a href="https://itch.io">Itch.io</a>
+		<a href="https://labs.openai.com">OpenAI Labs</a>
+		<a href="https://neal.fun/life-stats/">Life Stats</a>
+		<a href="https://neal.fun/design-the-next-iphone/">Design the Next iPhone</a>
+	
+		<h2>🐱 Random & Silly</h2>
+		<a href="https://bongo.cat">Bongo Cat</a>
+		<a href="https://cat-bounce.com/">Cat Bounce</a>
+		<a href="https://maxwellcat.world">Cat World</a>
+		<a href="https://theuselessweb.com/">The Useless Web</a>
+		<a href="https://noclip.website">No Clip</a>
+	</div>
+</body>
+<script>
+    particlesJS('particles-js', {
+        "particles": {
+            "number": { "value": 100 },
+            "size": { "value": 3 },
+            "move": { "speed": 2 },
+            "color": { "value": "#ff90ff" },
+            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
+            
+        }
+    });
+</script>
 </html>

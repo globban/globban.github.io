@@ -3,43 +3,64 @@
 		<title>Algot's Clicker game</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="https://www.algot.fun/logosmall.png">
-		<link rel="stylesheet" href="index.css">
 		<script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
 		<script type="module">
 			import initScoreHandler from "./ClickerScore/clicker-score.js";
 			initScoreHandler("clickerButton", "currentScore","highScore");
-
-			window.addEventListener("load", (event) => {
-				const modeButton = document.getElementById("modeButton");
-				modeButton.addEventListener("click", () => {
-					var element = document.body;
-					element.classList.toggle("dark-mode");
-				});
-			});
-			window.onload = function() {
-            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-            document.documentElement.style.setProperty('--text-color', savedTextColor);
-            document.getElementById('textColor').value = savedTextColor;
-        };
 		</script>
+		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 	</head>
+	<style>
+	@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+		body {
+			background-color: black;
+			color: white;
+			text-align: center;
+			overflow-x: hidden;
+		}
+		.center {
+			position: absolute;
+			width: 100%;
+		}
+
+		h1 {
+			font-family: orbitron;
+			font-size: 5em;
+			text-shadow: 0px 0px 10px #fff;
+		}
+
+		button {
+			padding: 0em 4em;
+			transition: all 0.5s;
+		}
+
+		button:hover {
+			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
+			transition: all 0.5s;
+		}
+			
+		
+	</style>
 	<body>
-		<div class="topnav">
-			<a  href="/index.html">Home</a>
-				<a href="/Links.html">Links</a>
-				<a class="active" href="/clicker.html">clicker</a>
-				<a href="/Webbutton.html">Random</a>
-				<a href="/clock.html">clock</a>
-				<a href="/visits.html">Chat</a>
-		  </div>
-		  <div class="toprgb"></div>
-		  <div class="blur toprgb"></div>
-		  <div class="blur toprgb"></div>
-		<div>
+		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; right: 1em; top: 1em; cursor: pointer; z-index: 999;"><img src="/arrow-right-solid.svg"></div>
+		<div id="particles-js">
+		<div class="center">
 			<h1>Clicker game</h1>
 			<button id="clickerButton"><h1>Click!</h1></button>
 			<h1>your score: <span id="currentScore"></span></h1> 
 			<h1>Highest score: <span id="highScore"></span></h1> 
 		</div>
 	</body>
+	<script>
+		particlesJS('particles-js', {
+        "particles": {
+            "number": { "value": 100 },
+            "size": { "value": 3 },
+            "move": { "speed": 2 },
+            "color": { "value": "#ff90ff" },
+            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
+            
+        }
+    });
+	</script>
 </html>
