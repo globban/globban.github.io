@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Algot's Web Workshop</title>
+    <link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+
+        h1 {
+            color: rgb(255, 255, 255);
+            text-align: center;
+            font-family: Orbitron;
+            font-size: 9em;
+            text-shadow: 0 0 10px var(--glow-color, #ffffff),
+                0 0 20px var(--glow-color);
+            animation-name: fade;
+            animation-iteration-count: 1;
+            animation-delay: 0s;
+            animation-duration: 4s;
+        }
+
+        :root {
+            --glow-color: rgb(255, 255, 255);
+        }
+
+
+        @keyframes fade {
+            0% {
+                color: rgba(255, 255, 255, 0);
+                text-shadow: none;
+            }
+            100% {
+                color: rgb(255, 255, 255);
+            }
+
+        }
+
+        body {
+            background-color: #000;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+
+        .icon {
+            top: 1cm;
+            right: 1cm;
+            color: #fff;
+            position: absolute;
+            font-size: 4em;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .icon :hover {
+            color: #999;
+            transition: ease;
+        }
+
+        #menu {
+            display: none;
+            opacity: 0;
+            width: 10em;
+            height: auto;
+            background-color: #1b1b1b;
+            position: absolute;
+            top: 0.7cm;
+            right: 0.5cm;
+            z-index: 0;
+            padding: 1em;
+            list-style: none;
+            transition: opacity 0.5s;
+        }
+
+        a {
+            color: #fff;
+            font-family: orbitron;
+            display: list-item;
+            padding-top: 1em;
+            text-decoration: none;
+        }
+
+        
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #ffffff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      transition: background-image 0.5s ease;
+      background-color: #000000;
+    }
+
+    .center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .container {
+      position: absolute;
+      left: 20px;
+      bottom: 100px;
+      background-color: rgba(110, 110, 110, 0.68);
+      border-radius: 1em;
+      height: 60vh;
+      overflow: scroll;
+      overflow-x: hidden;
+      padding: 1em;
+      font-size: 1vh;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.658);
+  border-radius: 10px;
+}
+    input[type="text"] {
+      padding: 1em 15em 1em 1em;
+      background-color: rgb(255, 255, 255);
+      box-shadow: none;
+      border-width: 1px;
+      font-size: 1em;
+      border-radius: 50px;
+      margin: 0.4rem;
+      position: absolute;
+      transform: translate(-14.1em, 10em);
+    }
+
+
+.google-apps-btn {
+    display: grid;
+    grid-template-columns: repeat(3, 10px);
+    grid-template-rows: repeat(3, 10px);
+    gap: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    top: 2vh;
+    right: 2vw;
+    position:absolute;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    border-color: #000000;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.apps-menu {
+    display: none;
+    background-color: rgba(77, 77, 77, 0.39);
+    border: 1px solid #000000;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 7vh;
+    right: 2vw;
+    border-radius: 1em;
+    z-index: 2;
+}
+
+.apps-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.apps-menu ul li {
+    padding: 8px 0;
+}
+
+.apps-menu ul li a {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.apps-menu ul li a:hover {
+    text-decoration: underline;
+}
+
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_self">
+        <input type="hidden">
+        <input autocomplete="off" class="form-control search" name="q" placeholder="Search" required="required"  type="text" autofocus
+        style="border: #000000; box-shadow: 3px 3px 3px grey; outline: none;">
+        </form>
+    
+      <div class="con">
+        <div class="google-apps-btn" onclick="toggleMenu()">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div id="appsMenu" class="apps-menu">
+            <ul>
+              <li><a href="https://mail.google.com/"><i class="fas fa-envelope"></i> Gmail</a></li>
+              <li><a href="https://www.youtube.com/"><i class="fab fa-youtube"></i> YouTube</a></li>
+              <li><a href="https://drive.google.com/"><i class="fab fa-google-drive"></i> Drive</a></li>
+              <li><a href="https://www.google.com/maps"><i class="fas fa-map-marker-alt"></i> Maps</a></li>
+              <li><a href="https://docs.google.com/"><i class="fas fa-file-alt"></i> Docs</a></li>
+              <li><a href="https://classroom.google.com/"><i class="fas fa-chalkboard-teacher"></i> Classroom</a></li>
+              <li><a href="https://slides.google.com/"><i class="fas fa-file-powerpoint"></i> Slides</a></li>
+              <li><a href="https://algot.fun"><i class="fas fa-code"></i> Algot.fun</a></li>
+              <li><a href="https://chatgpt.com/"><i class="fas fa-comments"></i> ChatGPT</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+<script>
+    particlesJS('particles-js', {
+        "particles": {
+            "number": { "value": 100 },
+            "size": { "value": 3 },
+            "move": { "speed": 2 },
+            "color": { "value": "#ff90ff" },
+            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
+            
+        }
+    });
+
+    function toggleMenu() {
+    const menu = document.getElementById('appsMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+</script>
+
+
+</html>
