@@ -29,7 +29,6 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      transition: background-image 0.5s ease;
       background-color: #000000;
     }
 
@@ -86,12 +85,13 @@
     var(--gradient-end, #000000),
     var(--gradient-start, #000000)
   );
-  background-size: 300%;
+  background-size: 200%;
   animation-name: rgb;
-  animation-duration: 7s;
+  animation-duration: 5s;
   animation-fill-mode: forwards;
   height: 4px;
   width: 100vw;
+  animation-iteration-count: infinite;
 }
     @keyframes rgb {
       0% {
@@ -177,7 +177,6 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #000000;
-    background-image: url("windows\ dark.jpg");
 }
 
 .container {
@@ -199,7 +198,7 @@ body {
 .dot {
     width: 7px;
     height: 7px;
-    background-color: -;
+    background-color: white;
     border-radius: 50%;
     border-color: #000000;
     border-width: 2px;
@@ -242,7 +241,6 @@ body {
 
 
   </style>
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 </head>
 <body onload="init()">
   <div class="toprgb" style="position: absolute; top: 0;"></div>
@@ -255,7 +253,6 @@ body {
   <div id="myDIV" style="display: none;">
     <div class="container">
       <h1>Background</h1>
-      <button id="toggleBackground" aria-label="Toggle background">particles.js</button>
       <input type="file" id="uploadImage" accept="image/*" aria-label="Upload background image" />
       <h1>Neon Gradient</h1>
       <input type="color" id="startColor" aria-label="Select start color" />
@@ -286,7 +283,7 @@ body {
         <option value="LCD">LCD</option>
       </select>
       <h1>Calendar</h1>
-      <button onclick="toggleCalendar()" aria-label="Toggle calendar">Toggle Calendar</button>
+      <button onclick="toggleCalendar(), renderCalendar()" aria-label="Toggle calendar">Toggle Calendar</button>
       <h1>Clock Size</h1>
       <input type="range" id="clockSizeInput" min="0" max="20" value="6" step="0.1" />
       <h1>Calendar Size</h1>
@@ -303,7 +300,6 @@ body {
     <div id="calendar"></div>
   </div>
 
-  <div id="particles-js"></div>
 
   <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_self">
     <input type="hidden">
@@ -344,6 +340,11 @@ body {
   <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
   <div class="toprgb" style="position: absolute; bottom: 0;"></div>
   <script>
+
+function reset() {
+  localStorage.clear();
+  location.reload();
+}
 
 function loadClockPosition() {
   const clock = document.getElementById('clock');
@@ -446,73 +447,16 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateClock, 1000);
 });
 
-function initParticles() {
-  particlesJS('particles-js', {
-    particles: {
-      number: { value: 80, },
-      color: { value: '#ffffff' },
-      shape: {
-        type: 'circle',
-        stroke: { width: 2, color: '#0000ff' },
-        polygon: { nb_sides: 5 },
-      },
-      opacity: { value: 0.1, random: true },
-      size: { value: 3, random: false },
-      line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1 },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: 'none',
-        random: false,
-        straight: false,
-        out_mode: '',
-        bounce: true,
-      },
-    },
-    interactivity: {
-      detect_on: 'canvas',
-      events: {
-        onhover: { enable: true, mode: 'repulse' },
-        onclick: { enable: true, mode: 'push' },
-        resize: true,
-      },
-      modes: {
-        repulse: { distance: 100, duration: 0.4 },
-        push: { particles_nb: 4 },
-      },
-    },
-    retina_detect: true,
-  });
-}
-
-function toggleBackground() {
-  const particlesContainer = document.getElementById('particles-js');
-  const body = document.body;
-
-  if (particlesContainer.style.display === 'none' || particlesContainer.style.display === '') {
-    particlesContainer.style.display = 'block';
-    body.style.backgroundImage = 'none';
-    saveSetting('backgroundMode', 'particles'); // Save mode as 'particles'
-  } else {
-    particlesContainer.style.display = 'none';
-    const backgroundImage = loadSetting('backgroundImage', null);
-    if (backgroundImage) {
-      body.style.backgroundImage = `url(${backgroundImage})`;
-    }
-    saveSetting('backgroundMode', 'image'); // Save mode as 'image'
-  }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
-  initParticles(); // Initialize particles.js
   enableClockDragging();
   enableSearchBarDragging();
+  enableCalendarDragging(); // Enable dragging for the calendar
   loadSearchBarPosition();
+  loadCalendarPosition(); // Load the saved position of the calendar
   updateClock();
   setInterval(updateClock, 1000);
-
-  document.getElementById('toggleBackground').addEventListener('click', toggleBackground);
 });
 
 function loadClockPosition() {
@@ -549,91 +493,122 @@ function myFunction() {
       document.documentElement.style.setProperty('--gradient-end', endColor);
     }
   
+    // ---------- Calendar Toggle ----------
+    function toggleCalendar() {
+      const calendarContainer = document.getElementById('calendarContainer');
+      const isVisible = calendarContainer.style.display === 'block';
+      calendarContainer.style.display = isVisible ? 'none' : 'block';
+      saveSetting('calendarVisible', !isVisible ? 'true' : 'false');
+    }
+  
+    // ---------- Render Calendar ----------
+    function renderCalendar() {
+      const calendar = document.getElementById('calendar');
+      const now = new Date();
+      const month = now.getMonth();
+      const year = now.getFullYear();
+    
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDay = new Date(year, month, 1).getDay();
+    
+      let calendarHTML = '<table>';
+      calendarHTML += '<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>';
+      calendarHTML += '<tr>';
+    
+      // Add empty cells for days before the first day of the month
+      for (let i = 0; i < firstDay; i++) {
+        calendarHTML += '<td></td>';
+      }
+    
+      // Add cells for each day of the month
+      for (let day = 1; day <= daysInMonth; day++) {
+        if ((firstDay + day - 1) % 7 === 0) {
+          calendarHTML += '</tr><tr>'; // Start a new row every Sunday
+        }
+        const isToday = day === now.getDate();
+        calendarHTML += `<td class="${isToday ? 'current-day' : ''}">${day}</td>`;
+      }
+    
+      calendarHTML += '</tr></table>';
+      calendar.innerHTML = calendarHTML; // Insert the generated HTML into the #calendar element
+    }
+  
     // ---------- Initialization & Settings ----------
     function init() {
-  const settings = {
-    gradientStart: '#ff00ff',
-    gradientMiddle: '#00ff00', // Default third color
-    gradientEnd: '#00ffff',
-    backgroundImage: null,
-    clockColor: '#ffffff',
-    clockFont: 'Roboto',
-    glowColor: '#ff00f0',
-    glowAlpha: 1,
-    dotColor: '#ffffff',
-    clockFontSize: 6,
-    hourColor: '#ffffff',
-    minuteColor: '#ff00f0',
-    calendarVisible: 'false',
-    calendarSize: 1,
-    toprgb: 'block',
-    backgroundMode: 'particles', // Default to particles
-  };
-
-  // Load settings
-  Object.keys(settings).forEach((key) => {
-    settings[key] = loadSetting(key, settings[key]);
-  });
-
-  // Apply settings
-  applyGradient(settings.gradientStart, settings.gradientMiddle, settings.gradientEnd);
-  document.getElementById('startColor').value = settings.gradientStart;
-  document.getElementById('thirdColor').value = settings.gradientMiddle;
-  document.getElementById('endColor').value = settings.gradientEnd;
-
-  if (settings.backgroundImage) {
-    document.body.style.backgroundImage = `url(${settings.backgroundImage})`;
-  }
-
-  document.documentElement.style.setProperty('--clock-color', settings.clockColor);
-  document.getElementById('clockColor').value = settings.clockColor;
-
-  document.getElementById('clockFont').value = settings.clockFont;
-  document.getElementById('clock').style.fontFamily = settings.clockFont;
-
-  document.getElementById('glowColor').value = settings.glowColor;
-  document.getElementById('glowAlpha').value = settings.glowAlpha;
-  updateGlowEffect(settings.glowColor, settings.glowAlpha);
-
-  document.getElementById('clock').style.fontSize = settings.clockFontSize + 'vw';
-  document.getElementById('clockSizeInput').value = settings.clockFontSize;
-
-  document.documentElement.style.setProperty('--dot', settings.dotColor);
-  document.getElementById('dots').value = settings.dotColor;
-
-  document.getElementById('hour').style.color = settings.hourColor;
-  document.getElementById('minute').style.color = settings.minuteColor;
-  document.getElementById('hourColor').value = settings.hourColor;
-  document.getElementById('minuteColor').value = settings.minuteColor;
-
-  const toprgbElements = document.querySelectorAll('.toprgb');
-  toprgbElements.forEach((el) => (el.style.display = settings.toprgb));
-
-  if (settings.calendarVisible === 'true') {
-    document.getElementById('calendarContainer').style.display = 'block';
-  } else {
-    document.getElementById('calendarContainer').style.display = 'none';
-  }
-
-  document.getElementById('calendarContainer').style.transform = `scale(${settings.calendarSize})`;
-  document.getElementById('calendarSizeInput').value = settings.calendarSize;
-
-  document.getElementById('clock').style.display = 'block';
-  loadClockPosition();
-
-  // Load the correct background mode
-  const particlesContainer = document.getElementById('particles-js');
-  if (settings.backgroundMode === 'particles') {
-    particlesContainer.style.display = 'block';
-    document.body.style.backgroundImage = 'none';
-  } else if (settings.backgroundMode === 'image') {
-    particlesContainer.style.display = 'none';
-    const backgroundImage = loadSetting('backgroundImage', null);
-    if (backgroundImage) {
-      document.body.style.backgroundImage = `url(${backgroundImage})`;
+      const settings = {
+        gradientStart: '#ff00ff',
+        gradientMiddle: '#00ff00', // Default third color
+        gradientEnd: '#00ffff',
+        backgroundImage: null, // Default to null
+        clockColor: '#ffffff',
+        clockFont: 'Roboto',
+        glowColor: '#ff00f0',
+        glowAlpha: 1,
+        dotColor: '#ffffff',
+        clockFontSize: 6,
+        hourColor: '#ffffff',
+        minuteColor: '#ff00f0',
+        calendarVisible: 'false',
+        calendarSize: 1,
+        toprgb: 'block',
+      };
+    
+      // Load settings
+      Object.keys(settings).forEach((key) => {
+        settings[key] = loadSetting(key, settings[key]);
+      });
+    
+      // Apply default or saved background image
+      if (settings.backgroundImage && settings.backgroundImage !== 'null') {
+        document.body.style.backgroundImage = settings.backgroundImage;
+      } else {
+        document.body.style.backgroundImage = 'url("windows dark.jpg")'; // Default background
+      }
+    
+      // Apply gradient settings
+      applyGradient(settings.gradientStart, settings.gradientMiddle, settings.gradientEnd);
+      document.getElementById('startColor').value = settings.gradientStart;
+      document.getElementById('thirdColor').value = settings.gradientMiddle;
+      document.getElementById('endColor').value = settings.gradientEnd;
+    
+      // Apply clock settings
+      document.documentElement.style.setProperty('--clock-color', settings.clockColor);
+      document.getElementById('clockColor').value = settings.clockColor;
+    
+      document.getElementById('clockFont').value = settings.clockFont;
+      document.getElementById('clock').style.fontFamily = settings.clockFont;
+    
+      document.getElementById('glowColor').value = settings.glowColor;
+      document.getElementById('glowAlpha').value = settings.glowAlpha;
+      updateGlowEffect(settings.glowColor, settings.glowAlpha);
+    
+      document.getElementById('clock').style.fontSize = settings.clockFontSize + 'vw';
+      document.getElementById('clockSizeInput').value = settings.clockFontSize;
+    
+      document.documentElement.style.setProperty('--dot', settings.dotColor);
+      document.getElementById('dots').value = settings.dotColor;
+    
+      document.getElementById('hour').style.color = settings.hourColor;
+      document.getElementById('hourColor').value = settings.hourColor;
+      document.getElementById('minuteColor').value = settings.minuteColor;
+  
+      const toprgbElements = document.querySelectorAll('.toprgb');
+      toprgbElements.forEach((el) => (el.style.display = settings.toprgb));
+  
+      if (settings.calendarVisible === 'true') {
+        document.getElementById('calendarContainer').style.display = 'block';
+        renderCalendar();
+      } else {
+        document.getElementById('calendarContainer').style.display = 'none';
+      }
+  
+      document.getElementById('calendarContainer').style.transform = `scale(${settings.calendarSize})`;
+      document.getElementById('calendarSizeInput').value = settings.calendarSize;
+  
+      document.getElementById('clock').style.display = 'block';
+      loadClockPosition();
     }
-  }
-}
+  
     // ---------- Event Listeners ----------
     document.addEventListener('DOMContentLoaded', () => {
       init();
@@ -659,6 +634,53 @@ function myFunction() {
         saveSetting('gradientEnd', this.value);
       });
   
+      document.getElementById('clockColor').addEventListener('input', function () {
+        document.documentElement.style.setProperty('--clock-color', this.value);
+        saveSetting('clockColor', this.value);
+      });
+  
+      document.getElementById('hourColor').addEventListener('input', function () {
+        document.getElementById('hour').style.color = this.value;
+        saveSetting('hourColor', this.value);
+      });
+  
+      document.getElementById('minuteColor').addEventListener('input', function () {
+        document.getElementById('minute').style.color = this.value;
+        saveSetting('minuteColor', this.value);
+      });
+  
+      document.getElementById('glowColor').addEventListener('input', function () {
+        const glowAlpha = document.getElementById('glowAlpha').value;
+        updateGlowEffect(this.value, glowAlpha);
+        saveSetting('glowColor', this.value);
+      });
+  
+      document.getElementById('glowAlpha').addEventListener('input', function () {
+        const glowColor = document.getElementById('glowColor').value;
+        updateGlowEffect(glowColor, this.value);
+        saveSetting('glowAlpha', this.value);
+      });
+  
+      document.getElementById('clockSizeInput').addEventListener('input', function () {
+        document.getElementById('clock').style.fontSize = this.value + 'vw';
+        saveSetting('clockFontSize', this.value);
+      });
+  
+      document.getElementById('calendarSizeInput').addEventListener('input', function () {
+        document.getElementById('calendarContainer').style.transform = `scale(${this.value})`;
+        saveSetting('calendarSize', this.value);
+      });
+  
+      document.getElementById('dots').addEventListener('input', function () {
+        document.documentElement.style.setProperty('--dot', this.value);
+        saveSetting('dotColor', this.value);
+      });
+  
+      document.getElementById('clockFont').addEventListener('change', function () {
+        document.getElementById('clock').style.fontFamily = this.value;
+        saveSetting('clockFont', this.value);
+      });
+  
       document.getElementById('toggleTopRGB').addEventListener('click', () => {
         const toprgbElements = document.querySelectorAll('.toprgb');
         toprgbElements.forEach((el) => {
@@ -681,6 +703,58 @@ function myFunction() {
       const b = parseInt(hex.slice(5, 7), 16);
       return `${r}, ${g}, ${b}`;
     }
+
+function enableCalendarDragging() {
+  const calendarContainer = document.getElementById('calendarContainer');
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  calendarContainer.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.clientX - calendarContainer.offsetLeft;
+    offsetY = e.clientY - calendarContainer.offsetTop;
+    calendarContainer.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const x = e.clientX - offsetX;
+      const y = e.clientY - offsetY;
+      calendarContainer.style.left = `${x}px`;
+      calendarContainer.style.top = `${y}px`;
+      calendarContainer.style.position = 'absolute';
+      saveSetting('calendarPositionX', `${x}px`);
+      saveSetting('calendarPositionY', `${y}px`);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    calendarContainer.style.cursor = 'grab';
+  });
+}
+
+function loadCalendarPosition() {
+  const calendarContainer = document.getElementById('calendarContainer');
+  const x = loadSetting('calendarPositionX', '50%');
+  const y = loadSetting('calendarPositionY', '50%');
+  calendarContainer.style.left = x;
+  calendarContainer.style.top = y;
+  calendarContainer.style.position = 'absolute';
+}
+
+document.getElementById('uploadImage').addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const imageUrl = `url(${e.target.result})`;
+      document.body.style.backgroundImage = imageUrl;
+      saveSetting('backgroundImage', imageUrl); // Save the image URL to localStorage
+    };
+    reader.readAsDataURL(file); // Convert the image to a data URL
+  }
+});
   </script>
 </body>
 </html>
