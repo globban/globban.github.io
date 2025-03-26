@@ -219,21 +219,6 @@
     text-decoration: underline;
 }
 
-#clock {
-  font-size: 6vw;
-  font-family: "Press Start 2P", "LCD", sans-serif;
-  color: var(--clock-color, #ffffff);
-  text-shadow: 0 0 10px var(--glow-color, #ffffff),
-    0 0 20px var(--glow-color, #ffffff),
-    0 0 30px var(--glow-color, #ffffff),
-    0 0 40px var(--glow-color, #ffffff),
-    0 0 50px var(--glow-color, #ffffff),
-    0 0 60px var(--glow-color, #ffffff),
-    0 0 70px var(--glow-color, #ffffff);
-  cursor: grab;
-  user-select: none;
-  position: absolute;
-}
 
     </style>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -331,9 +316,6 @@
               <li><a href="https://chatgpt.com/"><i class="fas fa-comments"></i> ChatGPT</a></li>
             </ul>
         </div>
-    </div>
-    <div id="clock" style="font-weight: 300; display: none;">
-      <span id="hour" style="color: #ffffff;">00</span>:<span id="minute" style="color: #ffffff;">00</span>
     </div>
 </body>
 <script>
@@ -478,13 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     retina_detect: true,
   });
-
-  // Initialize clock
-  updateClock();
-  setInterval(updateClock, 1000);
-  enableClockDragging();
-  loadClockPosition();
-  document.getElementById('clock').style.display = 'block'; // Show the clock
 });
 
 function saveSetting(key, value) {
@@ -493,52 +468,6 @@ function saveSetting(key, value) {
 
 function loadSetting(key, defaultValue) {
   return localStorage.getItem(key) || defaultValue;
-}
-
-function updateClock() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('hour').textContent = hours;
-  document.getElementById('minute').textContent = minutes;
-}
-
-function enableClockDragging() {
-  const clock = document.getElementById('clock');
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  clock.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - clock.offsetLeft;
-    offsetY = e.clientY - clock.offsetTop;
-    clock.style.cursor = 'grabbing';
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const x = e.clientX - offsetX;
-      const y = e.clientY - offsetY;
-      clock.style.left = `${x}px`;
-      clock.style.top = `${y}px`;
-      saveSetting('clockPositionX', `${x}px`);
-      saveSetting('clockPositionY', `${y}px`);
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-    clock.style.cursor = 'grab';
-  });
-}
-
-function loadClockPosition() {
-  const clock = document.getElementById('clock');
-  const x = loadSetting('clockPositionX', '50%');
-  const y = loadSetting('clockPositionY', '50%');
-  clock.style.left = x;
-  clock.style.top = y;
-  clock.style.position = 'absolute';
 }
 </script>
 
