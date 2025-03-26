@@ -3,8 +3,8 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Algot's Web Workshop</title>
-    <link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
+    <title>Newtab</title>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
 
@@ -219,6 +219,21 @@
     text-decoration: underline;
 }
 
+#clock {
+  font-size: 6vw;
+  font-family: "Press Start 2P", "LCD", sans-serif;
+  color: var(--clock-color, #ffffff);
+  text-shadow: 0 0 10px var(--glow-color, #ffffff),
+    0 0 20px var(--glow-color, #ffffff),
+    0 0 30px var(--glow-color, #ffffff),
+    0 0 40px var(--glow-color, #ffffff),
+    0 0 50px var(--glow-color, #ffffff),
+    0 0 60px var(--glow-color, #ffffff),
+    0 0 70px var(--glow-color, #ffffff);
+  cursor: grab;
+  user-select: none;
+  position: absolute;
+}
 
     </style>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -232,6 +247,64 @@
         <input autocomplete="off" class="form-control search" name="q" placeholder="Search" required="required"  type="text" autofocus
         style="border: #000000; box-shadow: 3px 3px 3px grey; outline: none;">
         </form>
+        
+        <div id="particlesCustomization" style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 10px; color: white;">
+            <h3>Customize Particles</h3>
+            <label for="particleCount">Particle Count:</label>
+            <input type="number" id="particleCount" value="100" min="10" max="500" step="10"><br><br>
+          
+            <label for="particleSize">Particle Size:</label>
+            <input type="number" id="particleSize" value="3" min="1" max="10" step="1"><br><br>
+          
+            <label for="particleSpeed">Particle Speed:</label>
+            <input type="number" id="particleSpeed" value="2" min="1" max="10" step="1"><br><br>
+          
+            <label for="particleOpacity">Particle Opacity:</label>
+            <input type="number" id="particleOpacity" value="0.5" min="0.1" max="1" step="0.1"><br><br>
+          
+            <label for="particleShape">Particle Shape:</label>
+            <select id="particleShape">
+              <option value="circle">Circle</option>
+              <option value="edge">Edge</option>
+              <option value="triangle">Triangle</option>
+              <option value="polygon">Polygon</option>
+              <option value="star">Star</option>
+            </select><br><br>
+          
+            <label for="particleColor">Particle Color:</label>
+            <input type="color" id="particleColor" value="#ff90ff"><br><br>
+          
+            <label for="lineColor">Line Color:</label>
+            <input type="color" id="lineColor" value="#ff00ff"><br><br>
+          
+            <label for="lineDistance">Line Distance:</label>
+            <input type="number" id="lineDistance" value="150" min="50" max="300" step="10"><br><br>
+          
+            <label for="lineWidth">Line Width:</label>
+            <input type="number" id="lineWidth" value="1" min="1" max="5" step="1"><br><br>
+          
+            <h3>Interactivity</h3>
+            <label for="hoverMode">Hover Mode:</label>
+            <select id="hoverMode">
+              <option value="grab">Grab</option>
+              <option value="repulse">Repulse</option>
+              <option value="bubble">Bubble</option>
+            </select><br><br>
+          
+            <label for="clickMode">Click Mode:</label>
+            <select id="clickMode">
+              <option value="push">Push</option>
+              <option value="remove">Remove</option>
+              <option value="repulse">Repulse</option>
+              <option value="bubble">Bubble</option>
+            </select><br><br>
+          
+            <h3>Background</h3>
+            <label for="backgroundColor">Background Color:</label>
+            <input type="color" id="backgroundColor" value="#000000"><br><br>
+          
+            <button onclick="updateParticles()">Apply Changes</button>
+          </div>
     
       <div class="con">
         <div class="google-apps-btn" onclick="toggleMenu()">
@@ -259,6 +332,9 @@
             </ul>
         </div>
     </div>
+    <div id="clock" style="font-weight: 300; display: none;">
+      <span id="hour" style="color: #ffffff;">00</span>:<span id="minute" style="color: #ffffff;">00</span>
+    </div>
 </body>
 <script>
     particlesJS('particles-js', {
@@ -277,6 +353,193 @@
     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
 
+function updateParticles() {
+  const particleCount = document.getElementById('particleCount').value;
+  const particleSize = document.getElementById('particleSize').value;
+  const particleSpeed = document.getElementById('particleSpeed').value;
+  const particleOpacity = document.getElementById('particleOpacity').value;
+  const particleShape = document.getElementById('particleShape').value;
+  const particleColor = document.getElementById('particleColor').value;
+  const lineColor = document.getElementById('lineColor').value;
+  const lineDistance = document.getElementById('lineDistance').value;
+  const lineWidth = document.getElementById('lineWidth').value;
+  const hoverMode = document.getElementById('hoverMode').value;
+  const clickMode = document.getElementById('clickMode').value;
+  const backgroundColor = document.getElementById('backgroundColor').value;
+
+  // Save settings to localStorage
+  saveSetting('particleCount', particleCount);
+  saveSetting('particleSize', particleSize);
+  saveSetting('particleSpeed', particleSpeed);
+  saveSetting('particleOpacity', particleOpacity);
+  saveSetting('particleShape', particleShape);
+  saveSetting('particleColor', particleColor);
+  saveSetting('lineColor', lineColor);
+  saveSetting('lineDistance', lineDistance);
+  saveSetting('lineWidth', lineWidth);
+  saveSetting('hoverMode', hoverMode);
+  saveSetting('clickMode', clickMode);
+  saveSetting('backgroundColor', backgroundColor);
+
+  // Update the background color of the #particles-js container
+  document.getElementById('particles-js').style.backgroundColor = backgroundColor;
+
+  // Reinitialize particles.js with new settings
+  particlesJS('particles-js', {
+    particles: {
+      number: { value: parseInt(particleCount) },
+      size: { value: parseInt(particleSize) },
+      move: { speed: parseInt(particleSpeed) },
+      opacity: { value: parseFloat(particleOpacity) },
+      shape: { type: particleShape },
+      color: { value: particleColor },
+      line_linked: {
+        enable: true,
+        distance: parseInt(lineDistance),
+        color: lineColor,
+        width: parseInt(lineWidth),
+      },
+    },
+    interactivity: {
+      detect_on: 'window', // Ensure this is set to 'canvas'
+      events: {
+        onhover: { enable: true, mode: hoverMode }, // Use the hoverMode value
+        onclick: { enable: true, mode: clickMode }, // Use the clickMode value
+      },
+      modes: {
+        grab: { distance: 200, line_linked: { opacity: 1 } },
+        repulse: { distance: 200 },
+        bubble: { distance: 200, size: 10, duration: 2, opacity: 0.8 },
+      },
+    },
+    retina_detect: true,
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Load saved settings or use defaults
+  const particleCount = loadSetting('particleCount', 100);
+  const particleSize = loadSetting('particleSize', 3);
+  const particleSpeed = loadSetting('particleSpeed', 2);
+  const particleOpacity = loadSetting('particleOpacity', 0.5);
+  const particleShape = loadSetting('particleShape', 'circle');
+  const particleColor = loadSetting('particleColor', '#ff90ff');
+  const lineColor = loadSetting('lineColor', '#ff00ff');
+  const lineDistance = loadSetting('lineDistance', 150);
+  const lineWidth = loadSetting('lineWidth', 1);
+  const hoverMode = loadSetting('hoverMode', 'grab');
+  const clickMode = loadSetting('clickMode', 'push');
+  const backgroundColor = loadSetting('backgroundColor', '#000000');
+
+  // Set input values
+  document.getElementById('particleCount').value = particleCount;
+  document.getElementById('particleSize').value = particleSize;
+  document.getElementById('particleSpeed').value = particleSpeed;
+  document.getElementById('particleOpacity').value = particleOpacity;
+  document.getElementById('particleShape').value = particleShape;
+  document.getElementById('particleColor').value = particleColor;
+  document.getElementById('lineColor').value = lineColor;
+  document.getElementById('lineDistance').value = lineDistance;
+  document.getElementById('lineWidth').value = lineWidth;
+  document.getElementById('hoverMode').value = hoverMode;
+  document.getElementById('clickMode').value = clickMode;
+  document.getElementById('backgroundColor').value = backgroundColor;
+
+  // Apply the background color to the #particles-js container
+  document.getElementById('particles-js').style.backgroundColor = backgroundColor;
+
+  // Initialize particles.js with saved or default settings
+  particlesJS('particles-js', {
+    particles: {
+      number: { value: parseInt(particleCount) },
+      size: { value: parseInt(particleSize) },
+      move: { speed: parseInt(particleSpeed) },
+      opacity: { value: parseFloat(particleOpacity) },
+      shape: { type: particleShape },
+      color: { value: particleColor },
+      line_linked: {
+        enable: true,
+        distance: parseInt(lineDistance),
+        color: lineColor,
+        width: parseInt(lineWidth),
+      },
+    },
+    interactivity: {
+      detect_on: 'window',
+      events: {
+        onhover: { enable: true, mode: hoverMode },
+        onclick: { enable: true, mode: clickMode },
+      },
+      modes: {
+        grab: { distance: 200, line_linked: { opacity: 1 } },
+        repulse: { distance: 200 },
+        bubble: { distance: 200, size: 10, duration: 2, opacity: 0.8 },
+      },
+    },
+    retina_detect: true,
+  });
+
+  // Initialize clock
+  updateClock();
+  setInterval(updateClock, 1000);
+  enableClockDragging();
+  loadClockPosition();
+  document.getElementById('clock').style.display = 'block'; // Show the clock
+});
+
+function saveSetting(key, value) {
+  localStorage.setItem(key, value);
+}
+
+function loadSetting(key, defaultValue) {
+  return localStorage.getItem(key) || defaultValue;
+}
+
+function updateClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('hour').textContent = hours;
+  document.getElementById('minute').textContent = minutes;
+}
+
+function enableClockDragging() {
+  const clock = document.getElementById('clock');
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  clock.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.clientX - clock.offsetLeft;
+    offsetY = e.clientY - clock.offsetTop;
+    clock.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const x = e.clientX - offsetX;
+      const y = e.clientY - offsetY;
+      clock.style.left = `${x}px`;
+      clock.style.top = `${y}px`;
+      saveSetting('clockPositionX', `${x}px`);
+      saveSetting('clockPositionY', `${y}px`);
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    clock.style.cursor = 'grab';
+  });
+}
+
+function loadClockPosition() {
+  const clock = document.getElementById('clock');
+  const x = loadSetting('clockPositionX', '50%');
+  const y = loadSetting('clockPositionY', '50%');
+  clock.style.left = x;
+  clock.style.top = y;
+  clock.style.position = 'absolute';
+}
 </script>
 
 
