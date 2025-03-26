@@ -233,7 +233,7 @@
         style="border: #000000; box-shadow: 3px 3px 3px grey; outline: none;">
         </form>
         
-        <div id="particlesCustomization" style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 10px; color: white;">
+        <div id="particlesCustomization" style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 10px; color: white; display: none;">
             <h3>Customize Particles</h3>
             <label for="particleCount">Particle Count:</label>
             <input type="number" id="particleCount" value="100" min="10" max="500" step="10"><br><br>
@@ -317,8 +317,15 @@
             </ul>
         </div>
     </div>
+
+    <div id="Customize" style="color: #fff; cursor: pointer; position: absolute; left: 20px; bottom: 20px; size: 1vh; text-shadow:3px 3px rgba(44, 44, 44, 0.75);"><i class="fa-solid fa-pen" onclick="menu2()"></i></div>
 </body>
 <script>
+
+  function menu2() {
+    const menu = document.getElementById('particlesCustomization');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
     particlesJS('particles-js', {
         "particles": {
             "number": { "value": 100 },
