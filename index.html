@@ -12,13 +12,12 @@
             color: rgb(255, 255, 255);
             text-align: center;
             font-family: Orbitron;
-            font-size: 9em;
-            text-shadow: 0 0 10px var(--glow-color, #ffffff),
-                0 0 20px var(--glow-color);
+            font-size: 5vw;
             animation-name: fade;
             animation-iteration-count: 1;
             animation-delay: 0s;
             animation-duration: 4s;
+            position: absolute;
         }
 
         :root {
@@ -37,8 +36,20 @@
 
         }
 
+        @keyframes drop {
+            0% {
+               top: 0vh;
+            }
+            100% {
+                top: 15vh;
+            }
+        }
+
         body {
-            background-color: #000;
+            background-image: url('/blender render/minimalistic glow red and blu.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-color: rgb(16, 16, 16);
         }
 
         ::-webkit-scrollbar {
@@ -48,10 +59,14 @@
         .center {
             margin: 0;
             position: absolute;
-            top: 50%;
+            top: 15%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 70vw;
+            animation-name: drop;
+            animation-iteration-count: 1;
+            animation-delay: 0s;
+            animation-duration: 4s;
         }
 
         #particles-js {
@@ -102,13 +117,24 @@
             padding-top: 1em;
             text-decoration: none;
         }
+
+        @keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.icon.spin {
+    animation: spin 0.5s ease-in-out;
+}
     </style>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <div id="particles-js"></div>
     <div class="icon" onclick="menu()"><i class="fas fa-bars"></i></div>
     <div id="menu">
         <a href="/visits.html"><i class="fas fa-comment"></i> Chat</a>
@@ -123,29 +149,30 @@
     </div>
 </body>
 <script>
-    particlesJS('particles-js', {
-        "particles": {
-            "number": { "value": 100 },
-            "size": { "value": 3 },
-            "move": { "speed": 2 },
-            "color": { "value": "#ff90ff" },
-            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
-            
-        }
-    });
 
-    function menu() {
-    let menuElement = document.getElementById('menu');
-    
+function menu() {
+    const menuElement = document.getElementById('menu');
+    const iconElement = document.querySelector('.icon i'); // Select the icon inside the menu bar
+
+    // Toggle menu visibility
     if (menuElement.style.opacity === '0' || menuElement.style.opacity === '') {
-        menuElement.style.opacity = '1';  // Show menu
+        menuElement.style.opacity = '1'; // Show menu
         menuElement.style.display = 'block';
     } else {
-        menuElement.style.opacity = '0';  // Hide menu
-        menuElement.style.display = 'none';
+        menuElement.style.opacity = '0'; // Hide menu
+        setTimeout(() => {
+            menuElement.style.display = 'none';
+        }, 500); // Wait for the opacity transition to complete
     }
-}
 
+    // Add spin animation class
+    iconElement.classList.add('spin');
+
+    // Remove the spin class after the animation ends
+    iconElement.addEventListener('animationend', () => {
+        iconElement.classList.remove('spin');
+    }, { once: true });
+}
 </script>
 
 

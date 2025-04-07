@@ -1,204 +1,229 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Algot's web-workshop</title>
 	<link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
 	<style>
+		/* Global Styles */
 		body {
-			background-color: #000000;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			text-align: center;
+			background-color: #000;
 			margin: 0;
 			padding: 0;
-		}
-
-		img {
-			max-width: 100%;
-			height: auto;
-		}
-
-		.text-cards {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(10vw, 100vw));
-			gap: 20px;
-			width: calc(100vw - 60px);
-			align-items: center;
-			margin: 20px 0;
-		}
-
-		/* General styling for items within the container */
-		.text-cards > * {
-			background: #000;
-			border: 3px solid #fff;
-			border-radius: 10px;
-			box-shadow: 0 4px 8px var(--text-color);
 			font-family: Arial, sans-serif;
-			transition: all 0.5s ease;
-			padding: 20px;
+			overflow-x: hidden;
+			scroll-behavior: smooth;
 		}
-
-		:root {
-			--text-color: #5900ff;
+		
+		/* Fixed Navigation Bar */
+		header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			background: rgba(0, 0, 0, 0.9);
+			z-index: 999;
+			display: flex;
+			justify-content: center;
+			padding: 1em 0;
+			border-bottom: 1px solid #fff;
 		}
-
-		.text-cards > *:hover {
-			transform: translateY(-5px);
-			background-color: var(--text-color);
+		
+		header nav {
+			display: flex;
+			gap: 2em;
 		}
-
-		/* Styling for links and paragraphs inside text cards */
-		.text-cards a,
-		.text-cards p {
-			margin: 0;
+		
+		header a {
 			color: #fff;
 			text-decoration: none;
-			font-weight: 700;
-			/* Prevent text wrapping */
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			padding: 15px;
-			height: fit-content;
-			width: fit-content;
+			font-weight: bold;
+			transition: color 0.3s;
 		}
-
+		
+		header a:hover {
+			color: #ffff00;
+		}
+		
+		/* Sections */
+		section {
+			padding: 4em 1em 2em;
+			margin-top: 3em;
+		}
+		
+		section h2 {
+			color: #000000;
+			margin-bottom: 1em;
+			text-align: center;
+		}
+		
+		/* Cards Layout */
+		.text-cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 20px;
+			width: 90%;
+			margin: 0 auto;
+		}
+		
+		.text-cards a,
 		.text-cards p {
-			color: #bbb;
-		}
-
-		/* Gradient border effect for links */
-		.text-cards a {
-			position: relative;
+			background: #000;
+			border-radius: 10px;
+			border: none;
+			padding: 20px;
+			color: #fff;
+			text-decoration: none;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			text-align: center;
-			padding: 10px;
-			font-size: 2em;
-			border-color: var(--text-color);
-			border-radius: 10px;
 			transition: all 0.5s ease;
-			border-width: 1px;
 		}
-
-		.text-cards a::before {
-			content: "";
-			position: absolute;
+		
+		.text-cards a:hover,
+		.text-cards p:hover {
+			transform: translateY(-5px);
+			box-shadow: 0px 0px 8px 8px #ffff00;
+		}
+		
+		/* Particles Background */
+		#particles-js {
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			background-color: #ffffff;
+			top: 0;
+			left: 0;
 			z-index: -1;
-			border-radius: 15px;
-			overflow: hidden;
-			background-color: #000;
 		}
-
-		/* Hide scrollbar but allow scrolling */
+		
+		/* Hide scrollbar for WebKit browsers */
 		::-webkit-scrollbar {
 			display: none;
 		}
-
-		h2 {
-			color: #fff;
-			width: calc(25vw - 100px);
-		}
-
-		#particles-js {
-            position: absolute;
-            width: 100%;
-            height: 160%;
-            background-color: #000;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
 	</style>
 	<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 </head>
 <body>
-	<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; right: 1em; top: 1em; cursor: pointer; z-index: 999;"><img src="/arrow-right-solid.svg"></div>
 	<div id="particles-js"></div>
-	<div class="text-cards">
-		<img style="width:45%;" src="logo.svg" alt="Logo"/>
+	
+	<header>
+		<nav>
+			<a href="#online-games">🎮 Online Games</a>
+			<a href="#classic">🔥 Classic &amp; Flash Games</a>
+			<a href="#creative">🎨 Creative &amp; Drawing</a>
+			<a href="#exploration">🌍 Exploration &amp; Geography</a>
+			<a href="#fun">🤔 Fun &amp; Challenges</a>
+			<a href="#knowledge">📚 Knowledge &amp; Experiments</a>
+			<a href="#random">🐱 Random &amp; Silly</a>
+		</nav>
+	</header>
+	
+	<section id="online-games">
 		<h2>🎮 Online Games</h2>
-		<a href="https://agar.io/">Agar.io</a>
-		<a href="/bloxd.html">BloxD</a>
-		<a href="https://mtsl.dk/csgo/">Case Clicker</a>
-		<a href="https://orteil.dashnet.org/cookieclicker/">Cookie Clicker</a>
-		<a href="https://dogeminer2.com">Dogeminer 2</a>
-		<a href="/drift.html">Drift</a>
-		<a href="https://totaljerkface.com/happy_wheels.tjf">Happy Wheels</a>
-		<a href="https://neal.fun/infinite-craft/">Infinite Craft</a>
-		<a href="https://classic.minecraft.net/">Minecraft Classic</a>
-		<a href="https://oimo.io">Oimo.io</a>
-		<a href="https://kodub.itch.io/polytrack">Polytrack</a>
-		<a href="https://sandtris.com/">Sandtris</a>
-		<a href="https://starblast.io">Starblast</a>
-	</div>
-	<div class="text-cards" style="position: absolute; left: 50vw;">
-		<h2>🔥 Classic & Flash Games</h2>
-		<a href="http://www.flashbynight.com/drench/">Drench</a>
-		<a href="http://eelslap.com/">Eelslap</a>
-		<a href="https://www.linerider.com/">Linerider</a>
-		<a href="https://mecabricks.com">Mecabricks</a>
-		<a href="https://shredsauce.com/">Shredsauce</a>
-		<a href="https://classicreload.com">Classic Reload</a>
-		<a href="https://poki.com">Poki</a>
-		<a href="https://www.crazygames.com">Crazy Games</a>
-		<a href="https://www.coolmathgames.com">Cool Math Games</a>
+		<div class="text-cards">
+			<a href="https://agar.io/">Agar.io</a>
+			<a href="/bloxd.html">BloxD</a>
+			<a href="https://mtsl.dk/csgo/">Case Clicker</a>
+			<a href="https://orteil.dashnet.org/cookieclicker/">Cookie Clicker</a>
+			<a href="https://dogeminer2.com">Dogeminer 2</a>
+			<a href="/drift.html">Drift</a>
+			<a href="https://totaljerkface.com/happy_wheels.tjf">Happy Wheels</a>
+			<a href="https://neal.fun/infinite-craft/">Infinite Craft</a>
+			<a href="https://classic.minecraft.net/">Minecraft Classic</a>
+			<a href="https://oimo.io">Oimo.io</a>
+			<a href="https://kodub.itch.io/polytrack">Polytrack</a>
+			<a href="https://sandtris.com/">Sandtris</a>
+			<a href="https://starblast.io">Starblast</a>
+		</div>
+	</section>
 	
-		<h2>🎨 Creative & Drawing</h2>
-		<a href="https://autodraw.com">Auto Draw</a>
-		<a href="https://neal.fun/logos-from-memory/">Draw Logos</a>
-		<a href="https://neal.fun/perfect-circle/">Draw Perfect Circle</a>
-		<a href="https://quickdraw.withgoogle.com">Draw with Google</a>
-		<a href="https://coolbackgrounds.io">Cool Backgrounds</a>
-		<a href="https://unsplash.com">Unsplash</a>
+	<section id="classic">
+		<h2>🔥 Classic &amp; Flash Games</h2>
+		<div class="text-cards">
+			<a href="http://www.flashbynight.com/drench/">Drench</a>
+			<a href="http://eelslap.com/">Eelslap</a>
+			<a href="https://www.linerider.com/">Linerider</a>
+			<a href="https://mecabricks.com">Mecabricks</a>
+			<a href="https://shredsauce.com/">Shredsauce</a>
+			<a href="https://classicreload.com">Classic Reload</a>
+			<a href="https://poki.com">Poki</a>
+			<a href="https://www.crazygames.com">Crazy Games</a>
+			<a href="https://www.coolmathgames.com">Cool Math Games</a>
+		</div>
+	</section>
 	
-		<h2>🌍 Exploration & Geography</h2>
-		<a href="https://framesynthesis.com/drivingsimulator/maps/">Google Maps Drive</a>
-		<a href="https://www.geoguessr.com/">GeoGuessr</a>
-		<a href="https://www.thetruesize.com/">The True Size Of</a>
-		<a href="https://neal.fun/wonders-of-street-view/">Street View Wonders</a>
-		<a href="https://neal.fun/size-of-space/">Size of Space</a>
-		<a href="https://neal.fun/deep-sea/">Deep Sea</a>
-	</div>
-	<div class="text-cards" style="position: absolute; left: 75vw;">
-		<h2>🤔 Fun & Challenges</h2>
-		<a href="https://alwaysjudgeabookbyitscover.com/">Judge a Book</a>
-		<a href="https://neal.fun/auction-game/">Auction Game</a>
-		<a href="https://neal.fun/asteroid-launcher/">Asteroid Launcher</a>
-		<a href="https://googlefeud.com">Google Feud</a>
-		<a href="https://geekprank.com/hacker/">Hackertyper</a>
-		<a href="https://neal.fun/speed/">Speed</a>
-		<a href="https://www.spend-elon-fortune.com">Spend Elon's Fortune</a>
-		<a href="https://neal.fun/absurd-trolley-problems/">Trolley Problems</a>
+	<section id="creative">
+		<h2>🎨 Creative &amp; Drawing</h2>
+		<div class="text-cards">
+			<a href="https://autodraw.com">Auto Draw</a>
+			<a href="https://neal.fun/logos-from-memory/">Draw Logos</a>
+			<a href="https://neal.fun/perfect-circle/">Draw Perfect Circle</a>
+			<a href="https://quickdraw.withgoogle.com">Draw with Google</a>
+			<a href="https://coolbackgrounds.io">Cool Backgrounds</a>
+			<a href="https://unsplash.com">Unsplash</a>
+		</div>
+	</section>
 	
-		<h2>📚 Knowledge & Experiments</h2>
-		<a href="https://2050.earth">2050 Earth</a>
-		<a href="https://libraryofbabel.info">Library of Babel</a>
-		<a href="https://itch.io">Itch.io</a>
-		<a href="https://labs.openai.com">OpenAI Labs</a>
-		<a href="https://neal.fun/life-stats/">Life Stats</a>
-		<a href="https://neal.fun/design-the-next-iphone/">Design the Next iPhone</a>
+	<section id="exploration">
+		<h2>🌍 Exploration &amp; Geography</h2>
+		<div class="text-cards">
+			<a href="https://framesynthesis.com/drivingsimulator/maps/">Google Maps Drive</a>
+			<a href="https://www.geoguessr.com/">GeoGuessr</a>
+			<a href="https://www.thetruesize.com/">The True Size Of</a>
+			<a href="https://neal.fun/wonders-of-street-view/">Street View Wonders</a>
+			<a href="https://neal.fun/size-of-space/">Size of Space</a>
+			<a href="https://neal.fun/deep-sea/">Deep Sea</a>
+		</div>
+	</section>
 	
-		<h2>🐱 Random & Silly</h2>
-		<a href="https://bongo.cat">Bongo Cat</a>
-		<a href="https://cat-bounce.com/">Cat Bounce</a>
-		<a href="https://maxwellcat.world">Cat World</a>
-		<a href="https://theuselessweb.com/">The Useless Web</a>
-		<a href="https://noclip.website">No Clip</a>
-	</div>
+	<section id="fun">
+		<h2>🤔 Fun &amp; Challenges</h2>
+		<div class="text-cards">
+			<a href="https://alwaysjudgeabookbyitscover.com/">Judge a Book</a>
+			<a href="https://neal.fun/auction-game/">Auction Game</a>
+			<a href="https://neal.fun/asteroid-launcher/">Asteroid Launcher</a>
+			<a href="https://googlefeud.com">Google Feud</a>
+			<a href="https://geekprank.com/hacker/">Hackertyper</a>
+			<a href="https://neal.fun/speed/">Speed</a>
+			<a href="https://www.spend-elon-fortune.com">Spend Elon's Fortune</a>
+			<a href="https://neal.fun/absurd-trolley-problems/">Trolley Problems</a>
+		</div>
+	</section>
+	
+	<section id="knowledge">
+		<h2>📚 Knowledge &amp; Experiments</h2>
+		<div class="text-cards">
+			<a href="https://2050.earth">2050 Earth</a>
+			<a href="https://libraryofbabel.info">Library of Babel</a>
+			<a href="https://itch.io">Itch.io</a>
+			<a href="https://labs.openai.com">OpenAI Labs</a>
+			<a href="https://neal.fun/life-stats/">Life Stats</a>
+			<a href="https://neal.fun/design-the-next-iphone/">Design the Next iPhone</a>
+		</div>
+	</section>
+	
+	<section id="random">
+		<h2>🐱 Random &amp; Silly</h2>
+		<div class="text-cards">
+			<a href="https://bongo.cat">Bongo Cat</a>
+			<a href="https://cat-bounce.com/">Cat Bounce</a>
+			<a href="https://maxwellcat.world">Cat World</a>
+			<a href="https://theuselessweb.com/">The Useless Web</a>
+			<a href="https://noclip.website">No Clip</a>
+		</div>
+	</section>
+	
+	<script>
+		particlesJS('particles-js', {
+			"particles": {
+				"number": { "value": 100 },
+				"size": { "value": 3 },
+				"move": { "speed": 2 },
+				"color": { "value": "#000000" },
+				"line_linked": { "enable": true, "distance": 169, "color": "#000000" }
+			}
+		});
+	</script>
 </body>
-<script>
-    particlesJS('particles-js', {
-        "particles": {
-            "number": { "value": 100 },
-            "size": { "value": 3 },
-            "move": { "speed": 2 },
-            "color": { "value": "#ff90ff" },
-            "line_linked": { "enable": true, "distance": 169, "color": "#ff00ff" },
-            
-        }
-    });
-</script>
 </html>
