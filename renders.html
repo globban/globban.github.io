@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>Image Gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
+    }
+
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      background-color: #000000;
+    }
+
+    h1 {
+      position: relative;
+      text-align: center;
+      color: #ffffff;
+      transition: text-shadow 0.3s ease;
+      top: 5vh;
+      font-size: 5em;
+      width: 100%;
+    }
+
+    h1:hover {
+      color: #ffffff;
+      transition: text-shadow 0.3s ease;
+      text-shadow: 0px 0px 20px rgb(255, 255, 255);
+    }
+
+    img {
+      width: 20em;
+      height: 20em;
+      object-fit: cover;
+      border: 5px solid transparent; /* Default border */
+      border-radius: 10px; /* Optional: Add rounded corners */
+      transition: border 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    img:hover {
+      border-image-slice: 1; /* Use the gradient as the border */
+      transform: scale(1.05); /* Slight zoom effect */
+      box-shadow: 
+        0 0 10px red, 
+        0 0 20px yellow, 
+        0 0 30px green, 
+        0 0 40px cyan, 
+        0 0 50px blue, 
+        0 0 60px magenta; /* Gradient glow effect */
+    }
+
+  </style>
+</head>
+<body>
+    
+  <h1>Image Gallery</h1>
+  <div id="particles-js"></div>
+  <p>
+    <img src="https://i.ibb.co/jP02KMXh/pink-gtr-in-modern-house.png" alt="pink-gtr-in-modern-house">
+    <img src="https://i.ibb.co/PvpRymWX/minimalistic-glow-orange.png" alt="minimalistic-glow-orange">
+    <img src="https://i.ibb.co/QvKqK0cK/minimalistic-glow-purple.png" alt="minimalistic-glow-purple">
+    <img src="https://i.ibb.co/GQ0SRttM/minimalistic-glow-red-and-blue.png" alt="minimalistic-glow-red-and-blue">
+    <img src="windows dark.jpg" alt="windows-dark">
+  </p>
+  <script>
+    particlesJS('particles-js', {
+      particles: {
+        number: {
+          value: 100,
+          density: {
+            enable: true,
+            value_area: 800,
+          },
+        },
+        color: {
+          value: '#ffffff',
+        },
+        shape: {
+          type: 'circle',
+        },
+        opacity: {
+          value: 0.5,
+          random: false,
+        },
+        size: {
+          value: 3,
+          random: true,
+        },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: '#ffffff',
+          opacity: 0.4,
+          width: 1,
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: 'none',
+          random: false,
+          straight: false,
+          out_mode: 'out',
+        },
+      },
+      interactivity: {
+        detect_on: 'window',
+        events: {
+          onhover: {
+            enable: true,
+            mode: 'repulse',
+          },
+        },
+        modes: {
+          grab: {
+            distance: 200,
+            line_linked: {
+              opacity: 1,
+            },
+          },
+          bubble: {
+            distance: 200,
+            size: 10,
+            duration: 2,
+            opacity: 0.8,
+          },
+          repulse: {
+            distance: 200,
+          },
+          push: {
+            particles_nb: 4,
+          },
+        },
+      },
+      retina_detect: true,
+    });
+  </script>
+</body>
+</html>

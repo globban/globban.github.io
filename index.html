@@ -1,179 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Algot's Web Workshop</title>
-    <link rel="icon" type="image/png" href="https://www.algot.fun/logosmall.png">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-
-        h1 {
-            color: rgb(255, 255, 255);
-            text-align: center;
-            font-family: Orbitron;
-            font-size: 5vw;
-            animation-name: fade;
-            animation-iteration-count: 1;
-            animation-delay: 0s;
-            animation-duration: 4s;
-            position: absolute;
-        }
-
-        :root {
-            --glow-color: rgb(255, 255, 255);
-        }
-
-
-        @keyframes fade {
-            0% {
-                color: rgba(255, 255, 255, 0);
-                text-shadow: none;
-            }
-            100% {
-                color: rgb(255, 255, 255);
-            }
-
-        }
-
-        @keyframes drop {
-            0% {
-               top: 0vh;
-            }
-            100% {
-                top: 15vh;
-            }
-        }
-
-        body {
-            background-image: url('/blender render/minimalistic glow red and blu.png');
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-color: rgb(16, 16, 16);
-        }
-
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        .center {
-            margin: 0;
-            position: absolute;
-            top: 15%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70vw;
-            animation-name: drop;
-            animation-iteration-count: 1;
-            animation-delay: 0s;
-            animation-duration: 4s;
-        }
-
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 99%;
-            background-color: #000;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-
-
-        .icon {
-            top: 1cm;
-            right: 1cm;
-            color: #fff;
-            position: absolute;
-            font-size: 4em;
-            cursor: pointer;
-            z-index: 1;
-        }
-
-        .icon :hover {
-            color: #999;
-            transition: ease;
-        }
-
-        #menu {
-            display: none;
-            opacity: 0;
-            width: 10em;
-            height: auto;
-            background-color: #1b1b1b;
-            position: absolute;
-            top: 0.7cm;
-            right: 0.5cm;
-            z-index: 0;
-            padding: 1em;
-            list-style: none;
-            transition: opacity 0.5s;
-        }
-
-        a {
-            color: #fff;
-            font-family: orbitron;
-            display: list-item;
-            padding-top: 1em;
-            text-decoration: none;
-        }
-
-        @keyframes spin {
-    0% {
-        transform: rotate(0deg);
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>Algot's web-workshop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000000;
     }
-    100% {
-        transform: rotate(360deg);
-    }
-}
 
-.icon.spin {
-    animation: spin 0.5s ease-in-out;
-}
-    </style>
-    <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      background-color: #000000;
+    }
+
+    h1 {
+      position: absolute;
+      top: 50vh;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3em;
+      text-align: center;
+      color: #ffffff;
+      transition: text-shadow 0.3s ease;
+    }
+    h1:hover {
+      color: #ffffff;
+      transition: text-shadow 0.3s ease;
+      text-shadow: 0px 0px 20px rgb(255, 255, 255);
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 60px; /* Initial width showing only icons */
+      background-color: #111;
+      overflow-x: hidden;
+      transition: width 0.3s ease; /* Smooth expand/collapse */
+      z-index: 1000;
+    }
+
+    /* Sidebar expands on hover */
+    .sidebar:hover {
+      width: 200px; /* Expanded width */
+    }
+
+    /* Sidebar links */
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      text-decoration: none;
+      font-size: 1.2em;
+      color: #ffffff;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Sidebar link hover effect */
+    .sidebar a:hover {
+      background-color: #575757;
+    }
+
+    /* Sidebar icons */
+    .sidebar a i {
+      margin-right: 10px; /* Space between icon and text */
+      min-width: 30px; /* Align icons */
+      text-align: center;
+    }
+
+    /* Sidebar text (hidden by default) */
+    .sidebar a span {
+      display: none; /* Hide text initially */
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    /* Show text when sidebar is expanded */
+    .sidebar:hover a span {
+      display: inline-block;
+    }
+    
+  </style>
 </head>
-
 <body>
-    <div class="icon" onclick="menu()"><i class="fas fa-bars"></i></div>
-    <div id="menu">
-        <a href="/visits.html"><i class="fas fa-comment"></i> Chat</a>
-        <a href="/Links.html"><i class="fas fa-link"></i> Links</a>
-        <a href="/clicker.html"><i class="fas fa-computer-mouse"></i> Clicker</a>
-        <a href="/Webbutton.html"><i class="fas fa-dice"></i> Random</a>
-        <a href="/EXTRACT.zip" download><i class="fas fa-download"></i> Newtab 2.0</a>
-        <a href="/drift.html"><i class="fas fa-car"></i> Drift</a>
-    </div>
-    <div class="center">
-        <h1 class="glow">Welcome to algot's web workshop 2.0</h1>
-    </div>
+  <div id="particles-js"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="/cball.html"><i class="fas fa-gamepad"></i><span>CoreBall</span></a>
+    <a href="/Links.html"><i class="fas fa-link"></i><span>Links</span></a>
+    <a href="/EXTRACT.zip" type="download"><i class="fas fa-download"></i><span>Algot.newtab</span></a>
+    <a href="/clicker.html"><i class="fas fa-mouse"></i><span>Clicker</span></a>
+    <a href="/Webbutton.html"><i class="fas fa-dice-five"></i><span>Random</span></a>
+    <a href="/renders.html"><i class="fas fa-images"></i><span>Gallery</span></a>
+    <a href="/visits.html"><i class="fas fa-comment"></i><span>Chat</span></a>
+  </div>
+  <h1 style="top:50vh;">Welcome to Algot's web-workshop</h1>
 </body>
 <script>
-
-function menu() {
-    const menuElement = document.getElementById('menu');
-    const iconElement = document.querySelector('.icon i'); // Select the icon inside the menu bar
-
-    // Toggle menu visibility
-    if (menuElement.style.opacity === '0' || menuElement.style.opacity === '') {
-        menuElement.style.opacity = '1'; // Show menu
-        menuElement.style.display = 'block';
-    } else {
-        menuElement.style.opacity = '0'; // Hide menu
-        setTimeout(() => {
-            menuElement.style.display = 'none';
-        }, 500); // Wait for the opacity transition to complete
-    }
-
-    // Add spin animation class
-    iconElement.classList.add('spin');
-
-    // Remove the spin class after the animation ends
-    iconElement.addEventListener('animationend', () => {
-        iconElement.classList.remove('spin');
-    }, { once: true });
-}
+  particlesJS('particles-js', {
+    particles: {
+      number: {
+        value: 100,
+        density: {
+          enable: true,
+          value_area: 800,
+        },
+      },
+      color: {
+        value: '#ffffff',
+      },
+      shape: {
+        type: 'circle',
+      },
+      opacity: {
+        value: 0.5,
+        random: false,
+      },
+      size: {
+        value: 3,
+        random: true,
+      },
+      line_linked: {
+        enable: true,
+        distance: 150,
+        color: '#ffffff',
+        opacity: 0.4,
+        width: 1,
+      },
+      move: {
+        enable: true,
+        speed: 2,
+        direction: 'none',
+        random: false,
+        straight: false,
+        out_mode: 'out',
+      },
+    },
+    interactivity: {
+      detect_on: 'window',
+      events: {
+        onhover: {
+          enable: true,
+          mode: 'repulse',
+        }
+      },
+      modes: {
+        grab: {
+          distance: 200,
+          line_linked: {
+            opacity: 1,
+          },
+        },
+        bubble: {
+          distance: 200,
+          size: 10,
+          duration: 2,
+          opacity: 0.8,
+        },
+        repulse: {
+          distance: 200,
+        },
+        push: {
+          particles_nb: 4,
+        },
+      },
+    },
+    retina_detect: true,
+  });
 </script>
-
-
 </html>
