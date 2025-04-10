@@ -73,16 +73,38 @@
                 text-shadow: 0 0 20px #FFD700;
             }
         }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #grid a {
+            display: block;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 	</style>
 	<body>
 		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
 		<div id="particles-js"></div>
-		<div id="center"></div>
-		  <h1>Take me to a random website</h1>
-		  
-				<button id="btn-random"><h1>please</h1></button>
-	        <!-- New message element for showing destination -->
-	        <p id="destination-url" style="color: white; font-size: 3vw; font-family: orbitron;"></p>
+		<div id="center">
+		  <h1>50/50</h1>
+         <h2 style="top: -3em; position: relative; color: #c3c3c3;">the actual chances are 70/30</h2> 
+          </div>
+		<div id="game-container" style="margin: 20px auto; width: 200px;">
+			<div id="cube" style="width: 100px; height: 100px; background-color: green; margin: 0 auto; cursor: pointer;"></div>
+			<p id="score-display" style="color: white; font-size: 1.5em; margin-top: 10px;">Score: 0</p>
+			<button id="restart-btn" style="display: none; margin-top: 10px; padding: 5px 10px;">Restart</button>
+			<p id="highscore-display" style="color: white; font-size: 1.5em; margin-top: 10px;"></p>
+		</div>
 	</body>
 	
 	<script>
@@ -134,7 +156,7 @@
         },
         onclick: {
           enable: true,
-          mode: 'push',
+          mode: 'grab',
         },
       },
       modes: {
@@ -160,5 +182,57 @@
     },
     retina_detect: true,
   });
+
+	(function(){
+    const cube = document.getElementById('cube');
+    const scoreDisplay = document.getElementById('score-display');
+    const highscoreDisplay = document.getElementById('highscore-display');
+    let score = 0;
+    const pChance = 0.7; // probability of staying green per click
+
+    function updateHighScore(currentScore) {
+       let highScore = localStorage.getItem('highScore');
+       highScore = highScore ? parseInt(highScore, 10) : 0;
+       if (currentScore > highScore) {
+           localStorage.setItem('highScore', currentScore);
+           highScore = currentScore;
+       }
+       // Calculate overall chance as (pChance^highScore * 100)
+       const computedChance = Math.pow(pChance, highScore) * 100;
+       // Format with 6 decimal places and then convert back to number to strip trailing zeros.
+       const chancePercent = parseFloat(computedChance.toFixed(6));
+       highscoreDisplay.textContent = 'Highscore: ' + highScore + ' (' + chancePercent + '%)';
+    }
+    
+    function restartGame() {
+         // Reset score and cube appearance
+         score = 0;
+         scoreDisplay.textContent = 'Score: ' + score;
+         cube.style.backgroundColor = 'green';
+    }
+    
+    function handleCubeClick() {
+        // If the cube is red, restart the game on click.
+        if (cube.style.backgroundColor === 'red') {
+            restartGame();
+            return;
+        }
+        
+        // With pChance chance, the cube stays green, otherwise it turns red.
+        if (Math.random() < pChance) {
+            score++;
+            scoreDisplay.textContent = 'Score: ' + score;
+        } else {
+            cube.style.backgroundColor = 'red';
+            localStorage.setItem('savedScore', score);
+            // Compute chance for this score and include it in the saved message.
+            const currentChance = parseFloat((Math.pow(pChance, score) * 100).toFixed(6));
+            scoreDisplay.textContent = 'Score saved: ' + score + ' (' + currentChance + '%)';
+            updateHighScore(score);
+        }
+    }
+    
+    cube.addEventListener('click', handleCubeClick);
+})();
 	</script>
 </html>

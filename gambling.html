@@ -73,16 +73,36 @@
                 text-shadow: 0 0 20px #FFD700;
             }
         }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #grid a {
+            display: block;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 	</style>
 	<body>
 		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
 		<div id="particles-js"></div>
-		<div id="center"></div>
-		  <h1>Take me to a random website</h1>
-		  
-				<button id="btn-random"><h1>please</h1></button>
-	        <!-- New message element for showing destination -->
-	        <p id="destination-url" style="color: white; font-size: 3vw; font-family: orbitron;"></p>
+		<div id="center">
+		  <h1>Welcome to Algot's casino</h1>
+          </div>
+        <div id="grid">
+            <a href="/Webbutton.html">Random website</a>
+            <a href="/5050.html">radioactive</a>
+            <a href="CSGO-Case-Clicker-master\CaseClicker.html">case opening</a>
+        </div>
 	</body>
 	
 	<script>
