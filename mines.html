@@ -1,0 +1,481 @@
+<html>
+	<head>
+		<title>Algot's web-buttton</title>
+		<link rel="icon" href="https://www.algot.fun/logosmall.png">
+		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+	</head>
+	<script type="module">
+		import randomButton from "./random-button.js";
+		//"load" event körs när sidan laddats klart 
+		window.addEventListener("load", (event) => {
+			//setup random button
+			randomButton("btn-random");
+		});
+		window.onload = function() {
+            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+            document.documentElement.style.setProperty('--text-color', savedTextColor);
+            document.getElementById('textColor').value = savedTextColor;
+        };
+	</script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+		body {
+			background-color: #000;
+			color: #fff;
+			font-family: 'Orbitron', sans-serif;
+			text-align: center;
+			overflow-x: hidden;
+		}
+		.center {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			text-align: center;
+			align-items: center;
+            transform: translateY(-50%);
+            top: 50%;
+		}
+
+		h1 {
+			font-family: orbitron;
+			font-size: 5em;
+			text-shadow: 0px 0px 10px #fff;
+		}
+
+		button {
+			padding: 0em 4em;
+			transition: all 0.5s;
+		}
+
+		button:hover {
+			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
+			transition: all 0.5s;
+		}
+
+		#particles-js {
+            position: absolute;
+            width: 100%;
+            height: 99%;
+            background-color: #000;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+		#destination-url.glow {
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ffffff;
+            }
+            to {
+                text-shadow: 0 0 20px #FFD700;
+            }
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #grid a {
+            display: block;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+    @keyframes epicGlow {
+        0% { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+        50% { box-shadow: 0 0 30px 15px rgba(0,255,0,1); }
+        100% { box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    }
+    
+    .epic-glow {
+        animation: epicGlow 0.3s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+    
+    .shake {
+        animation: shake 0.5s;
+    }
+    
+    #tiles-container {
+        width: 300px;       /* Increased size for a more modern look */
+        height: 300px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr); /* 5 columns for a 25-tile grid (adjust if needed) */
+        gap: 10px;
+        margin: 20px auto;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        padding: 10px;
+    }
+
+    .tile {
+        width: 100%;
+        aspect-ratio: 1/1;
+        background-color: #333;
+        border: 2px solid #444;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .tile:hover {
+        box-shadow: 0 0 10px #0f0;
+    }
+
+    #game-container {
+        margin: 20px auto;
+        width: 300px;
+        text-align: center;
+        background: #1a1a1a;
+        padding: 20px;
+        border: 2px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    }
+
+    #game-container input,
+    #game-container button {
+        margin-top: 10px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+
+    #game-container button {
+        background-color: #333;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    #game-container button:hover {
+        background-color: #444;
+        box-shadow: 0 0 10px #0f0;
+    }
+
+    #message-display {
+        margin-top: 10px;
+    }
+	</style>
+	<body>
+		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
+		<div id="particles-js"></div>
+		<div id="center">
+		  <h1>50/50</h1>
+         <h2 style="top: -3em; position: relative; color: #c3c3c3;">the actual chances are 70/30</h2> 
+          </div>
+		<div id="game-container">
+			<p id="balance-display" style="color: white; font-size: 1.5em; margin-top: 10px;">Balance: $100</p>
+			
+			<!-- Bet input field -->
+			<label for="bet-input" style="color: white; display:block; margin-top:10px;">
+				Bet Amount: $<span id="betValue">1</span>
+			</label>
+			<input type="number" id="bet-input" min="1" max="100" value="1" 
+				   oninput="document.getElementById('betValue').textContent = this.value" />
+			<button id="allin-btn" style="margin-top:10px;">All In</button>
+			
+			<!-- Red count slider -->
+			<label for="red-count-input" style="color: white; display:block; margin-top:10px;">
+				Number of red squares: <span id="redCountValue">10</span>
+			</label>
+			<input type="range" id="red-count-input" min="1" max="24" value="10" 
+				   oninput="document.getElementById('redCountValue').textContent = this.value" />
+			
+			<button id="start-btn">Start Game</button>
+			<button id="cashout-btn" style="display:none;">Cash Out</button>
+			<button id="restart-btn" style="display:none;">Restart</button>
+			<button id="reset-btn">Reset Balance</button>
+			
+			<!-- Message display -->
+			<p id="message-display" style="color:white; font-size:1.2em;"></p>
+		</div>
+		<div id="tiles-container"></div>
+	</body>
+	
+	<script>
+		particlesJS('particles-js', {
+    particles: {
+      number: {
+        value: 100,
+        density: {
+          enable: true,
+          value_area: 800,
+        },
+      },
+      color: {
+        value: '#ffffff',
+      },
+      shape: {
+        type: 'circle',
+      },
+      opacity: {
+        value: 0.5,
+        random: false,
+      },
+      size: {
+        value: 3,
+        random: true,
+      },
+      line_linked: {
+        enable: true,
+        distance: 150,
+        color: '#ffffff',
+        opacity: 0.4,
+        width: 1,
+      },
+      move: {
+        enable: true,
+        speed: 2,
+        direction: 'none',
+        random: false,
+        straight: false,
+        out_mode: 'out',
+      },
+    },
+    interactivity: {
+      detect_on: 'window',
+      events: {
+        onhover: {
+          enable: true,
+          mode: 'grab',
+        },
+        onclick: {
+          enable: true,
+          mode: 'grab',
+        },
+      },
+      modes: {
+        grab: {
+          distance: 200,
+          line_linked: {
+            opacity: 1,
+          },
+        },
+        bubble: {
+          distance: 200,
+          size: 10,
+          duration: 2,
+          opacity: 0.8,
+        },
+        repulse: {
+          distance: 200,
+        },
+        push: {
+          particles_nb: 4,
+        },
+      },
+    },
+    retina_detect: true,
+  });
+
+        (function(){
+        // Element references
+        const tilesContainer = document.getElementById('tiles-container');
+        const balanceDisplay = document.getElementById('balance-display');
+        const betInput = document.getElementById('bet-input');
+        const redCountInput = document.getElementById('red-count-input'); // input for number of red squares
+        const startBtn = document.getElementById('start-btn');
+        const cashoutBtn = document.getElementById('cashout-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const messageDisplay = document.getElementById('message-display');
+        const allInBtn = document.getElementById('allin-btn'); // All In button
+
+        let currentBet = 0;
+        let gameActive = false;
+        let greenCountRevealed = 0;
+        let desiredRedCount = 0; // as chosen by the player
+
+        // Multiplier starts at 1.0 (1×) and increases with safe clicks.
+        let multiplier = 1.0;
+
+        // House edge factor: players receive 97% of the fair win.
+        const houseEdge = 0.97;
+
+        // Initialize balance from localStorage or default to 100
+        let balance = localStorage.getItem('balance');
+        if(balance === null) {
+            balance = 100;
+            localStorage.setItem('balance', balance);
+        } else {
+            balance = parseFloat(balance);
+        }
+        balanceDisplay.textContent = 'Balance: $' + balance;
+
+        // Calculates potential win with house edge.
+        function potentialWin() {
+            return currentBet * multiplier * houseEdge;
+        }
+
+        // Creates 25 tiles (5x5 grid) with exactly desiredRedCount red tiles.
+        function generateTiles() {
+            tilesContainer.innerHTML = '';
+            greenCountRevealed = 0;
+            multiplier = 1.0; // Reset multiplier at round start.
+            const totalTiles = 25;
+            let redIndices = new Set();
+            while(redIndices.size < desiredRedCount){
+                redIndices.add(Math.floor(Math.random() * totalTiles));
+            }
+            for (let i = 0; i < totalTiles; i++) {
+                let tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.dataset.outcome = redIndices.has(i) ? 'red' : 'green';
+                tile.dataset.revealed = "false";
+                tile.addEventListener('click', handleTileClick);
+                tilesContainer.appendChild(tile);
+            }
+            messageDisplay.textContent = "Game started. Multiplier: " + multiplier.toFixed(2)
+                + "x. Potential win: $" + potentialWin().toFixed(2);
+        }
+
+        // Reveals remaining tiles and disables further clicking.
+        function revealAllTiles() {
+            const tiles = document.querySelectorAll('#tiles-container .tile');
+            tiles.forEach(tile => {
+                if(tile.dataset.revealed !== "true") {
+                    tile.style.backgroundColor = tile.dataset.outcome;
+                    tile.dataset.revealed = "true";
+                }
+                tile.style.cursor = 'default';
+                tile.replaceWith(tile.cloneNode(true)); // remove click events.
+            });
+        }
+
+        function restartGame() {
+            betInput.disabled = false;
+            redCountInput.disabled = false;
+            startBtn.style.display = 'inline-block';
+            cashoutBtn.style.display = 'none';
+            restartBtn.style.display = 'none';
+            gameActive = false;
+            generateTiles();
+            messageDisplay.textContent = "Game reset. Enter your bet and red count.";
+        }
+
+        function handleTileClick(event) {
+            if (!gameActive) return;
+            const tile = event.target;
+            if (tile.dataset.revealed === "true") return;
+            tile.dataset.revealed = "true";
+            const outcome = tile.dataset.outcome;
+            if (outcome === 'green') {
+                tile.style.backgroundColor = 'green';
+                greenCountRevealed++;
+                const baseIncrement = 0.5;
+                const riskBonus = desiredRedCount / 50;
+                multiplier += baseIncrement + riskBonus;
+                tile.classList.add('epic-glow');
+                setTimeout(() => tile.classList.remove('epic-glow'), 300);
+                const soundEffect = new Audio('/pass-sound.m4a');
+                soundEffect.play();
+                messageDisplay.textContent = greenCountRevealed + " safe green square(s). Multiplier: "
+                    + multiplier.toFixed(2) + "x. Potential win: $" + potentialWin().toFixed(2);
+            } else {
+                tile.style.backgroundColor = 'red';
+                messageDisplay.textContent = "Red square hit! Game over. Final win: $" + potentialWin().toFixed(2);
+                // Add losing effect: add "shake" to the grid.
+                tilesContainer.classList.add('shake');
+                // Remove shake effect after it finishes.
+                setTimeout(() => {
+                    tilesContainer.classList.remove('shake');
+                }, 500);
+                revealAllTiles();
+                gameActive = false;
+                cashoutBtn.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+            }
+        }
+
+        function startGame() {
+            currentBet = parseFloat(betInput.value);
+            desiredRedCount = parseInt(redCountInput.value, 10);
+            if(isNaN(currentBet) || currentBet <= 0) {
+                messageDisplay.textContent = "Please enter a valid bet.";
+                return;
+            }
+            // Now require at least 1 red square.
+            if(isNaN(desiredRedCount) || desiredRedCount < 1 || desiredRedCount > 25) {
+                messageDisplay.textContent = "Please choose a red count between 1 and 25.";
+                return;
+            }
+            if(currentBet > balance) {
+                messageDisplay.textContent = "Insufficient balance!";
+                return;
+            }
+            balance -= currentBet;
+            localStorage.setItem('balance', balance);
+            balanceDisplay.textContent = 'Balance: $' + balance;
+            betInput.disabled = true;
+            redCountInput.disabled = true;
+            startBtn.style.display = 'none';
+            cashoutBtn.style.display = 'inline-block';
+            gameActive = true;
+            generateTiles();
+        }
+
+        function cashOut() {
+            revealAllTiles();
+            const winAmount = potentialWin();
+            balance += winAmount;
+            localStorage.setItem('balance', balance);
+            balanceDisplay.textContent = 'Balance: $' + balance;
+            messageDisplay.textContent = "You cash out and win $" + winAmount.toFixed(2) + "!";
+            restartGame();
+        }
+
+        function resetBalance() {
+            balance = 100;
+            localStorage.setItem('balance', balance);
+            balanceDisplay.textContent = 'Balance: $' + balance;
+            messageDisplay.textContent = "Balance reset to $100.";
+            restartGame();
+        }
+
+        function allIn() {
+            betInput.value = balance;
+            document.getElementById('betValue').textContent = balance;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startGame);
+        cashoutBtn.addEventListener('click', cashOut);
+        restartBtn.addEventListener('click', restartGame);
+        resetBtn.addEventListener('click', resetBalance);
+        allInBtn.addEventListener('click', allIn);
+
+        // Optionally, show the grid immediately (or wait for Start Game)
+        generateTiles();
+
+    })();
+	</script>
+</html>

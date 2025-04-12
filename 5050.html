@@ -91,13 +91,23 @@
             border-radius: 10px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+    
+    @keyframes epicGlow {
+        0% { box-shadow: 0 0 10px 0 rgba(0,255,0,0.5); }
+        50% { box-shadow: 0 0 30px 15px rgba(0,255,0,1); }
+        100% { box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5); }
+    }
+    
+    .epic-glow {
+        animation: epicGlow 0.3s ease-in-out;
+    }
+    
 	</style>
 	<body>
 		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
 		<div id="particles-js"></div>
 		<div id="center">
 		  <h1>50/50</h1>
-         <h2 style="top: -3em; position: relative; color: #c3c3c3;">the actual chances are 70/30</h2> 
           </div>
 		<div id="game-container" style="margin: 20px auto; width: 200px;">
 			<div id="cube" style="width: 100px; height: 100px; background-color: green; margin: 0 auto; cursor: pointer;"></div>
@@ -188,7 +198,7 @@
     const scoreDisplay = document.getElementById('score-display');
     const highscoreDisplay = document.getElementById('highscore-display');
     let score = 0;
-    const pChance = 0.7; // probability of staying green per click
+    const pChance = 0.5; // probability of staying green per click
 
     function updateHighScore(currentScore) {
        let highScore = localStorage.getItem('highScore');
@@ -197,35 +207,35 @@
            localStorage.setItem('highScore', currentScore);
            highScore = currentScore;
        }
-       // Calculate overall chance as (pChance^highScore * 100)
        const computedChance = Math.pow(pChance, highScore) * 100;
-       // Format with 6 decimal places and then convert back to number to strip trailing zeros.
        const chancePercent = parseFloat(computedChance.toFixed(6));
        highscoreDisplay.textContent = 'Highscore: ' + highScore + ' (' + chancePercent + '%)';
     }
     
     function restartGame() {
-         // Reset score and cube appearance
          score = 0;
          scoreDisplay.textContent = 'Score: ' + score;
          cube.style.backgroundColor = 'green';
     }
     
     function handleCubeClick() {
-        // If the cube is red, restart the game on click.
         if (cube.style.backgroundColor === 'red') {
             restartGame();
             return;
         }
         
-        // With pChance chance, the cube stays green, otherwise it turns red.
         if (Math.random() < pChance) {
             score++;
             scoreDisplay.textContent = 'Score: ' + score;
+            // Add the epic glow effect
+            cube.classList.add('epic-glow');
+            setTimeout(() => cube.classList.remove('epic-glow'), 300);
+            // Play sound effect on successful pass
+            const soundEffect = new Audio('/pass-sound.m4a');
+            soundEffect.play();
         } else {
             cube.style.backgroundColor = 'red';
             localStorage.setItem('savedScore', score);
-            // Compute chance for this score and include it in the saved message.
             const currentChance = parseFloat((Math.pow(pChance, score) * 100).toFixed(6));
             scoreDisplay.textContent = 'Score saved: ' + score + ' (' + currentChance + '%)';
             updateHighScore(score);
@@ -233,6 +243,6 @@
     }
     
     cube.addEventListener('click', handleCubeClick);
-})();
+    })();
 	</script>
 </html>

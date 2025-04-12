@@ -1,3 +1,41 @@
+// New function to inspect an inventory item
+function inspectItem(item) {
+    const modal = document.querySelector(".modalWindow");
+    const modalMain = modal.querySelector(".modalMain");
+    
+    // Clear previous content
+    modalMain.innerHTML = "";
+    
+    // Create inspect content
+    const inspectContent = document.createElement("div");
+    inspectContent.className = "inspectContent";
+    // You can adjust this content as needed with item details
+    inspectContent.innerHTML = "<h2>Inspecting Item</h2>" +
+                               "<div>" + item.innerHTML + "</div>";
+    
+    // Create a continue button to close the modal
+    const closeBtn = document.createElement("div");
+    closeBtn.className = "modalClose";
+    closeBtn.textContent = "Continue";
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    };
+    
+    // Append the content and button to the modal
+    modalMain.appendChild(inspectContent);
+    modalMain.appendChild(closeBtn);
+    
+    // Show the modal
+    modal.style.display = "block";
+}
+document.addEventListener("DOMContentLoaded", function() {
+    const modalWindow = document.querySelector(".modalWindow");
+    if (modalWindow) {
+        modalWindow.addEventListener("click", function() {
+            modalWindow.style.display = "none";
+        });
+    }
+});
 // CSGOClicker - Case CSGOClicker
 //money, inventory, jackpot
 var itemCounter = 0;
@@ -5,7 +43,7 @@ var fps = 15;
 
 var money = 16;
 var currentCase = "case1";
-var acceptMoneyPerClick = 1;
+var acceptMoneyPerClick = Math.random() * 0.5 + 0.5;
 
 /*=========================Inventory============================*/
 //In inventory: weap skins
