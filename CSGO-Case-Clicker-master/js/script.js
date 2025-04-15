@@ -46,6 +46,32 @@ var currentCase = "case1";
 var acceptMoneyPerClick = Math.random() * 0.5 + 0.5;
 
 /*=========================Inventory============================*/
+
+/*=============== SELL LOW VALUE ITEMS ===============*/
+function sellItemsUnder(threshold) {
+    // Create an array of keys so that removal during iteration is safe.
+    var keysToSell = Object.keys(inventory);
+    for (var i = 0; i < keysToSell.length; i++) {
+        var id = keysToSell[i];
+        var item = eval(atob(inventory[id]));  // decode stored item
+        if (item['price'] < threshold) {
+            money += item['price'];
+            delete inventory[id];
+            $("#" + id).remove();
+            inventoryCurrent--;
+        }
+    }
+    inventoryValue();
+    skinOverflow();
+}
+
+// Optionally, add a button click handler to trigger the sale
+$("#sellLowValue").click(function() {
+    var threshold = parseFloat(prompt("Enter maximum price for selling items:"));
+    if (!isNaN(threshold)) {
+        sellItemsUnder(threshold);
+    }
+});
 //In inventory: weap skins
 //Hidden: money
 
@@ -15459,6 +15485,8 @@ $(".modalMain").on("click", ".modalClose", function() {
 
 $("#acceptButton").click(function() {
   money += acceptMoneyPerClick;
+  var audio = new Audio('/pass-sound.m4a');
+  audio.play();
 $('#accepted')[0].play();  
 });
 
@@ -15481,18 +15509,21 @@ $("#caseTab").click(function() {
     $(".inventoryContainer").hide();
     $(".caseContainer").show();
     $(".coinContainer").hide();
+    $("#sellLowValue").hide();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
     $(".tradeButtonContainer").show();
     if ($(".unboxing").css('display') !== 'block') {
       $(".unboxing").show();
       $(".jackpot").hide();
+      $("#sellLowValue").hide();
     }
   }
 });
 
 $("#inventoryTab").click(function() {
   if ($(".inventoryContainer").css('display') == 'none') {
+    $("#sellLowValue").show();
     $(this).toggleClass("active");
     $("#jackpotTab").removeClass("active");
     $("#upgradeTab").removeClass("active");
@@ -15524,6 +15555,7 @@ $("#upgradeTab").click(function() {
     $(".jackpotRightContainer").hide();
     $(".inventoryContainer").hide();
     $(".caseContainer").hide();
+    $("#sellLowValue").hide();
     $(".coinContainer").hide();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
@@ -15555,6 +15587,7 @@ $("#jackpotTab").click(function() {
       if ($(".unboxing").css('display') == 'block') {
         $(".unboxing").hide();
         $(".jackpot").show();
+        $("#sellLowValue").hide();
       }
     }
   }
@@ -15572,6 +15605,7 @@ $("#coinTab").click(function() {
     $(".coinContainer").show();
     $(".caseContainer").hide();
     $(".inventoryContainer").hide();
+    $("#sellLowValue").hide();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
     $(".tradeButtonContainer").hide();
@@ -15724,7 +15758,7 @@ $(".caseContainer").on('click', '.case', function() {
 var jackpotUnlocked = true;
 var jackpotInProgress = false;
 var swapSkins = 0;
-var maxSwapSkins = 15;
+var maxSwapSkins = 20;
 var swapSkinsValue = 0;
 var jackpotSelectedInventory = {};
 var jackpotDifficulty = "low";
@@ -15953,7 +15987,7 @@ function jackpotStart() {
   var playerTickets = 0;
   var totalTickets = 0;
   var jackpotItemCounter = 0;
-  var jackpotTimerCounter = 60;
+  var jackpotTimerCounter = 15;
   var depositTicker = 0;
   var AIKeys = JSON.parse(JSON.stringify(jackpotPots[jackpotDifficulty]));
 
@@ -16003,6 +16037,8 @@ function jackpotStart() {
   var jackpotTimer = setInterval(function() {
     if (jackpotTimerCounter > 0) {
       if (skins < maxSkins) {
+        jackpotAISkinDraw();
+        jackpotAISkinDraw();
         jackpotAISkinDraw();
       } else {
         jackpotPickWinner();
