@@ -64,7 +64,7 @@ function sellItemsUnder(threshold) {
     inventoryValue();
     skinOverflow();
     saveGameState();
-    location.reload();
+    loadGameState();
 }
 
 // Optionally, add a button click handler to trigger the sale
