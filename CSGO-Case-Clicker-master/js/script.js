@@ -63,6 +63,8 @@ function sellItemsUnder(threshold) {
     }
     inventoryValue();
     skinOverflow();
+    saveGameState();
+    location.reload();
 }
 
 // Optionally, add a button click handler to trigger the sale
@@ -70,6 +72,7 @@ $("#sellLowValue").click(function() {
     var threshold = parseFloat(prompt("Enter maximum price for selling items:"));
     if (!isNaN(threshold)) {
         sellItemsUnder(threshold);
+        
     }
 });
 //In inventory: weap skins
