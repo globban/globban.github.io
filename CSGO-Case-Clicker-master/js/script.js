@@ -15487,6 +15487,11 @@ $('#menu')[0].play();
   }
 });
 
+function add(cash) {
+  money += cash;
+  totalMoneySpent += cash;
+  inventoryValue();
+}
 
 $("#case").click(function() {
   if (inventoryCurrent < inventoryMax) {
