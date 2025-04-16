@@ -100,6 +100,21 @@ function openCase(i) {
 openCase(0);
 });
 
+$(document).on("keydown", function(e) {
+  // Skip keybind if focus is in an input field
+  if ($(e.target).is("input, textarea, select")) return;
+  
+  // Press "M" (for multi-case open)
+  if (e.key.toLowerCase() === "m") {
+      $("#multiCase").click();
+  }
+  
+  // Press "S" (for sell low value)
+  if (e.key.toLowerCase() === "s") {
+      $("#sellLowValue").click();
+  }
+});
+
 $("#sellLowValue").click(function() {
   var threshold = parseFloat($("#sellThreshold").val());
   if (!isNaN(threshold)) {
