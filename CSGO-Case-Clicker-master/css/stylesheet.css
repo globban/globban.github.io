@@ -948,6 +948,28 @@ button {
 	transition: 1s;
 }
 
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: #0f1317;
+  border: 1px #186144 solid;
+  color: #fff;
+  font-size: 20px;
+  font-family: 'Rajdhani', sans-serif;
+  text-align: center;
+  line-height: 40px;
+  width: 30%;
+  appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
 .main.small {
 	top: 350px;
 	border-top: 1px #186144 solid;

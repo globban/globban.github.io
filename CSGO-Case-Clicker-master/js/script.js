@@ -49,31 +49,62 @@ var acceptMoneyPerClick = Math.random() * 0.5 + 0.5;
 
 /*=============== SELL LOW VALUE ITEMS ===============*/
 function sellItemsUnder(threshold) {
-    // Create an array of keys so that removal during iteration is safe.
-    var keysToSell = Object.keys(inventory);
-    for (var i = 0; i < keysToSell.length; i++) {
-        var id = keysToSell[i];
-        var item = eval(atob(inventory[id]));  // decode stored item
-        if (item['price'] < threshold) {
-            money += item['price'];
-            delete inventory[id];
-            $("#" + id).remove();
-            inventoryCurrent--;
-        }
-    }
-    inventoryValue();
-    skinOverflow();
-    saveGameState();
-    loadGameState();
+  // Create an array of keys so that removal during iteration is safe.
+  var keysToSell = Object.keys(inventory);
+  for (var i = 0; i < keysToSell.length; i++) {
+      var id = keysToSell[i];
+      var item = eval(atob(inventory[id]));  // decode stored item
+      if (item['price'] < threshold) {
+          money += item['price'];
+          delete inventory[id];
+          $("#" + id).remove();
+          inventoryCurrent--;
+      }
+  }
+  inventoryValue();
+  skinOverflow();
+  saveGameState();
+  loadGameState();
 }
 
-// Optionally, add a button click handler to trigger the sale
-$("#sellLowValue").click(function() {
-    var threshold = parseFloat(prompt("Enter maximum price for selling items:"));
-    if (!isNaN(threshold)) {
-        sellItemsUnder(threshold);
-        
+$("#multiCase").click(function() {
+var count = parseInt($("#openCount").val(), 10);
+if (isNaN(count) || count <= 0) return;
+
+function openCase(i) {
+    if (i >= count) return; // finished opening requested cases
+    
+    if (inventoryCurrent >= inventoryMax) {
+        return;
     }
+    
+    var price = (operationCases[currentCase].price - caseDiscount) + (keyPrice - keyDiscount);
+    
+    // Only deduct money if price is positive
+    if (price >= 0 && money < price) {
+        return;
+    }
+    
+    if (price >= 0) {
+        money -= price;
+    }
+    
+    $('#unbox')[0].play();
+    randSkin();
+    inventoryValue();
+    
+    // Open next case instantly without delay
+    openCase(i + 1);
+}
+
+openCase(0);
+});
+
+$("#sellLowValue").click(function() {
+  var threshold = parseFloat($("#sellThreshold").val());
+  if (!isNaN(threshold)) {
+      sellItemsUnder(threshold);
+  }
 });
 //In inventory: weap skins
 //Hidden: money
@@ -15503,6 +15534,7 @@ $(".about").click(function() {
 $("#caseTab").click(function() {
   if ($(".caseContainer").css('display') == 'none') {
     $(this).toggleClass("active");
+    $(".invbuttons").hide();
     $("#jackpotTab").removeClass("active");
     $("#upgradeTab").removeClass("active");
     $("#inventoryTab").removeClass("active");
@@ -15537,6 +15569,7 @@ $("#inventoryTab").click(function() {
     $(".inventoryContainer").show();
     $(".caseContainer").hide();
     $(".coinContainer").hide();
+    $(".invbuttons").show();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
     $(".tradeButtonContainer").show();
@@ -15560,6 +15593,7 @@ $("#upgradeTab").click(function() {
     $(".caseContainer").hide();
     $("#sellLowValue").hide();
     $(".coinContainer").hide();
+    $(".invbuttons").hide();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
     $(".tradeButtonContainer").show();
@@ -15584,6 +15618,7 @@ $("#jackpotTab").click(function() {
       $(".inventoryContainer").hide();
       $(".caseContainer").hide();
       $(".coinContainer").hide();
+      $(".invbuttons").hide();
 	  $('#menu')[0].play();
       $(".tradeButtonContainer").hide();
       $(".rightMain").css("bottom","0");
@@ -15608,7 +15643,7 @@ $("#coinTab").click(function() {
     $(".coinContainer").show();
     $(".caseContainer").hide();
     $(".inventoryContainer").hide();
-    $("#sellLowValue").hide();
+    $(".invbuttons").hide();
 	$('#menu')[0].play();
     $(".rightMain").css("bottom","135px");
     $(".tradeButtonContainer").hide();
