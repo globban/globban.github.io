@@ -26,14 +26,10 @@
       setInterval(clock, 1000);
 
       function myFunction() {
+         sessionStorage.clear();
          location.reload();
       }
 
-      window.onload = function () {
-         const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-         document.documentElement.style.setProperty('--text-color', savedTextColor);
-         document.getElementById('textColor').value = savedTextColor;
-      };
    </script>
    <style>
       @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
@@ -62,6 +58,7 @@
          background-size: cover;
          background-position: center;
       }
+
    </style>
 </head>
 
