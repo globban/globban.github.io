@@ -1,83 +1,72 @@
 <html>
-	<head>
-		<title>clock</title>
-		<link rel="icon" type="image" href="https://www.algot.fun/logosmall.png">
-      <link rel="stylesheet" href="index.css">
-		<script>function add_zero(digit)
-            {
-               if(digit < 10)
-               {
-                  digit = "0" + digit;
-               }
-               else
-               {
-                  digit = digit.toString();
-               }
-               
-               return digit
-            }
-            
-            function clock()
-            {
-               const now = new Date();
-               
-               let hours = now.getHours();
-               let minutes = now.getMinutes();
-               let seconds = now.getSeconds();
-               
-               document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes)+ ":" + add_zero(seconds) ;
-            }
-            
-            setInterval(clock, 1000);
 
-            function myFunction()
-            {
-               window.location.href = "https://www.algot.fun/"
-            }
+<head>
+   <title>clock</title>
+   <script>function add_zero(digit) {
+         if (digit < 10) {
+            digit = "0" + digit;
+         }
+         else {
+            digit = digit.toString();
+         }
 
-            window.onload = function() {
-            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-            document.documentElement.style.setProperty('--text-color', savedTextColor);
-            document.getElementById('textColor').value = savedTextColor;
-        };
-	    </script>
-        <style>
-            @import url('https://fonts.cdnfonts.com/css/lcd');
+         return digit
+      }
 
-            
-            
+      function clock() {
+         const now = new Date();
 
-            #clock
-            {
-              align-items: center;
-               display: flex;
-               height: 96.5%;
-               justify-content: center;
-               font-size: 10vw;
-               text-shadow: 0 0 20px #ffffff;
-               font-family: 'Courier New', Courier, monospace;
-            }
-             
-            body {
-               overflow-y: hidden;
-            }
-            
+         let hours = now.getHours();
+         let minutes = now.getMinutes();
+         let seconds = now.getSeconds();
 
-        </style>
-    </head>
-	<body>
-      <div class="topnav">
-         <a href="/index.html">Home</a>
-         <a href="/Links.html">Links</a>
-         <a href="/clicker.html">clicker</a>
-         <a href="/Webbutton.html">Random</a>
-         <a class="active" href="/clock.html">clock</a>
-         <a href="/visits.html">Chat</a>
-        </div>
-        <div class="toprgb"></div>
-        <div class="blur toprgb"></div>
-        <div class="blur toprgb"></div>
-              <div id="clock">
-               <span id="digits" ></span>
-            </div>
-	</body>
+         document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes) + ":" + add_zero(seconds);
+      }
+
+      setInterval(clock, 1000);
+
+      function myFunction() {
+         location.reload();
+      }
+
+      window.onload = function () {
+         const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
+         document.documentElement.style.setProperty('--text-color', savedTextColor);
+         document.getElementById('textColor').value = savedTextColor;
+      };
+   </script>
+   <style>
+      @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+
+
+
+      #clock {
+         align-items: center;
+         display: flex;
+         height: 100%;
+         width: 100%;
+         justify-content: center;
+         color: white;
+         mix-blend-mode: difference;
+
+         font-family: chakra petch;
+      }
+
+      #digits {
+         font-size: 20vw;
+      }
+
+      body {
+         overflow-y: hidden;
+         background-image: url("https://res.cloudinary.com/dhxkd1vka/image/upload/v1744928054/Screenshot_2025-04-11_192425_qrr0iy.png");
+         background-size: cover;
+         background-position: center;
+      }
+   </style>
+</head>
+
+<body>
+   <div id="clock" onclick="myFunction()">
+      <span id="digits"></span>
+   </div>
+</body>
