@@ -24,6 +24,7 @@ body {
 	line-height: 1;
 	color: black;
 	background: white;
+	size-adjust: ;
 }
 ol, ul {
 	list-style: none;
@@ -1512,6 +1513,127 @@ div.knife {
 
 }
 
+/* General mobile styles */
+@media only screen and (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .navbar {
+    height: auto;
+    display: block;
+    text-align: center;
+  }
+
+  .navbar ul li a {
+    margin-right: 10px;
+    line-height: normal;
+    display: inline-block;
+  }
+
+  .headerLogo {
+    width: 120px;
+    height: auto;
+    margin: 10px auto;
+    float: none;
+    background-size: contain;
+  }
+
+  .aboutContainer {
+    height: auto;
+    padding: 20px;
+  }
+
+  .aboutBody {
+    width: 90%;
+  }
+
+  .aboutDevelopers {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .aboutDev {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .left, .right {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+
+  .caseDisplay {
+    width: 90%;
+    height: auto;
+    margin: 20px auto;
+  }
+
+  .jackpotDifficultyContainer div {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .modalMain.unbox, .modalMain.winner {
+    width: 90%;
+    height: auto;
+    margin: 20px auto;
+  }
+
+  .tradeButton {
+    font-size: 20px;
+    width: 90%;
+    height: auto;
+    line-height: normal;
+    margin: 10px auto;
+  }
+
+  .inventoryItem, .swappedItem {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+  }
+
+  .tab {
+    width: 70px;
+    font-size: 12px;
+  }
+
+  .case {
+    width: 90%;
+    margin: 10px auto;
+  }
+
+  .casePicture {
+    height: 60px;
+    width: 60px;
+  }
+
+  .mainInfo {
+    font-size: 14px;
+  }
+
+  .notification {
+    width: 90%;
+    font-size: 14px;
+  }
+
+  .settingsList {
+    width: 100%;
+  }
+
+  .settingsList li {
+    font-size: 14px;
+  }
+
+  .modalClose.unbox {
+    width: 120px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 16px;
+  }
+}
 
 /*===============KEYFRAMES=================*/
 
