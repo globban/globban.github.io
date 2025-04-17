@@ -14,8 +14,6 @@
       background-position: center;
       background-attachment: fixed;
       color: #ffffff;
-      display: flex;
-      justify-content: center;
       align-items: center;
       background-color: #000000;
     }
@@ -30,17 +28,18 @@
       background-color: #000000;
     }
 
-    h1 {
-      position: relative;
+    a {
+      text-decoration: none;
       text-align: center;
       color: #ffffff;
       transition: text-shadow 0.3s ease;
-      top: 5vh;
-      font-size: 5em;
+      font-size: 3em;
       width: 100%;
+      cursor: default;
+      display: block;
     }
 
-    h1:hover {
+    a:hover {
       color: #ffffff;
       transition: text-shadow 0.3s ease;
       text-shadow: 0px 0px 20px rgb(255, 255, 255);
@@ -53,6 +52,7 @@
       border: 5px solid transparent; /* Default border */
       border-radius: 10px; /* Optional: Add rounded corners */
       transition: border 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      margin: 1em;
     }
 
     img:hover {
@@ -71,9 +71,9 @@
 </head>
 <body>
     
-  <h1>Image Gallery</h1>
+  <a href="https://console.cloudinary.com/console/c-23aafa80a67382cc95030ff7bb3a8d/media_library/search?cld-target-product=digital_asset_management&q=&view_mode=grid"><h1>Image Gallery</h1></a>
   <div id="particles-js"></div>
-  <p>
+  <p style="text-align: center;">
     <img src="https://i.ibb.co/jP02KMXh/pink-gtr-in-modern-house.png" alt="pink-gtr-in-modern-house">
     <img src="https://i.ibb.co/PvpRymWX/minimalistic-glow-orange.png" alt="minimalistic-glow-orange">
     <img src="https://i.ibb.co/QvKqK0cK/minimalistic-glow-purple.png" alt="minimalistic-glow-purple">
