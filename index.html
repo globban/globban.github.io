@@ -59,12 +59,7 @@
       overflow-x: hidden;
       transition: width 0.3s ease; /* Smooth expand/collapse */
       z-index: 1000;
-      border-right: 1px solid transparent;
-      border-image: linear-gradient(0deg, #ff3d00, #eeff00) 1;
-
     }
-
-    
 
     /* Sidebar expands on hover */
     .sidebar:hover {
@@ -105,6 +100,7 @@
       display: inline-block;
     }
     
+    
   </style>
 </head>
 <body>
@@ -118,32 +114,11 @@
     <a href="/clicker.html"><i class="fas fa-mouse"></i><span>Clicker</span></a>
     <a href="/gambling.html"><i class="fas fa-dice-five"></i><span>Gambling</span></a>
     <a href="/renders.html"><i class="fas fa-images"></i><span>Gallery</span></a>
-    <a href="/clock.html"><i class="fas fa-clock"></i><span>Clock</span></a>
+    <a href="/car.html"><i class="fas fa-flag-checkered"></i><span>Drift</span></a>
   </div>
  <a href="/visits.html"><h1 style="top:50vh;" >Welcome to Algot's web-workshop</h1></a>
 </body>
 <script>
-  // Function to generate a random vibrant color
-  function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
-
-  // Apply random vibrant gradient to the sidebar
-  function applyRandomGradient() {
-    const color1 = getRandomColor();
-    const color2 = getRandomColor();
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.style.borderImage = `linear-gradient(45deg, ${color1}, ${color2}) 1`;
-  }
-
-  // Call the function on page load
-  document.addEventListener('DOMContentLoaded', applyRandomGradient);
-  
   particlesJS('particles-js', {
     particles: {
       number: {

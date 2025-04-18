@@ -1,0 +1,608 @@
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>Drift</title>
+  <style>
+    /* Editable CSS */
+    body { 
+      margin: 0; 
+      padding: 0; 
+      background: #333; 
+      overflow: hidden; 
+    }
+    canvas { 
+      display: block; 
+      background: #555;
+    }
+    /* New: Color customization menu style */
+    #colorMenu {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1000;
+      font-family: sans-serif;
+    }
+
+
+#leftbtn {
+    position: absolute;
+    height: 100vh;
+    width: 50vw;
+    top: 0px;
+    background-color: #00000000;
+    left: 0px;
+    border: #00000000;
+    color: #00000000;
+}
+
+#rightbtn {
+    position: absolute;
+    height: 100vh;
+    width: 50vw;
+    top: 0px;
+    background-color: #00000000;
+    right: 0px;
+    border: #00000000;
+    color: #00000000;
+}
+
+#mobileonly {
+    display: none;
+}
+
+.touch-only {
+    display: block;
+  }
+
+
+#watermark {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #aaa;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+h1 {
+    position: absolute;
+    color: #fff;
+    z-index: 999;
+    top: 50vh;
+    left: 50vw;
+    transform: translateX(-50%);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 3em;
+}
+  </style>
+</head>
+<body>
+    <div id="watermark">Algots drift worksop</div>
+  <!-- New: Color customization menu -->
+  <div id="colorMenu">
+    <label for="hueSlider">Car Hue: </label>
+    <input type="range" id="hueSlider" min="0" max="360" value="0">
+    <br>
+    <label for="saturationSlider">Saturation: </label>
+    <input type="range" id="saturationSlider" min="0" max="200" value="100">
+    <br>
+    <label for="brightnessSlider">Brightness: </label>
+    <input type="range" id="brightnessSlider" min="0" max="200" value="100">
+  </div>
+  
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Place these elements below your canvas element -->
+   <div id="mobile-only" class="touch-only">
+  <div id="mobileControls">
+    <div id="start">
+    <h1>press to start</h1>
+</div>
+    <button id="leftBtn">Left</button>
+    <button id="rightBtn">Right</button>
+  </div>
+</div>
+  <script>
+
+    
+
+if (!window.matchMedia('(any-hover: hover)').matches && 'ontouchstart' in window) {
+    document.getElementById('mobile-only').style.display = "block"
+} else {
+     document.getElementById('mobile-only').style.display = "none"
+}
+    // =======================
+    // CONFIGURATION SETTINGS
+    // =======================
+    const config = {
+      // Using window dimensions for fullscreen canvas.
+      canvasWidth: window.innerWidth,
+      canvasHeight: window.innerHeight,
+      carImageSrc: "car.png",        // Path to your car texture image.
+      carDimensions: { width: 47, height: 100 },
+      carInitialAngle: 90,            // 0: image front points right; draw offset adjusts that.
+      maxSpeed: 14,
+      friction: 0.98,
+      accelerationForward: 0.07,
+      accelerationBackward: -0.03,
+      steeringRate: 0.02,            // Change in steering angle per update.
+      maxSteeringAngle: 0.5,         // In radians (~28.6°)
+      wheelbase: 57,                 // Distance between front and rear axles.
+      drawRotationOffset: Math.PI/2, // +PI/2 rotates image so its front faces upward.
+      // How far back (in pixels) to move the steering pivot relative to the image center.
+      steeringPivotOffset: 30,
+      // Drift factor: how quickly the velocity angle (vAngle) catches up with the car's heading (angle)
+      driftFactor: 0.01,
+      // New: Hue, saturation, and brightness values applied to the car image
+      hue: 0,
+      saturation: 100,
+      brightness: 100
+    };
+
+    // New global variable for tire marks.
+    let tireMarks = [];
+
+    // =======================
+    // CANVAS SETUP
+    // =======================
+    const canvas = document.getElementById("gameCanvas");
+    canvas.width = config.canvasWidth;
+    canvas.height = config.canvasHeight;
+    const ctx = canvas.getContext("2d");
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      config.canvasWidth = window.innerWidth;
+      config.canvasHeight = window.innerHeight;
+    });
+
+    // New: Code to allow drawing obstacles by dragging.
+    let dragStart = null;
+    let currentDragObstacle = null;
+
+    canvas.addEventListener("mousedown", e => {
+        const rect = canvas.getBoundingClientRect();
+        dragStart = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    });
+
+    canvas.addEventListener("mousemove", e => {
+        if (!dragStart) return;
+        const rect = canvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        const x = Math.min(dragStart.x, currentX);
+        const y = Math.min(dragStart.y, currentY);
+        const width = Math.abs(currentX - dragStart.x);
+        const height = Math.abs(currentY - dragStart.y);
+        currentDragObstacle = { x, y, width, height };
+    });
+
+    canvas.addEventListener("mouseup", e => {
+        if (dragStart && currentDragObstacle && currentDragObstacle.width > 0 && currentDragObstacle.height > 0) {
+            obstacles.push(currentDragObstacle);
+        }
+        dragStart = null;
+        currentDragObstacle = null;
+    });
+
+    // =======================
+    // LOAD ASSETS
+    // =======================
+    const carImage = new Image();
+    carImage.src = config.carImageSrc;
+
+    // New: Define obstacles centered around the canvas center with increased spacing and additional obstacles.
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const obstacles = [
+      { x: centerX - 400, y: centerY - 300, width: 80,  height: 80 },
+      { x: centerX - 200, y: centerY - 200, width: 120, height: 50 },
+      { x: centerX,      y: centerY - 350, width: 100, height: 100 },
+      { x: centerX + 300, y: centerY - 150, width: 90,  height: 60 },
+      { x: centerX - 350, y: centerY + 100, width: 110, height: 110 },
+      { x: centerX - 500, y: centerY + 200, width: 100, height: 70 },
+      { x: centerX + 200, y: centerY + 250, width: 80,  height: 80 },
+      { x: centerX + 450, y: centerY,      width: 100, height: 100 },
+      { x: centerX - 150, y: centerY + 400, width: 90,  height: 60 },
+      { x: centerX + 250, y: centerY - 100, width: 110, height: 90 },
+      { x: centerX - 300, y: centerY - 450, width: 80,  height: 80 },
+      { x: centerX + 50,  y: centerY + 450, width: 120, height: 70 }
+    ];
+
+    // =======================
+    // CAR OBJECT & PHYSICS
+    // =======================
+    const car = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      width: config.carDimensions.width,
+      height: config.carDimensions.height,
+      angle: config.carInitialAngle,
+      vAngle: config.carInitialAngle,
+      velocity: 0,
+      acceleration: 0,
+      maxSpeed: config.maxSpeed,
+      friction: config.friction,
+      steeringAngle: 0,
+      maxSteeringAngle: config.maxSteeringAngle,
+      steeringRate: config.steeringRate,
+      wheelbase: config.wheelbase
+    };
+
+    // =======================
+    // INPUT HANDLING
+    // =======================
+    const keys = {};
+    document.addEventListener("keydown", e => { keys[e.key] = true; });
+    document.addEventListener("keyup", e => { keys[e.key] = false; });
+
+    // Mobile control buttons event listeners:
+    const upBtn = document.getElementById("upBtn");
+    const downBtn = document.getElementById("downBtn");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+
+
+    // Steer Left
+    leftBtn.addEventListener("touchstart", e => {
+        e.preventDefault();
+        keys["ArrowLeft"] = true;
+        keys["ArrowUp"] = true;
+        document.getElementById("start").style.display = "none"
+    });
+    leftBtn.addEventListener("touchend", e => {
+        e.preventDefault();
+        keys["ArrowLeft"] = false;
+    });
+
+    // Steer Right
+    rightBtn.addEventListener("touchstart", e => {
+        e.preventDefault();
+        keys["ArrowRight"] = true;
+        keys["ArrowUp"] = true;
+        document.getElementById("start").style.display = "none"
+    });
+    rightBtn.addEventListener("touchend", e => {
+        e.preventDefault();
+        keys["ArrowRight"] = false;
+    });
+
+    // New: Update the hue, saturation, and brightness settings from the sliders.
+    const hueSlider = document.getElementById("hueSlider");
+    const saturationSlider = document.getElementById("saturationSlider");
+    const brightnessSlider = document.getElementById("brightnessSlider");
+
+    // Retrieve saved values from localStorage if they exist.
+    const savedHue = localStorage.getItem("carHue");
+    if (savedHue !== null) {
+        config.hue = savedHue;
+        hueSlider.value = savedHue;
+    }
+
+    const savedSaturation = localStorage.getItem("carSaturation");
+    if (savedSaturation !== null) {
+        config.saturation = savedSaturation;
+        saturationSlider.value = savedSaturation;
+    }
+
+    const savedBrightness = localStorage.getItem("carBrightness");
+    if (savedBrightness !== null) {
+        config.brightness = savedBrightness;
+        brightnessSlider.value = savedBrightness;
+    }
+
+    hueSlider.addEventListener("input", e => {
+      config.hue = e.target.value;
+      localStorage.setItem("carHue", config.hue);
+    });
+
+    saturationSlider.addEventListener("input", e => {
+      config.saturation = e.target.value;
+      localStorage.setItem("carSaturation", config.saturation);
+    });
+
+    brightnessSlider.addEventListener("input", e => {
+      config.brightness = e.target.value;
+      localStorage.setItem("carBrightness", config.brightness);
+    });
+
+    // =======================
+    // COLLISION DETECTION FUNCTION
+    // =======================
+    function checkCollision() {
+      // Use the effective angle (including the draw offset) so the hitbox matches the drawing.
+      const effectiveAngle = car.angle + config.drawRotationOffset;
+      const hw = car.width / 2;
+      const hh = car.height / 2;
+      const centerX = car.x;
+      const centerY = car.y;
+
+      // Compute the corners of the car's hitbox.
+      const corners = [
+        { x: -hw, y: -hh - config.steeringPivotOffset },
+        { x: hw,  y: -hh - config.steeringPivotOffset },
+        { x: hw,  y: hh - config.steeringPivotOffset },
+        { x: -hw, y: hh - config.steeringPivotOffset }
+      ].map(corner => {
+        const cos = Math.cos(effectiveAngle);
+        const sin = Math.sin(effectiveAngle);
+        return {
+          x: centerX + corner.x * cos - corner.y * sin,
+          y: centerY + corner.x * sin + corner.y * cos
+        };
+      });
+
+      // Compute an Axis-Aligned Bounding Box (AABB) for an early-out.
+      const minX = Math.min(...corners.map(p => p.x));
+      const maxX = Math.max(...corners.map(p => p.x));
+      const minY = Math.min(...corners.map(p => p.y));
+      const maxY = Math.max(...corners.map(p => p.y));
+
+      for (let i = 0; i < obstacles.length; i++) {
+        const obs = obstacles[i];
+
+        // Broad phase check: AABB overlap.
+        if (obs.x + obs.width < minX || obs.x > maxX || obs.y + obs.height < minY || obs.y > maxY) {
+          continue;
+        }
+
+        // Fine check: SAT for rectangle-rectangle collision.
+        if (rectRectCollision(corners, obs)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Helper: Check collision between rotated polygon (the car hitbox) and axis-aligned rectangle.
+    function rectRectCollision(poly, rect) {
+      const rectCorners = [
+        { x: rect.x, y: rect.y },
+        { x: rect.x + rect.width, y: rect.y },
+        { x: rect.x + rect.width, y: rect.y + rect.height },
+        { x: rect.x, y: rect.y + rect.height }
+      ];
+
+      return !hasSeparatingAxis(poly, rectCorners) && !hasSeparatingAxis(rectCorners, poly);
+    }
+
+    function hasSeparatingAxis(polyA, polyB) {
+      for (let i = 0; i < polyA.length; i++) {
+        const p1 = polyA[i];
+        const p2 = polyA[(i + 1) % polyA.length];
+        const normal = { x: p2.y - p1.y, y: -(p2.x - p1.x) };
+
+        let [minA, maxA] = projectPolygon(polyA, normal);
+        let [minB, maxB] = projectPolygon(polyB, normal);
+
+        if (maxA < minB || maxB < minA) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function projectPolygon(points, axis) {
+      const dot = (p, a) => p.x * a.x + p.y * a.y;
+      const projections = points.map(p => dot(p, axis));
+      return [Math.min(...projections), Math.max(...projections)];
+    }
+
+    // =======================
+    // UPDATE FUNCTION
+    // =======================
+    function update() {
+      // Determine acceleration via input...
+      if (keys["ArrowUp"] || keys["w"] || keys["W"]) {
+        car.acceleration = config.accelerationForward;
+      } else if (keys["ArrowDown"] || keys["s"] || keys["S"]) {
+        car.acceleration = config.accelerationBackward;
+      } else {
+        car.acceleration = 0;
+      }
+
+      // Update velocity
+      car.velocity += car.acceleration;
+      if (car.velocity > car.maxSpeed) car.velocity = car.maxSpeed;
+      if (car.velocity < -car.maxSpeed / 2) car.velocity = -car.maxSpeed / 2;
+      car.velocity *= car.friction;
+
+      // Update steering angle with input
+      if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+        car.steeringAngle -= car.steeringRate;
+      } else if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+        car.steeringAngle += car.steeringRate;
+      } else {
+        if (car.steeringAngle > 0) {
+          car.steeringAngle -= config.steeringRate / 2;
+          if (car.steeringAngle < 0) car.steeringAngle = 0;
+        } else if (car.steeringAngle < 0) {
+          car.steeringAngle += config.steeringRate / 2;
+          if (car.steeringAngle > 0) car.steeringAngle = 0;
+        }
+      }
+
+      if (car.steeringAngle > car.maxSteeringAngle) car.steeringAngle = car.maxSteeringAngle;
+      if (car.steeringAngle < -car.maxSteeringAngle) car.steeringAngle = -car.maxSteeringAngle;
+
+      // Update rotation and store previous position before applying movement.
+      car.angle += (car.velocity / car.wheelbase) * Math.tan(car.steeringAngle);
+      car.vAngle += (car.angle - car.vAngle) * config.driftFactor;
+      const prevX = car.x;
+      const prevY = car.y;
+      car.x += car.velocity * Math.cos(car.vAngle);
+      car.y += car.velocity * Math.sin(car.vAngle);
+
+      // Collision detection against canvas bounds:
+      if (car.x < -car.width/2) {
+        car.x = canvas.width + car.width/2;
+      } else if (car.x > canvas.width + car.width/2) {
+        car.x = -car.width/2;
+      }
+
+      if (car.y < -car.height/2) {
+        car.y = canvas.height + car.height/2;
+      } else if (car.y > canvas.height + car.height/2) {
+        car.y = -car.height/2;
+      }
+      // If an obstacle collision is detected, only partially revert movement and dampen the velocity.
+      if (checkCollision()) {
+        const deltaX = car.x - prevX;
+        const deltaY = car.y - prevY;
+        // Preserve more of the attempted movement (e.g., 50%)
+        car.x = prevX + deltaX * 0.5;
+        car.y = prevY + deltaY * 0.5;
+        // Reduce the velocity only slightly for a smoother glide.
+        car.velocity *= 0.9;
+      }
+            
+      // New: Add tire marks when turning or braking.
+      if (Math.abs(car.steeringAngle) > 0.05 || car.acceleration < 0) {
+        const wheelSeparation = 40; // matches the rear wheel separation in drawWheels()
+        // Compute left rear wheel position.
+        const leftX = car.x + (wheelSeparation/2) * Math.sin(car.angle);
+        const leftY = car.y - (wheelSeparation/2) * Math.cos(car.angle);
+        // Compute right rear wheel position.
+        const rightX = car.x - (wheelSeparation/2) * Math.sin(car.angle);
+        const rightY = car.y + (wheelSeparation/2) * Math.cos(car.angle);
+        tireMarks.push({ x: leftX, y: leftY, angle: car.vAngle, life: 1.5 }); // increased initial life
+        tireMarks.push({ x: rightX, y: rightY, angle: car.vAngle, life: 1.5 });
+      }
+    }
+
+    // =======================
+    // DRAW OBSTACLES FUNCTION
+    // =======================
+    function drawObstacles() {
+      obstacles.forEach(obstacle => {
+        ctx.fillStyle = "grey";
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+      });
+    }
+
+    // =======================
+    // DRAW WHEELS FUNCTION
+    // =======================
+    function drawWheels() {
+      const wheelWidth = 20;
+      const wheelHeight = 8;
+      const wheelSeparation = 40;
+
+      // Rear wheels
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle);
+      ctx.fillStyle = "black";
+      ctx.fillRect(-wheelWidth/2, -wheelSeparation/2 - wheelHeight/2, wheelWidth, wheelHeight);
+      ctx.fillRect(-wheelWidth/2, wheelSeparation/2 - wheelHeight/2, wheelWidth, wheelHeight);
+      ctx.restore();
+
+      // Front wheels (steered)
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle);
+      ctx.translate(car.wheelbase, 0);
+      ctx.fillStyle = "black";
+      ctx.save();
+      ctx.translate(0, -wheelSeparation/2);
+      ctx.rotate(car.steeringAngle);
+      ctx.fillRect(-wheelWidth/2, -wheelHeight/2, wheelWidth, wheelHeight);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(0, wheelSeparation/2);
+      ctx.rotate(car.steeringAngle);
+      ctx.fillRect(-wheelWidth/2, -wheelHeight/2, wheelWidth, wheelHeight);
+      ctx.restore();
+      ctx.restore();
+    }
+
+    // =======================
+    // DRAW FUNCTION
+    // =======================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // New: Draw tire marks before other elements.
+      tireMarks.forEach(mark => {
+        ctx.save();
+        ctx.translate(mark.x, mark.y);
+        ctx.rotate(mark.angle);
+        ctx.globalAlpha = mark.life;
+        ctx.fillStyle = "black";
+        ctx.fillRect(-5, -1, 10, 2);
+        ctx.restore();
+      });
+      // Update and remove faded tire marks.
+      tireMarks = tireMarks.map(mark => ({ ...mark, life: mark.life - 0.005 })) // slower fadew
+                             .filter(mark => mark.life > 0);
+      
+      // Draw obstacles before drawing the car and wheels:
+      drawObstacles();
+      
+      // Draw preview of the current drag obstacle:
+      if (currentDragObstacle) {
+          ctx.save();
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(currentDragObstacle.x, currentDragObstacle.y, currentDragObstacle.width, currentDragObstacle.height);
+          ctx.restore();
+      }
+      
+      // Draw wheels first:
+      drawWheels();
+      
+      // Draw the car image with hue adjustment:
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle + config.drawRotationOffset);
+      // Apply the combined filter:
+      ctx.filter = `hue-rotate(${config.hue}deg) saturate(${config.saturation}%) brightness(${config.brightness}%)`;
+      if (carImage.complete) {
+        ctx.drawImage(
+          carImage,
+          -car.width/2,
+          -car.height/2 - config.steeringPivotOffset,
+          car.width,
+          car.height
+        );
+      } else {
+        ctx.fillStyle = "blue";
+        ctx.fillRect(
+          -car.width/2,
+          -car.height/2 - config.steeringPivotOffset,
+          car.width,
+          car.height
+        );
+      }
+      ctx.restore();
+
+      // Optional: Indicator for the car's front (invisible in this case)
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.angle + config.drawRotationOffset);
+      ctx.fillStyle = "transparent";
+      ctx.fillRect(-5, -car.height/2 - config.steeringPivotOffset, 10, 10);
+      ctx.restore();
+    }
+
+    // =======================
+    // MAIN GAME LOOP
+    // =======================
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    gameLoop();
+  </script>
+</body>
+</html>
