@@ -288,7 +288,7 @@
           distance: 200,
         },
         push: {
-          particles_nb: 4,
+          particles_nb: 0,
         },
       },
     },
@@ -317,7 +317,7 @@
         let multiplier = 1.0;
 
         // House edge factor: players receive 97% of the fair win.
-        const houseEdge = 0.97;
+        const houseEdge = 1;
 
         // Initialize balance from localStorage or default to 100
         let balance = localStorage.getItem('balance');

@@ -16,15 +16,18 @@
 			color: white;
 			text-align: center;
 			overflow-x: hidden;
+      overflow-y: hidden;
 		}
 		.center {
-			position: absolute;
-			width: 100%;
+      position: absolute;
+  left: 50%; /* relative to nearest positioned ancestor or body element */
+  top: 50%; /*  relative to nearest positioned ancestor or body element */
+  transform: translate(-50%, -50%); /* relative to element's height & width */
 		}
 
 		h1 {
 			font-family: orbitron;
-			font-size: 5em;
+			font-size: 5vw;
 			text-shadow: 0px 0px 10px #fff;
 		}
 
@@ -119,7 +122,7 @@
           distance: 200,
         },
         push: {
-          particles_nb: 4,
+          particles_nb: 0,
         },
       },
     },
