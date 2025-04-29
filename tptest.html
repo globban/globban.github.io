@@ -101,9 +101,10 @@
     </div>
     <div class="info" id="ping">Ping: – ms</div>
     <div class="info" id="downloadSize">Downloaded: – MB</div>
+    <div class="info" id="gigabyte">1GB in –</div>
     <button id="startButton">Start test</button>
+   
   </div>
-
 
   <script>
   (function(){
@@ -120,6 +121,7 @@
     const speedValueEl   = document.getElementById('speedValue');
     const pingEl         = document.getElementById('ping');
     const downloadSizeEl = document.getElementById('downloadSize');
+    const gigabyteEl     = document.getElementById('gigabyte');
     const startBtn       = document.getElementById('startButton');
 
     // ---- State ----
@@ -142,6 +144,7 @@
       speedValueEl.textContent   = '–';
       pingEl.textContent         = 'Ping: …';
       downloadSizeEl.textContent = 'Downloaded: 0.00 MB';
+      gigabyteEl.textContent = '1GB in –';
       totalBytes = lastBytes = 0;
       samples = [];
 
@@ -195,6 +198,10 @@
           : 0;
         speedValueEl.textContent = finalAvg.toFixed(2);
         updateGauge(finalAvg / MAX_EXPECTED * 100);
+
+        // Calculate the time to download 1GB
+        const timeToDownloadGB = (8000 / finalAvg);  // Multiply by 1000 to convert Mbps to MB/s, then divide 1024MB by the speed
+        gigabyteEl.textContent = `1GB in ${timeToDownloadGB.toFixed(2)} seconds`;
 
         running = false;
         startBtn.disabled = false;

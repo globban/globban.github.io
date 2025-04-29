@@ -31,10 +31,12 @@
       font-family: sans-serif;
       font-size: 25px;
       display: none;
+      z-index: 1200;
     }
     #colorMenu input[type="range"] {
       width: 80vw;
       height: 6vh;
+      margin: 10px 0;
     }
     #menubutton {
       position: absolute;
@@ -87,6 +89,24 @@
       text-align: center;
       z-index: 1000;
     }
+
+    #speedmenu {
+      position: absolute;
+      top: 1vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1201;
+      font-family: sans-serif;
+      font-size: 25px;
+    }
+
+    #speedmenu input[type="range"] {
+      width: 7em;
+    }
   </style>
 </head>
 <body>
@@ -99,9 +119,12 @@
     <label for="saturationSlider">Saturation:</label>
     <input type="range" id="saturationSlider" min="0" max="200" value="100"><br>
     <label for="brightnessSlider">Brightness:</label>
-    <input type="range" id="brightnessSlider" min="0" max="200" value="100">
+    <input type="range" id="brightnessSlider" min="0" max="200" value="100"><br>
   </div>
-
+  <div id="speedmenu">
+  <label for="SpeedSlider">Speed:</label>
+  <input type="range" id="SpeedSlider" min="1" max="50" value="12">
+</div>
   <canvas id="gameCanvas"></canvas>
 
   <div id="mobile-only" class="touch-only">
@@ -277,6 +300,29 @@
       localStorage.setItem("carBrightness", config.brightness);
     });
 
+    const SpeedSlider = document.getElementById("SpeedSlider");
+const savedSpeed = localStorage.getItem("addspeed"); // Load saved speed value if it exists
+let addspeed = savedSpeed ? parseFloat(savedSpeed) : 0; // Initialize addspeed with saved value, or default to 0
+
+// Update the speed value on input
+SpeedSlider.value = addspeed; // Set the slider to the saved value (or default)
+
+// Event listener to update addspeed and save it in localStorage
+SpeedSlider.addEventListener("input", (e) => {
+  addspeed = parseFloat(e.target.value); // Update the global addspeed value
+
+  // Save the new value in localStorage
+  localStorage.setItem("addspeed", addspeed);
+  console.log("New speed: ", addspeed);
+});
+
+  // Existing code for menu functionality
+  function menu() {
+    const cm = document.getElementById("colorMenu");
+    cm.style.display = cm.style.display === "block" ? "none" : "block";
+  }
+    
+
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#888';
@@ -357,7 +403,7 @@
     function loop(ts) {
       const delta = ts - lastTs;
       lastTs = ts;
-      const speedMult = Math.max(delta / (1000/60), 1); // 1 at 60 FPS, >1 if slower
+      const speedMult = (addspeed / 10); // 1 at 60 FPS, >1 if slower
       update(speedMult);
       checkCollision();
       // wrap
@@ -374,6 +420,8 @@
     car.x = canvas.width/2;
     car.y = canvas.height/2;
     requestAnimationFrame(loop);
+
+    
   </script>
 </body>
 </html>
