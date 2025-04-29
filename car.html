@@ -115,15 +115,15 @@
   </div>
 
   <script>
+    // Input & UI setup
     const leftBtn = document.getElementById("leftBtn");
     const rightBtn = document.getElementById("rightBtn");
-
     const hueSlider = document.getElementById("hueSlider");
     const saturationSlider = document.getElementById("saturationSlider");
     const brightnessSlider = document.getElementById("brightnessSlider");
-
     const keys = {};
 
+    // Touch handlers
     leftBtn.addEventListener("touchstart", e => {
       e.preventDefault();
       keys["ArrowLeft"] = true;
@@ -134,7 +134,6 @@
       e.preventDefault();
       keys["ArrowLeft"] = false;
     });
-
     rightBtn.addEventListener("touchstart", e => {
       e.preventDefault();
       keys["ArrowRight"] = true;
@@ -146,6 +145,28 @@
       keys["ArrowRight"] = false;
     });
 
+    // Color persistence
+    ['Hue','Saturation','Brightness'].forEach(prop => {
+      const key = 'car' + prop;
+      const slider = document.getElementById(prop.toLowerCase() + 'Slider');
+      const saved = localStorage.getItem(key);
+      if (saved !== null) slider.value = saved;
+      slider.addEventListener('input', e => {
+        config[prop.toLowerCase()] = e.target.value;
+        localStorage.setItem(key, e.target.value);
+      });
+    });
+
+    function menu() {
+      const cm = document.getElementById("colorMenu");
+      cm.style.display = cm.style.display === "block" ? "none" : "block";
+    }
+
+    if (!window.matchMedia('(any-hover: hover)').matches && 'ontouchstart' in window) {
+      document.getElementById('mobile-only').style.display = "block";
+    }
+
+    // Game config
     const config = {
       baseCar: { w: 47, h: 100, pivotOffset: 30 },
       baseWheelbase: 57,
@@ -162,6 +183,70 @@
       saturation: 100,
       brightness: 100
     };
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const carImg = new Image();
+    carImg.src = config.carSrc;
+
+    let scale = 1, dpr = 1, obstacles = [];
+
+    function resize() {
+      dpr = devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+
+      // Regenerate obstacles
+      const baseObs = generateRandomObstacles(12);
+      obstacles = baseObs.map(o => ({
+        x: (canvas.width/4) + o.x * scale * dpr,
+        y: (canvas.height/4) + o.y * scale * dpr,
+        width: o.width * scale * dpr,
+        height: o.height * scale * dpr,
+        angle: o.angle
+      }));
+
+      // No more resolution‐based scaling—use base values
+      config.scaledMaxSpeed   = config.maxSpeed;
+      config.scaledAccelFwd   = config.accelFwd;
+      config.scaledAccelBack  = config.accelBack;
+    }
+
+    window.addEventListener('resize', resize);
+
+    const car = { x:0, y:0, angle:Math.PI/2, vAngle:Math.PI/2, velocity:0, steering:0 };
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup',   e => keys[e.key] = false);
+
+    function update(speedMultiplier) {
+      // Auto full‐throttle on mobile
+      if (document.getElementById('mobile-only').style.display === "block") {
+        keys.ArrowUp = true;
+      }
+
+      let accel = 0;
+      if (keys.ArrowUp   || keys.w || keys.W) accel = config.scaledAccelFwd;
+  else if (keys.ArrowDown || keys.s || keys.S) accel = config.scaledAccelBack;
+
+      car.velocity = (car.velocity + accel * speedMultiplier) * config.friction;
+      car.velocity = Math.max(-config.scaledMaxSpeed/2,
+                             Math.min(config.scaledMaxSpeed, car.velocity));
+
+      if (keys.ArrowLeft || keys.A || keys.a)      car.steering -= config.steeringRate * speedMultiplier;
+      else if (keys.ArrowRight || keys.D || keys.d ) car.steering += config.steeringRate * speedMultiplier;
+      else                      car.steering *= 0.5;
+      car.steering = Math.max(-config.maxSteer,
+                              Math.min(config.maxSteer, car.steering));
+
+      car.angle  += (car.velocity / (config.baseWheelbase * scale * dpr))
+                    * Math.tan(car.steering) * speedMultiplier;
+      car.vAngle += (car.angle - car.vAngle) * config.driftFactor;
+      car.x     += car.velocity * Math.cos(car.vAngle) * speedMultiplier;
+      car.y     += car.velocity * Math.sin(car.vAngle) * speedMultiplier;
+    }
 
     const savedHue = localStorage.getItem("carHue");
     if (savedHue !== null) {
@@ -192,192 +277,103 @@
       localStorage.setItem("carBrightness", config.brightness);
     });
 
-    function menu() {
-      const colorMenu = document.getElementById("colorMenu");
-      colorMenu.style.display = colorMenu.style.display === "block" ? "none" : "block";
-    }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#888';
+      obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.width, o.height));
 
-    if (!window.matchMedia('(any-hover: hover)').matches && 'ontouchstart' in window) {
-      document.getElementById('mobile-only').style.display = "block";
-    }
+      if (carImg.complete) {
+        const w = config.baseCar.w * scale * dpr;
+        const h = config.baseCar.h * scale * dpr;
+        const pivot = config.baseCar.pivotOffset * scale * dpr;
 
-    const BASE_RES = { width: 1920, height: 1080 };
-    let scale = 1;
-    let dpr = 1;
-    let obstacles = [];
-    const baseObstacles = [
-      { x:-400, y:-300, w:80, h:80 }, { x:-200, y:-200, w:120, h:50 }, { x:0, y:-350, w:100, h:100 },
-      { x:300, y:-150, w:90, h:60 }, { x:-350, y:100, w:110, h:110 }, { x:-500, y:200, w:100, h:70 },
-      { x:200, y:250, w:80, h:80 }, { x:450, y:0, w:100, h:100 }, { x:-150, y:400, w:90, h:60 },
-      { x:250, y:-100, w:110, h:90 }, { x:-300, y:-450, w:80, h:80 }, { x:50, y:450, w:120, h:70 }
-    ];
+        ctx.save();
+        ctx.translate(car.x, car.y);
+        ctx.rotate(car.angle + Math.PI/2);
+        ctx.filter = `hue-rotate(${config.hue}deg)
+                      saturate(${config.saturation}%)
+                      brightness(${config.brightness}%)`;
+        ctx.drawImage(carImg, -w/2, -h/2 - pivot, w, h);
+        ctx.filter = 'none';
 
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const carImg = new Image(); carImg.src = config.carSrc;
-
-    function resize() {
-  dpr = devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + 'px';
-  canvas.style.height = window.innerHeight + 'px';
-  scale = Math.min(window.innerWidth / BASE_RES.width, window.innerHeight / BASE_RES.height);
-
-  const cx = canvas.width / 4, cy = canvas.height / 4;
-
-  // Scale obstacles appropriately
-  obstacles = generateRandomObstacles(12).map(o => ({
-    x: cx + o.x * scale * dpr,
-    y: cy + o.y * scale * dpr,
-    width: o.width * scale * dpr,
-    height: o.height * scale * dpr,
-    angle: o.angle
-  }));
-
-  config.scaledMaxSpeed = config.maxSpeed * scale * dpr;
-  config.scaledAccelFwd = config.accelFwd * scale * dpr;
-  config.scaledAccelBack = config.accelBack * scale * dpr;
-}
-
-
-    window.addEventListener('resize', resize);
-
-    const car = { x:0, y:0, angle:Math.PI/2, vAngle:Math.PI/2, velocity:0, steering:0 };
-    window.addEventListener('keydown', e => keys[e.key] = true);
-    window.addEventListener('keyup', e => keys[e.key] = false);
-
-    function update() {
-  if (document.getElementById('mobile-only').style.display === "block") {
-    keys.ArrowUp = true;
-  }
-
-  let accel = 0;
-  if (keys.ArrowUp || keys.w || keys.W) accel = config.scaledAccelFwd;
-  else if (keys.ArrowDown || keys.s || keys.S) accel = config.scaledAccelBack;
-
-  car.velocity = (car.velocity + accel) * config.friction;
-  car.velocity = Math.max(-config.scaledMaxSpeed/2, Math.min(config.scaledMaxSpeed, car.velocity));
-
-  if (keys.ArrowLeft || keys.a || keys.A) car.steering -= config.steeringRate;
-  else if (keys.ArrowRight || keys.d || keys.D) car.steering += config.steeringRate;
-  else car.steering *= 0.5;
-  car.steering = Math.max(-config.maxSteer, Math.min(config.maxSteer, car.steering));
-
-  car.angle += (car.velocity / (config.baseWheelbase * scale * dpr)) * Math.tan(car.steering);
-  car.vAngle += (car.angle - car.vAngle) * config.driftFactor;
-
-  car.x += car.velocity * Math.cos(car.vAngle);
-  car.y += car.velocity * Math.sin(car.vAngle);
-
-  checkCollision(); // <-- 💥 Call collision check here
-
-  if (car.x<0) car.x=canvas.width;
-  if (car.x>canvas.width) car.x=0;
-  if (car.y<0) car.y=canvas.height;
-  if (car.y>canvas.height) car.y=0;
-}
-
-
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#888';
-  obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.width, o.height));
-
-  if (carImg.complete) {
-    const w = config.baseCar.w * scale * dpr;
-    const h = config.baseCar.h * scale * dpr;
-    const pivot = config.baseCar.pivotOffset * scale * dpr;
-    ctx.save();
-    ctx.translate(car.x, car.y);
-    ctx.rotate(car.angle + Math.PI/2);
-
-    ctx.filter = `hue-rotate(${config.hue}deg) saturate(${config.saturation}%) brightness(${config.brightness}%)`;
-    ctx.drawImage(carImg, -w/2, -h/2 - pivot, w, h);
-    ctx.filter = 'none';
-
-    // Draw hitbox
-    const hitboxW = w * config.hitboxScale;
-    const hitboxH = h * config.hitboxScale;
-    ctx.strokeStyle = '#00000000';
-    ctx.lineWidth = 3;
-    ctx.globalAlpha = 0.7;
-    ctx.strokeRect(-hitboxW/2, -hitboxH/2 - pivot, hitboxW, hitboxH);
-    ctx.globalAlpha = 1;
-
-    ctx.restore();
-  }
-}
-
-function checkCollision() {
-  const w = config.baseCar.w * scale * dpr * config.hitboxScale;
-  const h = config.baseCar.h * scale * dpr * config.hitboxScale;
-  const pivot = config.baseCar.pivotOffset * scale * dpr;
-
-  // Car corners in world space
-  const sin = Math.sin(car.angle + Math.PI/2);
-  const cos = Math.cos(car.angle + Math.PI/2);
-
-  const carCorners = [
-    { x: car.x + (-w/2) * cos - (-h/2 - pivot) * sin, y: car.y + (-w/2) * sin + (-h/2 - pivot) * cos },
-    { x: car.x + (w/2) * cos - (-h/2 - pivot) * sin, y: car.y + (w/2) * sin + (-h/2 - pivot) * cos },
-    { x: car.x + (w/2) * cos - (h/2 - pivot) * sin, y: car.y + (w/2) * sin + (h/2 - pivot) * cos },
-    { x: car.x + (-w/2) * cos - (h/2 - pivot) * sin, y: car.y + (-w/2) * sin + (h/2 - pivot) * cos }
-  ];
-
-  for (const o of obstacles) {
-    for (const corner of carCorners) {
-      if (
-        corner.x > o.x &&
-        corner.x < o.x + o.width &&
-        corner.y > o.y &&
-        corner.y < o.y + o.height
-      ) {
-        // Hit! Bounce back
-        car.velocity = -car.velocity * 0.3;
-        return;
+        // hitbox (invisible)
+        ctx.globalAlpha = 0.7;
+        ctx.strokeStyle = '#00000000';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-w*config.hitboxScale/2,
+                       -h*config.hitboxScale/2 - pivot,
+                       w*config.hitboxScale,
+                       h*config.hitboxScale);
+        ctx.globalAlpha = 1;
+        ctx.restore();
       }
     }
-  }
-}
 
-function generateRandomObstacles(numObstacles) {
-  const minSize = 50; // Minimum size of obstacles
-  const maxSize = 150; // Maximum size of obstacles
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
+    function checkCollision() {
+      const w = config.baseCar.w * scale * dpr * config.hitboxScale * 0.5;
+      const h = config.baseCar.h * scale * dpr * config.hitboxScale * 0.5;
+      const pivot = config.baseCar.pivotOffset * scale * dpr;
+      const sin = Math.sin(car.angle + Math.PI/2);
+      const cos = Math.cos(car.angle + Math.PI/2);
+      const corners = [
+        { x: car.x + (-w/2)*cos - (-h/2-pivot)*sin,
+          y: car.y + (-w/2)*sin + (-h/2-pivot)*cos },
+        { x: car.x + ( w/2)*cos - (-h/2-pivot)*sin,
+          y: car.y + ( w/2)*sin + (-h/2-pivot)*cos },
+        { x: car.x + ( w/2)*cos - ( h/2-pivot)*sin,
+          y: car.y + ( w/2)*sin + ( h/2-pivot)*cos },
+        { x: car.x + (-w/2)*cos - ( h/2-pivot)*sin,
+          y: car.y + (-w/2)*sin + ( h/2-pivot)*cos }
+      ];
+      for (let o of obstacles) {
+        for (let c of corners) {
+          if (c.x > o.x && c.x < o.x + o.width &&
+              c.y > o.y && c.y < o.y + o.height) {
+            car.velocity = car.velocity * 0.5; // slow down on collision
+            return;
+          }
+        }
+      }
+    }
 
-  const generatedObstacles = [];
+    function generateRandomObstacles(num) {
+      const min = 50, max = 150;
+      const arr = [];
+      for (let i = 0; i < num; i++) {
+        const w = Math.random()*(max-min)+min;
+        const h = Math.random()*(max-min)+min;
+        arr.push({
+          x: Math.random()*(canvas.width-w),
+          y: Math.random()*(canvas.height-h),
+          width: w, height: h,
+          angle: Math.random()*Math.PI*2
+        });
+      }
+      return arr;
+    }
 
-  for (let i = 0; i < numObstacles; i++) {
-    const width = Math.random() * (maxSize - minSize) + minSize;
-    const height = Math.random() * (maxSize - minSize) + minSize;
-
-    // Correct placement of obstacles across the full screen
-    const x = Math.random() * (canvasWidth - width);
-    const y = Math.random() * (canvasHeight - height);
-
-    const angle = Math.random() * Math.PI * 2; // Random angle for the obstacle
-
-    generatedObstacles.push({ x, y, width, height, angle });
-  }
-
-  return generatedObstacles;
-}
-
-
-
-
-    function loop() {
-      update();
+    // === new FPS‐compensated loop ===
+    let lastTs = performance.now();
+    function loop(ts) {
+      const delta = ts - lastTs;
+      lastTs = ts;
+      const speedMult = Math.max(delta / (1000/60), 1); // 1 at 60 FPS, >1 if slower
+      update(speedMult);
+      checkCollision();
+      // wrap
+      if (car.x<0)          car.x = canvas.width;
+      if (car.x>canvas.width) car.x = 0;
+      if (car.y<0)          car.y = canvas.height;
+      if (car.y>canvas.height) car.y = 0;
       draw();
       requestAnimationFrame(loop);
     }
 
+    // start
     resize();
     car.x = canvas.width/2;
     car.y = canvas.height/2;
-    loop();
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
