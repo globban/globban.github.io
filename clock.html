@@ -1,69 +1,216 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-   <title>clock</title>
-   <script>function add_zero(digit) {
-         if (digit < 10) {
-            digit = "0" + digit;
-         }
-         else {
-            digit = digit.toString();
-         }
+  <meta charset="UTF-8" />
+  <title>Clock</title>
+  <style>
+    :root {
+      --bg-color: #e0e0e0;
+      --text-color: #333;
+      --box-shadow-light: #ffffff;
+      --box-shadow-dark: #bebebe;
+      --clock-bg: #e0e0e0;
+      --digit-shadow: #fff;
+    }
 
-         return digit
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    .box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px;
+      margin: 50px auto;
+      max-width: 600px;
+      border-radius: 20px;
+      background: var(--bg-color);
+      box-shadow:
+        10px 10px 20px var(--box-shadow-dark),
+       -10px -10px 20px var(--box-shadow-light);
+      transition: all 0.3s ease;
+    }
+
+    .left {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .digits {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--text-color);
+      text-shadow: 1px 1px 0 var(--digit-shadow);
+    }
+
+    .analog-clock {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--clock-bg);
+      box-shadow:
+        inset 6px 6px 10px var(--box-shadow-dark),
+        inset -6px -6px 10px var(--box-shadow-light);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .hand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 50%;
+      transform: rotate(90deg);
+      border-radius: 2px;
+    }
+
+    .hand.hour {
+      width: 35px;
+      height: 4px;
+      background: #333;
+    }
+
+    .hand.minute {
+      width: 50px;
+      height: 3px;
+      background: #555;
+    }
+
+    .hand.second {
+      width: 60px;
+      height: 2px;
+      background: #e63946;
+    }
+
+    /* Toggle Switch Styles */
+    .switch {
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: relative;
+      cursor: pointer;
+      background-color: #ccc;
+      border-radius: 34px;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      transition: 0.4s;
+      box-shadow:
+        inset 6px 6px 10px var(--box-shadow-dark),
+        inset -6px -6px 10px var(--box-shadow-light);
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #161616;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+  <script>
+    function add_zero(digit) {
+      return digit < 10 ? "0" + digit : digit.toString();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      document.getElementById("time").innerHTML =
+        add_zero(hours) + ":" + add_zero(minutes) + ":" + add_zero(seconds);
+
+      const offset = -now.getTimezoneOffset() / 60;
+      document.getElementById("gmt").innerHTML =
+        `GMT${offset >= 0 ? '+' : ''}${offset}`;
+
+      const dateString = now.toDateString();
+      document.getElementById("calendar").innerHTML = dateString;
+
+      updateAnalogClock(hours, minutes, seconds);
+    }
+
+    function updateAnalogClock(h, m, s) {
+      const hourDeg = ((h % 12) + m / 60) * 30;
+      const minuteDeg = (m + s / 60) * 6;
+      const secondDeg = s * 6;
+
+      document.getElementById("hour-hand").style.transform = `rotate(${hourDeg}deg)`;
+      document.getElementById("minute-hand").style.transform = `rotate(${minuteDeg}deg)`;
+      document.getElementById("second-hand").style.transform = `rotate(${secondDeg}deg)`;
+    }
+
+    function toggleMode() {
+      const isDark = document.getElementById("modeToggle").checked;
+
+      if (isDark) {
+        document.documentElement.style.setProperty('--bg-color', '#2c2c2c');
+        document.documentElement.style.setProperty('--text-color', '#e0e0e0');
+        document.documentElement.style.setProperty('--box-shadow-light', '#3a3a3a');
+        document.documentElement.style.setProperty('--box-shadow-dark', '#1a1a1a');
+        document.documentElement.style.setProperty('--clock-bg', '#2c2c2c');
+        document.documentElement.style.setProperty('--digit-shadow', '#000');
+      } else {
+        document.documentElement.style.setProperty('--bg-color', '#e0e0e0');
+        document.documentElement.style.setProperty('--text-color', '#333');
+        document.documentElement.style.setProperty('--box-shadow-light', '#ffffff');
+        document.documentElement.style.setProperty('--box-shadow-dark', '#bebebe');
+        document.documentElement.style.setProperty('--clock-bg', '#e0e0e0');
+        document.documentElement.style.setProperty('--digit-shadow', '#fff');
       }
+    }
 
-      function clock() {
-         const now = new Date();
-
-         let hours = now.getHours();
-         let minutes = now.getMinutes();
-         let seconds = now.getSeconds();
-
-         document.getElementById("digits").innerHTML = add_zero(hours) + ":" + add_zero(minutes) + ":" + add_zero(seconds);
-      }
-
-      setInterval(clock, 1000);
-
-      function myFunction() {
-         sessionStorage.clear();
-         location.reload();
-      }
-
-   </script>
-   <style>
-      @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
-
-
-
-      #clock {
-         align-items: center;
-         display: flex;
-         height: 100%;
-         width: 100%;
-         justify-content: center;
-         color: white;
-         mix-blend-mode: difference;
-
-         font-family: chakra petch;
-      }
-
-      #digits {
-         font-size: 20vw;
-      }
-
-      body {
-         overflow-y: hidden;
-         background-image: url("https://res.cloudinary.com/dhxkd1vka/image/upload/Screenshot_2025-04-11_192425_qrr0iy.png");
-         background-size: cover;
-         background-position: center;
-      }
-
-   </style>
+    document.addEventListener("DOMContentLoaded", function () {
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+  </script>
 </head>
-
 <body>
-   <div id="clock" onclick="myFunction()">
-      <span id="digits"></span>
-   </div>
+  <div class="box">
+    <div class="left">
+      
+      <div id="calendar" class="digits">Date</div>
+      <div id="time" class="digits">00:00:00</div>
+      <div id="gmt" class="digits">GMT+</div>
+    </div>
+    <label class="switch">
+        <input type="checkbox" id="modeToggle" onchange="toggleMode()">
+        <span class="slider"></span>
+      </label>
+    <div class="analog-clock">
+      <div id="hour-hand" class="hand hour"></div>
+      <div id="minute-hand" class="hand minute"></div>
+      <div id="second-hand" class="hand second"></div>
+    </div>
+  </div>
 </body>
+</html>

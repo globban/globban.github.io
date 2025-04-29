@@ -1,0 +1,38 @@
+body {
+    background: url('windows\ dark.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.box {
+    width: 60em;
+    height: 20em;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.301),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(77, 71, 100, 0.4);
+    background: #3a3842;
+    border-radius: 25px;
+}
+
+.digits {
+    size: fit-content;
+    width: 5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(139, 125, 192);
+    font: 5em arial ;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.301),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(77, 71, 100, 0.4);
+    border-radius: 25px;
+    margin: auto;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+
+}

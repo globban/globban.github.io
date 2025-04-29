@@ -1,0 +1,267 @@
+
+     * {
+        box-sizing: border-box;
+        
+      }
+
+body {
+  padding: 0;
+  margin: 0;
+  background: #2A2832;
+}
+
+      .parent {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        width: 400px;
+        height: 700px;
+        background: #3a3842;
+        border-radius: 15px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        position: relative;
+      }
+
+      a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        background: #3a3842;
+        border-radius: 25px;
+        margin: 15px;
+
+      }
+i {
+  margin-right: 10px;
+  width:25px;
+  height:25px;
+  border: solid #5f66b7;
+  border-width: 0 6px 6px 0;
+  display: inline-block;
+  transition: background 0.1s ease-in-out;
+  
+}
+
+.right {
+  transform: rotate(-45deg);
+}
+
+      .btm {
+        cursor: pointer;
+        box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.2),
+          -10px -10px 20px 5px rgba(77, 71, 100, 0.4),
+          -1px -1px 4px 2px rgba(77, 71, 100, 0.4);
+        transition: background 0.1s ease-in-out;
+      }
+      .btm:hover {
+        background: hsl(250, 10%, 25%);
+      }
+
+
+.btm:active {
+  box-shadow: 5px 5px 10px 2.5px rgba(0, 0, 0, 0.2),
+          -5px -5px 10px 2.5px rgba(77, 71, 100, 0.3),
+          -1px -1px 4px 2px rgba(77, 71, 100, 0.4);
+          background: #3a3842;
+}
+.btm:active i {
+  border: solid #555b96;
+  border-width: 0 6px 6px 0;
+}
+
+ /** --------------------------input-------------------------- **/
+
+input {
+ width: 100px;
+  height: 100px;
+   background: #3a3842;
+   border-radius: 25px;
+   margin: 15px;
+  box-sizing: border-box;
+  text-align:center;
+  border: none;
+  color: #77ca;
+  font-size: 20px;
+  background: #3a3842;
+  box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.2),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(77, 71, 100, 0.4);
+  transition: all 0.3s ease-in-out;
+
+}
+
+input:focus
+ {
+    outline: none;
+   box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.2),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(77, 71, 100, 0.4),
+          5px 5px 10px 2.5px rgba(0, 0, 0, 0.2),
+          -5px -5px 10px 2.5px rgba(77, 71, 100, 0.4),
+          -1px -1px 4px 2px rgba(77, 71, 100, 0.4);
+   
+}
+      /** --------------------------Switch-------------------------- **/
+      .switch {
+        position: relative;
+        width: 100px;
+        height: 55px;
+        margin: 15px;
+        font: 600 15px Arial;
+        border-radius: 25px;
+
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 25px;
+        background: #393741;
+        box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.2),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(77, 71, 100, 0.4);
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+        color: #424250;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "OFF";
+        text-align: center;
+        line-height: 45px;
+        width: 45px;
+        height: 45px;
+        left: 10px;
+        bottom: 5px;
+        background: #3a3842;
+        box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.2),
+          -2px -2px 2px 0px rgba(89, 83, 116, 0.5);
+        border-radius: 20px;
+        transition: 0.4s;
+      }
+      /*----is ON----*/
+
+      input:checked + .slider {
+        background: #5a5e97;
+        box-shadow: inset 5px 5px 8px 1px #43466d,
+          inset -3px -3px 8px 0px #7175b3, inset -2px -2px 2px 1px #686fcc;
+      }
+
+      input:checked + .slider:before {
+        content: "ON";
+        transform: translateX(36px);
+        box-shadow: 2px 2px 2px 1px #43466d,
+          -2px -2px 2px 0px #585d8e;
+       color: #686fcc;
+
+      }
+
+      /** --------------------------Radio-------------------------- **/
+
+.radio {
+        display: block;
+        position: relative;
+        margin: 15px auto;
+        cursor: pointer;
+        font-size: 22px;
+        user-select: none;
+        transform: translate(-10px);
+
+      }
+     .radio input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 35px;
+        width: 35px;
+        border-radius: 9px;
+        background: #3a3842;
+        box-shadow: inset 5px 5px 8px 1px rgba(0, 0, 0, 0.2),6px 6px 15px 3px rgba(48, 46, 54, 1),
+          inset -5px -5px 8px 0px rgba(77, 71, 100, 0.3),
+          inset -1px -2px 2px 0px rgba(104, 97, 133, 0.4),-6px -6px 15px 3px rgba(77, 71, 100, 0.6);
+        
+
+      }
+
+
+      .checkmark:after {
+        content: "";
+        position: absolute;
+        left: 15px;
+        top: 10px;
+        width: 5px;
+        height: 10px;
+        border: solid #686fcc;
+        border-width: 0 4px 4px 0;
+        transform: rotate(45deg);
+        opacity:0;
+        transition: 0.4s;
+
+        
+       }
+
+      input:checked + .checkmark {
+          box-shadow: 6px 6px 15px 3px rgba(48, 46, 54, 1),1px 1px 5px 1px rgba(48, 46, 54, 0.8),
+          -6px -6px 15px 3px rgba(77, 71, 100, 0.6),
+          -1px -1px 2px 1px rgba(77, 71, 100, 0.6);
+        
+      } 
+      .radio input:checked + .checkmark:after {
+        opacity:100;
+      }
+
+     
+
+
+/*---------------------End--------------------*/
+      p {
+        position: absolute;
+        font: 700 20px Arial;
+        color: hsl(252, 8%, 30%);
+        bottom: 30px;
+        margin: 0 auto;
+        background: #3a3842;
+        user-select: none;
+        transition: all 0.5s ease-in-out;
+      }
+
+      p:hover {
+        color: hsl(252, 8%, 50%);
+        text-shadow: 0px 0px 25px rgba(89, 83, 116, 0.5);
+      }
+
+      .line_bar {
+        width: 100%;
+        height: 5px;
+        position: absolute;
+        background: hsl(252, 8%, 30%);
+        bottom: 40px;
+      }
+                           
