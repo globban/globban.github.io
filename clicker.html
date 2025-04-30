@@ -1,132 +1,66 @@
 <html>
-	<head>
-		<title>Clicker</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
-		<script type="module">
-			import initScoreHandler from "./ClickerScore/clicker-score.js";
-			initScoreHandler("clickerButton", "currentScore","highScore");
-		</script>
-		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-	</head>
-	<style>
-	@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-		body {
-			background-color: black;
-			color: white;
-			text-align: center;
-			overflow-x: hidden;
-      overflow-y: hidden;
-		}
-		.center {
-      position: absolute;
-  left: 50%; /* relative to nearest positioned ancestor or body element */
-  top: 50%; /*  relative to nearest positioned ancestor or body element */
-  transform: translate(-50%, -50%); /* relative to element's height & width */
-		}
 
-		h1 {
-			font-family: orbitron;
-			font-size: 5vw;
-			text-shadow: 0px 0px 10px #fff;
-		}
+<head>
+  <title>Clicker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
+  <script type="module">
+    import initScoreHandler from "./ClickerScore/clicker-score.js";
+    initScoreHandler("clickerButton", "currentScore", "highScore");
+  </script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
 
-		button {
-			padding: 0em 4em;
-			transition: all 0.5s;
-		}
+  body {
+    background-color: black;
+    color: white;
+    text-align: center;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
 
-		button:hover {
-			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
-			transition: all 0.5s;
-		}
-			
-		
-	</style>
-	<body>
-		<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer; z-index: 999;"><img src="/arrow-left-solid.svg"></div>
-		<div id="particles-js">
-		<div class="center">
-			<h1>Clicker game</h1>
-			<button id="clickerButton"><h1>Click!</h1></button>
-			<h1>your score: <span id="currentScore"></span></h1> 
-			<h1>Highest score: <span id="highScore"></span></h1> 
-		</div>
-	</body>
-	<script>
-		particlesJS('particles-js', {
-    particles: {
-      number: {
-        value: 100,
-        density: {
-          enable: true,
-          value_area: 800,
-        },
-      },
-      color: {
-        value: '#ffffff',
-      },
-      shape: {
-        type: 'circle',
-      },
-      opacity: {
-        value: 0.5,
-        random: false,
-      },
-      size: {
-        value: 3,
-        random: true,
-      },
-      line_linked: {
-        enable: true,
-        distance: 150,
-        color: '#ffffff',
-        opacity: 0.4,
-        width: 1,
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: 'none',
-        random: false,
-        straight: false,
-        out_mode: 'out',
-      },
-    },
-    interactivity: {
-      detect_on: 'window',
-      events: {
-        onhover: {
-          enable: true,
-          mode: 'grab',
-        },
-        onclick: {
-          enable: true,
-          mode: 'push',
-        },
-      },
-      modes: {
-        grab: {
-          distance: 200,
-          line_linked: {
-            opacity: 1,
-          },
-        },
-        bubble: {
-          distance: 200,
-          size: 10,
-          duration: 2,
-          opacity: 0.8,
-        },
-        repulse: {
-          distance: 200,
-        },
-        push: {
-          particles_nb: 0,
-        },
-      },
-    },
-    retina_detect: true,
-  });
-	</script>
+  .center {
+    position: absolute;
+    left: 50%;
+    /* relative to nearest positioned ancestor or body element */
+    top: 50%;
+    /*  relative to nearest positioned ancestor or body element */
+    transform: translate(-50%, -50%);
+    /* relative to element's height & width */
+  }
+
+  h1 {
+    font-family: orbitron;
+    font-size: 5vw;
+  }
+
+  button {
+    padding: 0em 4em;
+    transition: all 0.5s;
+    background: none;
+    color: white;
+    border: solid 1px white;
+    border-radius: 25px;
+  }
+
+  button:hover {
+    box-shadow: 0px 0px 40px 19px rgb(255, 0, 0);
+    transition: all 0.3s;
+  }
+</style>
+
+<body>
+  <div id="particles-js">
+    <div class="center">
+      <h1>Clicker game</h1>
+      <button id="clickerButton">
+        <h1>Click!</h1>
+      </button>
+      <h1>score: <span id="currentScore"></span></h1>
+      <h1>High score: <span id="highScore"></span></h1>
+    </div>
+</body>
+<script src="/particles.js"></script>
 </html>

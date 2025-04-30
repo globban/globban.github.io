@@ -112,7 +112,6 @@
   <div class="sidebar">
     <a href="/cball.html"><i class="fas fa-gamepad"></i><span>CoreBall</span></a>
     <a href="/Links.html"><i class="fas fa-link"></i><span>Links</span></a>
-    <a href="/EXTRACT.zip" type="download"><i class="fas fa-download"></i><span>Algot.newtab</span></a>
     <a href="/clicker.html"><i class="fas fa-mouse"></i><span>Clicker</span></a>
     <a href="/clock.html"><i class="fas fa-clock"></i><span>Clock</span></a>
     <a href="/car.html"><i class="fas fa-flag-checkered"></i><span>Drift</span></a>
@@ -121,9 +120,11 @@
     <a href="/Webbutton.html"><i class="fas fa-random"></i><span>Random</span></a>
     <a href="/CSGO-Case-Clicker-master/CaseClicker.html"><i class="fas fa-gift"></i><span>CaseClicker</span></a>
     <a href="/5050.html"><i class="fas fa-divide"></i><span>50/50</span></a>
+    <a href="/EXTRACT.zip" type="download"><i class="fas fa-download"></i><span>Algot.newtab</span></a>
   </div>
  <h1>Welcome to Algot's web-workshop</h1>
 </body>
+<script src="/particles.js"></script>
 <script>
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
@@ -145,75 +146,5 @@ function getRandomColor() {
   // Call the function on page load
   document.addEventListener('DOMContentLoaded', applyRandomGradient);
 
-  particlesJS('particles-js', {
-    particles: {
-      number: {
-        value: 100,
-        density: {
-          enable: true,
-          value_area: 800,
-        },
-      },
-      color: {
-        value: '#ffffff',
-      },
-      shape: {
-        type: 'circle',
-      },
-      opacity: {
-        value: 0.5,
-        random: false,
-      },
-      size: {
-        value: 3,
-        random: true,
-      },
-      line_linked: {
-        enable: true,
-        distance: 150,
-        color: '#ffffff',
-        opacity: 0.4,
-        width: 1,
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: 'none',
-        random: false,
-        straight: false,
-        out_mode: 'out',
-      },
-    },
-    interactivity: {
-      detect_on: 'window',
-      events: {
-        onhover: {
-          enable: true,
-          mode: 'repulse',
-        }
-      },
-      modes: {
-        grab: {
-          distance: 200,
-          line_linked: {
-            opacity: 1,
-          },
-        },
-        bubble: {
-          distance: 200,
-          size: 10,
-          duration: 2,
-          opacity: 0.8,
-        },
-        repulse: {
-          distance: 200,
-        },
-        push: {
-          particles_nb: 0,
-        },
-      },
-    },
-    retina_detect: true,
-  });
 </script>
 </html>

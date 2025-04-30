@@ -19,7 +19,7 @@
       height: 100%;
       top: 0;
       left: 0;
-      z-index: -1;
+      z-index: 1;
       background-color: #000000;
     }
 
@@ -27,88 +27,13 @@
 </style>
 
 <body>
-	<div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
 	<div id="particles-js" style="z-index: -1;"></div>
 	<div class="center"></div>
 	<script src="https://minnit.chat/js/embed.js" defer></script><minnit-chat
 		data-chatname="https://organizations.minnit.chat/461028553679790/Main?embed"
 		data-style="width:90%; height:100%;"></minnit-chat>
 	</div>
-	<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 </body>
-<script>
-	particlesJS('particles-js', {
-    particles: {
-      number: {
-        value: 40,
-        density: {
-          enable: true,
-          value_area: 800,
-        },
-      },
-      color: {
-        value: '#ffffff',
-      },
-      shape: {
-        type: 'circle',
-      },
-      opacity: {
-        value: 0.5,
-        random: false,
-      },
-      size: {
-        value: 3,
-        random: true,
-      },
-      line_linked: {
-        enable: true,
-        distance: 150,
-        color: '#ffffff',
-        opacity: 0.4,
-        width: 1,
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: 'none',
-        random: false,
-        straight: false,
-        out_mode: 'out',
-      },
-    },
-    interactivity: {
-      detect_on: 'window',
-      events: {
-        onhover: {
-          enable: true,
-          mode: 'grab',
-        },
-        onclick: {
-          enable: true,
-          mode: 'push',
-        },
-      },
-      modes: {
-        grab: {
-          distance: 200,
-          line_linked: {
-            opacity: 1,
-          },
-        },
-        bubble: {
-          distance: 200,
-          size: 10,
-          duration: 2,
-          opacity: 0.8,
-        },
-        repulse: {
-          distance: 200,
-        },
-        push: {
-          particles_nb: 4,
-        },
-      },
-    },
-    retina_detect: true,
-  });
-</script>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="/particles.js"></script>

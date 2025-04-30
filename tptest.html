@@ -1,112 +1,177 @@
 <!DOCTYPE html>
 <html lang="sv">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Tptest</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0e0e0e;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-    .test-container {
-      text-align: center;
-      padding: 40px;
-      background: #505050;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      max-width: 360px;
-      width: 100%;
-    }
-    h1 {
-      margin: 0 0 24px;
-      font-size: 20px;
-      font-weight: 500;
-      color: #ffffff;
-    }
-    .gauge {
-      position: relative;
-      width: 280px; height: 280px;
-      margin: 0 auto 20px;
-      background: conic-gradient(#4CAF50 0deg, #e0e0e0 0deg);
-      border-radius: 50%;
-      transition: background 0.2s ease-out;
-    }
-    .gauge-inner {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 220px; height: 220px;
-      margin: -110px 0 0 -110px;
-      background: #505050;
-      border-radius: 50%;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    #speedValue {
-      font-size: 64px;
-      font-weight: 600;
-      color: #4CAF50;
-      line-height: 1;
-    }
-    #speedUnit {
-      font-size: 18px;
-      color: #ffffff;
-      margin-top: -8px;
-    }
-    .info {
-      font-size: 16px;
-      color: #ffffff;
-      margin: 8px 0;
-    }
-    #startButton {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #fff;
-      background: #4CAF50;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #startButton:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-    #startButton:hover:not(:disabled) {
-      background: #43a047;
-    }
-  </style>
-
-</head>
-<body>
-  <div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer;"><img src="/arrow-left-solid.svg"></div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Tptest</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #3f3f3f;
+        transform-origin: center top;
+        transition: transform 0.3s ease;
+      }
   
-  <div class="test-container">
-    <h1>Tptest</h1>
-    <div class="gauge" id="gauge">
-      <div class="gauge-inner">
-        <div id="speedValue">–</div>
-        <div id="speedUnit">Mbps</div>
+      .zoom-controls {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+      }
+  
+      .zoom-button {
+        padding: 10px 15px;
+        font-size: 20px;
+        border: none;
+        border-radius: 12px;
+        background: #505050;
+        color: #fff;
+        cursor: pointer;
+        box-shadow:
+          6px 6px 10px #3b3b3b,
+          -6px -6px 10px #656565;
+        transition: all 0.2s ease;
+      }
+  
+      .zoom-button:hover {
+        box-shadow:
+          inset 4px 4px 8px #3b3b3b,
+          inset -4px -4px 8px #656565;
+        color: #4CAF50;
+      }
+  
+      .test-container {
+        text-align: center;
+        padding: 40px;
+        background: #505050;
+        border-radius: 20px;
+        max-width: 360px;
+        width: 100%;
+        box-shadow:
+          inset 4px 4px 8px #3b3b3b,
+          inset -4px -4px 8px #656565;
+        
+      }
+  
+      h1 {
+        margin: 0 0 24px;
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffffff;
+      }
+  
+      .gauge {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        margin: 0 auto 20px;
+        background: conic-gradient(#4CAF50 0deg, #e0e0e0 0deg);
+        border-radius: 50%;
+        transition: background 0.2s ease-out;
+      }
+  
+      .gauge-inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 220px;
+        height: 220px;
+        margin: -110px 0 0 -110px;
+        background: #505050;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          inset 6px 6px 12px #3a3a3a,
+          inset -6px -6px 12px #606060;
+      }
+  
+      #speedValue {
+        font-size: 64px;
+        font-weight: 600;
+        color: #4CAF50;
+        line-height: 1;
+      }
+  
+      #speedUnit {
+        font-size: 18px;
+        color: #ffffff;
+        margin-top: -8px;
+      }
+  
+      .info {
+        font-size: 16px;
+        color: #ffffff;
+        margin: 8px 0;
+      }
+  
+      #startButton {
+        margin-top: 20px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #ffffff;
+        background: #505050;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow:
+          6px 6px 10px #3b3b3b,
+          -6px -6px 10px #656565;
+        transition: all 0.2s ease;
+      }
+  
+      #startButton:hover:not(:disabled) {
+        box-shadow:
+          inset 4px 4px 8px #3b3b3b,
+          inset -4px -4px 8px #656565;
+        color: #4CAF50;
+      }
+  
+      #startButton:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+  
+      #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        background-color: #000000;
+      }
+    </style>
+  </head>
+  <body>
+  
+    <div class="test-container">
+      <h1>Tptest</h1>
+      <div class="gauge" id="gauge">
+        <div class="gauge-inner">
+          <div id="speedValue">–</div>
+          <div id="speedUnit">Mbps</div>
+        </div>
       </div>
+      <div class="info" id="ping">Ping: – ms</div>
+      <div class="info" id="downloadSize">Downloaded: – MB</div>
+      <div class="info" id="gigabyte">1GB in –</div>
+      <button id="startButton">Start test</button>
     </div>
-    <div class="info" id="ping">Ping: – ms</div>
-    <div class="info" id="downloadSize">Downloaded: – MB</div>
-    <div class="info" id="gigabyte">1GB in –</div>
-    <button id="startButton">Start test</button>
-   
-  </div>
-
+  
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="particles.js"></script>
   <script>
+
   (function(){
     // ---- Config ----
     const DURATION     = 15_000;

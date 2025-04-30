@@ -35,85 +35,13 @@
   </style>
 </head>
 <body>
+  <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2em; color: white; z-index: 0;">Loading...</div>
   <div id="particles-js"></div>
-  <iframe id="iframehtml5" width="100%" height="680px" src="https://www.monkey-type.org/games/coreballiframe"
+  <iframe id="iframehtml5" width="100%" height="680px" style="z-index: 1;" src="https://www.monkey-type.org/games/coreballiframe"
   frameborder="0" scrolling="no" class="iframe-default" allowfullscreen="false"></iframe>
-  <div onclick="history.back()" style="height: 3em; width: 3em; position: absolute; left: 1em; top: 1em; cursor: pointer; z-index: 1;"><img src="/arrow-left-solid.svg"></div>
-</body>
-<script>
-  particlesJS('particles-js', {
-    particles: {
-      number: {
-        value: 100,
-        density: {
-          enable: true,
-          value_area: 800,
-        },
-      },
-      color: {
-        value: '#ffffff',
-      },
-      shape: {
-        type: 'circle',
-      },
-      opacity: {
-        value: 0.5,
-        random: false,
-      },
-      size: {
-        value: 3,
-        random: true,
-      },
-      line_linked: {
-        enable: true,
-        distance: 150,
-        color: '#ffffff',
-        opacity: 0.4,
-        width: 1,
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: 'none',
-        random: false,
-        straight: false,
-        out_mode: 'out',
-      },
-    },
-    interactivity: {
-      detect_on: 'canvas',
-      events: {
-        onhover: {
-          enable: true,
-          mode: 'grab',
-        },
-        onclick: {
-          enable: true,
-          mode: 'push',
-        },
-      },
-      modes: {
-        grab: {
-          distance: 200,
-          line_linked: {
-            opacity: 1,
-          },
-        },
-        bubble: {
-          distance: 200,
-          size: 10,
-          duration: 2,
-          opacity: 0.8,
-        },
-        repulse: {
-          distance: 200,
-        },
-        push: {
-          particles_nb: 4,
-        },
-      },
-    },
-    retina_detect: true,
-  });
-</script>
+  </body>
+<script src="/particles.js" ></script>
+
+
+
 </html>

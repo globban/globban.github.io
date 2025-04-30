@@ -39,19 +39,19 @@
 	border-style: ridge;
 }
 
-/* RGB gradient bar */
-.toprgb {
-    height: 4px;
-    width: 100vw;
-    background: var(--text-color);
-	position: sticky;
-	top: 4.6em;
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* Text blur effect */
 .blur {
     filter: blur(8px);
 }
+
+
 
 /* Headings */
 h1 {
