@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <meta charset="UTF-8" />
   <title>Algot's web-workshop</title>
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -101,12 +101,27 @@
     .sidebar:hover a span {
       display: inline-block;
     }
+
+    button#installBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 1000; /* Ensure button is above other elements */
+    }
     
     
   </style>
 </head>
 <body>
   <div id="particles-js"></div>
+  <button id="installBtn" style="display: none;">Download App</button>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -114,18 +129,65 @@
     <a href="/Links.html"><i class="fas fa-link"></i><span>Links</span></a>
     <a href="/clicker.html"><i class="fas fa-mouse"></i><span>Clicker</span></a>
     <a href="/clock.html"><i class="fas fa-clock"></i><span>Clock</span></a>
-    <a href="/car.html"><i class="fas fa-flag-checkered"></i><span>Drift</span></a>
+    <a href="/car.html"><i class="fas fa-flag-checkered"></i><span>Polytrack</span></a>
     <a href="/visits.html"><i class="fas fa-comments"></i><span>Chat</span></a>
     <a href="/tptest.html"><i class="fas fa-tachometer-alt"></i><span>Speed</span></a>
     <a href="/Webbutton.html"><i class="fas fa-random"></i><span>Random</span></a>
+    <a href="/roulette.html"><i class="fas fa-ring"></i><span>Roulette</span></a>
     <a href="/CSGO-Case-Clicker-master/CaseClicker.html"><i class="fas fa-gift"></i><span>CaseClicker</span></a>
     <a href="/5050.html"><i class="fas fa-divide"></i><span>50/50</span></a>
+
     <a href="/EXTRACT.zip" type="download"><i class="fas fa-download"></i><span>Algot.newtab</span></a>
   </div>
  <h1>Welcome to Algot's web-workshop</h1>
 </body>
 <script src="/particles.js"></script>
 <script>
+  const installBtn = document.getElementById('installBtn');
+
+// Detect if app is already installed
+const isInStandaloneMode = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true; // For iOS Safari
+
+if (isInStandaloneMode()) {
+  installBtn.style.display = 'none';
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.error('Service Worker registration failed:', err));
+}
+
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent auto prompt
+  e.preventDefault();
+  deferredPrompt = e;
+
+  if (!isInStandaloneMode()) {
+    installBtn.style.display = 'block';
+  }
+
+  installBtn.addEventListener('click', () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('App installed');
+      } else {
+        console.log('App not installed');
+      }
+      deferredPrompt = null;
+    });
+  });
+});
+
+
+
+
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
     let color = '#';
