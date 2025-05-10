@@ -806,10 +806,31 @@
 	margin-top: -25px;
 }
 /*chip end*/
+
+@media screen and (orientation: portrait) {
+      body::before {
+        content: "Please rotate your device to landscape mode.";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgb(0, 0, 0);
+        color: white;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        text-align: center;
+        padding: 1em;
+		overflow: hidden;
+      }
+    }
   </style>
 </head>
 <body>
+
   <script>
+
+
    let bankValue = 1000;
 let currentBet = 0;
 let wager = 5;

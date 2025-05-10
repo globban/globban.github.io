@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Slot Machine</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 50px;
+      overflow: hidden;
+    }
+
+    .slot-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .reel {
+      width: 80px;
+      height: 80px;
+      overflow: hidden;
+      border: 3px solid #fff;
+      border-radius: 10px;
+      background: #222;
+      position: relative;
+    }
+
+    .symbols {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      transition: transform 1.5s ease-out;
+    }
+
+    .symbol {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border: none;
+      background: #0f0;
+      color: #000;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+
+    #result {
+      font-size: 1.5rem;
+      margin-top: 20px;
+    }
+
+    .win {
+      color: #0f0;
+      text-shadow: 0 0 10px #0f0;
+      animation: winFlash 1s ease-in-out infinite;
+    }
+
+    @keyframes winFlash {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    #balance {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+
+    #waitMessage {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: #ff0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎰 Slot Machine 🎰</h1>
+
+  <div id="balance">🪙</div>
+
+  <div class="slot-container">
+    <div class="reel" id="reel1"><div class="symbols"></div></div>
+    <div class="reel" id="reel2"><div class="symbols"></div></div>
+    <div class="reel" id="reel3"><div class="symbols"></div></div>
+  </div>
+
+  <input type="number" id="betAmount" placeholder="Enter Bet" min="1" max="100">
+  <button onclick="spin()">Spin</button>
+  <button id="getCoinButton" onclick="getCoin()">Get 1 Coin</button>
+
+  <p id="result"></p>
+  <p id="waitMessage"></p>
+
+  <script>
+    const symbols = ["🍒", "🍋", "🍊", "🍉", "⭐", "🔔"];
+    const reels = [
+      document.querySelector('#reel1 .symbols'),
+      document.querySelector('#reel2 .symbols'),
+      document.querySelector('#reel3 .symbols')
+    ];
+    const resultText = document.getElementById('result');
+    const balanceText = document.getElementById('balance');
+    const waitMessage = document.getElementById('waitMessage');
+
+    // Load balance from localStorage or set to 100 if not available
+    let balance = localStorage.getItem('balance') ? parseInt(localStorage.getItem('balance')) : 100;
+    let lastBankruptTime = localStorage.getItem('lastBankruptTime') ? parseInt(localStorage.getItem('lastBankruptTime')) : 0;
+
+    // Display the current balance
+    balanceText.textContent = `${balance} 🪙`;
+
+    // Check if the player is in the waiting period (30 seconds)
+    function checkBankruptcy() {
+      const currentTime = Date.now();
+      if (balance <= 0) {
+        // Check if the player is in the waiting period
+        if (currentTime - lastBankruptTime < 30000) {
+          // Display wait message
+          waitMessage.textContent = `You are bankrupt. Please wait ${(30 - Math.floor((currentTime - lastBankruptTime) / 1000))} seconds.`;
+          return false;
+        } else if (currentTime - lastBankruptTime >= 30000) {
+          // After 30 seconds, allow the player to spin again but with no reset
+          waitMessage.textContent = "You are still bankrupt. Please add more coins to continue.";
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function getCoin() {
+  balance += 1; // Add 1 coin to the balance
+  balanceText.textContent = `${balance} 🪙`; // Update the balance display
+  localStorage.setItem('balance', balance); // Save the updated balance to localStorage
+}
+
+    function createReelStrip(endSymbol) {
+      const strip = [];
+      for (let i = 0; i < 10; i++) {
+        const sym = Math.random() < 0.5 ? endSymbol : symbols[Math.floor(Math.random() * symbols.length)];
+        strip.push(sym);
+      }
+      strip.push(endSymbol); // final visible symbol
+      return strip;
+    }
+
+    async function spin() {
+      // Check if the player is bankrupt and needs to wait
+      if (!checkBankruptcy()) {
+        return;
+      }
+
+      const betAmount = parseInt(document.getElementById('betAmount').value);
+
+      if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
+        resultText.textContent = "Invalid bet or insufficient coins!";
+        return;
+      }
+
+      // Deduct the bet from balance
+      balance -= betAmount;
+      balanceText.textContent = `${balance} 🪙`;
+
+      // Save updated balance to localStorage
+      localStorage.setItem('balance', balance);
+
+      resultText.textContent = "Spinning...";
+      resultText.classList.remove("win");
+
+      const finalSymbols = [];
+
+      reels.forEach((reel, i) => {
+        reel.innerHTML = "";
+
+        const endSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+        finalSymbols.push(endSymbol);
+
+        const strip = createReelStrip(endSymbol);
+        strip.forEach(sym => {
+          const div = document.createElement("div");
+          div.className = "symbol";
+          div.textContent = sym;
+          reel.appendChild(div);
+        });
+
+        // Reset to top
+        reel.style.transform = "translateY(0)";
+      });
+
+      // Animate each reel with a delay for a realistic effect
+      reels.forEach((reel, i) => {
+        const totalHeight = reel.children.length * 80;
+        setTimeout(() => {
+          reel.style.transition = "transform 1.5s ease-out";
+          reel.style.transform = `translateY(-${totalHeight - 80}px)`;
+        }, i * 300); // stagger delay for a more realistic feel
+      });
+
+      // Check win after all reels stop
+      setTimeout(() => {
+        const symbolCount = {};
+        finalSymbols.forEach(symbol => symbolCount[symbol] = (symbolCount[symbol] || 0) + 1);
+
+        if (finalSymbols.every(sym => sym === finalSymbols[0])) {
+          // All symbols are the same
+          resultText.textContent = "🎉 JACKPOT! 🎉";
+          resultText.classList.add("win");
+          balance += betAmount * 10; // Jackpot win gives 10x the bet amount
+        } else if (Object.values(symbolCount).includes(2)) {
+          // Two symbols are the same
+          resultText.textContent = "🎉 2 Symbols Match! 🎉";
+          balance += Math.floor(betAmount * 1.5); // 2 matching symbols give 1.5x the bet amount, rounded down
+        } else {
+          resultText.textContent = "Try again!";
+        }
+
+        balanceText.textContent = `${balance} 🪙`;
+
+        // Save updated balance to localStorage
+        localStorage.setItem('balance', balance);
+      }, 2200 + reels.length * 300); // Total delay after spinning
+    }
+
+    function simulateSpins(spins) {
+      let wins = 0;
+      let losses = 0;
+
+      for (let i = 0; i < spins; i++) {
+        const finalSymbols = [];
+        for (let j = 0; j < 3; j++) {
+          const endSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+          finalSymbols.push(endSymbol);
+        }
+
+        const symbolCount = {};
+        finalSymbols.forEach(symbol => symbolCount[symbol] = (symbolCount[symbol] || 0) + 1);
+
+        if (finalSymbols.every(sym => sym === finalSymbols[0])) {
+          // Jackpot
+          wins++;
+        } else if (Object.values(symbolCount).includes(2)) {
+          // Two symbols match
+          wins++;
+        } else {
+          losses++;
+        }
+      }
+
+      console.log(`Wins: ${wins}, Losses: ${losses}, Win Rate: ${(wins / spins) * 100}%`);
+    }
+
+    simulateSpins(10000); // Simulate 10,000 spins
+  </script>
+
+</body>
+</html>
