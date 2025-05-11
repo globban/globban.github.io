@@ -140,8 +140,18 @@
     </ul>
   </div>
 
+  <!-- Toggle button for Liked Photos Selector -->
+  <button id="toggleLikedPhotosSelectorBtn" style="position:fixed;bottom:76px;left:20px;z-index:11;font-size:1.5em;background:#222222;color:#fff;border:none;border-radius:8px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+    <i class="fas fa-images"></i>
+  </button>
+
+  <!-- Add the upload button and file input next to the liked photos selector -->
+
   <!-- Liked Photos Selector -->
-  <div id="likedPhotosSelector" style="position:fixed;bottom:20px;left:20px;z-index:10;display:flex;gap:10px;"></div>
+  <div id="likedPhotosSelector" style="position:fixed;bottom:20px;left:20px;z-index:10;display:flex;gap:10px;display:none;"></div>
+
+  <!-- Hidden file input for custom image upload -->
+  <input type="file" id="customImageInput" accept="image/*" style="display:none" />
 
   <script>
     function toggleMenu() {
@@ -195,7 +205,6 @@
 
       // Always show the ... button
       const moreImg = document.createElement('img');
-      // SVG data URI for three horizontal dots
       moreImg.src = 'data:image/svg+xml;utf8,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="16" r="3" fill="white"/><circle cx="16" cy="16" r="3" fill="white"/><circle cx="24" cy="16" r="3" fill="white"/></svg>';
       moreImg.alt = 'More';
       moreImg.title = 'Go to Pexels page';
@@ -212,6 +221,27 @@
         window.open('pexels.html', '_blank');
       };
       selector.appendChild(moreImg);
+
+      // Show the upload icon as a FontAwesome icon in the menu
+      const uploadBtn = document.createElement('button');
+      uploadBtn.type = 'button';
+      uploadBtn.title = 'Upload your own image';
+      uploadBtn.style.width = '48px';
+      uploadBtn.style.height = '48px';
+      uploadBtn.style.display = 'flex';
+      uploadBtn.style.alignItems = 'center';
+      uploadBtn.style.justifyContent = 'center';
+      uploadBtn.style.background = '#222';
+      uploadBtn.style.border = '2px solid #888';
+      uploadBtn.style.borderRadius = '8px';
+      uploadBtn.style.marginLeft = '4px';
+      uploadBtn.style.cursor = 'pointer';
+      uploadBtn.innerHTML = '<i class="fas fa-upload" style="color:white;font-size:1.5em;"></i>';
+      uploadBtn.onclick = function(e) {
+        e.stopPropagation();
+        document.getElementById('customImageInput').click();
+      };
+      selector.appendChild(uploadBtn);
     }
 
     // Store the selected photo src in localStorage
@@ -238,6 +268,36 @@
         setSelectedPhotoSrc(randomPhoto.src);
       }
     }
+
+    // Toggle the visibility of the liked photos selector or go to /pexels.html if no liked photos
+    document.getElementById('toggleLikedPhotosSelectorBtn').onclick = function() {
+      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
+      const selector = document.getElementById('likedPhotosSelector');
+      if (likedPhotos.length === 0) {
+        window.location.href = 'pexels.html';
+      } else {
+        selector.style.display = (selector.style.display === 'none' || selector.style.display === '') ? 'flex' : 'none';
+      }
+    };
+
+    // Handle file selection
+    document.getElementById('customImageInput').onchange = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Save the uploaded image as a "liked photo" with a special marker
+        const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
+        likedPhotos.push({ src: e.target.result, photographer: "You" });
+        localStorage.setItem('likedPhotos', JSON.stringify(likedPhotos));
+        setSelectedPhotoSrc(e.target.result);
+        setBackgroundFromSelected();
+        renderLikedPhotosSelector();
+      };
+      reader.readAsDataURL(file);
+      // Reset input so the same file can be uploaded again if desired
+      event.target.value = '';
+    };
 
     // Dummy init() function (update as needed)
     function init() {

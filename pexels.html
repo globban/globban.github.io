@@ -93,9 +93,9 @@
   </div>
   <p id="loading">Loading...</p>
   <p id="credit"></p>
-  <button id="toggleLikedBtn" onclick="toggleLikedPhotos()">Show Liked Photos</button>
+  <button id="toggleLikedBtn" onclick="toggleLikedPhotos()">Show Saved Photos</button>
   <div id="likedPhotos">
-    <h3>Liked Photos</h3>
+    <h3>Saved Images</h3>
     <div id="likedPhotosContainer"></div>
   </div>
 
@@ -180,10 +180,10 @@
     const btn = document.getElementById('toggleLikedBtn');
     if (container.style.display === 'block') {
       container.style.display = 'none';
-      btn.textContent = 'Show Liked Photos';
+      btn.textContent = 'Show Saved Photos';
     } else {
       container.style.display = 'block';
-      btn.textContent = 'Hide Liked Photos';
+      btn.textContent = 'Hide Saved Photos';
     }
   }
 
@@ -216,8 +216,8 @@
 
       // Create Like button as an icon (using a heart emoji)
       const likeBtn = document.createElement('button');
-      likeBtn.innerHTML = '❤️'; // heart icon
-      likeBtn.title = 'Like this photo';
+      likeBtn.innerHTML = 'Save'; // heart icon
+      likeBtn.title = 'Like this photo?';
       likeBtn.onclick = function() {
         likePhoto(randomPhoto);
       };
