@@ -6,16 +6,16 @@
   <title>Newtab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
-  <!-- Import fonts: Press Start 2P from Google and LCD from cdnfonts -->
+  <!-- Import fonts -->
   <style>
     @import url('https://fonts.cdnfonts.com/css/lcd');
     @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+    
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
@@ -30,730 +30,219 @@
       overflow: hidden;
       background-color: #000000;
     }
-
-    .center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
+    
     .container {
       position: absolute;
       left: 20px;
       bottom: 100px;
-      background-color: rgba(110, 110, 110, 0.68);
+      background-color: rgba(0, 0, 0, 0.68);
       border-radius: 1em;
       height: 60vh;
-      overflow: scroll;
-      overflow-x: hidden;
+      overflow-y: scroll;
       padding: 1em;
       font-size: 1vh;
+      text-align: center;
     }
-
-    ::-webkit-scrollbar {
-      width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey; 
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.658);
-  border-radius: 10px;
-}
+    
     input[type="text"] {
       padding: 1em 15em 1em 1em;
-      background-color: rgb(255, 255, 255);
-      box-shadow: none;
-      border-width: 1px;
+      background-color: #fff;
       font-size: 1em;
       border-radius: 50px;
       margin: 0.4rem;
       position: absolute;
       transform: translate(-14.1em, 10em);
-    }
-
-    .toprgb {
-  background: linear-gradient(
-    90deg,
-    var(--gradient-start, #000000),
-    var(--gradient-middle, #000000),
-    var(--gradient-end, #000000),
-    var(--gradient-start, #000000)
-  );
-  background-size: 200%;
-  animation-name: rgb;
-  animation-duration: 5s;
-  animation-fill-mode: forwards;
-  height: 4px;
-  width: 100vw;
-  animation-iteration-count: infinite;
-}
-    @keyframes rgb {
-      0% {
-        background-position-x: 0%;
-      }
-      100% {
-        background-position-x: 200%;
-      }
-    }
-
-    #clock {
-      font-size: 6vw;
-      /* When using LCD, set font-family accordingly */
-      font-family: "Press Start 2P", "LCD", sans-serif;
-      color: var(--clock-color, #ffffff);
-      text-shadow: 0 0 10px var(--glow-color, #ffffff),
-        0 0 20px var(--glow-color, #ffffff),
-        0 0 30px var(--glow-color, #ffffff),
-        0 0 40px var(--glow-color, #ffffff),
-        0 0 50px var(--glow-color, #ffffff),
-        0 0 60px var(--glow-color, #ffffff),
-        0 0 70px var(--glow-color, #ffffff);
-      cursor: grab;
-      user-select: none;
-      position: absolute;
-    }
-
-    .blur {
-      filter: blur(8px);
-      padding-top: 1em;
-    }
-
-    button {
-      box-shadow: none;
-      background-color: rgb(255, 255, 255);
-      color: rgb(0, 0, 0);
+      outline: none;
       border: none;
+    }
+    
+    .google-apps-btn {
+      display: grid;
+      grid-template-columns: repeat(3, 10px);
+      grid-template-rows: repeat(3, 10px);
+      gap: 5px;
       cursor: pointer;
-
-    }
-
-    h1 {
-      font-size: 2rem;
-      color: #ffffff;
-    }
-
-    #calendarContainer {
-      display: none;
       position: absolute;
-      /* Remove transform once dragging begins */
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 1em;
-      border-radius: 10px;
-      color: white;
-      cursor: grab;
-      user-select: none;
+      top: 30px;
+      right: 30px;
     }
-
-    #calendar td.current-day {
-      background-color: white;
-      color: black;
-      user-select: none;
+    
+    .dot {
+      width: 7px;
+      height: 7px;
+      background-color: #fff;
+      border-radius: 50%;
+      border: 2px solid #000;
     }
-
-    #hour {
-  color: var(--hour-color, #ffffff); /* Default red */
-}
-
-#minute {
-  color: var(--minute-color, #ff00d4); /* Default green */
-}
-
-#trianglify {
-  display: none;
-  
-}
-
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #000000;
-}
-
-.container {
-    text-align: center;
-}
-
-.google-apps-btn {
-    display: grid;
-    grid-template-columns: repeat(3, 10px);
-    grid-template-rows: repeat(3, 10px);
-    gap: 5px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    top: 2vh;
-    right: 2vw;
-    position:absolute;
-}
-
-.dot {
-    width: 7px;
-    height: 7px;
-    background-color: white;
-    border-radius: 50%;
-    border-color: #000000;
-    border-width: 2px;
-    background:var(--dot) ;
-}
-
-.apps-menu {
-    display: none;
-    background-color: rgba(77, 77, 77, 0.39);
-    border: 1px solid #000000;
-    padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: absolute;
-    top: 7vh;
-    right: 2vw;
-    border-radius: 1em;
-}
-
-.apps-menu ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.apps-menu ul li {
-    padding: 8px 0;
-}
-
-:root {
-  --dot:#ffffff ;
-}
-
-.apps-menu ul li a {
-    text-decoration: none;
-    color: #ffffff;
-}
-
-.apps-menu ul li a:hover {
-    text-decoration: underline;
-}
-
-
+    
+    .apps-menu {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.39);
+      border: 1px solid #000;
+      padding: 10px;
+      position: absolute;
+      top: 7vh;
+      right: 2vw;
+      border-radius: 1em;
+    }
+    
+    .apps-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .apps-menu ul li {
+      padding: 8px 0;
+    }
+    
+    .apps-menu ul li a {
+      text-decoration: none;
+      color: #fff;
+    }
+    
+    .apps-menu ul li a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
-<body onload="init()">
-  <div class="toprgb" style="position: absolute; top: 0;"></div>
-  <div class="blur toprgb" style="position: absolute; top: -10px;"></div>
-
-  <div id="clock"  style="font-weight: 300; display: none;">
-    <span id="hour" style="color: #ffffff;">00</span>:<span id="minute" style="color: #ffffff; ">00</span>
+<body onload="init(); renderLikedPhotosSelector(); setBackgroundFromSelected();">
+  <div id="clock" style="display: none;">
+    <span id="hour">00</span>:<span id="minute">00</span>
   </div>
-
-  <div id="myDIV" style="display: none;">
-    <div class="container">
-      <h1>Background</h1>
-      <input type="file" id="uploadImage" accept="image/*" aria-label="Upload background image" />
-      <h1>Neon Gradient</h1>
-      <input type="color" id="startColor" aria-label="Select start color" />
-      <input type="color" id="thirdColor" aria-label="Select third gradient color" />
-      <input type="color" id="endColor" aria-label="Select end color" />
-      <button id="toggleTopRGB" aria-label="Toggle top gradient" style="position: relative;">Toggle Top RGB</button>
-      <h1>Colon Color</h1>
-      <input type="color" id="clockColor" aria-label="Select clock color" />
-      <h1>Hour Color</h1>
-<input type="color" id="hourColor" aria-label="Select hour color" />
-
-<h1>Minute Color</h1>
-<input type="color" id="minuteColor" aria-label="Select minute color" />
-
-      <h1>Clock Glow Color</h1>
-      <input type="color" id="glowColor" aria-label="Select glow color" />
-      <h1>Glow Alpha</h1>
-      <input type="range" id="glowAlpha" min="0" max="1" step="0.01" value="1" aria-label="Select glow opacity" />
-      <h1>Clock Font</h1>
-      <select id="clockFont">
-        <option value="Roboto">Roboto</option>
-        <option value="Courier Prime">Courier Prime</option>
-        <option value="Lobster">Lobster</option>
-        <option value="Oswald">Oswald</option>
-        <option value="Bangers">Bangers</option>
-        <option value="Pacifico">Pacifico</option>
-        <option value="Monospace">Monospace</option>
-        <option value="LCD">LCD</option>
-      </select>
-      <h1>Calendar</h1>
-      <button onclick="toggleCalendar(), renderCalendar()" aria-label="Toggle calendar">Toggle Calendar</button>
-      <h1>Clock Size</h1>
-      <input type="range" id="clockSizeInput" min="0" max="20" value="6" step="0.1" />
-      <h1>Calendar Size</h1>
-      <input type="range" id="calendarSizeInput" min="0.2" max="5" step="0.1" value="1">
-      <h1>Apps button</h1>
-      <input type="color" id="dots" aria-label="dots" />
-      <h1>Reset</h1>
-      <button onclick="reset()">RESET</button>
-    </div>
-  </div>
-
-  <div id="calendarContainer" style="width: fit-content;">
-    <h1>Calendar</h1>
-    <div id="calendar"></div>
-  </div>
-
-
-  <form action="https://www.google.com/search" class="searchform" method="get" name="searchform" target="_self">
+  
+  <form action="https://www.google.com/search" class="searchform" method="get" target="_self">
     <input type="hidden">
-    <input autocomplete="off" class="form-control search" name="q" placeholder="Search" required="required"  type="text" autofocus
-    style="border: #000000; box-shadow: 3px 3px 3px grey; outline: none;">
-    </form>
+    <input class="form-control search" name="q" placeholder="Search" required type="text" autofocuss autocomplete="off" />
+  </form>
+  
+  <div class="google-apps-btn" onclick="toggleMenu()">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+  <div id="appsMenu" class="apps-menu">
+    <ul>
+      <li><a href="https://mail.google.com/"><i class="fas fa-envelope"></i> Gmail</a></li>
+      <li><a href="https://www.youtube.com/"><i class="fab fa-youtube"></i> YouTube</a></li>
+      <li><a href="https://drive.google.com/"><i class="fab fa-google-drive"></i> Drive</a></li>
+      <li><a href="https://www.google.com/maps"><i class="fas fa-map-marker-alt"></i> Maps</a></li>
+      <li><a href="https://docs.google.com/"><i class="fas fa-file-alt"></i> Docs</a></li>
+      <li><a href="https://classroom.google.com/"><i class="fas fa-chalkboard-teacher"></i> Classroom</a></li>
+      <li><a href="https://slides.google.com/"><i class="fas fa-file-powerpoint"></i> Slides</a></li>
+      <li><a href="https://algot.fun"><i class="fas fa-code"></i> Algot.fun</a></li>
+      <li><a href="https://chatgpt.com/"><i class="fas fa-comments"></i> ChatGPT</a></li>
+    </ul>
+  </div>
 
-  <div class="con">
-    <div class="google-apps-btn" onclick="toggleMenu()">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-    </div>
-    <div id="appsMenu" class="apps-menu">
-        <ul>
-          <li><a href="https://mail.google.com/"><i class="fas fa-envelope"></i> Gmail</a></li>
-          <li><a href="https://www.youtube.com/"><i class="fab fa-youtube"></i> YouTube</a></li>
-          <li><a href="https://drive.google.com/"><i class="fab fa-google-drive"></i> Drive</a></li>
-          <li><a href="https://www.google.com/maps"><i class="fas fa-map-marker-alt"></i> Maps</a></li>
-          <li><a href="https://docs.google.com/"><i class="fas fa-file-alt"></i> Docs</a></li>
-          <li><a href="https://classroom.google.com/"><i class="fas fa-chalkboard-teacher"></i> Classroom</a></li>
-          <li><a href="https://slides.google.com/"><i class="fas fa-file-powerpoint"></i> Slides</a></li>
-          <li><a href="https://algot.fun"><i class="fas fa-code"></i> Algot.fun</a></li>
-          <li><a href="https://chatgpt.com/"><i class="fas fa-comments"></i> ChatGPT</a></li>
-        </ul>
-    </div>
-</div>
+  <!-- Liked Photos Selector -->
+  <div id="likedPhotosSelector" style="position:fixed;bottom:20px;left:20px;z-index:10;display:flex;gap:10px;"></div>
 
-  <button onclick="myFunction()" aria-label="Toggle customization menu" style="position: absolute; bottom: 20px; left: 10px; color:#ffffff;background-color: #00000000;">
-    <i class="fa-solid fa-pen"></i>
-  </button>
-  <div class="toprgb blur" style="position: absolute; bottom: -10px;"></div>
-  <div class="toprgb" style="position: absolute; bottom: 0;"></div>
   <script>
-
-function reset() {
-  localStorage.clear();
-  location.reload();
-}
-
-function loadClockPosition() {
-  const clock = document.getElementById('clock');
-  const x = loadSetting('clockPositionX', '50%');
-  const y = loadSetting('clockPositionY', '50%');
-  clock.style.left = x;
-  clock.style.top = y;
-  clock.style.position = 'absolute';
-}
-
-function updateClock() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('hour').textContent = hours;
-  document.getElementById('minute').textContent = minutes;
-}
-
-function enableClockDragging() {
-  const clock = document.getElementById('clock');
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  clock.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - clock.offsetLeft;
-    offsetY = e.clientY - clock.offsetTop;
-    clock.style.cursor = 'grabbing';
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const x = e.clientX - offsetX;
-      const y = e.clientY - offsetY;
-      clock.style.left = `${x}px`;
-      clock.style.top = `${y}px`;
-      saveSetting('clockPositionX', `${x}px`);
-      saveSetting('clockPositionY', `${y}px`);
+    function toggleMenu() {
+      const menu = document.getElementById('appsMenu');
+      menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
     }
-  });
 
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-    clock.style.cursor = 'grab';
-  });
-}
+    // Render liked photos as selectable thumbnails
+    function renderLikedPhotosSelector() {
+      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
+      const selector = document.getElementById('likedPhotosSelector');
+      selector.innerHTML = '';
 
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  enableClockDragging();
-  updateClock();
-  setInterval(updateClock, 1000);
-});
-
-function enableSearchBarDragging() {
-  const searchBar = document.querySelector('.searchform');
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  searchBar.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - searchBar.offsetLeft;
-    offsetY = e.clientY - searchBar.offsetTop;
-    searchBar.style.cursor = 'grabbing';
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const x = e.clientX - offsetX;
-      const y = e.clientY - offsetY;
-      searchBar.style.left = `${x}px`;
-      searchBar.style.top = `${y}px`;
-      searchBar.style.position = 'absolute';
-      saveSetting('searchBarPositionX', `${x}px`);
-      saveSetting('searchBarPositionY', `${y}px`);
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-    searchBar.style.cursor = 'grab';
-  });
-}
-
-function loadSearchBarPosition() {
-  const searchBar = document.querySelector('.searchform');
-  const x = loadSetting('searchBarPositionX', '50%');
-  const y = loadSetting('searchBarPositionY', '50%');
-  searchBar.style.left = x;
-  searchBar.style.top = y;
-  searchBar.style.position = 'absolute';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  enableClockDragging();
-  enableSearchBarDragging(); // Enable dragging for the search bar
-  loadSearchBarPosition();   // Load the saved position of the search bar
-  updateClock();
-  setInterval(updateClock, 1000);
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  enableClockDragging();
-  enableSearchBarDragging();
-  enableCalendarDragging(); // Enable dragging for the calendar
-  loadSearchBarPosition();
-  loadCalendarPosition(); // Load the saved position of the calendar
-  updateClock();
-  setInterval(updateClock, 1000);
-});
-
-function loadClockPosition() {
-  const clock = document.getElementById('clock');
-  const x = loadSetting('clockPositionX', '50%');
-  const y = loadSetting('clockPositionY', '50%');
-  clock.style.left = x;
-  clock.style.top = y;
-  clock.style.position = 'absolute';
-}
-
-function toggleMenu() {
-  const menu = document.getElementById('appsMenu');
-  menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
-}
-
-function myFunction() {
-  const customizationMenu = document.getElementById('myDIV');
-  customizationMenu.style.display = customizationMenu.style.display === 'none' || customizationMenu.style.display === '' ? 'block' : 'none';
-}
-    // ---------- Unified Save and Load Functions ----------
-    function saveSetting(key, value) {
-      localStorage.setItem(key, value);
-    }
-  
-    function loadSetting(key, defaultValue) {
-      return localStorage.getItem(key) || defaultValue;
-    }
-  
-    // ---------- Apply Gradient ----------
-    function applyGradient(startColor, middleColor, endColor) {
-      document.documentElement.style.setProperty('--gradient-start', startColor);
-      document.documentElement.style.setProperty('--gradient-middle', middleColor);
-      document.documentElement.style.setProperty('--gradient-end', endColor);
-    }
-  
-    // ---------- Calendar Toggle ----------
-    function toggleCalendar() {
-      const calendarContainer = document.getElementById('calendarContainer');
-      const isVisible = calendarContainer.style.display === 'block';
-      calendarContainer.style.display = isVisible ? 'none' : 'block';
-      saveSetting('calendarVisible', !isVisible ? 'true' : 'false');
-    }
-  
-    // ---------- Render Calendar ----------
-    function renderCalendar() {
-      const calendar = document.getElementById('calendar');
-      const now = new Date();
-      const month = now.getMonth();
-      const year = now.getFullYear();
-    
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const firstDay = new Date(year, month, 1).getDay();
-    
-      let calendarHTML = '<table>';
-      calendarHTML += '<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>';
-      calendarHTML += '<tr>';
-    
-      // Add empty cells for days before the first day of the month
-      for (let i = 0; i < firstDay; i++) {
-        calendarHTML += '<td></td>';
-      }
-    
-      // Add cells for each day of the month
-      for (let day = 1; day <= daysInMonth; day++) {
-        if ((firstDay + day - 1) % 7 === 0) {
-          calendarHTML += '</tr><tr>'; // Start a new row every Sunday
-        }
-        const isToday = day === now.getDate();
-        calendarHTML += `<td class="${isToday ? 'current-day' : ''}">${day}</td>`;
-      }
-    
-      calendarHTML += '</tr></table>';
-      calendar.innerHTML = calendarHTML; // Insert the generated HTML into the #calendar element
-    }
-  
-    // ---------- Initialization & Settings ----------
-    function init() {
-      const settings = {
-        gradientStart: '#ff00ff',
-        gradientMiddle: '#00ff00', // Default third color
-        gradientEnd: '#00ffff',
-        backgroundImage: null, // Default to null
-        clockColor: '#ffffff',
-        clockFont: 'Roboto',
-        glowColor: '#ff00f0',
-        glowAlpha: 1,
-        dotColor: '#ffffff',
-        clockFontSize: 6,
-        hourColor: '#ffffff',
-        minuteColor: '#ff00f0',
-        calendarVisible: 'false',
-        calendarSize: 1,
-        toprgb: 'block',
-      };
-    
-      // Load settings
-      Object.keys(settings).forEach((key) => {
-        settings[key] = loadSetting(key, settings[key]);
-      });
-    
-      // Apply default or saved background image
-      if (settings.backgroundImage && settings.backgroundImage !== 'null') {
-        document.body.style.backgroundImage = settings.backgroundImage;
-      } else {
-        document.body.style.backgroundImage = 'url("windows dark.jpg")'; // Default background
-      }
-    
-      // Apply gradient settings
-      applyGradient(settings.gradientStart, settings.gradientMiddle, settings.gradientEnd);
-      document.getElementById('startColor').value = settings.gradientStart;
-      document.getElementById('thirdColor').value = settings.gradientMiddle;
-      document.getElementById('endColor').value = settings.gradientEnd;
-    
-      // Apply clock settings
-      document.documentElement.style.setProperty('--clock-color', settings.clockColor);
-      document.getElementById('clockColor').value = settings.clockColor;
-    
-      document.getElementById('clockFont').value = settings.clockFont;
-      document.getElementById('clock').style.fontFamily = settings.clockFont;
-    
-      document.getElementById('glowColor').value = settings.glowColor;
-      document.getElementById('glowAlpha').value = settings.glowAlpha;
-      updateGlowEffect(settings.glowColor, settings.glowAlpha);
-    
-      document.getElementById('clock').style.fontSize = settings.clockFontSize + 'vw';
-      document.getElementById('clockSizeInput').value = settings.clockFontSize;
-    
-      document.documentElement.style.setProperty('--dot', settings.dotColor);
-      document.getElementById('dots').value = settings.dotColor;
-    
-      document.getElementById('hour').style.color = settings.hourColor;
-      document.getElementById('hourColor').value = settings.hourColor;
-      document.getElementById('minuteColor').value = settings.minuteColor;
-  
-      const toprgbElements = document.querySelectorAll('.toprgb');
-      toprgbElements.forEach((el) => (el.style.display = settings.toprgb));
-  
-      if (settings.calendarVisible === 'true') {
-        document.getElementById('calendarContainer').style.display = 'block';
-        renderCalendar();
-      } else {
-        document.getElementById('calendarContainer').style.display = 'none';
-      }
-  
-      document.getElementById('calendarContainer').style.transform = `scale(${settings.calendarSize})`;
-      document.getElementById('calendarSizeInput').value = settings.calendarSize;
-  
-      document.getElementById('clock').style.display = 'block';
-      loadClockPosition();
-    }
-  
-    // ---------- Event Listeners ----------
-    document.addEventListener('DOMContentLoaded', () => {
-      init();
-  
-      document.getElementById('startColor').addEventListener('input', function () {
-        const middleColor = document.getElementById('thirdColor').value;
-        const endColor = document.getElementById('endColor').value;
-        applyGradient(this.value, middleColor, endColor);
-        saveSetting('gradientStart', this.value);
-      });
-  
-      document.getElementById('thirdColor').addEventListener('input', function () {
-        const startColor = document.getElementById('startColor').value;
-        const endColor = document.getElementById('endColor').value;
-        applyGradient(startColor, this.value, endColor);
-        saveSetting('gradientMiddle', this.value);
-      });
-  
-      document.getElementById('endColor').addEventListener('input', function () {
-        const startColor = document.getElementById('startColor').value;
-        const middleColor = document.getElementById('thirdColor').value;
-        applyGradient(startColor, middleColor, this.value);
-        saveSetting('gradientEnd', this.value);
-      });
-  
-      document.getElementById('clockColor').addEventListener('input', function () {
-        document.documentElement.style.setProperty('--clock-color', this.value);
-        saveSetting('clockColor', this.value);
-      });
-  
-      document.getElementById('hourColor').addEventListener('input', function () {
-        document.getElementById('hour').style.color = this.value;
-        saveSetting('hourColor', this.value);
-      });
-  
-      document.getElementById('minuteColor').addEventListener('input', function () {
-        document.getElementById('minute').style.color = this.value;
-        saveSetting('minuteColor', this.value);
-      });
-  
-      document.getElementById('glowColor').addEventListener('input', function () {
-        const glowAlpha = document.getElementById('glowAlpha').value;
-        updateGlowEffect(this.value, glowAlpha);
-        saveSetting('glowColor', this.value);
-      });
-  
-      document.getElementById('glowAlpha').addEventListener('input', function () {
-        const glowColor = document.getElementById('glowColor').value;
-        updateGlowEffect(glowColor, this.value);
-        saveSetting('glowAlpha', this.value);
-      });
-  
-      document.getElementById('clockSizeInput').addEventListener('input', function () {
-        document.getElementById('clock').style.fontSize = this.value + 'vw';
-        saveSetting('clockFontSize', this.value);
-      });
-  
-      document.getElementById('calendarSizeInput').addEventListener('input', function () {
-        document.getElementById('calendarContainer').style.transform = `scale(${this.value})`;
-        saveSetting('calendarSize', this.value);
-      });
-  
-      document.getElementById('dots').addEventListener('input', function () {
-        document.documentElement.style.setProperty('--dot', this.value);
-        saveSetting('dotColor', this.value);
-      });
-  
-      document.getElementById('clockFont').addEventListener('change', function () {
-        document.getElementById('clock').style.fontFamily = this.value;
-        saveSetting('clockFont', this.value);
-      });
-  
-      document.getElementById('toggleTopRGB').addEventListener('click', () => {
-        const toprgbElements = document.querySelectorAll('.toprgb');
-        toprgbElements.forEach((el) => {
-          const newDisplay = el.style.display === 'none' ? 'block' : 'none';
-          el.style.display = newDisplay;
-          saveSetting('toprgb', newDisplay);
+      // If there are liked photos, render them
+      if (likedPhotos.length > 0) {
+        likedPhotos.forEach((photo) => {
+          const img = document.createElement('img');
+          img.src = photo.src;
+          img.alt = 'Liked Photo';
+          img.style.width = '48px';
+          img.style.height = '48px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '8px';
+          img.style.border = (getSelectedPhotoSrc() === photo.src) ? '3px solid #fff' : '2px solid #888';
+          img.style.cursor = 'pointer';
+          img.title = 'Set as background';
+          img.style.marginRight = '4px';
+          img.onclick = function() {
+            setSelectedPhotoSrc(photo.src);
+            setBackgroundFromSelected();
+            renderLikedPhotosSelector();
+          };
+          selector.appendChild(img);
         });
-      });
-    });
-  
-    // ---------- Helper Functions ----------
-    function updateGlowEffect(color, alpha) {
-      const glowColor = `rgba(${hexToRgb(color)}, ${alpha})`;
-      document.documentElement.style.setProperty('--glow-color', glowColor);
+      } else {
+        // Show default image if no liked photos
+        const defaultImgUrl = "https://images.pexels.com/photos/11592804/pexels-photo-11592804.jpeg";
+        const img = document.createElement('img');
+        img.src = defaultImgUrl;
+        img.alt = 'Default Photo';
+        img.style.width = '48px';
+        img.style.height = '48px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        img.style.border = '3px solid #fff';
+        img.style.cursor = 'default';
+        img.title = 'Default background';
+        img.style.marginRight = '4px';
+        selector.appendChild(img);
+      }
+
+      // Always show the ... button
+      const moreImg = document.createElement('img');
+      // SVG data URI for three horizontal dots
+      moreImg.src = 'data:image/svg+xml;utf8,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="16" r="3" fill="white"/><circle cx="16" cy="16" r="3" fill="white"/><circle cx="24" cy="16" r="3" fill="white"/></svg>';
+      moreImg.alt = 'More';
+      moreImg.title = 'Go to Pexels page';
+      moreImg.style.width = '48px';
+      moreImg.style.height = '48px';
+      moreImg.style.objectFit = 'cover';
+      moreImg.style.borderRadius = '8px';
+      moreImg.style.border = '2px solid #888';
+      moreImg.style.cursor = 'pointer';
+      moreImg.style.background = '#222';
+      moreImg.style.marginLeft = '4px';
+      moreImg.onclick = function(e) {
+        e.stopPropagation();
+        window.open('pexels.html', '_blank');
+      };
+      selector.appendChild(moreImg);
     }
-  
-    function hexToRgb(hex) {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return `${r}, ${g}, ${b}`;
+
+    // Store the selected photo src in localStorage
+    function setSelectedPhotoSrc(src) {
+      localStorage.setItem('selectedLikedPhoto', src);
+    }
+    function getSelectedPhotoSrc() {
+      return localStorage.getItem('selectedLikedPhoto');
     }
 
-function enableCalendarDragging() {
-  const calendarContainer = document.getElementById('calendarContainer');
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  calendarContainer.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - calendarContainer.offsetLeft;
-    offsetY = e.clientY - calendarContainer.offsetTop;
-    calendarContainer.style.cursor = 'grabbing';
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      const x = e.clientX - offsetX;
-      const y = e.clientY - offsetY;
-      calendarContainer.style.left = `${x}px`;
-      calendarContainer.style.top = `${y}px`;
-      calendarContainer.style.position = 'absolute';
-      saveSetting('calendarPositionX', `${x}px`);
-      saveSetting('calendarPositionY', `${y}px`);
+    // Set background from selected liked photo, or fallback to random if none selected
+    function setBackgroundFromSelected() {
+      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
+      const selected = getSelectedPhotoSrc();
+      if (likedPhotos.length === 0) {
+        document.body.style.backgroundImage = 'url("https://images.pexels.com/photos/11592804/pexels-photo-11592804.jpeg")';
+        return;
+      }
+      if (selected && likedPhotos.some(p => p.src === selected)) {
+        document.body.style.backgroundImage = `url(${selected})`;
+      } else if (likedPhotos.length > 0) {
+        const randomPhoto = likedPhotos[Math.floor(Math.random() * likedPhotos.length)];
+        document.body.style.backgroundImage = `url(${randomPhoto.src})`;
+        setSelectedPhotoSrc(randomPhoto.src);
+      }
     }
-  });
 
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-    calendarContainer.style.cursor = 'grab';
-  });
-}
-
-function loadCalendarPosition() {
-  const calendarContainer = document.getElementById('calendarContainer');
-  const x = loadSetting('calendarPositionX', '50%');
-  const y = loadSetting('calendarPositionY', '50%');
-  calendarContainer.style.left = x;
-  calendarContainer.style.top = y;
-  calendarContainer.style.position = 'absolute';
-}
-
-document.getElementById('uploadImage').addEventListener('change', function (event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const imageUrl = `url(${e.target.result})`;
-      document.body.style.backgroundImage = imageUrl;
-      saveSetting('backgroundImage', imageUrl); // Save the image URL to localStorage
-    };
-    reader.readAsDataURL(file); // Convert the image to a data URL
-  }
-});
+    // Dummy init() function (update as needed)
+    function init() {
+      // Initialization code goes here.
+    }
   </script>
 </body>
 </html>
