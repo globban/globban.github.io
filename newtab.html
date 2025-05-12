@@ -5,17 +5,7 @@
   <meta charset="UTF-8" />
   <title>Newtab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
-  <!-- Import fonts -->
   <style>
-    @import url('https://fonts.cdnfonts.com/css/lcd');
-    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Oswald&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-    
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
@@ -24,38 +14,9 @@
       background-attachment: fixed;
       color: #ffffff;
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
       background-color: #000000;
+      overflow: hidden; /* Prevent scrolling */
     }
-    
-    .container {
-      position: absolute;
-      left: 20px;
-      bottom: 100px;
-      background-color: rgba(0, 0, 0, 0.68);
-      border-radius: 1em;
-      height: 60vh;
-      overflow-y: scroll;
-      padding: 1em;
-      font-size: 1vh;
-      text-align: center;
-    }
-    
-    input[type="text"] {
-      padding: 1em 15em 1em 1em;
-      background-color: #fff;
-      font-size: 1em;
-      border-radius: 50px;
-      margin: 0.4rem;
-      position: absolute;
-      transform: translate(-14.1em, 10em);
-      outline: none;
-      border: none;
-    }
-    
     .google-apps-btn {
       display: grid;
       grid-template-columns: repeat(3, 10px);
@@ -65,54 +26,161 @@
       position: absolute;
       top: 30px;
       right: 30px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(30,30,30,0.35);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      box-shadow: 0 2px 8px #0006;
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      transition: background 0.2s;
     }
-    
+    .google-apps-btn:hover {
+      background: rgba(30,30,30,0.55);
+    }
     .dot {
       width: 7px;
       height: 7px;
       background-color: #fff;
       border-radius: 50%;
     }
-    
     .apps-menu {
       display: none;
-      background-color: rgba(0, 0, 0, 0.39);
-      padding: 10px;
       position: absolute;
-      top: 7vh;
-      right: 2vw;
-      border-radius: 1em;
+      top: 120px;
+      right: 30px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(30,30,30,0.35);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      box-shadow: 0 2px 8px #0006;
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      transition: background 0.2s;
     }
-    
     .apps-menu ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
-    
     .apps-menu ul li {
       padding: 8px 0;
     }
-    
     .apps-menu ul li a {
       text-decoration: none;
       color: #fff;
     }
-    
     .apps-menu ul li a:hover {
       text-decoration: underline;
     }
+    #uploadBtn {
+      position: fixed;
+      bottom: 40px;
+      left: 40px;
+      z-index: 10;
+      font-size: 1.5em;
+      background: rgba(30,30,30,0.35);
+      color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0006;
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      transition: background 0.2s;
+    }
+    #uploadBtn:hover {
+      background: rgba(30,30,30,0.55);
+    }
+    #uploadMenu {
+      display: none;
+      position: fixed;
+      left: 40px;
+      bottom: 110px;
+      z-index: 20;
+      background: rgba(30,30,30,0.35);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 18px;
+      padding: 20px 24px 16px 24px;
+      box-shadow: 0 2px 16px #0008;
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      color: #fff;
+      min-width: 270px;
+    }
+    #uploadMenu label, #uploadMenu input, #uploadMenu button, #uploadMenu a {
+      font-size: 1em;
+      margin-bottom: 10px;
+      display: block;
+    }
+    #uploadMenu input[type="text"] {
+      width: 80%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      outline: none;
+    }
+    #uploadMenu button {
+      background: rgba(0,0,0,0.25);
+      color: #fff;
+      border: 1px solid #888;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    #uploadMenu button:hover {
+      background: rgba(0,0,0,0.45);
+    }
+    #uploadMenu .recs {
+      margin-top: 10px;
+      font-size: 0.97em;
+      color: #eee;
+    }
+    #uploadMenu .recs a {
+      color: #aeeaff;
+      text-decoration: underline;
+      display: inline;
+      margin-right: 10px;
+    }
+    #searchBarContainer {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      bottom: 30vh;
+    }
+    #searchBar {
+      width: 400px;
+      max-width: 100vw;
+      padding: 12px 18px;
+      border-radius: 24px;
+      border: none;
+      font-size: 1.2em;
+      outline: none;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      box-shadow: 0 2px 8px #0006;
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      border: 1.5px solid rgba(255,255,255,0.18);
+    }
+    #searchBar::placeholder {
+      color: #ccc;
+    }
   </style>
 </head>
-<body onload="init(); renderLikedPhotosSelector(); setBackgroundFromSelected();">
-  <div id="clock" style="display: none;">
-    <span id="hour">00</span>:<span id="minute">00</span>
-  </div>
-  
-  <form action="https://www.google.com/search" class="searchform" method="get" target="_self">
-    <input type="hidden">
-    <input class="form-control search" name="q" placeholder="Search" required type="text" autofocus autocomplete="off" />
-  </form>
-  
+<body onload="setBackgroundFromSelected();">
+  <!-- Google Apps Button -->
   <div class="google-apps-btn" onclick="toggleMenu()">
     <div class="dot"></div>
     <div class="dot"></div>
@@ -124,6 +192,7 @@
     <div class="dot"></div>
     <div class="dot"></div>
   </div>
+  <!-- Apps Menu -->
   <div id="appsMenu" class="apps-menu">
     <ul>
       <li><a href="https://mail.google.com/"><i class="fas fa-envelope"></i> Gmail</a></li>
@@ -138,18 +207,32 @@
     </ul>
   </div>
 
-  <!-- Toggle button for Liked Photos Selector -->
-  <button id="toggleLikedPhotosSelectorBtn" style="position:fixed;bottom:76px;left:20px;z-index:11;font-size:1.5em;background:#222222;color:#fff;border:none;border-radius:8px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
-    <i class="fas fa-images"></i>
+  <!-- Search Bar -->
+  <div id="searchBarContainer">
+    <form action="https://www.google.com/search" method="GET" target="_blank" style="width:100%;display:flex;justify-content:center;">
+      <input id="searchBar" name="q" type="text" placeholder="Search Google..." autocomplete="off" autofocus/>
+    </form>
+  </div>
+
+  <!-- Upload Button -->
+  <button id="uploadBtn" title="Set background">
+    <i class="fas fa-upload"></i>
   </button>
-
-  <!-- Add the upload button and file input next to the liked photos selector -->
-
-  <!-- Liked Photos Selector -->
-  <div id="likedPhotosSelector" style="position:fixed;bottom:20px;left:20px;z-index:10;display:flex;gap:10px;display:none;"></div>
-
-  <!-- Hidden file input for custom image upload -->
-  <input type="file" id="customImageInput" accept="image/*" style="display:none" />
+  <div id="uploadMenu">
+    <button id="closeUploadMenu" style="float:right;margin:-8px -8px 8px 0;background:none;border:none;color:#fff;font-size:1.2em;cursor:pointer;">&times;</button>
+    <label for="customImageInput" style="margin-bottom:4px;">Upload image file:</label>
+    <input type="file" id="customImageInput" accept="image/*" style="margin-bottom:10px;">
+    <label for="customImageUrlInput" style="margin-bottom:4px;">Or paste image URL:</label>
+    <input type="text" id="customImageUrlInput" placeholder="https://example.com/image.jpg">
+    <button id="setUrlBtn">Set from URL</button>
+    <span id="urlError" style="color:#ffbaba;font-size:0.97em;display:none;margin-bottom:8px;"></span>
+    <div class="recs">
+      Try free images from
+      <a href="https://pixabay.com/" target="_blank">Pixabay</a>
+      or
+      <a href="https://unsplash.com/" target="_blank">Unsplash</a>
+    </div>
+  </div>
 
   <script>
     function toggleMenu() {
@@ -157,126 +240,30 @@
       menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
     }
 
-    // Render liked photos as selectable thumbnails
-    function renderLikedPhotosSelector() {
-      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
-      const selector = document.getElementById('likedPhotosSelector');
-      selector.innerHTML = '';
-
-      // If there are liked photos, render them
-      if (likedPhotos.length > 0) {
-        likedPhotos.forEach((photo) => {
-          const img = document.createElement('img');
-          img.src = photo.src;
-          img.alt = 'Liked Photo';
-          img.style.width = '48px';
-          img.style.height = '48px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '8px';
-          img.style.border = (getSelectedPhotoSrc() === photo.src) ? '3px solid #fff' : '2px solid #888';
-          img.style.cursor = 'pointer';
-          img.title = 'Set as background';
-          img.style.marginRight = '4px';
-          img.onclick = function() {
-            setSelectedPhotoSrc(photo.src);
-            setBackgroundFromSelected();
-            renderLikedPhotosSelector();
-          };
-          selector.appendChild(img);
-        });
-      } else {
-        // Show default image if no liked photos
-        const defaultImgUrl = "https://images.pexels.com/photos/11592804/pexels-photo-11592804.jpeg";
-        const img = document.createElement('img');
-        img.src = defaultImgUrl;
-        img.alt = 'Default Photo';
-        img.style.width = '48px';
-        img.style.height = '48px';
-        img.style.objectFit = 'cover';
-        img.style.borderRadius = '8px';
-        img.style.border = '3px solid #fff';
-        img.style.cursor = 'default';
-        img.title = 'Default background';
-        img.style.marginRight = '4px';
-        selector.appendChild(img);
-      }
-
-      // Always show the ... button
-      const moreImg = document.createElement('img');
-      moreImg.src = 'data:image/svg+xml;utf8,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="16" r="3" fill="white"/><circle cx="16" cy="16" r="3" fill="white"/><circle cx="24" cy="16" r="3" fill="white"/></svg>';
-      moreImg.alt = 'More';
-      moreImg.title = 'Go to Pexels page';
-      moreImg.style.width = '48px';
-      moreImg.style.height = '48px';
-      moreImg.style.objectFit = 'cover';
-      moreImg.style.borderRadius = '8px';
-      moreImg.style.border = '2px solid #888';
-      moreImg.style.cursor = 'pointer';
-      moreImg.style.background = '#222';
-      moreImg.style.marginLeft = '4px';
-      moreImg.onclick = function(e) {
-        e.stopPropagation();
-        window.open('pexels.html', '_blank');
-      };
-      selector.appendChild(moreImg);
-
-      // Show the upload icon as a FontAwesome icon in the menu
-      const uploadBtn = document.createElement('button');
-      uploadBtn.type = 'button';
-      uploadBtn.title = 'Upload your own image';
-      uploadBtn.style.width = '48px';
-      uploadBtn.style.height = '48px';
-      uploadBtn.style.display = 'flex';
-      uploadBtn.style.alignItems = 'center';
-      uploadBtn.style.justifyContent = 'center';
-      uploadBtn.style.background = '#222';
-      uploadBtn.style.border = '2px solid #888';
-      uploadBtn.style.borderRadius = '8px';
-      uploadBtn.style.marginLeft = '4px';
-      uploadBtn.style.cursor = 'pointer';
-      uploadBtn.innerHTML = '<i class="fas fa-upload" style="color:white;font-size:1.5em;"></i>';
-      uploadBtn.onclick = function(e) {
-        e.stopPropagation();
-        document.getElementById('customImageInput').click();
-      };
-      selector.appendChild(uploadBtn);
-    }
-
-    // Store the selected photo src in localStorage
-    function setSelectedPhotoSrc(src) {
-      localStorage.setItem('selectedLikedPhoto', src);
-    }
-    function getSelectedPhotoSrc() {
-      return localStorage.getItem('selectedLikedPhoto');
-    }
-
-    // Set background from selected liked photo, or fallback to random if none selected
+    // Set background from localStorage if available
     function setBackgroundFromSelected() {
-      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
-      const selected = getSelectedPhotoSrc();
-      if (likedPhotos.length === 0) {
-        document.body.style.backgroundImage = 'url("https://images.pexels.com/photos/11592804/pexels-photo-11592804.jpeg")';
-        return;
-      }
-      if (selected && likedPhotos.some(p => p.src === selected)) {
-        document.body.style.backgroundImage = `url(${selected})`;
-      } else if (likedPhotos.length > 0) {
-        const randomPhoto = likedPhotos[Math.floor(Math.random() * likedPhotos.length)];
-        document.body.style.backgroundImage = `url(${randomPhoto.src})`;
-        setSelectedPhotoSrc(randomPhoto.src);
+      const img = localStorage.getItem('customBackground');
+      if (img) {
+        document.body.style.backgroundImage = `url(${img})`;
       }
     }
 
-    // Toggle the visibility of the liked photos selector or go to /pexels.html if no liked photos
-    document.getElementById('toggleLikedPhotosSelectorBtn').onclick = function() {
-      const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
-      const selector = document.getElementById('likedPhotosSelector');
-      if (likedPhotos.length === 0) {
-        window.location.href = 'pexels.html';
-      } else {
-        selector.style.display = (selector.style.display === 'none' || selector.style.display === '') ? 'flex' : 'none';
-      }
+    // Show/hide upload menu
+    document.getElementById('uploadBtn').onclick = function(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('uploadMenu');
+      menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
     };
+    document.getElementById('closeUploadMenu').onclick = function() {
+      document.getElementById('uploadMenu').style.display = 'none';
+    };
+    // Hide menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('uploadMenu');
+      if (menu.style.display === 'block' && !menu.contains(e.target) && e.target.id !== 'uploadBtn') {
+        menu.style.display = 'none';
+      }
+    });
 
     // Handle file selection
     document.getElementById('customImageInput').onchange = function(event) {
@@ -284,23 +271,76 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        // Save the uploaded image as a "liked photo" with a special marker
-        const likedPhotos = JSON.parse(localStorage.getItem('likedPhotos')) || [];
-        likedPhotos.push({ src: e.target.result, photographer: "You" });
-        localStorage.setItem('likedPhotos', JSON.stringify(likedPhotos));
-        setSelectedPhotoSrc(e.target.result);
+        localStorage.setItem('customBackground', e.target.result);
         setBackgroundFromSelected();
-        renderLikedPhotosSelector();
+        document.getElementById('uploadMenu').style.display = 'none';
       };
       reader.readAsDataURL(file);
-      // Reset input so the same file can be uploaded again if desired
       event.target.value = '';
     };
 
-    // Dummy init() function (update as needed)
-    function init() {
-      // Initialization code goes here.
-    }
+    // Handle URL input
+    document.getElementById('setUrlBtn').onclick = function() {
+      const urlInput = document.getElementById('customImageUrlInput');
+      let url = urlInput.value.trim();
+      const errorSpan = document.getElementById('urlError');
+      errorSpan.style.display = 'none';
+      errorSpan.textContent = '';
+
+      if (!url) {
+        errorSpan.textContent = 'Please enter an image URL.';
+        errorSpan.style.display = 'block';
+        return;
+      }
+
+      // If no extension, try .png first, then .jpg
+      if (!/\.(png|jpg|jpeg|webp|gif)$/i.test(url)) {
+        // Try .png
+        if (!url.endsWith('.png') && !url.endsWith('.jpg') && !url.endsWith('.jpeg')) {
+          let testPng = url + '.png';
+          let testJpg = url + '.jpg';
+          // Try loading .png first
+          let img = new Image();
+          img.onload = function() {
+            localStorage.setItem('customBackground', testPng);
+            setBackgroundFromSelected();
+            document.getElementById('uploadMenu').style.display = 'none';
+            urlInput.value = '';
+            errorSpan.style.display = 'none';
+          };
+          img.onerror = function() {
+            // Try .jpg if .png fails
+            let img2 = new Image();
+            img2.onload = function() {
+              localStorage.setItem('customBackground', testJpg);
+              setBackgroundFromSelected();
+              document.getElementById('uploadMenu').style.display = 'none';
+              urlInput.value = '';
+              errorSpan.style.display = 'none';
+            };
+            img2.onerror = function() {
+              errorSpan.textContent = 'Could not find a valid image at .png or .jpg.';
+              errorSpan.style.display = 'block';
+            };
+            img2.src = testJpg;
+          };
+          img.src = testPng;
+          return;
+        }
+      }
+
+      // If extension is present and valid
+      if (!/^https?:\/\/.+\.(jpg|jpeg|png|webp|gif)$/i.test(url)) {
+        errorSpan.textContent = 'This does not look like a direct image URL.';
+        errorSpan.style.display = 'block';
+        return;
+      }
+      localStorage.setItem('customBackground', url);
+      setBackgroundFromSelected();
+      document.getElementById('uploadMenu').style.display = 'none';
+      urlInput.value = '';
+      errorSpan.style.display = 'none';
+    };
   </script>
 </body>
 </html>
