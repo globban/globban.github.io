@@ -2,95 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Particles Cast Display</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Cast -->
-  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Particles Customizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      height: 100%;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
-
-    #particles-js {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-
-    #controls, #toggle-controls, google-cast-launcher {
-      z-index: 10;
-    }
-
-    #controls {
+    body, html { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
+    #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; }
+    .controls {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 1rem;
-      border-radius: 10px;
-      color: white;
-      max-height: 90%;
-      overflow-y: auto;
-      width: 300px;
-      display: none;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.486);
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 90%;
+      color: #fff;
     }
-
-    #toggle-controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-size: 0.9em;
-    }
-
-    input, select {
+    .controls label { display: block; margin-top: 10px; }
+    .controls input, .controls select, .controls button {
       width: 100%;
-    }
-
-    button#apply {
-      margin-top: 1rem;
-      width: 100%;
-      padding: 0.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    google-cast-launcher {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
+      padding: 6px;
+      margin-top: 4px;
+      
     }
   </style>
 </head>
 <body>
-
   <div id="particles-js"></div>
 
-  <button id="toggle-controls">⚙️</button>
-  <google-cast-launcher></google-cast-launcher>
-
-  <div id="controls">
-    <label>Background: <input type="color" id="bgColor" value="#000000"></label>
-    <label>Particle Color: <input type="color" id="color" value="#ffffff"></label>
-    <label>Shape:
-      <select id="shape">
+  <div class="controls" id="controlsMenu">
+    <label>Background Color:
+      <input type="color" id="bgColor" value="#000000">
+    </label>
+    <label>Particle Color:
+      <input type="color" id="particleColor" value="#ffffff">
+    </label>
+    <label>Particle Count:
+      <input type="range" id="particleNumber" min="10" max="500" value="100">
+    </label>
+    <label>Particle Size:
+      <input type="range" id="particleSize" min="1" max="10" value="3">
+    </label>
+    <label>Particle Shape:
+      <select id="particleShape">
         <option value="circle">Circle</option>
         <option value="edge">Edge</option>
         <option value="triangle">Triangle</option>
@@ -98,104 +53,158 @@
         <option value="star">Star</option>
       </select>
     </label>
-    <label>Sides (Polygon): <input type="number" id="sides" value="5" min="3" max="12"></label>
-    <label>Size: <input type="range" id="size" min="1" max="10" value="3"></label>
-    <label>Opacity: <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.5"></label>
-    <label>Count: <input type="range" id="count" min="10" max="500" value="100"></label>
-    <label>Speed: <input type="range" id="speed" min="0" max="10" value="2"></label>
-    <label>Link Particles: <input type="checkbox" id="link" checked></label>
-    <label>Link Color: <input type="color" id="linkColor" value="#ffffff"></label>
-    <label>Link Distance: <input type="range" id="linkDistance" min="10" max="300" value="150"></label>
-    <label>Hover Effect: <input type="checkbox" id="hover" checked></label>
-    <label>Click Effect: <input type="checkbox" id="click" checked></label>
-    <button id="apply">Apply</button>
+    <label>Movement Speed:
+      <input type="range" id="moveSpeed" min="0" max="10" value="2">
+    </label>
+    <label>Particle Stroke Color:
+      <input type="color" id="particleStrokeColor" value="#ffffff">
+    </label>
+    <label>Particle Stroke Width:
+      <input type="range" id="particleStrokeWidth" min="0" max="10" value="0">
+    </label>
+    <label>Line Color:
+      <input type="color" id="lineColor" value="#ffffff">
+    </label>
+    <label>Line Opacity:
+      <input type="range" id="lineOpacity" min="0" max="1" step="0.01" value="0.4">
+    </label>
+    <label>Line Width:
+      <input type="range" id="lineWidth" min="0" max="10" value="1">
+    </label>
+    <label>Line Distance:
+      <input type="range" id="lineDistance" min="10" max="500" value="150">
+    </label>
+    <button onclick="applySettings()">Apply</button>
+    <button onclick="generateLink()">Generate Shareable Link</button>
+    <input type="text" id="shareURL" readonly placeholder="Paste this into boombatower.github.io" onclick="copyLink()" />
+<small id="copyMsg" style="display:none; color: green;">Copied!</small>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-
   <script>
-    const config = {
-      particles: {
-        number: { value: 100, density: { enable: true, value_area: 800 } },
-        color: { value: "#ffffff" },
-        shape: { type: "circle", polygon: { nb_sides: 5 } },
-        opacity: { value: 0.5, random: false },
-        size: { value: 3, random: true },
-        line_linked: {
-          enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1
-        },
-        move: {
-          enable: true, speed: 2, direction: "none", out_mode: "out"
-        }
-      },
-      interactivity: {
-        detect_on: "canvas",
-        events: {
-          onhover: { enable: true, mode: "repulse" },
-          onclick: { enable: true, mode: "push" }
-        },
-        modes: {
-          repulse: { distance: 100 },
-          push: { particles_nb: 4 }
-        }
-      },
-      retina_detect: true
-    };
+    // Hide menu on load
+    window.addEventListener("DOMContentLoaded", () => {
+      loadParticlesFromParams();
+      document.getElementById("controlsMenu").style.display = "none";
+    });
+
+    // Show menu on click anywhere
+    document.addEventListener("click", function showMenuOnce(e) {
+      const menu = document.getElementById("controlsMenu");
+      if (menu.style.display === "none") {
+        menu.style.display = "block";
+        // Remove this event after showing menu
+        document.removeEventListener("click", showMenuOnce);
+        // Prevent click-through to controls
+        e.stopPropagation();
+      }
+    });
+
+    // Prevent menu click from hiding it again
+    document.getElementById("controlsMenu").addEventListener("click", function(e) {
+      e.stopPropagation();
+    });
 
     function applySettings() {
-      document.body.style.backgroundColor = document.getElementById("bgColor").value;
-      config.particles.color.value = document.getElementById("color").value;
-      config.particles.shape.type = document.getElementById("shape").value;
-      config.particles.shape.polygon.nb_sides = parseInt(document.getElementById("sides").value);
-      config.particles.size.value = parseFloat(document.getElementById("size").value);
-      config.particles.opacity.value = parseFloat(document.getElementById("opacity").value);
-      config.particles.number.value = parseInt(document.getElementById("count").value);
-      config.particles.move.speed = parseFloat(document.getElementById("speed").value);
-      config.particles.line_linked.enable = document.getElementById("link").checked;
-      config.particles.line_linked.color = document.getElementById("linkColor").value;
-      config.particles.line_linked.distance = parseInt(document.getElementById("linkDistance").value);
-      config.interactivity.events.onhover.enable = document.getElementById("hover").checked;
-      config.interactivity.events.onclick.enable = document.getElementById("click").checked;
+      const bg = document.getElementById("bgColor").value;
+      const color = document.getElementById("particleColor").value;
+      const number = +document.getElementById("particleNumber").value;
+      const size = +document.getElementById("particleSize").value;
+      const shape = document.getElementById("particleShape").value;
+      const speed = +document.getElementById("moveSpeed").value;
+      const strokeColor = document.getElementById("particleStrokeColor").value;
+      const strokeWidth = +document.getElementById("particleStrokeWidth").value;
+      const lineColor = document.getElementById("lineColor").value;
+      const lineOpacity = +document.getElementById("lineOpacity").value;
+      const lineWidth = +document.getElementById("lineWidth").value;
+      const lineDistance = +document.getElementById("lineDistance").value;
 
-      // Reload
-      if (window.pJSDom && pJSDom.length > 0) {
-        pJSDom[0].pJS.fn.vendors.destroypJS();
-        pJSDom = [];
-      }
-      particlesJS("particles-js", config);
+      document.body.style.backgroundColor = bg;
+
+      // Clear previous instance
+      const canvas = document.querySelector('#particles-js canvas');
+      if (canvas) canvas.remove();
+
+      particlesJS("particles-js", {
+        background: { color: { value: bg } },
+        particles: {
+          number: { value: number },
+          color: { value: color },
+          shape: { 
+            type: shape,
+            stroke: {
+              width: strokeWidth,
+              color: strokeColor
+            }
+          },
+          size: { value: size },
+          move: { enable: true, speed: speed },
+          line_linked: {
+            enable: lineWidth > 0,
+            distance: lineDistance,
+            color: lineColor,
+            opacity: lineOpacity,
+            width: lineWidth
+          }
+        },
+        interactivity: {
+          events: {
+            onhover: { enable: false },
+            onclick: { enable: false }
+          }
+        }
+      });
     }
 
-    document.getElementById("apply").onclick = applySettings;
-    document.getElementById("toggle-controls").onclick = () => {
-      const ctrl = document.getElementById("controls");
-      ctrl.style.display = ctrl.style.display === "none" ? "block" : "none";
-    };
+    function copyLink() {
+      const input = document.getElementById("shareURL");
+      input.select();
+      input.setSelectionRange(0, 99999); // mobile
+      navigator.clipboard.writeText(input.value).then(() => {
+        const msg = document.getElementById("copyMsg");
+        msg.style.display = "inline";
+        setTimeout(() => msg.style.display = "none", 2000);
+      });
+    }
 
-    applySettings(); // initial
+    function generateLink() {
+      const params = new URLSearchParams({
+        bg: document.getElementById("bgColor").value,
+        color: document.getElementById("particleColor").value,
+        number: document.getElementById("particleNumber").value,
+        size: document.getElementById("particleSize").value,
+        shape: document.getElementById("particleShape").value,
+        speed: document.getElementById("moveSpeed").value,
+        strokeColor: document.getElementById("particleStrokeColor").value,
+        strokeWidth: document.getElementById("particleStrokeWidth").value,
+        lineColor: document.getElementById("lineColor").value,
+        lineOpacity: document.getElementById("lineOpacity").value,
+        lineWidth: document.getElementById("lineWidth").value,
+        lineDistance: document.getElementById("lineDistance").value
+      });
+      const url = `${location.origin}${location.pathname}?${params.toString()}`;
+      document.getElementById("shareURL").value = url;
+    }
 
-    // Google Cast setup
-    window['__onGCastApiAvailable'] = function(isAvailable) {
-      if (isAvailable) {
-        const context = cast.framework.CastContext.getInstance();
-        context.setOptions({
-          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-        });
+    function loadParticlesFromParams() {
+      const url = new URL(window.location.href);
+      const params = Object.fromEntries(url.searchParams.entries());
 
-        context.addEventListener(
-          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
-          function(event) {
-            if (event.castState === cast.framework.CastState.CONNECTED) {
-              // Connected to Cast device — hide GUI
-              document.getElementById("controls").style.display = "none";
-              document.getElementById("toggle-controls").style.display = "none";
-              const castButton = document.querySelector("google-cast-launcher");
-              if (castButton) castButton.style.display = "none";
-            }
-          }
-        );
-      }
-    };
+      if (params.bg) document.getElementById("bgColor").value = params.bg;
+      if (params.color) document.getElementById("particleColor").value = params.color;
+      if (params.number) document.getElementById("particleNumber").value = params.number;
+      if (params.size) document.getElementById("particleSize").value = params.size;
+      if (params.shape) document.getElementById("particleShape").value = params.shape;
+      if (params.speed) document.getElementById("moveSpeed").value = params.speed;
+      if (params.strokeColor) document.getElementById("particleStrokeColor").value = params.strokeColor;
+      if (params.strokeWidth) document.getElementById("particleStrokeWidth").value = params.strokeWidth;
+      if (params.lineColor) document.getElementById("lineColor").value = params.lineColor;
+      if (params.lineOpacity) document.getElementById("lineOpacity").value = params.lineOpacity;
+      if (params.lineWidth) document.getElementById("lineWidth").value = params.lineWidth;
+      if (params.lineDistance) document.getElementById("lineDistance").value = params.lineDistance;
+
+      applySettings();
+    }
   </script>
 </body>
 </html>
