@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Particles Cast Display</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Cast -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    #controls, #toggle-controls, google-cast-launcher {
+      z-index: 10;
+    }
+
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 1rem;
+      border-radius: 10px;
+      color: white;
+      max-height: 90%;
+      overflow-y: auto;
+      width: 300px;
+      display: none;
+    }
+
+    #toggle-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    input, select {
+      width: 100%;
+    }
+
+    button#apply {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    google-cast-launcher {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="particles-js"></div>
+
+  <button id="toggle-controls">⚙️</button>
+  <google-cast-launcher></google-cast-launcher>
+
+  <div id="controls">
+    <label>Background: <input type="color" id="bgColor" value="#000000"></label>
+    <label>Particle Color: <input type="color" id="color" value="#ffffff"></label>
+    <label>Shape:
+      <select id="shape">
+        <option value="circle">Circle</option>
+        <option value="edge">Edge</option>
+        <option value="triangle">Triangle</option>
+        <option value="polygon">Polygon</option>
+        <option value="star">Star</option>
+      </select>
+    </label>
+    <label>Sides (Polygon): <input type="number" id="sides" value="5" min="3" max="12"></label>
+    <label>Size: <input type="range" id="size" min="1" max="10" value="3"></label>
+    <label>Opacity: <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.5"></label>
+    <label>Count: <input type="range" id="count" min="10" max="500" value="100"></label>
+    <label>Speed: <input type="range" id="speed" min="0" max="10" value="2"></label>
+    <label>Link Particles: <input type="checkbox" id="link" checked></label>
+    <label>Link Color: <input type="color" id="linkColor" value="#ffffff"></label>
+    <label>Link Distance: <input type="range" id="linkDistance" min="10" max="300" value="150"></label>
+    <label>Hover Effect: <input type="checkbox" id="hover" checked></label>
+    <label>Click Effect: <input type="checkbox" id="click" checked></label>
+    <button id="apply">Apply</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <script>
+    const config = {
+      particles: {
+        number: { value: 100, density: { enable: true, value_area: 800 } },
+        color: { value: "#ffffff" },
+        shape: { type: "circle", polygon: { nb_sides: 5 } },
+        opacity: { value: 0.5, random: false },
+        size: { value: 3, random: true },
+        line_linked: {
+          enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1
+        },
+        move: {
+          enable: true, speed: 2, direction: "none", out_mode: "out"
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: { enable: true, mode: "repulse" },
+          onclick: { enable: true, mode: "push" }
+        },
+        modes: {
+          repulse: { distance: 100 },
+          push: { particles_nb: 4 }
+        }
+      },
+      retina_detect: true
+    };
+
+    function applySettings() {
+      document.body.style.backgroundColor = document.getElementById("bgColor").value;
+      config.particles.color.value = document.getElementById("color").value;
+      config.particles.shape.type = document.getElementById("shape").value;
+      config.particles.shape.polygon.nb_sides = parseInt(document.getElementById("sides").value);
+      config.particles.size.value = parseFloat(document.getElementById("size").value);
+      config.particles.opacity.value = parseFloat(document.getElementById("opacity").value);
+      config.particles.number.value = parseInt(document.getElementById("count").value);
+      config.particles.move.speed = parseFloat(document.getElementById("speed").value);
+      config.particles.line_linked.enable = document.getElementById("link").checked;
+      config.particles.line_linked.color = document.getElementById("linkColor").value;
+      config.particles.line_linked.distance = parseInt(document.getElementById("linkDistance").value);
+      config.interactivity.events.onhover.enable = document.getElementById("hover").checked;
+      config.interactivity.events.onclick.enable = document.getElementById("click").checked;
+
+      // Reload
+      if (window.pJSDom && pJSDom.length > 0) {
+        pJSDom[0].pJS.fn.vendors.destroypJS();
+        pJSDom = [];
+      }
+      particlesJS("particles-js", config);
+    }
+
+    document.getElementById("apply").onclick = applySettings;
+    document.getElementById("toggle-controls").onclick = () => {
+      const ctrl = document.getElementById("controls");
+      ctrl.style.display = ctrl.style.display === "none" ? "block" : "none";
+    };
+
+    applySettings(); // initial
+
+    // Google Cast setup
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        const context = cast.framework.CastContext.getInstance();
+        context.setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+
+        context.addEventListener(
+          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+          function(event) {
+            if (event.castState === cast.framework.CastState.CONNECTED) {
+              // Connected to Cast device — hide GUI
+              document.getElementById("controls").style.display = "none";
+              document.getElementById("toggle-controls").style.display = "none";
+              const castButton = document.querySelector("google-cast-launcher");
+              if (castButton) castButton.style.display = "none";
+            }
+          }
+        );
+      }
+    };
+  </script>
+</body>
+</html>
