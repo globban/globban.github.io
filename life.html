@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Conway's Game of Life</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+    }
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    button, input[type=range], input[type=color] {
+      margin: 4px;
+      font-size: 16px;
+    }
+    .settings {
+      margin-top: 10px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button onclick="toggleSimulation()">Start / Pause</button>
+    <button onclick="clearGrid()">Clear All</button>
+    <div class="settings" id="settingsPanel">
+      <label>Speed:
+        <input id="speedSlider" type="range" min="1" max="100" value="60">
+      </label><br />
+      <label>Cell/Glow Color:
+        <input type="color" id="colorPicker" value="#00ff00">
+      </label><br />
+      <label>Zoom:
+        <input id="zoomSlider" type="range" min="5" max="40" value="10">
+      </label>
+    </div>
+  </div>
+
+  <canvas id="gridCanvas"></canvas>
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    const gridCanvas = document.getElementById("gridCanvas");
+    const gridCtx = gridCanvas.getContext("2d");
+    const gameCanvas = document.getElementById("gameCanvas");
+    const ctx = gameCanvas.getContext("2d");
+
+    const speedSlider = document.getElementById("speedSlider");
+    const colorPicker = document.getElementById("colorPicker");
+    const zoomSlider = document.getElementById("zoomSlider");
+    const settingsPanel = document.getElementById("settingsPanel");
+
+    let speed = 60;
+    let resolution = 10;
+    let cols, rows, grid = [], running = false, lastUpdate = 0;
+
+    speedSlider.addEventListener("input", () => {
+      speed = parseInt(speedSlider.value);
+    });
+
+    zoomSlider.addEventListener("input", () => {
+      resolution = parseInt(zoomSlider.value);
+      initGrid();
+      drawGridLines();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        toggleSimulation();
+        e.preventDefault();
+      }
+    });
+
+    function resizeCanvas() {
+      gridCanvas.width = gameCanvas.width = window.innerWidth;
+      gridCanvas.height = gameCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      initGrid();
+      drawGridLines();
+    });
+
+    resizeCanvas();
+
+    function initGrid() {
+      cols = Math.floor(gameCanvas.width / resolution);
+      rows = Math.floor(gameCanvas.height / resolution);
+      grid = new Array(rows);
+      for (let row = 0; row < rows; row++) {
+        grid[row] = new Uint8Array(cols);
+      }
+      drawCells();
+    }
+
+    function drawGridLines() {
+      gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+      gridCtx.strokeStyle = "#222";
+      for (let x = 0; x <= gridCanvas.width; x += resolution) {
+        gridCtx.beginPath();
+        gridCtx.moveTo(x, 0);
+        gridCtx.lineTo(x, gridCanvas.height);
+        gridCtx.stroke();
+      }
+      for (let y = 0; y <= gridCanvas.height; y += resolution) {
+        gridCtx.beginPath();
+        gridCtx.moveTo(0, y);
+        gridCtx.lineTo(gridCanvas.width, y);
+        gridCtx.stroke();
+      }
+    }
+
+    function drawCells() {
+      ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+      const color = colorPicker.value;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * resolution;
+          const y = row * resolution;
+
+          if (grid[row][col]) {
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, resolution, resolution);
+          }
+        }
+      }
+      ctx.shadowBlur = 0;
+    }
+
+    function updateGrid() {
+      const nextGrid = new Array(rows);
+      for (let row = 0; row < rows; row++) {
+        nextGrid[row] = new Uint8Array(cols);
+        for (let col = 0; col < cols; col++) {
+          let neighbors = 0;
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              if (i === 0 && j === 0) continue;
+              const r = (row + i + rows) % rows;
+              const c = (col + j + cols) % cols;
+              neighbors += grid[r][c];
+            }
+          }
+          const cell = grid[row][col];
+          if (cell === 1 && (neighbors === 2 || neighbors === 3)) {
+            nextGrid[row][col] = 1;
+          } else if (cell === 0 && neighbors === 3) {
+            nextGrid[row][col] = 1;
+          }
+        }
+      }
+      grid = nextGrid;
+    }
+
+    function update(timestamp) {
+      if (running && timestamp - lastUpdate > (1000 - speed * 10)) {
+        updateGrid();
+        drawCells();
+        lastUpdate = timestamp;
+      }
+      requestAnimationFrame(update);
+    }
+
+    function toggleSimulation() {
+      running = !running;
+    }
+
+    function clearGrid() {
+      for (let row = 0; row < rows; row++) {
+        grid[row].fill(0);
+      }
+      drawCells();
+    }
+
+    gameCanvas.addEventListener("click", function(event) {
+      const rect = gameCanvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const col = Math.floor(x / resolution);
+      const row = Math.floor(y / resolution);
+      grid[row][col] = grid[row][col] ? 0 : 1;
+      drawCells();
+    });
+
+    initGrid();
+    drawGridLines();
+    requestAnimationFrame(update);
+  </script>
+</body>
+</html>
