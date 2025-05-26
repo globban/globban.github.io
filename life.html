@@ -38,27 +38,90 @@
       margin-top: 10px;
       display: block;
     }
+    /* New styles for pattern library previews */
+
+
+    #patternLibraryGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 18px;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    #patternLibraryGrid > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      width: 70px;
+      user-select: none;
+      background: #f7f7f7;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 8px 4px 6px 4px;
+      transition: box-shadow 0.2s, border 0.2s;
+      border: 2px solid transparent;
+    }
+
+    #patternLibraryGrid > div:hover {
+      border: 2px solid #00c800;
+      box-shadow: 0 4px 16px #00c80022;
+    }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <button onclick="toggleSimulation()">Start / Pause</button>
-    <button onclick="clearGrid()">Clear All</button>
-    <div class="settings" id="settingsPanel">
+  <!-- Menu icon in top left -->
+  <button id="menuBtn" title="Menu / Clear All" style="position: absolute; top: 10px; left: 10px; z-index: 20; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="18" height="12" rx="2" stroke="#fff" fill="none"/>
+      <line x1="9" y1="10" x2="15" y2="10" />
+      <line x1="9" y1="14" x2="15" y2="14" />
+    </svg>
+  </button>
+
+  <!-- Menu panel now contains the controls, pattern library (explanation removed) -->
+  <div id="menuPanel" style="position: absolute; top: 60px; left: 10px; z-index: 30; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: none;">
+    <div id="settingsPanel">
       <label>Speed:
         <input id="speedSlider" type="range" min="1" max="100" value="60">
-      </label><br />
+      </label><br>
       <label>Cell/Glow Color:
         <input type="color" id="colorPicker" value="#00ff00">
-      </label><br />
+      </label><br>
       <label>Zoom:
         <input id="zoomSlider" type="range" min="5" max="40" value="10">
-      </label>
+      </label><br>
+      <label>Mode:
+        <button id="modeToggleBtn" style="font-size:16px;">Switch to Erase</button>
+      </label><br>
+    </div>
+    <button id="clearBtn" style="width:100%; padding:8px; font-size:16px; margin-top:10px;">Clear All</button>
+    <button id="patternLibraryBtn" style="width:100%; padding:8px; font-size:16px; margin-top:10px;">Pattern Library</button>
+  </div>
+
+  <!-- Pattern Library Modal -->
+  <div id="patternLibraryModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:100; align-items:center; justify-content:center;">
+    <div id="patternLibraryBox" style="background:#fff; color:#111; border-radius:12px; padding:24px 16px 16px 16px; min-width:320px; min-height:180px; box-shadow:0 8px 32px #0008; display:flex; flex-direction:column; align-items:center; max-width:90vw;">
+      <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:1.3em; font-weight:bold;">Pattern Library</span>
+        <button id="closePatternLibraryBtn" style="font-size:1.2em; background:none; border:none; color:#111; cursor:pointer;">✕</button>
+      </div>
+      <div id="patternLibraryGrid"></div>
     </div>
   </div>
 
+  <!-- Canvas elements -->
   <canvas id="gridCanvas"></canvas>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Play/Pause button in bottom right -->
+  <button id="playBtn" title="Play/Pause" style="position: absolute; bottom: 24px; right: 24px; z-index: 20; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+    <!-- Icon will be set by JS -->
+  </button>
 
   <script>
     const gridCanvas = document.getElementById("gridCanvas");
@@ -70,10 +133,17 @@
     const colorPicker = document.getElementById("colorPicker");
     const zoomSlider = document.getElementById("zoomSlider");
     const settingsPanel = document.getElementById("settingsPanel");
+    const menuPanel = document.getElementById("menuPanel");
+    const modeToggleBtn = document.getElementById("modeToggleBtn");
 
     let speed = 60;
     let resolution = 10;
     let cols, rows, grid = [], running = false, lastUpdate = 0;
+    let isErasing = false; // New flag for erase mode
+    let isDrawing = false; // <-- Fix: Declare isDrawing
+
+    // New global variable for current mode (draw or erase)
+    let drawMode = "draw";
 
     speedSlider.addEventListener("input", () => {
       speed = parseInt(speedSlider.value);
@@ -85,11 +155,91 @@
       drawGridLines();
     });
 
+    // Update Space key handling to toggle simulation and update play icon
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
         toggleSimulation();
+        setPlayIcon(running);
         e.preventDefault();
       }
+    });
+
+    // Toggle menu panel on menu button click
+    document.getElementById("menuBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const menuPanel = document.getElementById("menuPanel");
+      menuPanel.style.display = menuPanel.style.display === "none" ? "block" : "none";
+    });
+
+    // Clear grid via the Clear All button in the menu
+    document.getElementById("clearBtn").addEventListener("click", (e) => {
+      clearGrid();
+      // Optionally hide the menu after clearing
+      document.getElementById("menuPanel").style.display = "none";
+      e.stopPropagation();
+    });
+
+    // Toggle mode button event
+    document.getElementById("modeToggleBtn").addEventListener("click", () => {
+      if(drawMode === "draw"){
+        drawMode = "erase";
+        document.getElementById("modeToggleBtn").innerText = "Switch to Draw";
+      } else {
+        drawMode = "draw";
+        document.getElementById("modeToggleBtn").innerText = "Switch to Erase";
+      }
+    });
+
+    // Updated drawCellAtEvent to use drawMode:
+    function drawCellAtEvent(event) {
+      const rect = gameCanvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const col = Math.floor(x / resolution);
+      const row = Math.floor(y / resolution);
+      // Add bounds check to prevent errors:
+      if (row >= 0 && row < rows && col >= 0 && col < cols) {
+        if (drawMode === "draw") {
+          grid[row][col] = 1;
+        } else {
+          grid[row][col] = 0;
+        }
+        drawCells();
+      }
+    }
+    
+    // Existing drawing events remain unchanged:
+    gameCanvas.addEventListener("mousedown", (event) => {
+      isDrawing = true;
+      drawCellAtEvent(event);
+    });
+    
+    gameCanvas.addEventListener("mousemove", (event) => {
+      if (isDrawing) {
+        drawCellAtEvent(event);
+      }
+    });
+    
+    window.addEventListener("mouseup", () => {
+      isDrawing = false;
+    });
+    
+    // Mobile touch support updated to use drawCellAtEvent:
+    gameCanvas.addEventListener("touchstart", (event) => {
+      isDrawing = true;
+      drawCellAtEvent(event.touches[0]);
+      event.preventDefault();
+    });
+    
+    gameCanvas.addEventListener("touchmove", (event) => {
+      if (isDrawing) {
+        drawCellAtEvent(event.touches[0]);
+        event.preventDefault();
+      }
+    });
+    
+    gameCanvas.addEventListener("touchend", () => {
+      isDrawing = false;
     });
 
     function resizeCanvas() {
@@ -197,19 +347,380 @@
       drawCells();
     }
 
-    gameCanvas.addEventListener("click", function(event) {
-      const rect = gameCanvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const col = Math.floor(x / resolution);
-      const row = Math.floor(y / resolution);
-      grid[row][col] = grid[row][col] ? 0 : 1;
-      drawCells();
+    // Play/Pause button logic
+    const playBtn = document.getElementById("playBtn");
+
+    function setPlayIcon(isPlaying) {
+      playBtn.innerHTML = isPlaying
+        // Pause icon
+        ? `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="8" width="6" height="20" rx="2" fill="#fff"/>
+            <rect x="21" y="8" width="6" height="20" rx="2" fill="#fff"/>
+          </svg>`
+        // Play icon
+        : `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12,8 28,18 12,28" fill="#fff"/>
+          </svg>`;
+    }
+    setPlayIcon(running);
+
+    playBtn.addEventListener("click", () => {
+      toggleSimulation();
+      setPlayIcon(running);
     });
+
+    // Remove old controls' Start/Pause and Clear All buttons
+    document.querySelectorAll('.controls button').forEach(btn => btn.remove());
 
     initGrid();
     drawGridLines();
     requestAnimationFrame(update);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Define our patterns (ensure each one is properly defined)
+      const patterns = {
+        glider: [
+          [0, 1, 0],
+          [0, 0, 1],
+          [1, 1, 1]
+        ],
+        lwss: [
+          [0, 1, 1, 1, 1],
+          [1, 0, 0, 0, 1],
+          [0, 0, 0, 0, 1],
+          [1, 0, 0, 1, 0]
+        ],
+        rPentomino: [
+          [0, 1, 1],
+          [1, 1, 0],
+          [0, 1, 0]
+        ],
+        block: [
+          [1, 1],
+          [1, 1]
+        ],
+        beehive: [
+          [0, 1, 1, 0],
+          [1, 0, 0, 1],
+          [0, 1, 1, 0]
+        ],
+        acorn: [
+          [0, 0, 1, 0, 0, 0, 0],
+          [1, 0, 0, 1, 1, 1, 0],
+          [0, 1, 0, 0, 0, 0, 0]
+        ],
+        diehard: [
+          [0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 1, 0, 0, 0, 0, 0],
+          [1, 0, 0, 0, 1, 1, 1, 0],
+          [0, 1, 0, 0, 0, 0, 0, 0]
+        ],
+        pulsar: [
+          [0,0,0,0,0,0,0,0,0],
+          [0,1,1,1,0,1,1,1,0],
+          [0,1,0,0,0,0,0,1,0],
+          [0,1,1,1,0,1,1,1,0],
+          [0,0,0,0,0,0,0,0,0],
+          [0,1,1,1,0,1,1,1,0],
+          [0,1,0,0,0,0,0,1,0],
+          [0,1,1,1,0,1,1,1,0],
+          [0,0,0,0,0,0,0,0,0]
+        ],
+        pentadecathlon: [
+          [0,0,0,0,0,0,0,0,0,0],
+          [0,1,1,1,1,0,1,1,1,0],
+          [0,1,0,0,0,0,0,1,0,0],
+          [0,1,1,1,1,0,1,1,1,0],
+          [0,0,0,0,0,0,0,0,0,0],
+          [0,1,1,1,1,0,1,1,1,0],
+          [0,1,0,0,0,0,0,1,0,0],
+          [0,1,1,1,1,0,1,1,1,0],
+          [0,0,0,0,0,0,0,0,0,0]
+        ]
+      };
+
+      // Get pattern library container (only once)
+      const patternLibraryContainer = document.getElementById("patternLibraryContainer");
+      let selectedPattern = null;
+
+      // Unified function to create a preview element with a canvas and label
+      function createPatternPreview(name, patternArray) {
+        const previewSize = 100; // preview canvas size in pixels
+        const cellSize = previewSize / Math.max(patternArray.length, patternArray[0].length);
+        const previewDiv = document.createElement("div");
+        previewDiv.style.flex = "0 0 auto";
+        previewDiv.style.border = "1px solid #555";
+        previewDiv.style.padding = "5px";
+        previewDiv.style.cursor = "pointer";
+        previewDiv.style.textAlign = "center";
+
+        const canvas = document.createElement("canvas");
+        canvas.width = previewSize;
+        canvas.height = previewSize;
+        const pctx = canvas.getContext("2d");
+
+        // Draw background
+        pctx.fillStyle = "#222";
+        pctx.fillRect(0, 0, previewSize, previewSize);
+
+        // Draw the pattern cells
+        pctx.fillStyle = "#00ff00";
+        for (let i = 0; i < patternArray.length; i++) {
+          for (let j = 0; j < patternArray[i].length; j++) {
+            if (patternArray[i][j] === 1) {
+              pctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+            }
+          }
+        }
+
+        const label = document.createElement("div");
+        label.style.fontSize = "12px";
+        label.style.color = "#fff";
+        label.innerText = name;
+
+        previewDiv.appendChild(canvas);
+        previewDiv.appendChild(label);
+
+        previewDiv.addEventListener("click", () => {
+          // Highlight this preview and clear any previous highlights
+          Array.from(patternLibraryContainer.children).forEach(child => {
+            child.style.borderColor = "#555";
+          });
+          previewDiv.style.borderColor = "#fff";
+          selectedPattern = name;
+        });
+
+        return previewDiv;
+      }
+
+      // Clear existing previews and add one for each pattern
+      patternLibraryContainer.innerHTML = "";
+      for (const [name, pattern] of Object.entries(patterns)) {
+        const preview = createPatternPreview(name, pattern);
+        patternLibraryContainer.appendChild(preview);
+      }
+
+      // Modify the Place Pattern button handler to use the selected preview (or fallback to dropdown)
+      const placePatternBtn = document.getElementById("placePatternBtn");
+      placePatternBtn.addEventListener("click", () => {
+        const patternName = selectedPattern;
+        if (patternName && patterns[patternName]) {
+          placePattern(patterns[patternName]);
+        }
+      });
+    });
+
+    function placePattern(pattern) {
+      // Place pattern at the center of the grid
+      const patternRows = pattern.length;
+      const patternCols = pattern[0].length;
+      const startRow = Math.floor((rows - patternRows) / 2);
+      const startCol = Math.floor((cols - patternCols) / 2);
+
+      for (let i = 0; i < patternRows; i++) {
+        for (let j = 0; j < patternCols; j++) {
+          const r = startRow + i;
+          const c = startCol + j;
+          if (r >= 0 && r < rows && c >= 0 && c < cols) {
+            grid[r][c] = pattern[i][j];
+          }
+        }
+      }
+      drawCells();
+    }
+
+    // Patterns definition
+    const patterns = {
+      glider: [
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 1, 1]
+      ],
+      lwss: [
+        [0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 0]
+      ],
+      rPentomino: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 1, 0]
+      ],
+      block: [
+        [1, 1],
+        [1, 1]
+      ],
+      beehive: [
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [0, 1, 1, 0]
+      ],
+      acorn: [
+        [0, 0, 1, 0, 0, 0, 0],
+        [1, 0, 0, 1, 1, 1, 0],
+        [0, 1, 0, 0, 0, 0, 0]
+      ],
+      diehard: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 1, 1, 1, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0]
+      ],
+      pulsar: [
+        [0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,0,1,1,1,0],
+        [0,1,0,0,0,0,0,1,0],
+        [0,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,0,1,1,1,0],
+        [0,1,0,0,0,0,0,1,0],
+        [0,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,0,0]
+      ],
+      pentadecathlon: [
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,1,0,1,1,1,0],
+        [0,1,0,0,0,0,0,1,0,0],
+        [0,1,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,1,1,0,1,1,1,0],
+        [0,1,0,0,0,0,0,1,0,0],
+        [0,1,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,0,0,0]
+      ]
+    };
+
+    // --- Pattern Library Modal Logic ---
+    const patternLibraryBtn = document.getElementById("patternLibraryBtn");
+    const patternLibraryModal = document.getElementById("patternLibraryModal");
+    const patternLibraryGrid = document.getElementById("patternLibraryGrid");
+    const closePatternLibraryBtn = document.getElementById("closePatternLibraryBtn");
+
+    let patternPreviewActive = false;
+    let previewPattern = null;
+    let previewPatternRows = 0;
+    let previewPatternCols = 0;
+
+    // Show modal on button click
+    patternLibraryBtn.addEventListener("click", () => {
+      patternLibraryModal.style.display = "flex";
+      patternLibraryGrid.innerHTML = "";
+      // Add all pattern previews
+      for (const [name, pattern] of Object.entries(patterns)) {
+        const previewDiv = document.createElement("div");
+        previewDiv.style.display = "flex";
+        previewDiv.style.flexDirection = "column";
+        previewDiv.style.alignItems = "center";
+        previewDiv.style.cursor = "pointer";
+        previewDiv.style.width = "70px";
+        previewDiv.style.userSelect = "none";
+        previewDiv.title = name;
+
+        const label = document.createElement("div");
+        label.style.fontSize = "11px";
+        label.style.marginTop = "4px";
+        label.style.color = "#222";
+        label.innerText = name;
+        previewDiv.appendChild(label);
+
+        previewDiv.addEventListener("click", () => {
+          patternLibraryModal.style.display = "none";
+          // Activate preview mode
+          previewPattern = pattern;
+          previewPatternRows = pattern.length;
+          previewPatternCols = pattern[0].length;
+          patternPreviewActive = true;
+        });
+
+        patternLibraryGrid.appendChild(previewDiv);
+      }
+    });
+
+    // Close modal
+    closePatternLibraryBtn.addEventListener("click", () => {
+      patternLibraryModal.style.display = "none";
+    });
+
+    // --- Pattern Preview on Grid ---
+    function drawPatternPreviewOnGrid(mouseX, mouseY) {
+      if (!patternPreviewActive || !previewPattern) return;
+      // Draw preview overlay on gameCanvas
+      drawCells(); // redraw normal cells first
+      ctx.save();
+      ctx.globalAlpha = 0.6;
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "#00c800";
+      ctx.lineWidth = 2;
+      // Calculate top-left cell
+      const col = Math.floor(mouseX / resolution);
+      const row = Math.floor(mouseY / resolution);
+      for (let i = 0; i < previewPatternRows; i++) {
+        for (let j = 0; j < previewPatternCols; j++) {
+          if (previewPattern[i][j]) {
+            const x = (col + j) * resolution;
+            const y = (row + i) * resolution;
+            ctx.fillStyle = "#00ff00";
+            ctx.fillRect(x, y, resolution, resolution);
+            ctx.strokeRect(x, y, resolution, resolution);
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+    // Mouse move: show preview if active
+    gameCanvas.addEventListener("mousemove", (event) => {
+      if (patternPreviewActive && previewPattern) {
+        const rect = gameCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        drawPatternPreviewOnGrid(x, y);
+      }
+    });
+
+    // Mouse click: place pattern if preview active
+    gameCanvas.addEventListener("mousedown", (event) => {
+      if (patternPreviewActive && previewPattern) {
+        const rect = gameCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const col = Math.floor(x / resolution);
+        const row = Math.floor(y / resolution);
+        // Place pattern at mouse location
+        for (let i = 0; i < previewPatternRows; i++) {
+          for (let j = 0; j < previewPatternCols; j++) {
+            const r = row + i;
+            const c = col + j;
+            if (r >= 0 && r < rows && c >= 0 && c < cols) {
+              grid[r][c] = previewPattern[i][j];
+            }
+          }
+        }
+        patternPreviewActive = false;
+        previewPattern = null;
+        drawCells();
+      }
+    });
+
+    // On mouse leave, remove preview
+    gameCanvas.addEventListener("mouseleave", () => {
+      if (patternPreviewActive) {
+        drawCells();
+      }
+    });
+
+    // On mouse move (when not previewing), just draw cells as normal
+    gameCanvas.addEventListener("mousemove", (event) => {
+      if (!patternPreviewActive && isDrawing) {
+        drawCellAtEvent(event);
+      }
+    });
+
+    // On mouse up, stop drawing
+    window.addEventListener("mouseup", () => {
+      isDrawing = false;
+    });
   </script>
 </body>
 </html>
