@@ -163,3 +163,336 @@ function add_zero(digit)
             setInterval(clock, 1000);
 
 
+
+// Customizable colors with default values
+let customColors = {
+  blockColor: "#007bff", // block fill and glow
+  gridColor: "#a3b1c6",  // grid borders
+  bgColor: "#e0e5ec"     // background
+};
+
+document.getElementById("blockColor").addEventListener("change", (e) => {
+  customColors.blockColor = e.target.value;
+  drawGrid();
+  drawShapes();
+});
+document.getElementById("gridColor").addEventListener("change", (e) => {
+  customColors.gridColor = e.target.value;
+  drawGrid();
+});
+document.getElementById("bgColor").addEventListener("change", (e) => {
+  customColors.bgColor = e.target.value;
+  document.body.style.background = customColors.bgColor;
+  drawGrid();
+});
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const restartButton = document.getElementById("restartButton");
+const scoreDisplay = document.getElementById("score");
+
+const GRID_WIDTH = 9;
+const GRID_HEIGHT = 7;
+const CELL_SIZE = 50;
+const SHAPE_COUNT = 3;
+
+// Set canvas dimensions (responsive for mobile)
+canvas.width = GRID_WIDTH * CELL_SIZE;
+canvas.height = (GRID_HEIGHT + 2) * CELL_SIZE; // Extra space for shapes below the grid
+
+let score = 0;
+let grid = Array.from({ length: GRID_HEIGHT }, () => Array(GRID_WIDTH).fill(0));
+let shapes = [];
+let currentShape = null;
+let offsetX, offsetY;
+
+// Variables for flash effect when lines clear
+let flashCells = [];
+let flashAlpha = 1;
+let flashing = false;
+
+// Shape templates (1's represent filled cells)
+const shapeTemplates = [
+    [[1]],
+    [[1, 1]],
+    [[1], [1]],
+    [[1, 1], [1, 0]],
+    [[1, 1], [0, 1]],
+    [[1, 1], [1, 1]],
+    [[1, 1, 1]],
+    [[1], [1], [1]],
+    [[1, 1, 0], [0, 1, 1]]
+];
+
+// Generate shapes to choose from
+function generateShapes() {
+    shapes = [];
+    for (let i = 0; i < SHAPE_COUNT; i++) {
+        let pattern = shapeTemplates[Math.floor(Math.random() * shapeTemplates.length)];
+        shapes.push({
+            pattern,
+            x: i * 150 + 50, // Horizontal positioning at bottom
+            y: GRID_HEIGHT * CELL_SIZE + 20, // Position shapes below the grid
+            width: pattern[0].length * CELL_SIZE,
+            height: pattern.length * CELL_SIZE
+        });
+    }
+}
+
+// Draw the game grid and placed blocks
+function drawGrid() {
+    // Fill background with custom bg color
+    ctx.fillStyle = customColors.bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid cells and their borders
+    for (let row = 0; row < GRID_HEIGHT; row++) {
+        for (let col = 0; col < GRID_WIDTH; col++) {
+            const x = col * CELL_SIZE;
+            const y = row * CELL_SIZE;
+            ctx.strokeStyle = customColors.gridColor;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+            
+            // Draw filled block with glow effect
+            if (grid[row][col] === 1) {
+                ctx.save();
+                ctx.shadowColor = customColors.blockColor;
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = customColors.blockColor;
+                ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                ctx.restore();
+            }
+            
+            // Draw flash overlay if needed
+            if (flashCells.some(cell => cell.row === row && cell.col === col)) {
+                ctx.fillStyle = `rgba(255,255,255,${flashAlpha})`;
+                ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+            }
+        }
+    }
+}
+
+// Draw the draggable shapes available to place
+function drawShapes() {
+    shapes.forEach(shape => {
+        ctx.save();
+        ctx.shadowColor = customColors.blockColor;
+        ctx.shadowBlur = 8;
+        shape.pattern.forEach((row, rIdx) => {
+            row.forEach((cell, cIdx) => {
+                if (cell) {
+                    ctx.fillStyle = customColors.blockColor;
+                    ctx.fillRect(shape.x + cIdx * CELL_SIZE, shape.y + rIdx * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            });
+        });
+        ctx.restore();
+    });
+}
+
+// Animate flash effect for cleared cells
+function animateFlash() {
+    if (!flashing) return;
+    flashAlpha -= 0.05;
+    if (flashAlpha <= 0) {
+        flashAlpha = 1;
+        flashCells = [];
+        flashing = false;
+        drawGrid();
+        drawShapes();
+        return;
+    }
+    drawGrid();
+    drawShapes();
+    requestAnimationFrame(animateFlash);
+}
+
+// Convert page coordinates to canvas coordinates
+function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    if (e.touches) {
+        x = e.touches[0].clientX - rect.left;
+        y = e.touches[0].clientY - rect.top;
+    } else {
+        x = e.offsetX;
+        y = e.offsetY;
+    }
+    return { x, y };
+}
+
+// Handle drag start for both mouse and touch
+function startDrag(e) {
+    e.preventDefault();
+    const { x: mouseX, y: mouseY } = getCanvasCoords(e);
+    for (let shape of shapes) {
+        if (mouseX >= shape.x && mouseX <= shape.x + shape.width &&
+            mouseY >= shape.y && mouseY <= shape.y + shape.height) {
+            currentShape = shape;
+            offsetX = mouseX - shape.x;
+            offsetY = mouseY - shape.y;
+            return;
+        }
+    }
+}
+
+// Handle drag move for both mouse and touch
+function moveDrag(e) {
+    if (!currentShape) return;
+    e.preventDefault();
+    const { x: mouseX, y: mouseY } = getCanvasCoords(e);
+    currentShape.x = mouseX - offsetX;
+    currentShape.y = mouseY - offsetY;
+    drawGrid();
+    drawShapes();
+}
+
+// Handle drag end for both mouse and touch
+function endDrag(e) {
+    if (!currentShape) return;
+    let snappedX = Math.round(currentShape.x / CELL_SIZE) * CELL_SIZE;
+    let snappedY = Math.round(currentShape.y / CELL_SIZE) * CELL_SIZE;
+
+    let gridX = snappedX / CELL_SIZE;
+    let gridY = snappedY / CELL_SIZE;
+
+    // Check if shape fits within grid bounds
+    if (
+        gridX < 0 ||
+        gridX + currentShape.pattern[0].length > GRID_WIDTH ||
+        gridY < 0 ||
+        gridY + currentShape.pattern.length > GRID_HEIGHT
+    ) {
+        currentShape = null;
+        drawGrid();
+        drawShapes();
+        return;
+    }
+
+    // Check for collision with already placed blocks
+    let collision = false;
+    for (let r = 0; r < currentShape.pattern.length; r++) {
+        for (let c = 0; c < currentShape.pattern[0].length; c++) {
+            if (currentShape.pattern[r][c] === 1) {
+                if (grid[gridY + r][gridX + c] === 1) {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        if (collision) break;
+    }
+    if (collision) {
+        // On collision, trigger a shake effect
+        canvas.classList.add("shake");
+        setTimeout(() => canvas.classList.remove("shake"), 300);
+        currentShape = null;
+        drawGrid();
+        drawShapes();
+        return;
+    }
+
+    // Place the shape onto the grid and mark cells for flash effect
+    for (let r = 0; r < currentShape.pattern.length; r++) {
+        for (let c = 0; c < currentShape.pattern[0].length; c++) {
+            if (currentShape.pattern[r][c] === 1) {
+                grid[gridY + r][gridX + c] = 1;
+                flashCells.push({ row: gridY + r, col: gridX + c });
+            }
+        }
+    }
+
+    shapes = shapes.filter(shape => shape !== currentShape);
+    currentShape = null;
+
+    clearLines();
+    if (shapes.length === 0) generateShapes();
+
+    if (flashCells.length > 0) {
+        flashing = true;
+        flashAlpha = 1;
+        requestAnimationFrame(animateFlash);
+    } else {
+        drawGrid();
+        drawShapes();
+    }
+}
+
+// Check and clear complete rows and columns, update score accordingly
+function clearLines() {
+    let cleared = 0;
+    let cellsToFlash = [];
+
+    // Clear full rows
+    for (let row = 0; row < GRID_HEIGHT; row++) {
+        if (grid[row].every(cell => cell === 1)) {
+            for (let col = 0; col < GRID_WIDTH; col++) {
+                cellsToFlash.push({ row, col });
+            }
+            grid[row] = Array(GRID_WIDTH).fill(0);
+            cleared++;
+        }
+    }
+
+    // Clear full columns
+    for (let col = 0; col < GRID_WIDTH; col++) {
+        if (grid.every(row => row[col] === 1)) {
+            for (let row = 0; row < GRID_HEIGHT; row++) {
+                cellsToFlash.push({ row, col });
+                grid[row][col] = 0;
+            }
+            cleared++;
+        }
+    }
+
+    if (cleared > 0) {
+        score += cleared * 10;
+        scoreDisplay.textContent = `Score: ${score}`;
+        flashCells = flashCells.concat(cellsToFlash);
+        flashing = true;
+        flashAlpha = 1;
+        requestAnimationFrame(animateFlash);
+    }
+}
+
+// Restart the game
+restartButton.addEventListener("click", () => {
+    grid = Array.from({ length: GRID_HEIGHT }, () => Array(GRID_WIDTH).fill(0));
+    score = 0;
+    scoreDisplay.textContent = "Score: 0";
+    generateShapes();
+    drawGrid();
+    drawShapes();
+});
+
+// Set up event listeners for both mouse and touch interactions
+canvas.addEventListener("mousedown", startDrag);
+canvas.addEventListener("mousemove", moveDrag);
+canvas.addEventListener("mouseup", endDrag);
+canvas.addEventListener("touchstart", startDrag);
+canvas.addEventListener("touchmove", moveDrag);
+canvas.addEventListener("touchend", endDrag);
+
+// Add shake effect CSS via JavaScript
+const style = document.createElement('style');
+style.textContent = `
+@keyframes shake {
+  0% { transform: translate(0px, 0px); }
+  25% { transform: translate(5px, 0px); }
+  50% { transform: translate(-5px, 0px); }
+  75% { transform: translate(5px, 0px); }
+  100% { transform: translate(0px, 0px); }
+}
+.shake {
+  animation: shake 0.3s;
+}
+`;
+document.head.appendChild(style);
+
+// Initialize and draw game
+generateShapes();
+drawGrid();
+drawShapes();
+
+
