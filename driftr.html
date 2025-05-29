@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Drifting Car</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { margin: 0; overflow: hidden; background: #111; }
     canvas { display: block; background: #1c1c1c; }
-    /* Simple position for control panel */
+    /* Top control panel */
     #controls {
       position: absolute;
       top: 10px;
@@ -15,13 +16,36 @@
       font-family: sans-serif;
       z-index: 10;
     }
-    #controls label {
-      margin-right: 10px;
-    }
+    #controls label { margin-right: 10px; }
     #controls button {
       padding: 5px 10px;
       font-size: 14px;
       margin-left: 10px;
+    }
+    /* Joystick container */
+    #joystickContainer {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      touch-action: none;
+      z-index: 20;
+    }
+    /* Joystick knob */
+    #joystick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 60px;
+      height: 60px;
+      margin-left: -30px;
+      margin-top: -30px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      touch-action: none;
     }
   </style>
 </head>
@@ -35,6 +59,10 @@
     <button id="saveButton">Save</button>
   </div>
   <canvas id="game"></canvas>
+  <!-- Joystick replaces mobile arrow buttons -->
+  <div id="joystickContainer">
+    <div id="joystick"></div>
+  </div>
   <script>
     // Setup canvas and context
     const canvas = document.getElementById('game');
@@ -47,7 +75,60 @@
     document.addEventListener('keydown', e => keys[e.key] = true);
     document.addEventListener('keyup', e => keys[e.key] = false);
     
-    // Car object and defaults
+    // ----- Joystick setup -----
+    const joystickContainer = document.getElementById('joystickContainer');
+    const joystickElem = document.getElementById('joystick');
+    const joystick = { x: 0, y: 0, active: false }; // x,y relative to container center
+    const maxRadius = 50;
+    
+    // Helper to clamp the joystick vector
+    function clampJoystick(dx, dy) {
+      const dist = Math.hypot(dx, dy);
+      if (dist > maxRadius) {
+        const scale = maxRadius / dist;
+        return { x: dx * scale, y: dy * scale };
+      }
+      return { x: dx, y: dy };
+    }
+    
+    function resetJoystick() {
+      joystick.x = 0;
+      joystick.y = 0;
+      joystick.active = false;
+      // reset knob to center
+      joystickElem.style.transform = 'translate(-50%, -50%)';
+    }
+    
+    joystickContainer.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      joystick.active = true;
+      updateJoystick(e);
+    });
+    
+    // Listen for pointermove on window so dragging outside is captured.
+    window.addEventListener('pointermove', (e) => {
+      if (!joystick.active) return;
+      updateJoystick(e);
+    });
+    
+    window.addEventListener('pointerup', (e) => {
+      resetJoystick();
+    });
+    
+    function updateJoystick(e) {
+      const rect = joystickContainer.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      // Calculate vector from center even if pointer is outside
+      const dx = e.clientX - rect.left - centerX;
+      const dy = e.clientY - rect.top - centerY;
+      const clamped = clampJoystick(dx, dy);
+      joystick.x = clamped.x;
+      joystick.y = clamped.y;
+      joystickElem.style.transform = `translate(${clamped.x}px, ${clamped.y}px)`;
+    }
+    
+    // ----- Car and Physics -----
     const car = {
       x: canvas.width / 2,
       y: canvas.height / 2,
@@ -56,32 +137,28 @@
       angle: 0,
       velocityX: 0,
       velocityY: 0,
-      acceleration: 1200,       // pixels/second^2
-      friction: 0.98,           // general slowdown factor
-      driftFactor: 1,           // lateral slide
-      gripFactor: 1.3,          // steering response
-      maxSpeed: 500             // pixels/second
+      acceleration: 1000,  // pixels/second^2
+      friction: 0.98,
+      driftFactor: 1,
+      gripFactor: 1,
+      maxSpeed: 500,
+      lateralFriction: 0.99  // Lateral friction to sustain drift
     };
     
-    // Load saved hue or default to 20
+    // Car hue control
     let customCarHue = localStorage.getItem('carHue') || 20;
-    // Create the car color in HSL using the hue slider value, fixed saturation/lightness
     let customCarColor = `hsl(${customCarHue}, 80%, 50%)`;
-    
-    // Update slider UI with loaded value
     const carHueSlider = document.getElementById('carHue');
     const hueValueDisplay = document.getElementById('hueValue');
     carHueSlider.value = customCarHue;
     hueValueDisplay.textContent = customCarHue;
     
-    // Update hue on slider change, updating color and displayed value
     carHueSlider.addEventListener('input', (e) => {
       customCarHue = e.target.value;
       hueValueDisplay.textContent = customCarHue;
       customCarColor = `hsl(${customCarHue}, 80%, 50%)`;
     });
     
-    // Save button persists the selected hue to localStorage
     document.getElementById('saveButton').addEventListener('click', () => {
       localStorage.setItem('carHue', customCarHue);
       alert('Car hue saved!');
@@ -89,98 +166,260 @@
     
     let lastTime = performance.now();
     
-    function updateCar(dt) {
-      const steerInput = (keys['ArrowLeft'] ? -1 : 0) + (keys['ArrowRight'] ? 1 : 0);
-      const throttle  = (keys['ArrowUp']   ? 1 : 0) + (keys['ArrowDown']  ? -1 : 0);
-      
-      // Apply throttle force
-      const force = throttle * car.acceleration * dt;
-      car.velocityX += Math.cos(car.angle) * force;
-      car.velocityY += Math.sin(car.angle) * force;
-      
-      // Velocity decomposition
-      const sin = Math.sin(car.angle);
-      const cos = Math.cos(car.angle);
-      const forwardVel = car.velocityX * cos + car.velocityY * sin;
-      const lateralVel = -car.velocityX * sin + car.velocityY * cos;
-      const adjustedLateralVel = lateralVel * car.driftFactor;
-      
-      // Recompose velocity
-      car.velocityX = forwardVel * cos - adjustedLateralVel * sin;
-      car.velocityY = forwardVel * sin + adjustedLateralVel * cos;
-      
-      // Limit speed
-      const speed = Math.hypot(car.velocityX, car.velocityY);
-      if (speed > car.maxSpeed) {
-        const scale = car.maxSpeed / speed;
-        car.velocityX *= scale;
-        car.velocityY *= scale;
-      }
-      
-      // Apply friction
-      car.velocityX *= car.friction;
-      car.velocityY *= car.friction;
-      
-      // Update position
-      car.x += car.velocityX * dt;
-      car.y += car.velocityY * dt;
-      
-      // Steering based on speed
-      if (Math.abs(speed) > 5) {
-        const steerStrength = steerInput * car.gripFactor / Math.max(speed, 50);
-        car.angle += steerStrength * speed * dt * 3; // tuning factor
-      }
-      
-      // Wrap around screen
-      if (car.x < 0) car.x = canvas.width;
-      if (car.x > canvas.width) car.x = 0;
-      if (car.y < 0) car.y = canvas.height;
-      if (car.y > canvas.height) car.y = 0;
-    }
+    // After setting up canvas, add tire mark canvas:
+const tireCanvas = document.createElement('canvas');
+tireCanvas.width = canvas.width;
+tireCanvas.height = canvas.height;
+const tireCtx = tireCanvas.getContext('2d');
+
+    // --- Obstacles ---
+    // Define a simple array of obstacles (rectangles)
+    const obstacles = [
+  // Starting area
+  { x: 50,  y: 50,  width: 200, height: 30 },
+  { x: 300, y: 100, width: 100, height: 80 },
+  { x: 450, y: 50,  width: 150, height: 30 },
+  
+  // Midfield clusters.
+  { x: 650, y: 150, width: 200, height: 50 },
+  { x: 900, y: 50,  width: 50,  height: 200 },
+  { x: 50,  y: 300, width: 100, height: 100 },
+  { x: 200, y: 350, width: 250, height: 30 },
+  { x: 500, y: 400, width: 150, height: 50 },
+  { x: 700, y: 350, width: 100, height: 100 },
+  { x: 850, y: 400, width: 200, height: 40 },
+  
+  // Extended area: creating corridors and clusters.
+  { x: 1100, y: 200, width: 150, height: 60 },
+  { x: 1000, y: 500, width: 250, height: 40 },
+  { x: 1300, y: 300, width: 150, height: 150 },
+  { x: 1500, y: 100, width: 200, height: 30 },
+  { x: 1700, y: 50,  width: 100, height: 100 },
+  { x: 1600, y: 400, width: 200, height: 80 },
+  
+  // Far area: a maze-like cluster.
+  { x: 1800, y: 250, width: 120, height: 30 },
+  { x: 1900, y: 300, width: 30,  height: 200 },
+  { x: 1700, y: 500, width: 150, height: 40 },
+  { x: 2000, y: 100, width: 100, height: 150 },
+  { x: 2100, y: 300, width: 200, height: 30 },
+  { x: 2200, y: 400, width: 150, height: 50 },
+  
+  // Random scattered obstacles to add variety.
+  { x: 800,  y: 600, width: 80,  height: 30 },
+  { x: 1200, y: 700, width: 100, height: 50 },
+  { x: 1400, y: 650, width: 120, height: 30 },
+  { x: 1600, y: 750, width: 80,  height: 30 },
+  { x: 1900, y: 650, width: 150, height: 40 }
+];
     
-    function drawCar() {
+    function drawObstacles() {
       ctx.save();
-      ctx.translate(car.x, car.y);
-      ctx.rotate(car.angle);
-      ctx.fillStyle = customCarColor;
-      ctx.fillRect(-car.width/2, -car.height/2, car.width, car.height);
+      ctx.fillStyle = "#555";
+      obstacles.forEach(ob => {
+        ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+      });
       ctx.restore();
     }
     
-    // Create an offscreen canvas for desaturation
-    const offscreen = document.createElement('canvas');
-    offscreen.width = canvas.width;
-    offscreen.height = canvas.height;
-    const offCtx = offscreen.getContext('2d');
+    // Simple collision detection using a circle approximation.
+    // clamping helper:
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
+    
+    // Replace your checkCollision function with this improved version:
+    function checkCollision() {
+      // Use a circular approximation for the car.
+      const carRadius = Math.hypot(car.width, car.height) / 2;
+      obstacles.forEach(ob => {
+        const closestX = clamp(car.x, ob.x, ob.x + ob.width);
+        const closestY = clamp(car.y, ob.y, ob.y + ob.height);
+        const distX = car.x - closestX;
+        const distY = car.y - closestY;
+        const distanceSquared = distX * distX + distY * distY;
+        if (distanceSquared < carRadius * carRadius) {
+          const distance = Math.sqrt(distanceSquared) || 1;
+          const nx = distX / distance;
+          const ny = distY / distance;
+          // Calculate penetration and separate car out of the obstacle.
+          const penetration = carRadius - distance;
+          car.x += nx * penetration;
+          car.y += ny * penetration;
+          // Remove the component of velocity in the direction of the collision normal.
+          let dot = car.velocityX * nx + car.velocityY * ny;
+          car.velocityX = car.velocityX - dot * nx;
+          car.velocityY = car.velocityY - dot * ny;
+        }
+      });
+    }
+    
+    // --- Update Car Physics ---
+    // Update Car Physics with tire marks:
+    // ----- Update Car Physics (including new joystick throttle cone and digital steering) -----
+function updateCar(dt) {
+  // --- Joystick Input ---
+  let jThrottle = 0;
+  if (joystick.active) {
+    const jMag = Math.hypot(joystick.x, joystick.y);
+    const jAngle = Math.atan2(joystick.y, joystick.x); // 0 = right, π/2 = down, -π/2 = up
+    jThrottle = jMag / maxRadius;
+    // Instead of directly setting the angle, limit the turn rate.
+    const maxTurnRate = 3; // radians per second (adjust as needed)
+    let angleDiff = jAngle - car.angle;
+    // Normalize angleDiff to the interval [-π, π]:
+    angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
+    const maxTurnDelta = maxTurnRate * dt;
+    if (angleDiff > maxTurnDelta) {
+      angleDiff = maxTurnDelta;
+    } else if (angleDiff < -maxTurnDelta) {
+      angleDiff = -maxTurnDelta;
+    }
+    car.angle += angleDiff;
+  }
+  
+  // --- Keyboard Input (used only when joystick is inactive) ---
+  // Added WASD along with arrow keys.
+  const keyThrottle = ((keys['ArrowUp'] || keys['w'] ? 1 : 0) + (keys['ArrowDown'] || keys['s'] ? -1 : 0));
+  const keySteer    = ((keys['ArrowLeft'] || keys['a'] ? -1 : 0) + (keys['ArrowRight'] || keys['d'] ? 1 : 0));
+  
+  // Use joystick throttle if active; otherwise, use keyboard throttle.
+  const throttle = joystick.active ? jThrottle : keyThrottle;
+  
+  // For steering, if joystick is inactive, use keyboard steering.
+  const steerInput = joystick.active ? 0 : keySteer; // keyboard determines steering if joystick not used
 
+  // Apply throttle force along the car's current (or joystick-defined) angle.
+  const force = throttle * car.acceleration * dt;
+  car.velocityX += Math.cos(car.angle) * force;
+  car.velocityY += Math.sin(car.angle) * force;
+  
+  // --- Drift Physics ---
+  const sinA = Math.sin(car.angle);
+  const cosA = Math.cos(car.angle);
+  // Decompose velocity.
+  let forwardVel = car.velocityX * cosA + car.velocityY * sinA;
+  let lateralVel = -car.velocityX * sinA + car.velocityY * cosA;
+  
+  // Save lateral velocity for tire marks.
+  car.lateralVel = lateralVel;
+  
+  // Apply friction separately.
+  forwardVel *= car.friction;
+  lateralVel *= car.lateralFriction;
+  
+  // Recompose velocity.
+  car.velocityX = forwardVel * cosA - lateralVel * sinA;
+  car.velocityY = forwardVel * sinA + lateralVel * cosA;
+  
+  // --- Steering for Keyboard Controls (only if joystick is not active) ---
+  if (!joystick.active && Math.abs(steerInput) > 0 && Math.hypot(car.velocityX, car.velocityY) > 5) {
+    const steerStrength = steerInput * car.gripFactor / Math.max(Math.hypot(car.velocityX, car.velocityY), 50);
+    car.angle += steerStrength * Math.hypot(car.velocityX, car.velocityY) * dt * 3;
+  }
+  
+  // Update position.
+  car.x += car.velocityX * dt;
+  car.y += car.velocityY * dt;
+  
+  // Collision and screen wrapping.
+  checkCollision();
+  if (car.x < 0) car.x = canvas.width;
+  if (car.x > canvas.width) car.x = 0;
+  if (car.y < 0) car.y = canvas.height;
+  if (car.y > canvas.height) car.y = 0;
+  
+  // --- Calculate Drift Angle for Tire Marks ---
+  let vAngle = Math.atan2(car.velocityY, car.velocityX);
+  let driftAngle = Math.abs(((vAngle - car.angle) + Math.PI) % (2 * Math.PI) - Math.PI);
+  const driftAngleThreshold = 50 * Math.PI / 180; // 50° in radians
+  if (driftAngle >= driftAngleThreshold) {
+    drawTireMarks();
+  }
+}
+    
+    // ----- Update Tire Marks Drawing -----
+function drawTireMarks() {
+  tireCtx.save();
+  tireCtx.translate(car.x, car.y);
+  tireCtx.rotate(car.angle);
+  
+  // Fixed mark dimensions.
+  const markWidth = 3;
+  const markHeight = 8;
+  // Define fixed offsets for each tire.
+  const frontLeft  = { x: -car.width/2 + 3, y: -car.height/2 };
+  const frontRight = { x:  car.width/2 - 3 - markWidth, y: -car.height/2 };
+  const rearLeft   = { x: -car.width/2 + 3, y:  car.height/2 - markHeight };
+  const rearRight  = { x:  car.width/2 - 3 - markWidth, y:  car.height/2 - markHeight };
+  
+  tireCtx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  tireCtx.fillRect(frontLeft.x, frontLeft.y, markWidth, markHeight);
+  tireCtx.fillRect(frontRight.x, frontRight.y, markWidth, markHeight);
+  tireCtx.fillRect(rearLeft.x, rearLeft.y, markWidth, markHeight);
+  tireCtx.fillRect(rearRight.x, rearRight.y, markWidth, markHeight);
+  
+  tireCtx.restore();
+}
+    
+    // Use the car texture but overlay customCarColor tint so changing hue works:
+    const carTexture = new Image();
+    carTexture.src = 'car.png'; // Replace with your texture path
+    
+    // ----- Update Car Drawing -----
+function drawCar() {
+  ctx.save();
+  ctx.translate(car.x, car.y);
+  ctx.rotate(car.angle);
+  if (carTexture.complete) {
+    // Apply hue rotation filter so the texture retains detail.
+    ctx.filter = `hue-rotate(${customCarHue}deg)`;
+    ctx.drawImage(carTexture, -car.width/2, -car.height/2, car.width, car.height);
+    ctx.filter = 'none';
+  } else {
+    ctx.fillStyle = customCarColor;
+    ctx.fillRect(-car.width/2, -car.height/2, car.width, car.height);
+  }
+  ctx.restore();
+}
+    
+    // --- Main Loop ---
     function loop(currentTime) {
       const dt = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
       
-      // 1. Fade the entire canvas slightly toward black.
-      // Adjust the alpha (e.g. 0.05) to control fading speed.
-      ctx.fillStyle = 'rgba(28, 28, 28, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 2. Convert the current canvas (the trail) to grayscale.
-      // Use the offscreen canvas so the new car drawing is not affected.
-      offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-      offCtx.filter = 'grayscale(100%)';
-      offCtx.drawImage(canvas, 0, 0);
+      // Hide joystick if keyboard is being used.
+      updateInputDisplay();
       
-      // 3. Blend the grayscale image back onto the main canvas with a low alpha.
-      ctx.globalAlpha = 0.05;
-      ctx.drawImage(offscreen, 0, 0);
-      ctx.globalAlpha = 1;
-      offCtx.filter = 'none';
-
+      // Clear main canvas.
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Fade tireCanvas over approximately 5 seconds (fade slower with lower alpha).
+      tireCtx.globalCompositeOperation = 'destination-out';
+      tireCtx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+      tireCtx.fillRect(0, 0, tireCanvas.width, tireCanvas.height);
+      tireCtx.globalCompositeOperation = 'source-over';
+      
+      // Draw tire marks beneath obstacles and car.
+      ctx.drawImage(tireCanvas, 0, 0);
+      
       updateCar(dt);
+      drawObstacles();
       drawCar();
       
       requestAnimationFrame(loop);
     }
-    
+
     requestAnimationFrame(loop);
+    
+    function updateInputDisplay() {
+  if (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'] ||
+      keys['w'] || keys['a'] || keys['s'] || keys['d']) {
+    joystickContainer.style.display = "none";
+  } else {
+    joystickContainer.style.display = "block";
+  }
+}
   </script>
 </body>
 </html>
