@@ -1,217 +1,404 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <meta charset="UTF-8" />
-  <title>Algot's web-workshop</title>
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://kit.fontawesome.com/87a560d2c6.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #000000;
-    }
+<html>
+    <head>
+        <title>Algot.fun</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <style>
+            body {
+                background-color: #000;
+                margin: 0;
+                overflow: hidden;
+            }
+            canvas {
+                position: fixed;
+                top: 0; left: 0; width: 100vw; height: 100vh;
+                display: block;
+                opacity: 0;
+                transition: opacity 1.2s;
+            }
+            #welcome-text {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #fff;
+                font-size: 2.5em;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 1.2s;
+                z-index: 10;
+                text-shadow: 0 2px 16px #000, 0 0 4px #fff8;
+            }
+            #menu-card, #item-card {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.96);
+                border-radius: 24px;
+                box-shadow: 0 8px 32px #000a;
+                padding: 40px 80px 32px 80px;
+                display: flex;
+                align-items: center;
+                z-index: 20;
+                min-width: 320px;
+                min-height: 260px;
+                opacity: 0;
+                transition: opacity 0.8s;
+            }
+            .arrow {
+                font-size: 2.5em;
+                color: #fff;
+                cursor: pointer;
+                user-select: none;
+                padding: 0 18px;
+                transition: color 0.2s;
+                filter: drop-shadow(0 0 8px #fff8);
+            }
+            .arrow:hover {
+                color: #ffd700;
+            }
+            .card-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 1 1 auto;
+                min-width: 180px;
+            }
+            .card-icon, .item-icon {
+                font-size: 5em;
+                margin-bottom: 24px;
+                user-select: none;
+                color: #fff;
+                filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgba(255, 255, 255, 0.533));
+                text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
+            }
+            .card-title, .item-title {
+                font-size: 2em;
+                color: #fff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                margin-top: 12px;
+                text-align: center;
+                letter-spacing: 0.04em;
+                text-shadow: 0 2px 12px #000a;
+            }
+            @media (max-width: 600px) {
+                #menu-card, #item-card { padding: 24px 12px; min-width: 180px; }
+                .card-icon, .item-icon { font-size: 3em; }
+                .card-title, .item-title { font-size: 1.2em; }
+                .arrow { font-size: 1.5em; padding: 0 8px; }
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="topo"></canvas>
+        <div id="welcome-text">Welcome to Algot's web-workshop</div>
+        <button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; z-index: 1000;">Download App</button>
+        <div id="menu-card" style="display:none;">
+            <div class="arrow arrow-left" id="menu-arrow-left">&#8592;</div>
+            <div class="card-content" id="card-content">
+                <div class="card-icon" id="card-icon"></div>
+                <div class="card-title" id="card-title"></div>
+            </div>
+            <div class="arrow arrow-right" id="menu-arrow-right">&#8594;</div>
+        </div>
+        <div id="item-card" style="display:none;">
+            <div class="arrow arrow-left" id="item-arrow-left">&#8592;</div>
+            <div class="card-content" id="item-content">
+                <div class="item-icon" id="item-icon"></div>
+                <div class="item-title" id="item-title"></div>
+            </div>
+            <div class="arrow arrow-right" id="item-arrow-right">&#8594;</div>
+        </div>
+        <script>
+        const canvas = document.getElementById('topo');
+        const ctx = canvas.getContext('2d');
 
-    #particles-js {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      background-color: #000000;
-    }
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            // Use dpr for pixel size, but use dpr-adjusted width/height for drawing
+            canvas.width = Math.round(window.innerWidth * dpr);
+            canvas.height = Math.round(window.innerHeight * dpr);
+            canvas.style.width = window.innerWidth + "px";
+            canvas.style.height = window.innerHeight + "px";
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
 
-    h1{
-      position: absolute;
-      top: 50vh;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 5vw;
-      text-align: center;
-      color: #ffffff;
-      transition: text-shadow 0.3s ease;
-      text-decoration: none;
-    }
-    h1:hover {
-      color: #ffffff;
-      transition: text-shadow 0.3s ease;
-      text-shadow: 0px 0px 20px rgb(255, 255, 255);
-    }
+        function randomBlobs(num, w, h) {
+            let blobs = [];
+            for (let i = 0; i < num; i++) {
+                blobs.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: 80 + Math.random() * 120,
+                    strength: 0.7 + Math.random() * 0.6
+                });
+            }
+            return blobs;
+        }
 
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 60px; /* Initial width showing only icons */
-      background-color: #111;
-      overflow-x: hidden;
-      transition: width 0.3s ease; /* Smooth expand/collapse */
-      z-index: 1000;
-      border-right: 1px solid transparent;
-      border-image: linear-gradient(0deg, #ff3d00, #eeff00) 1;
-    }
+        function field(x, y, blobs) {
+            let sum = 0;
+            for (const b of blobs) {
+                let dx = x - b.x, dy = y - b.y;
+                sum += b.strength * Math.exp(-(dx*dx + dy*dy)/(2*b.r*b.r));
+            }
+            return sum;
+        }
 
-    /* Sidebar expands on hover */
-    .sidebar:hover {
-      width: 200px; /* Expanded width */
-    }
+        function drawTopo() {
+            // Use CSS pixel size for drawing, since ctx is scaled
+            const w = window.innerWidth, h = window.innerHeight;
+            ctx.clearRect(0, 0, w, h);
+            const blobs = randomBlobs(8 + Math.floor(Math.random()*6), w, h);
+            const lines = 18;
+            const step = 5; // Larger step for more pixelation and speed
+            for (let l = 0; l < lines; l++) {
+                const level = l / (lines - 1) * 1.5 + 0.2;
+                const alpha = 0.12 + 0.09 * Math.random();
+                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                for (let x = 0; x < w; x += step) {
+                    for (let y = 0; y < h; y += step) {
+                        const v = field(x + step/2, y + step/2, blobs);
+                        if (Math.abs(v - level) < 0.03) {
+                            ctx.fillRect(x, y, step, step);
+                        }
+                    }
+                }
+            }
+        }
 
-    /* Sidebar links */
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      text-decoration: none;
-      font-size: 1.2em;
-      color: #ffffff;
-      transition: background-color 0.3s ease;
-    }
+        // Main categories and their FontAwesome icons
+        const categories = [
+            { title: "Arcade", icon: "fa-solid fa-gamepad", items: [
+                { title: "Snake", icon: "fa-solid fa-shapes", link: "snake.html" },
+                { title: "Tetris", icon: "fa-solid fa-cube", link: "tetris.html" },
+                { title: "Coreball", icon: "fa-solid fa-bullseye", link: "cball.html" }, // fixed
+                { title: "Clicker", icon: "fa-solid fa-mouse-pointer", link: "clicker.html" },
+                { title: "Polytrack", icon: "fa-solid fa-road", link: "car.html" } // fixed
+            ]},
+            { title: "Misc", icon: "fa-solid fa-asterisk", items: [
+                { title: "DVD", icon: "fa-solid fa-compact-disc", link: "dvd.html" },
+                { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" } // fixed
+            ]},
+            { title: "Social", icon: "fa-solid fa-users", items: [
+                { title: "Driftr", icon: "fa-solid fa-car-side", link: "https://low-groovy-clematis.glitch.me/driftr.html" }, // fixed (external)
+                { title: "Chat", icon: "fa-solid fa-comments", link: "visits.html" } // fixed
+            ]},
+            { title: "Tools", icon: "fa-solid fa-wrench", items: [
+                { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
+                { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
+            ]},
+            { title: "Gambling", icon: "fa-solid fa-dice", items: [
+                { title: "CaseClicker", icon: "fa-solid fa-box-open", link: "CSGO-Case-Clicker-master/CaseClicker.html" }, // fixed
+                { title: "Roulette", icon: "fa-solid fa-circle-notch", link: "roulette.html" },
+                { title: "Slots", icon: "fa-solid fa-coins", link: "slot.html" }, // fixed
+                { title: "5050", icon: "fa-solid fa-percent", link: "5050.html" },
+                { title: "Random", icon: "fa-solid fa-random", link: "Webbutton.html" } // fixed
+            ]}
+        ];
+        let currentCategory = 0;
+        let inItems = false;
+        let currentItem = 0;
 
-    /* Sidebar link hover effect */
-    .sidebar a:hover {
-      background-color: #575757;
-    }
+        // Update main menu card
+        function updateMenuCard() {
+            const icon = document.getElementById('card-icon');
+            const title = document.getElementById('card-title');
+            icon.innerHTML = `<i class="${categories[currentCategory].icon}"></i>`;
+            title.textContent = categories[currentCategory].title;
+        }
 
-    /* Sidebar icons */
-    .sidebar a i {
-      margin-right: 10px; /* Space between icon and text */
-      min-width: 30px; /* Align icons */
-      text-align: center;
-    }
+        // Update item card
+        function updateItemCard() {
+            const icon = document.getElementById('item-icon');
+            const title = document.getElementById('item-title');
+            const item = categories[currentCategory].items[currentItem];
+            icon.innerHTML = `<i class="${item.icon}"></i>`;
+            title.textContent = item.title;
+        }
 
-    /* Sidebar text (hidden by default) */
-    .sidebar a span {
-      display: none; /* Hide text initially */
-      white-space: nowrap; /* Prevent text wrapping */
-    }
+        // Show main menu
+        function showMenuCard() {
+            inItems = false;
+            document.getElementById('menu-card').style.display = "flex";
+            document.getElementById('menu-card').style.opacity = "0";
+            updateMenuCard();
+            setTimeout(() => { document.getElementById('menu-card').style.opacity = "1"; }, 30);
+            document.getElementById('item-card').style.display = "none";
+        }
 
-    /* Show text when sidebar is expanded */
-    .sidebar:hover a span {
-      display: inline-block;
-    }
+        // Show item menu
+        function showItemCard() {
+            inItems = true;
+            currentItem = 0;
+            document.getElementById('menu-card').style.opacity = "0";
+            setTimeout(() => {
+                document.getElementById('menu-card').style.display = "none";
+                updateItemCard();
+                document.getElementById('item-card').style.display = "flex";
+                document.getElementById('item-card').style.opacity = "0";
+                setTimeout(() => { document.getElementById('item-card').style.opacity = "1"; }, 30);
+            }, 800);
+        }
 
-    button#installBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      z-index: 1000; /* Ensure button is above other elements */
-    }
-    
-    
-  </style>
-</head>
-<body>
-  <div id="particles-js"></div>
-  <button id="installBtn" style="display: none;">Download App</button>
+        // Hide item menu and return to main menu
+        function backToMenu() {
+            document.getElementById('item-card').style.opacity = "0";
+            setTimeout(() => {
+                document.getElementById('item-card').style.display = "none";
+                // Fix: fade in menu card after item card is hidden
+                document.getElementById('menu-card').style.display = "flex";
+                document.getElementById('menu-card').style.opacity = "0";
+                updateMenuCard();
+                setTimeout(() => { document.getElementById('menu-card').style.opacity = "1"; }, 30);
+                inItems = false;
+            }, 800);
+        }
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <a href="/snake.html"><i class="fas fa-dragon"></i><span>Snake</span></a>
-    <a href="/cball.html"><i class="fas fa-gamepad"></i><span>CoreBall</span></a>
-    <a href="/tetris.html"><i class="fas fa-th"></i><span>Tetris</span></a>
-    <a href="/clicker.html"><i class="fas fa-mouse"></i><span>Clicker</span></a>
-    <a href="/dvd.html"><i class="fas fa-tv"></i><span>DVD</span></a>
-    <a href="https://low-groovy-clematis.glitch.me/driftr.html"><i class="fas fa-car-side"></i><span>Drift</span></a>
-    <a href="/life.html"><i class="fas fa-heart"></i><span>Cells</span></a>
-    <a href="/clock.html"><i class="fas fa-clock"></i><span>Clock</span></a>
-    <a href="/car.html"><i class="fas fa-flag-checkered"></i><span>Polytrack</span></a>
-    <a href="/visits.html"><i class="fas fa-comments"></i><span>Chat</span></a>
-    <a href="/tptest.html"><i class="fas fa-tachometer-alt"></i><span>Speed</span></a>
-    <a href="/Webbutton.html"><i class="fas fa-random"></i><span>Random</span></a>
-    <a href="/roulette.html"><i class="fas fa-ring"></i><span>Roulette</span></a>
-    <a href="/slot.html"><i class="fas fa-clover"></i><span>Slots</span></a>
-    <a href="/CSGO-Case-Clicker-master/CaseClicker.html"><i class="fas fa-gift"></i><span>CaseClicker</span></a>
-    <a href="/5050.html"><i class="fas fa-divide"></i><span>50/50</span></a>
-    <a href="/EXTRACT.zip" type="download"><i class="fas fa-download"></i><span>Algot.newtab</span></a>
-    
-  </div>
- <h1>Welcome to Algot's web-workshop</h1>
-</body>
-<script src="/particles.js"></script>
-<script>
-  const installBtn = document.getElementById('installBtn');
+        // Arrow click handlers for main menu and item menu
+        document.getElementById('menu-arrow-left').onclick = () => {
+            if (inItems) return;
+            currentCategory = (currentCategory + categories.length - 1) % categories.length;
+            updateMenuCard();
+        };
+        document.getElementById('menu-arrow-right').onclick = () => {
+            if (inItems) return;
+            currentCategory = (currentCategory + 1) % categories.length;
+            updateMenuCard();
+        };
+        document.getElementById('item-arrow-left').onclick = () => {
+            if (!inItems) return;
+            currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
+            updateItemCard();
+        };
+        document.getElementById('item-arrow-right').onclick = () => {
+            if (!inItems) return;
+            currentItem = (currentItem + 1) % categories[currentCategory].items.length;
+            updateItemCard();
+        };
 
-// Detect if app is already installed
-const isInStandaloneMode = () =>
-  window.matchMedia('(display-mode: standalone)').matches ||
-  window.navigator.standalone === true; // For iOS Safari
+        // Keyboard navigation
+        window.addEventListener('keydown', e => {
+            const menuVisible = document.getElementById('menu-card').style.display === "flex";
+            const itemVisible = document.getElementById('item-card').style.display === "flex";
+            if (!menuVisible && !itemVisible) return;
+            if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+                if (inItems) {
+                    currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
+                    updateItemCard();
+                } else {
+                    currentCategory = (currentCategory + categories.length - 1) % categories.length;
+                    updateMenuCard();
+                }
+                e.preventDefault();
+            }
+            if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+                if (inItems) {
+                    currentItem = (currentItem + 1) % categories[currentCategory].items.length;
+                    updateItemCard();
+                } else {
+                    currentCategory = (currentCategory + 1) % categories.length;
+                    updateMenuCard();
+                }
+                e.preventDefault();
+            }
+            if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+                if (inItems) {
+                    // Go to link
+                    window.location.href = categories[currentCategory].items[currentItem].link;
+                } else {
+                    showItemCard();
+                }
+                e.preventDefault();
+            }
+            if (e.key === "Escape" && inItems) {
+                backToMenu();
+                e.preventDefault();
+            }
+        });
 
-if (isInStandaloneMode()) {
-  installBtn.style.display = 'none';
-}
+        // Mouse click on main menu to enter items
+        document.getElementById('card-content').onclick = () => {
+            if (!inItems) showItemCard();
+        };
+        // Mouse click on item card to go to link
+        document.getElementById('item-content').onclick = () => {
+            if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
+        };
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('Service Worker registered'))
-    .catch(err => console.error('Service Worker registration failed:', err));
-}
+        // Show menu after welcome text fades out
+        function fadeInCanvas() {
+            canvas.style.opacity = "0";
+            // Force reflow to restart transition
+            void canvas.offsetWidth;
+            canvas.style.opacity = "1";
+            // Fade in text at the same time
+            const text = document.getElementById('welcome-text');
+            text.style.opacity = "0";
+            void text.offsetWidth;
+            text.style.opacity = "1";
+            // Fade out text after 2.2s
+            setTimeout(() => {
+                text.style.opacity = "0";
+                // Show menu card after text fades out
+                setTimeout(showMenuCard, 1200);
+            }, 2200);
+        }
 
+        function redrawWithFade() {
+            drawTopo();
+            fadeInCanvas();
+        }
 
-let deferredPrompt;
+        resize();
+        redrawWithFade();
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevent auto prompt
-  e.preventDefault();
-  deferredPrompt = e;
+        window.addEventListener('resize', () => { resize(); redrawWithFade(); });
+        // window.addEventListener('click', redrawWithFade); // <-- Remove or comment out this line
 
-  if (!isInStandaloneMode()) {
-    installBtn.style.display = 'block';
-  }
+        // --- PWA Install Prompt ---
+        const installBtn = document.getElementById('installBtn');
 
-  installBtn.addEventListener('click', () => {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('App installed');
-      } else {
-        console.log('App not installed');
-      }
-      deferredPrompt = null;
-    });
-  });
-});
+        // Detect if app is already installed
+        const isInStandaloneMode = () =>
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true; // For iOS Safari
 
+        if (isInStandaloneMode()) {
+            installBtn.style.display = 'none';
+        }
 
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.error('Service Worker registration failed:', err));
+        }
 
+        let deferredPrompt;
 
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent auto prompt
+            e.preventDefault();
+            deferredPrompt = e;
 
-  // Apply random vibrant gradient to the sidebar
-  function applyRandomGradient() {
-    const color1 = getRandomColor();
-    const color2 = getRandomColor();
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.style.borderImage = `linear-gradient(45deg, ${color1}, ${color2}) 1`;
-  }
+            if (!isInStandaloneMode()) {
+                installBtn.style.display = 'block';
+            }
 
-  // Call the function on page load
-  document.addEventListener('DOMContentLoaded', applyRandomGradient);
-
-</script>
+            installBtn.addEventListener('click', () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App installed');
+                    } else {
+                        console.log('App not installed');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
+        </script>
+    </body>
 </html>
