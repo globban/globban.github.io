@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chill Blob Place</title>
+  <style>
+    body {
+      background: #222;
+      margin: 0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      display: flex;
+      flex-direction: row;
+      margin-top: 24px;
+      gap: 24px;
+    }
+    #pixel-canvas {
+      image-rendering: pixelated;
+      background: #222;
+      border: 4px solid #444;
+      box-shadow: 0 0 24px #000a;
+      margin-bottom: 0;
+      display: block;
+    }
+    #chat {
+      background: #181818;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #000a;
+      width: 260px;
+      height: 384px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      color: #fff;
+      font-size: 1em;
+      word-break: break-word;
+    }
+    #chat-input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 1em;
+      padding: 10px;
+      background: #222;
+      color: #fff;
+      border-top: 1px solid #333;
+      box-sizing: border-box;
+    }
+    #chat-form {
+      display: flex;
+      flex-direction: row;
+    }
+    #chat-send {
+      background: #2ecc40;
+      color: #fff;
+      border: none;
+      padding: 0 16px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 0 0 8px 0;
+    }
+    #chat-send:active {
+      background: #27ae60;
+    }
+    #username {
+      margin: 0 0 8px 0;
+      color: #fff;
+      font-size: 1em;
+      text-align: center;
+    }
+    #color-picker {
+      margin: 8px 0 0 0;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      outline: none;
+      margin: 0 2px;
+      box-shadow: 0 1px 4px #000a;
+    }
+    .color-btn.selected {
+      border: 2px solid #2ecc40;
+      box-shadow: 0 0 8px #2ecc40;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="color:#fff;margin-top:18px;">Blob Chill Place</h2>
+  <div id="game-container">
+    <canvas id="pixel-canvas" width="320" height="240"></canvas>
+    <div id="chat">
+      <div id="username"></div>
+      <div id="color-picker"></div>
+      <div id="chat-messages"></div>
+      <form id="chat-form" autocomplete="off">
+        <input id="chat-input" maxlength="80" placeholder="Say something..." autocomplete="off" />
+        <button id="chat-send" type="submit">➤</button>
+      </form>
+    </div>
+  </div>
+<script>
+// --- Multiplayer backend using WebSocket (public echo server for demo) ---
+const WS_URL = "wss://ws.postman-echo.com/raw";
+
+// --- Blob world config ---
+const TILE_SIZE = 16;
+const WORLD_W = 20, WORLD_H = 15;
+const canvas = document.getElementById("pixel-canvas");
+const ctx = canvas.getContext("2d");
+
+// --- Blob color palette ---
+const BLOB_COLORS = [
+  "#fff", "#222", "#fc3", "#3cf", "#2ecc40", "#f66", "#c3f", "#ffb347", "#ff69b4", "#6cf", "#000"
+];
+
+// --- User state ---
+let username = localStorage.chillUsername || randomName();
+let blobColor = localStorage.chillBlobColor || BLOB_COLORS[0];
+let myId = Math.random().toString(36).slice(2,10);
+let myPos = {x: Math.floor(Math.random()*WORLD_W), y: Math.floor(Math.random()*WORLD_H)};
+let others = {}; // id: {x, y, color, name, lastSeen}
+
+// --- Username prompt ---
+function randomName() {
+  const emojis = ["🌸","🌼","🌈","🌻","🌙","🌊","🌵","🌞","🍀","🍄","🍉","🍕","🍔","🍩","🍪","🍦"];
+  return emojis[Math.floor(Math.random()*emojis.length)] +
+    String.fromCharCode(65+Math.floor(Math.random()*26)) +
+    String.fromCharCode(65+Math.floor(Math.random()*26));
+}
+function askName() {
+  let n = prompt("Pick a username (3 chars, emoji allowed):", username);
+  if (!n) n = randomName();
+  n = [...n.trim()].slice(0,3).join("");
+  if (n.length < 1) n = randomName();
+  username = n;
+  localStorage.chillUsername = username;
+  document.getElementById("username").textContent = "You: " + username;
+  sendState();
+}
+document.getElementById("username").textContent = "You: " + username;
+document.getElementById("username").onclick = askName;
+
+// --- Color picker ---
+const colorPicker = document.getElementById("color-picker");
+function renderColorPicker() {
+  colorPicker.innerHTML = "";
+  BLOB_COLORS.forEach(color => {
+    const btn = document.createElement("button");
+    btn.className = "color-btn" + (color === blobColor ? " selected" : "");
+    btn.style.background = color;
+    btn.onclick = e => {
+      blobColor = color;
+      localStorage.chillBlobColor = color;
+      renderColorPicker();
+      sendState();
+      e.preventDefault();
+    };
+    colorPicker.appendChild(btn);
+  });
+}
+renderColorPicker();
+
+// --- Draw checkered world and blobs ---
+function draw() {
+  // Checkered background
+  for (let y=0; y<WORLD_H; ++y) for (let x=0; x<WORLD_W; ++x) {
+    ctx.fillStyle = (x+y)%2 === 0 ? "#fff" : "#111";
+    ctx.fillRect(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+  // Others
+  for (const id in others) {
+    const o = others[id];
+    if (Date.now() - o.lastSeen > 6000) continue; // timeout
+    ctx.fillStyle = o.color;
+    ctx.beginPath();
+    ctx.arc(o.x*TILE_SIZE+TILE_SIZE/2, o.y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/2-2, 0, 2*Math.PI);
+    ctx.fill();
+  }
+  // Me
+  ctx.fillStyle = blobColor;
+  ctx.beginPath();
+  ctx.arc(myPos.x*TILE_SIZE+TILE_SIZE/2, myPos.y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/2-2, 0, 2*Math.PI);
+  ctx.fill();
+}
+setInterval(draw, 60);
+
+// --- Movement controls ---
+document.addEventListener("keydown", e => {
+  let moved = false;
+  if (e.key === "ArrowUp" || e.key === "w") { if (myPos.y > 0) myPos.y--; moved = true; }
+  if (e.key === "ArrowDown" || e.key === "s") { if (myPos.y < WORLD_H-1) myPos.y++; moved = true; }
+  if (e.key === "ArrowLeft" || e.key === "a") { if (myPos.x > 0) myPos.x--; moved = true; }
+  if (e.key === "ArrowRight" || e.key === "d") { if (myPos.x < WORLD_W-1) myPos.x++; moved = true; }
+  if (moved) sendState();
+});
+// Touch controls: swipe
+let touchStartX=0, touchStartY=0;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+});
+canvas.addEventListener('touchend', e => {
+  if (e.changedTouches.length === 1) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 10 && myPos.x < WORLD_W-1) myPos.x++;
+      else if (dx < -10 && myPos.x > 0) myPos.x--;
+    } else {
+      if (dy > 10 && myPos.y < WORLD_H-1) myPos.y++;
+      else if (dy < -10 && myPos.y > 0) myPos.y--;
+    }
+    sendState();
+  }
+});
+
+// --- WebSocket multiplayer and chat ---
+let ws = new WebSocket(WS_URL);
+ws.onopen = () => {
+  sendState();
+};
+ws.onmessage = e => {
+  let msg;
+  try { msg = JSON.parse(e.data); } catch { return; }
+  if (msg.type === "state" && msg.id !== myId) {
+    others[msg.id] = {
+      x: msg.x, y: msg.y, color: msg.color, lastSeen: Date.now()
+    };
+  }
+  if (msg.type === "chat") {
+    addChat(msg.name, msg.text, msg.color);
+  }
+};
+ws.onclose = () => {
+  setTimeout(() => { ws = new WebSocket(WS_URL); }, 2000);
+};
+function sendState() {
+  if (ws.readyState === 1) {
+    ws.send(JSON.stringify({
+      type: "state",
+      id: myId,
+      x: myPos.x,
+      y: myPos.y,
+      color: blobColor
+    }));
+  }
+}
+
+// --- Chat ---
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatMessages = document.getElementById("chat-messages");
+function addChat(name, text, color) {
+  let div = document.createElement("div");
+  div.innerHTML = `<b style="color:${color}">${escapeHTML(name)}</b>: ${escapeHTML(text)}`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+function escapeHTML(str) {
+  return (str||"").replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+chatForm.onsubmit = e => {
+  e.preventDefault();
+  let text = chatInput.value.trim();
+  if (!text) return;
+  if (ws.readyState === 1) {
+    ws.send(JSON.stringify({
+      type: "chat",
+      name: username,
+      color: blobColor,
+      text: text
+    }));
+  }
+  chatInput.value = "";
+};
+</script>
+</body>
+</html>

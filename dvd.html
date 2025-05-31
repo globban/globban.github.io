@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bouncing DVD Logo</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: #000000;
+      position: relative;
+    }
+    #dvdCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="dvdCanvas"></canvas>
+  <script>
+    // --- Logo Settings ---
+    const logoWidth = 160 * 1.75;
+    const logoHeight = 80 * 1.75;
+
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('dvdCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // --- Logo State ---
+    let x = Math.random() * (canvas.width - logoWidth);
+    let y = Math.random() * (canvas.height - logoHeight);
+    let dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+    let dy = 3 * (Math.random() > 0.5 ? 1 : -1);
+
+    // --- Trail State ---
+    let showTrail = true;
+    let prevX = x + logoWidth / 2;
+    let prevY = y + logoHeight / 2;
+    canvas.addEventListener('click', () => {
+      showTrail = !showTrail;
+    });
+
+    // --- Load Logo Image ---
+    const dvdImg = new Image();
+    dvdImg.src = 'dvd.svg';
+
+    // --- Color State ---
+    let logoColor = getWashedOutColor(); // Start as washed out
+
+    // --- Drawing Functions ---
+    function drawLogo(x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, logoWidth, logoHeight);
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.drawImage(dvdImg, x, y, logoWidth, logoHeight);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.restore();
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function getWashedOutColor() {
+      // Pastel/washed out color: high lightness, low-medium saturation
+      const h = Math.floor(Math.random() * 360);
+      const s = 30 + Math.random() * 30; // 30-60%
+      const l = 70 + Math.random() * 20; // 70-90%
+      return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    // --- Animation Loop ---
+    function animate() {
+      drawBackground();
+
+      // Draw red trail if enabled
+      if (showTrail) {
+        ctx.save();
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x + logoWidth / 2, y + logoHeight / 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (dvdImg.complete) {
+        drawLogo(x, y, logoColor);
+      }
+
+      // Save current position for next frame's trail
+      prevX = x + logoWidth / 2;
+      prevY = y + logoHeight / 2;
+
+      // Move logo
+      x += dx;
+      y += dy;
+
+      // Hitbox: match image bounds
+      let bounced = false;
+      if (x <= 0 || x + logoWidth >= canvas.width) {
+        dx = -dx;
+        bounced = true;
+        x = Math.max(0, Math.min(x, canvas.width - logoWidth));
+      }
+      if (y <= 0 || y + logoHeight >= canvas.height) {
+        dy = -dy;
+        bounced = true;
+        y = Math.max(0, Math.min(y, canvas.height - logoHeight));
+      }
+
+      // Change color on bounce
+      if (bounced) {
+        logoColor = getWashedOutColor();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // --- Start Animation when image is loaded ---
+    dvdImg.onload = () => {
+      drawBackground();
+      animate();
+    };
+  </script>
+</body>
+</html>

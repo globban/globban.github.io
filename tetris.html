@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Soft Body Tetris</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #222; }
+    body { display: flex; align-items: center; justify-content: center; height: 100vh; }
+    #particles-js { position: fixed; width: 100vw; height: 100vh; z-index: 0; top: 0; left: 0; }
+    canvas { background: #111; box-shadow: 0 0 20px #000a; touch-action: none; z-index: 1; position: relative; }
+    #score, #highscore {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-family: monospace;
+      font-size: 2em;
+      z-index: 10;
+      text-shadow: 0 2px 8px #000a;
+      user-select: none;
+    }
+    #highscore {
+      top: 56px;
+      font-size: 1.2em;
+      color: #ffb347;
+    }
+    #controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 10;
+      user-select: none;
+    }
+    .btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #333;
+      color: #fff;
+      font-size: 2em;
+      border: none;
+      box-shadow: 0 2px 8px #000a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.85;
+      touch-action: manipulation;
+    }
+    .btn:active { background: #555; }
+    #fullscreen {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      z-index: 20;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+    #fullscreen:active { background: #555; }
+  </style>
+</head>
+<body>
+<div id="particles-js"></div>
+<div id="score">Score: 0</div>
+<div id="highscore">Highscore: 0</div>
+<!-- Scoreboard with player names -->
+<div id="scoreboard" style="position:absolute;right:16px;top:80px;z-index:10;background:#222c;padding:12px 18px;border-radius:12px;box-shadow:0 2px 8px #000a;color:#fff;font-family:monospace;min-width:140px;">
+  <div style="font-size:1.2em;font-weight:bold;margin-bottom:8px;">Scoreboard</div>
+  <ol id="scoreboard-list" style="margin:0;padding-left:1.2em;"></ol>
+</div>
+<button id="fullscreen">Fullscreen</button>
+<canvas id="tetris" width="300" height="600"></canvas>
+<div id="controls" style="display:none">
+  <button class="btn" id="left">&#8592;</button>
+  <button class="btn" id="down">&#8595;</button>
+  <button class="btn" id="rotate">&#8635;</button>
+  <button class="btn" id="right">&#8594;</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+// --- particles.js background (like index.html) ---
+particlesJS("particles-js", {
+  "particles": {
+    "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+    "color": { "value": "#fff" },
+    "shape": { "type": "circle" },
+    "opacity": { "value": 0.2, "random": true },
+    "size": { "value": 3, "random": true },
+    "line_linked": { "enable": true, "distance": 120, "color": "#fff", "opacity": 0.15, "width": 1 },
+    "move": { "enable": true, "speed": 1.2, "direction": "none", "random": false, "straight": false, "out_mode": "out" }
+  },
+  "interactivity": {
+    "detect_on": "canvas",
+    "events": { "onhover": { "enable": false }, "onclick": { "enable": false }, "resize": true }
+  },
+  "retina_detect": true
+});
+
+// --- Tetris code ---
+const COLS = 10, ROWS = 20, BLOCK = 30;
+const canvas = document.getElementById('tetris');
+const ctx = canvas.getContext('2d');
+const scoreDiv = document.getElementById('score');
+const highscoreDiv = document.getElementById('highscore');
+let score = 0;
+let highscore = Number(localStorage.tetrisHighscore || 0);
+highscoreDiv.textContent = "Highscore: " + highscore;
+
+// Tetromino shapes
+const SHAPES = [
+  [[1,1,1,1]], // I
+  [[1,1],[1,1]], // O
+  [[0,1,0],[1,1,1]], // T
+  [[1,0,0],[1,1,1]], // J
+  [[0,0,1],[1,1,1]], // L
+  [[1,1,0],[0,1,1]], // S
+  [[0,1,1],[1,1,0]]  // Z
+];
+const COLORS = ["#3cf", "#fc3", "#c3f", "#f66", "#6f6", "#6cf", "#fc6"];
+
+// Soft body parameters
+const SPRING = 0.2, DAMP = 0.7, MASS = 1;
+
+// Each block in a tetromino is a soft body point
+class SoftBlock {
+  constructor(x, y, color) {
+    this.x = x * BLOCK;
+    this.y = y * BLOCK;
+    this.ox = this.x;
+    this.oy = this.y;
+    this.vx = 0;
+    this.vy = 0;
+    this.color = color;
+  }
+  update(targetX, targetY) {
+    // Spring force to target
+    let fx = (targetX - this.x) * SPRING;
+    let fy = (targetY - this.y) * SPRING;
+    // Damping
+    this.vx = (this.vx + fx) * DAMP;
+    this.vy = (this.vy + fy) * DAMP;
+    // Gravity
+    this.vy += 0.2;
+    // Move
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+  draw(px, py) {
+    ctx.save();
+    ctx.translate(px + this.x, py + this.y);
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(BLOCK/2, BLOCK/2, BLOCK/2-2, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Tetromino class
+class Tetromino {
+  constructor(shape, color) {
+    this.shape = shape;
+    this.color = color;
+    this.x = 3;
+    this.y = 0;
+    this.blocks = [];
+    for (let r=0; r<shape.length; ++r) {
+      for (let c=0; c<shape[r].length; ++c) {
+        if (shape[r][c]) {
+          this.blocks.push(new SoftBlock(c, r, color));
+        }
+      }
+    }
+  }
+  move(dx, dy, board) {
+    this.x += dx;
+    this.y += dy;
+    if (this.collide(board)) {
+      this.x -= dx;
+      this.y -= dy;
+      return false;
+    }
+    return true;
+  }
+  rotate(board) {
+    // Simple 90deg rotation
+    let newShape = [];
+    for (let c=0; c<this.shape[0].length; ++c) {
+      newShape[c] = [];
+      for (let r=this.shape.length-1; r>=0; --r) {
+        newShape[c][this.shape.length-1-r] = this.shape[r][c];
+      }
+    }
+    let oldShape = this.shape;
+    this.shape = newShape;
+    // Rebuild blocks
+    let i = 0;
+    for (let r=0; r<newShape.length; ++r) {
+      for (let c=0; c<newShape[r].length; ++c) {
+        if (newShape[r][c]) {
+          if (this.blocks[i]) {
+            this.blocks[i].ox = c * BLOCK;
+            this.blocks[i].oy = r * BLOCK;
+          }
+          i++;
+        }
+      }
+    }
+    if (this.collide(board)) this.shape = oldShape;
+  }
+  collide(board) {
+    let i = 0;
+    for (let r=0; r<this.shape.length; ++r) {
+      for (let c=0; c<this.shape[r].length; ++c) {
+        if (this.shape[r][c]) {
+          let nx = this.x + c;
+          let ny = this.y + r;
+          if (nx < 0 || nx >= COLS || ny >= ROWS || (ny >= 0 && board[ny][nx])) {
+            return true;
+          }
+          i++;
+        }
+      }
+    }
+    return false;
+  }
+  update() {
+    // Animate soft body blocks to their logical positions
+    let i = 0;
+    for (let r=0; r<this.shape.length; ++r) {
+      for (let c=0; c<this.shape[r].length; ++c) {
+        if (this.shape[r][c]) {
+          let targetX = c * BLOCK;
+          let targetY = r * BLOCK;
+          this.blocks[i].update(targetX, targetY);
+          i++;
+        }
+      }
+    }
+  }
+  draw() {
+    let px = this.x * BLOCK;
+    let py = this.y * BLOCK;
+    for (let b of this.blocks) b.draw(px, py);
+  }
+}
+
+// Board
+let board = [];
+for (let r=0; r<ROWS; ++r) {
+  board[r] = Array(COLS).fill(0);
+}
+
+let current = spawn();
+let dropCounter = 0, dropInterval = 500, lastTime = 0;
+let gameOver = false;
+
+function spawn() {
+  let idx = Math.floor(Math.random()*SHAPES.length);
+  return new Tetromino(SHAPES[idx], COLORS[idx]);
+}
+
+function merge(tet) {
+  let i = 0;
+  for (let r=0; r<tet.shape.length; ++r) {
+    for (let c=0; c<tet.shape[r].length; ++c) {
+      if (tet.shape[r][c]) {
+        let nx = tet.x + c, ny = tet.y + r;
+        if (ny >= 0) board[ny][nx] = tet.color;
+        i++;
+      }
+    }
+  }
+}
+
+function sweep() {
+  let lines = 0;
+  outer: for (let r=ROWS-1; r>=0; --r) {
+    for (let c=0; c<COLS; ++c) if (!board[r][c]) continue outer;
+    board.splice(r,1);
+    board.unshift(Array(COLS).fill(0));
+    r++;
+    lines++;
+  }
+  if (lines > 0) {
+    score += [0, 40, 100, 300, 1200][lines] || lines*100;
+    scoreDiv.textContent = "Score: " + score;
+    if (score > highscore) {
+      highscore = score;
+      localStorage.tetrisHighscore = highscore;
+      highscoreDiv.textContent = "Highscore: " + highscore;
+    }
+  }
+}
+
+function drawBoard() {
+  for (let r=0; r<ROWS; ++r) {
+    for (let c=0; c<COLS; ++c) {
+      if (board[r][c]) {
+        ctx.save();
+        ctx.fillStyle = board[r][c];
+        ctx.beginPath();
+        ctx.arc(c*BLOCK+BLOCK/2, r*BLOCK+BLOCK/2, BLOCK/2-2, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+}
+
+// --- Scoreboard logic with player names ---
+function getScoreboard() {
+  return JSON.parse(localStorage.tetrisScoreboard || "[]");
+}
+function setScoreboard(arr) {
+  localStorage.tetrisScoreboard = JSON.stringify(arr);
+}
+function updateScoreboard(newScore, playerName) {
+  let board = getScoreboard();
+  board.push({score: newScore, name: playerName});
+  board = board.filter(x => typeof x.score === "number" && typeof x.name === "string");
+  board = board.sort((a,b)=>b.score-a.score).slice(0,10);
+  setScoreboard(board);
+  renderScoreboard();
+}
+function renderScoreboard() {
+  let board = getScoreboard();
+  let html = board.map((s,i)=>`<li>${escapeHTML(s.name)} <b>${s.score}</b></li>`).join("");
+  document.getElementById('scoreboard-list').innerHTML = html || "<li>No scores yet</li>";
+}
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+renderScoreboard();
+
+// --- Prompt for player name (3 chars, allow emoji) ---
+// --- Simple Grapheme Splitter (handles most emoji and ZWJ sequences) ---
+function simpleGraphemeSplit(str) {
+  // Split by Unicode "extended grapheme cluster" using regex (covers most emoji, flags, ZWJ)
+  // This is not perfect, but works for most names and emojis.
+  // Source: https://stackoverflow.com/a/37511463
+  return str.match(/(\P{Mark}\p{Mark}*|\p{Mark}+|\p{Emoji}(?:\u200D\p{Emoji})*)/gu) || [];
+}
+
+function promptPlayerName() {
+  let name = localStorage.tetrisPlayerName || "";
+  while (true) {
+    name = prompt("Enter your player name (3 letters, A-Z/0-9):", name || "AAA") || "";
+    name = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0,3);
+    if (name.length === 3) break;
+    if (name === "") return "???";
+    alert("Name must be exactly 3 letters or numbers (A-Z, 0-9).");
+  }
+  localStorage.tetrisPlayerName = name;
+  return name;
+}
+
+// --- Online Scoreboard Sync ---
+// Replace with your own bin and key from https://jsonbin.io/
+const ONLINE_SCOREBOARD_URL = "https://api.jsonbin.io/v3/b/683a36aa8a456b7966a78229";
+const ONLINE_SCOREBOARD_KEY = "$2a$10$/ixw5jkkHC.ZGSRfFRuDKui80wjbSFtxiGyA2mgw2L.58/CHwNsVK";
+
+// Fetch online scoreboard
+async function fetchOnlineScoreboard() {
+  try {
+    const res = await fetch(ONLINE_SCOREBOARD_URL, {
+      headers: { "X-Master-Key": ONLINE_SCOREBOARD_KEY }
+    });
+    const data = await res.json();
+    return data.record && Array.isArray(data.record.scoreboard) ? data.record.scoreboard : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Save online scoreboard
+async function saveOnlineScoreboard(board) {
+  try {
+    await fetch(ONLINE_SCOREBOARD_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": ONLINE_SCOREBOARD_KEY
+      },
+      body: JSON.stringify({ scoreboard: board })
+    });
+  } catch (e) {}
+}
+
+// Update and render online scoreboard
+async function updateOnlineScoreboard(newScore, playerName) {
+  let board = await fetchOnlineScoreboard();
+  board.push({score: newScore, name: playerName});
+  board = board.filter(x => typeof x.score === "number" && typeof x.name === "string");
+  board = board.sort((a,b)=>b.score-a.score).slice(0,10);
+  await saveOnlineScoreboard(board);
+  renderOnlineScoreboard(board);
+}
+async function renderOnlineScoreboard(board) {
+  if (!board) board = await fetchOnlineScoreboard();
+  let html = board.map((s,i)=>`<li>${escapeHTML(s.name)} <b>${s.score}</b></li>`).join("");
+  document.getElementById('scoreboard-list').innerHTML = html || "<li>No scores yet</li>";
+}
+
+// On page load, show online scoreboard
+renderOnlineScoreboard();
+
+// --- Modify game over logic to update scoreboard with name ---
+function update(time=0) {
+  if (gameOver) return;
+  let delta = time - lastTime;
+  lastTime = time;
+  dropCounter += delta;
+  if (dropCounter > dropInterval) {
+    if (!current.move(0,1,board)) {
+      merge(current);
+      sweep();
+      current = spawn();
+      if (current.collide(board)) {
+        gameOver = true;
+        setTimeout(async () => {
+          let playerName = promptPlayerName();
+          await updateOnlineScoreboard(score, playerName);
+          alert("Game Over!");
+        }, 100);
+        return;
+      }
+    }
+    dropCounter = 0;
+  }
+  current.update();
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBoard();
+  current.draw();
+}
+
+// Keyboard Controls (Arrow keys, WASD)
+document.addEventListener('keydown', e => {
+  if (gameOver) return;
+  if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") current.move(-1,0,board);
+  else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") current.move(1,0,board);
+  else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") current.move(0,1,board);
+  else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") current.rotate(board);
+});
+
+// Touchscreen swipe/tap controls
+let touchStartX = 0, touchStartY = 0, touchMoved = false, touchMovedEnough = false;
+let lastMoveDir = 0;
+let moveRepeatTimer = null;
+canvas.addEventListener('touchstart', e => {
+  if (gameOver) return;
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+    touchMovedEnough = false;
+    lastMoveDir = 0;
+    if (moveRepeatTimer) clearInterval(moveRepeatTimer);
+  }
+});
+canvas.addEventListener('touchmove', e => {
+  if (gameOver) return;
+  if (e.touches.length === 1) {
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    // Lower threshold for more sensitivity
+    const threshold = 6;
+    // Only trigger tap if movement was below threshold
+    if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
+      touchMovedEnough = true;
+    }
+    // Allow continuous left/right movement
+    if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) current.move(1,0,board);
+      else current.move(-1,0,board);
+      touchMoved = true;
+      lastMoveDir = dx > 0 ? 1 : -1;
+      touchStartX = e.touches[0].clientX; // allow repeated moves
+      touchStartY = e.touches[0].clientY;
+    } else if (Math.abs(dy) > threshold && Math.abs(dy) > Math.abs(dx)) {
+      if (dy > 0) {
+        // Soft drop (like pressing down)
+        current.move(0,1,board);
+      }
+      touchMoved = true;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }
+});
+canvas.addEventListener('touchend', e => {
+  if (gameOver) return;
+  // Only rotate if finger did NOT move enough to count as a swipe
+  if (!touchMovedEnough) {
+    current.rotate(board);
+  }
+});
+
+// Fullscreen
+document.getElementById('fullscreen').onclick = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.body.requestFullscreen();
+  }
+};
+
+// Resize canvas for fullscreen
+function resizeForFullscreen() {
+  let w = window.innerWidth, h = window.innerHeight;
+  let scale = Math.min(w/(COLS*BLOCK), h/(ROWS*BLOCK));
+  canvas.width = COLS*BLOCK*scale;
+  canvas.height = ROWS*BLOCK*scale;
+  ctx.setTransform(scale,0,0,scale,0,0);
+}
+window.addEventListener('resize', resizeForFullscreen);
+resizeForFullscreen();
+
+update();
+</script>
+</body>
+</html>
