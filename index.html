@@ -1,116 +1,154 @@
 <html>
-    <head>
-        <title>Algot.fun</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-        <style>
-            body {
-                background-color: #000;
-                margin: 0;
-                overflow: hidden;
-            }
-            canvas {
-                position: fixed;
-                top: 0; left: 0; width: 100vw; height: 100vh;
-                display: block;
-                opacity: 0;
-                transition: opacity 1.2s;
-            }
-            #welcome-text {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                color: #fff;
-                font-size: 2.5em;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 1.2s;
-                z-index: 10;
-                text-shadow: 0 2px 16px #000, 0 0 4px #fff8;
-            }
-            #menu-card, #item-card {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.96);
-                border-radius: 24px;
-                box-shadow: 0 8px 32px #000a;
-                padding: 40px 80px 32px 80px;
-                display: flex;
-                align-items: center;
-                z-index: 20;
-                min-width: 320px;
-                min-height: 260px;
-                opacity: 0;
-                transition: opacity 0.8s;
-            }
-            .arrow {
-                font-size: 2.5em;
-                color: #fff;
-                cursor: pointer;
-                user-select: none;
-                padding: 0 18px;
-                transition: color 0.2s;
-                filter: drop-shadow(0 0 8px #fff8);
-            }
-            .arrow:hover {
-                color: #ffd700;
-            }
-            .card-content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                flex: 1 1 auto;
+
+<head>
+    <title>Algot.fun</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json" />
+
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            opacity: 0;
+            transition: opacity 1.2s;
+        }
+
+        #welcome-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 2.5em;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.2s;
+            z-index: 10;
+            text-shadow: 0 2px 16px #000, 0 0 4px #fff8;
+        }
+
+        #menu-card,
+        #item-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.96);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px #000a;
+            padding: 40px 80px 32px 80px;
+            display: flex;
+            align-items: center;
+            z-index: 20;
+            min-width: 320px;
+            min-height: 260px;
+            opacity: 0;
+            transition: opacity 0.8s;
+        }
+
+        .arrow {
+            font-size: 2.5em;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+            padding: 0 18px;
+            transition: color 0.2s;
+            filter: drop-shadow(0 0 8px #fff8);
+        }
+
+        .arrow:hover {
+            color: #ffd700;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1 1 auto;
+            min-width: 180px;
+        }
+
+        .card-icon,
+        .item-icon {
+            font-size: 5em;
+            margin-bottom: 24px;
+            user-select: none;
+            color: #fff;
+            filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgba(255, 255, 255, 0.533));
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
+        }
+
+        .card-title,
+        .item-title {
+            font-size: 2em;
+            color: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin-top: 12px;
+            text-align: center;
+            letter-spacing: 0.04em;
+            text-shadow: 0 2px 12px #000a;
+        }
+
+        @media (max-width: 600px) {
+
+            #menu-card,
+            #item-card {
+                padding: 24px 12px;
                 min-width: 180px;
             }
-            .card-icon, .item-icon {
-                font-size: 5em;
-                margin-bottom: 24px;
-                user-select: none;
-                color: #fff;
-                filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgba(255, 255, 255, 0.533));
-                text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
+
+            .card-icon,
+            .item-icon {
+                font-size: 3em;
             }
-            .card-title, .item-title {
-                font-size: 2em;
-                color: #fff;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                margin-top: 12px;
-                text-align: center;
-                letter-spacing: 0.04em;
-                text-shadow: 0 2px 12px #000a;
+
+            .card-title,
+            .item-title {
+                font-size: 1.2em;
             }
-            @media (max-width: 600px) {
-                #menu-card, #item-card { padding: 24px 12px; min-width: 180px; }
-                .card-icon, .item-icon { font-size: 3em; }
-                .card-title, .item-title { font-size: 1.2em; }
-                .arrow { font-size: 1.5em; padding: 0 8px; }
+
+            .arrow {
+                font-size: 1.5em;
+                padding: 0 8px;
             }
-        </style>
-    </head>
-    <body>
-        <canvas id="topo"></canvas>
-        <div id="welcome-text">Welcome to Algot's web-workshop</div>
-        <button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; z-index: 1000;">Download App</button>
-        <div id="menu-card" style="display:none;">
-            <div class="arrow arrow-left" id="menu-arrow-left">&#8592;</div>
-            <div class="card-content" id="card-content">
-                <div class="card-icon" id="card-icon"></div>
-                <div class="card-title" id="card-title"></div>
-            </div>
-            <div class="arrow arrow-right" id="menu-arrow-right">&#8594;</div>
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="topo"></canvas>
+    <div id="welcome-text">Welcome to Algot's web-workshop</div>
+    <div id="menu-card" style="display:none;">
+        <div class="arrow arrow-left" id="menu-arrow-left">&#8592;</div>
+        <div class="card-content" id="card-content">
+            <div class="card-icon" id="card-icon"></div>
+            <div class="card-title" id="card-title"></div>
         </div>
-        <div id="item-card" style="display:none;">
-            <div class="arrow arrow-left" id="item-arrow-left">&#8592;</div>
-            <div class="card-content" id="item-content">
-                <div class="item-icon" id="item-icon"></div>
-                <div class="item-title" id="item-title"></div>
-            </div>
-            <div class="arrow arrow-right" id="item-arrow-right">&#8594;</div>
+        <div class="arrow arrow-right" id="menu-arrow-right">&#8594;</div>
+    </div>
+    <div id="item-card" style="display:none;">
+        <div class="arrow arrow-left" id="item-arrow-left">&#8592;</div>
+        <div class="card-content" id="item-content">
+            <div class="item-icon" id="item-icon"></div>
+            <div class="item-title" id="item-title"></div>
         </div>
-        <script>
+        <div class="arrow arrow-right" id="item-arrow-right">&#8594;</div>
+    </div>
+
+    <script>
+
+ 
         const canvas = document.getElementById('topo');
         const ctx = canvas.getContext('2d');
 
@@ -142,7 +180,7 @@
             let sum = 0;
             for (const b of blobs) {
                 let dx = x - b.x, dy = y - b.y;
-                sum += b.strength * Math.exp(-(dx*dx + dy*dy)/(2*b.r*b.r));
+                sum += b.strength * Math.exp(-(dx * dx + dy * dy) / (2 * b.r * b.r));
             }
             return sum;
         }
@@ -151,7 +189,7 @@
             // Use CSS pixel size for drawing, since ctx is scaled
             const w = window.innerWidth, h = window.innerHeight;
             ctx.clearRect(0, 0, w, h);
-            const blobs = randomBlobs(8 + Math.floor(Math.random()*6), w, h);
+            const blobs = randomBlobs(8 + Math.floor(Math.random() * 6), w, h);
             const lines = 18;
             const step = 5; // Larger step for more pixelation and speed
             for (let l = 0; l < lines; l++) {
@@ -160,7 +198,7 @@
                 ctx.fillStyle = `rgba(255,255,255,${alpha})`;
                 for (let x = 0; x < w; x += step) {
                     for (let y = 0; y < h; y += step) {
-                        const v = field(x + step/2, y + step/2, blobs);
+                        const v = field(x + step / 2, y + step / 2, blobs);
                         if (Math.abs(v - level) < 0.03) {
                             ctx.fillRect(x, y, step, step);
                         }
@@ -171,32 +209,42 @@
 
         // Main categories and their FontAwesome icons
         const categories = [
-            { title: "Arcade", icon: "fa-solid fa-gamepad", items: [
-                { title: "Snake", icon: "fa-solid fa-shapes", link: "snake.html" },
-                { title: "Tetris", icon: "fa-solid fa-cube", link: "tetris.html" },
-                { title: "Coreball", icon: "fa-solid fa-bullseye", link: "cball.html" }, // fixed
-                { title: "Clicker", icon: "fa-solid fa-mouse-pointer", link: "clicker.html" },
-                { title: "Polytrack", icon: "fa-solid fa-road", link: "car.html" } // fixed
-            ]},
-            { title: "Misc", icon: "fa-solid fa-asterisk", items: [
-                { title: "DVD", icon: "fa-solid fa-compact-disc", link: "dvd.html" },
-                { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" } // fixed
-            ]},
-            { title: "Social", icon: "fa-solid fa-users", items: [
-                { title: "Driftr", icon: "fa-solid fa-car-side", link: "https://low-groovy-clematis.glitch.me/driftr.html" }, // fixed (external)
-                { title: "Chat", icon: "fa-solid fa-comments", link: "visits.html" } // fixed
-            ]},
-            { title: "Tools", icon: "fa-solid fa-wrench", items: [
-                { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
-                { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
-            ]},
-            { title: "Gambling", icon: "fa-solid fa-dice", items: [
-                { title: "CaseClicker", icon: "fa-solid fa-box-open", link: "CSGO-Case-Clicker-master/CaseClicker.html" }, // fixed
-                { title: "Roulette", icon: "fa-solid fa-circle-notch", link: "roulette.html" },
-                { title: "Slots", icon: "fa-solid fa-coins", link: "slot.html" }, // fixed
-                { title: "5050", icon: "fa-solid fa-percent", link: "5050.html" },
-                { title: "Random", icon: "fa-solid fa-random", link: "Webbutton.html" } // fixed
-            ]}
+            {
+                title: "Arcade", icon: "fa-solid fa-gamepad", items: [
+                    { title: "Snake", icon: "fa-solid fa-shapes", link: "snake.html" },
+                    { title: "Tetris", icon: "fa-solid fa-cube", link: "tetris.html" },
+                    { title: "Coreball", icon: "fa-solid fa-bullseye", link: "cball.html" }, // fixed
+                    { title: "Clicker", icon: "fa-solid fa-mouse-pointer", link: "clicker.html" },
+                    { title: "Slowroads", icon: "fa-solid fa-road", link: "https://slowroads.io/" } // fixed
+                ]
+            },
+            {
+                title: "Misc", icon: "fa-solid fa-asterisk", items: [
+                    { title: "DVD", icon: "fa-solid fa-compact-disc", link: "dvd.html" },
+                    { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" } // fixed
+                ]
+            },
+            {
+                title: "Social", icon: "fa-solid fa-users", items: [
+                    { title: "Driftr", icon: "fa-solid fa-car-side", link: "https://low-groovy-clematis.glitch.me/driftr.html" }, // fixed (external)
+                    { title: "Chat", icon: "fa-solid fa-comments", link: "visits.html" } // fixed
+                ]
+            },
+            {
+                title: "Tools", icon: "fa-solid fa-wrench", items: [
+                    { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
+                    { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
+                ]
+            },
+            {
+                title: "Gambling", icon: "fa-solid fa-dice", items: [
+                    { title: "CaseClicker", icon: "fa-solid fa-box-open", link: "CSGO-Case-Clicker-master/CaseClicker.html" }, // fixed
+                    { title: "Roulette", icon: "fa-solid fa-circle-notch", link: "roulette.html" },
+                    { title: "Slots", icon: "fa-solid fa-coins", link: "slot.html" }, // fixed
+                    { title: "5050", icon: "fa-solid fa-percent", link: "5050.html" },
+                    { title: "Random", icon: "fa-solid fa-random", link: "Webbutton.html" } // fixed
+                ]
+            }
         ];
         let currentCategory = 0;
         let inItems = false;
@@ -359,46 +407,8 @@
         // window.addEventListener('click', redrawWithFade); // <-- Remove or comment out this line
 
         // --- PWA Install Prompt ---
-        const installBtn = document.getElementById('installBtn');
 
-        // Detect if app is already installed
-        const isInStandaloneMode = () =>
-            window.matchMedia('(display-mode: standalone)').matches ||
-            window.navigator.standalone === true; // For iOS Safari
+    </script>
+</body>
 
-        if (isInStandaloneMode()) {
-            installBtn.style.display = 'none';
-        }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(() => console.log('Service Worker registered'))
-                .catch(err => console.error('Service Worker registration failed:', err));
-        }
-
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent auto prompt
-            e.preventDefault();
-            deferredPrompt = e;
-
-            if (!isInStandaloneMode()) {
-                installBtn.style.display = 'block';
-            }
-
-            installBtn.addEventListener('click', () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('App installed');
-                    } else {
-                        console.log('App not installed');
-                    }
-                    deferredPrompt = null;
-                });
-            });
-        });
-        </script>
-    </body>
 </html>
