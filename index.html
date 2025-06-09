@@ -4,8 +4,16 @@
     <title>Algot.fun</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="manifest" href="/manifest.json" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
     <style>
+        @font-face {
+  font-family: dot;
+  src: url(dot.ttf);
+}
+
+#item-card, .item-title, .item-icon, #item-content, .preview-icon {
+    font-family: 'dot' !important;
+}
         body {
             background-color: #000;
             margin: 0;
@@ -20,7 +28,7 @@
             height: 100vh;
             display: block;
             opacity: 0;
-            transition: opacity 1.2s;
+            transition: opacity 0.5s;
         }
 
         #welcome-text {
@@ -29,13 +37,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 2.5em;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 4vw;
+            font-family: 'dot';
             opacity: 0;
             pointer-events: none;
-            transition: opacity 1.2s;
+            transition: opacity 2s;
             z-index: 10;
-            text-shadow: 0 2px 16px #000, 0 0 4px #fff8;
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
+            width: 100%;
+            text-align: center;
         }
 
         #menu-card,
@@ -44,21 +54,21 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.96);
+            background: rgba(0, 0, 0, 0);
             border-radius: 24px;
             box-shadow: 0 8px 32px #000a;
             padding: 40px 80px 32px 80px;
             display: flex;
             align-items: center;
-            z-index: 20;
-            min-width: 320px;
-            min-height: 260px;
+            z-index: 0;
+            width: 100vw;
+            height: 100vh;
             opacity: 0;
-            transition: opacity 0.8s;
+            transition: opacity 0.5s;
         }
 
         .arrow {
-            font-size: 2.5em;
+            font-size: 4vw;
             color: #fff;
             cursor: pointer;
             user-select: none;
@@ -68,7 +78,7 @@
         }
 
         .arrow:hover {
-            color: #ffd700;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1));
         }
 
         .card-content {
@@ -85,69 +95,117 @@
             margin-bottom: 24px;
             user-select: none;
             color: #fff;
-            filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgba(255, 255, 255, 0.533));
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
+        }
+
+        .card-icon:hover,
+        .item-icon:hover {
+            filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgb(255, 255, 255));
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgb(255, 255, 255);
+            transition: all 0.5s;
         }
 
         .card-title,
         .item-title {
             font-size: 2em;
             color: #fff;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'dot';
             margin-top: 12px;
             text-align: center;
             letter-spacing: 0.04em;
             text-shadow: 0 2px 12px #000a;
         }
 
-        @media (max-width: 600px) {
+        .preview-icon {
+    font-size: 2.5em;
+    margin: 0 18px;
+    opacity: 0.4;
+    filter: grayscale(1) blur(1px);
+    transition: transform 0.35s cubic-bezier(.5,1.5,.5,1), opacity 0.3s, filter 0.3s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    cursor: pointer;
+    pointer-events: auto;
+    color: #fff;
+}
 
-            #menu-card,
-            #item-card {
-                padding: 24px 12px;
-                min-width: 180px;
-            }
+.preview-icon.scroll-up {
+    transform: translateY(-48px);
+    opacity: 0;
+}
 
-            .card-icon,
-            .item-icon {
-                font-size: 3em;
-            }
+.preview-icon.scroll-down {
+    transform: translateY(48px);
+    opacity: 0;
+}
 
-            .card-title,
-            .item-title {
-                font-size: 1.2em;
-            }
+#back-button {
+    z-index: 999;
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    top: 10vw;
+    left: 10vw;
+    background-color: #00000000;
+    border: none;
+    color: #fff;
+}
 
-            .arrow {
-                font-size: 1.5em;
-                padding: 0 8px;
-            }
-        }
+#time {
+    color: #fff;
+    font-size: 2em;
+    text-align: center;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    font-family: 'dot';
+}
     </style>
 </head>
 
 <body>
     <canvas id="topo"></canvas>
-    <div id="welcome-text">Welcome to Algot's web-workshop</div>
-    <div id="menu-card" style="display:none;">
-        <div class="arrow arrow-left" id="menu-arrow-left">&#8592;</div>
-        <div class="card-content" id="card-content">
+    <div id="welcome-text">Welcome to Algots web-workshop</div>
+    <div id="time">00:00</div>
+    <div id="menu-card" style="display:flex;opacity:0;">
+        <div class="card-content" id="card-content" style="display:flex;flex-direction:column;align-items:center;">
+            <div class="preview-icon" id="next-category-icon"></div>
             <div class="card-icon" id="card-icon"></div>
+            <div class="preview-icon" id="prev-category-icon"></div>
             <div class="card-title" id="card-title"></div>
+            
         </div>
-        <div class="arrow arrow-right" id="menu-arrow-right">&#8594;</div>
+        
     </div>
+
     <div id="item-card" style="display:none;">
-        <div class="arrow arrow-left" id="item-arrow-left">&#8592;</div>
-        <div class="card-content" id="item-content">
+        
+        <div class="card-content" id="item-content" style="display:flex;flex-direction:column;align-items:center;">
+            <button id="back-button">
+            <i class="fa fa-arrow-left" style="font-size: 5em;"></i> 
+        </button>
+            <div class="preview-icon" id="next-item-icon"></div>
             <div class="item-icon" id="item-icon"></div>
+            <div class="preview-icon" id="prev-item-icon"></div>
             <div class="item-title" id="item-title"></div>
         </div>
-        <div class="arrow arrow-right" id="item-arrow-right">&#8594;</div>
     </div>
 
+        </button>
     <script>
+        function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
 
+      document.getElementById("time").innerHTML =
+        add_zero(hours) + ":" + add_zero(minutes);
+    }
  
         const canvas = document.getElementById('topo');
         const ctx = canvas.getContext('2d');
@@ -223,19 +281,15 @@
             {
                 title: "Misc", icon: "fa-solid fa-asterisk", items: [
                     { title: "DVD", icon: "fa-solid fa-compact-disc", link: "dvd.html" },
-                    { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" } // fixed
+                    { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" }, // fixed
+                    { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
+                    { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
                 ]
             },
             {
                 title: "Social", icon: "fa-solid fa-users", items: [
                     { title: "Driftr", icon: "fa-solid fa-car-side", link: "/drift.html" }, // fixed (external)
                     { title: "Chat", icon: "fa-solid fa-comments", link: "visits.html" } // fixed
-                ]
-            },
-            {
-                title: "Tools", icon: "fa-solid fa-wrench", items: [
-                    { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
-                    { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
                 ]
             },
             {
@@ -251,22 +305,39 @@
         let currentCategory = 0;
         let inItems = false;
         let currentItem = 0;
+        let welcomeDone = false; // Add this flag
 
         // Update main menu card
         function updateMenuCard() {
             const icon = document.getElementById('card-icon');
             const title = document.getElementById('card-title');
+            const prevIcon = document.getElementById('prev-category-icon');
+            const nextIcon = document.getElementById('next-category-icon');
+            const total = categories.length;
+            const prevIdx = (currentCategory + total - 1) % total;
+            const nextIdx = (currentCategory + 1) % total;
+
             icon.innerHTML = `<i class="${categories[currentCategory].icon}"></i>`;
             title.textContent = categories[currentCategory].title;
+            prevIcon.innerHTML = `<i class="${categories[prevIdx].icon}"></i>`;
+            nextIcon.innerHTML = `<i class="${categories[nextIdx].icon}"></i>`;
         }
 
         // Update item card
         function updateItemCard() {
             const icon = document.getElementById('item-icon');
             const title = document.getElementById('item-title');
-            const item = categories[currentCategory].items[currentItem];
-            icon.innerHTML = `<i class="${item.icon}"></i>`;
-            title.textContent = item.title;
+            const prevIcon = document.getElementById('prev-item-icon');
+            const nextIcon = document.getElementById('next-item-icon');
+            const items = categories[currentCategory].items;
+            const total = items.length;
+            const prevIdx = (currentItem + total - 1) % total;
+            const nextIdx = (currentItem + 1) % total;
+
+            icon.innerHTML = `<i class="${items[currentItem].icon}"></i>`;
+            title.textContent = items[currentItem].title;
+            prevIcon.innerHTML = `<i class="${items[prevIdx].icon}"></i>`;
+            nextIcon.innerHTML = `<i class="${items[nextIdx].icon}"></i>`;
         }
 
         // Show main menu
@@ -307,34 +378,68 @@
             }, 800);
         }
 
-        // Arrow click handlers for main menu and item menu
-        document.getElementById('menu-arrow-left').onclick = () => {
-            if (inItems) return;
-            currentCategory = (currentCategory + categories.length - 1) % categories.length;
-            updateMenuCard();
-        };
-        document.getElementById('menu-arrow-right').onclick = () => {
-            if (inItems) return;
-            currentCategory = (currentCategory + 1) % categories.length;
-            updateMenuCard();
-        };
-        document.getElementById('item-arrow-left').onclick = () => {
-            if (!inItems) return;
-            currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
-            updateItemCard();
-        };
-        document.getElementById('item-arrow-right').onclick = () => {
-            if (!inItems) return;
-            currentItem = (currentItem + 1) % categories[currentCategory].items.length;
-            updateItemCard();
-        };
+        // Make preview icons clickable for next/prev
+document.getElementById('next-category-icon').onclick = () => {
+    if (inItems) return;
+    currentCategory = (currentCategory + 1) % categories.length;
+    updateMenuCard();
+};
+document.getElementById('prev-category-icon').onclick = () => {
+    if (inItems) return;
+    currentCategory = (currentCategory + categories.length - 1) % categories.length;
+    updateMenuCard();
+};
+document.getElementById('next-item-icon').onclick = () => {
+    if (!inItems) return;
+    currentItem = (currentItem + 1) % categories[currentCategory].items.length;
+    updateItemCard();
+};
+document.getElementById('prev-item-icon').onclick = () => {
+    if (!inItems) return;
+    currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
+    updateItemCard();
+};
+document.getElementById('back-button').onclick = () => {
+    if (inItems) backToMenu();
+};
 
-        // Keyboard navigation
+function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
+// For menu main icon
+if (isTouchDevice()) {
+    document.getElementById('card-icon').onclick = () => {
+        if (!inItems) showItemCard();
+    };
+    document.getElementById('item-icon').onclick = () => {
+        if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
+    };
+} else {
+    document.getElementById('card-icon').onclick = () => {
+        if (!inItems) {
+            // Single click: highlight or do nothing
+        }
+    };
+    document.getElementById('card-icon').ondblclick = () => {
+        if (!inItems) showItemCard();
+    };
+    document.getElementById('item-icon').onclick = () => {
+        if (inItems) {
+            // Single click: highlight or do nothing
+        }
+    };
+    document.getElementById('item-icon').ondblclick = () => {
+        if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
+    };
+}
+
+// Keyboard navigation: up/down only
         window.addEventListener('keydown', e => {
             const menuVisible = document.getElementById('menu-card').style.display === "flex";
             const itemVisible = document.getElementById('item-card').style.display === "flex";
             if (!menuVisible && !itemVisible) return;
-            if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+            if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
                 if (inItems) {
                     currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
                     updateItemCard();
@@ -344,7 +449,7 @@
                 }
                 e.preventDefault();
             }
-            if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+            if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
                 if (inItems) {
                     currentItem = (currentItem + 1) % categories[currentCategory].items.length;
                     updateItemCard();
@@ -356,7 +461,6 @@
             }
             if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
                 if (inItems) {
-                    // Go to link
                     window.location.href = categories[currentCategory].items[currentItem].link;
                 } else {
                     showItemCard();
@@ -369,16 +473,74 @@
             }
         });
 
-        // Mouse click on main menu to enter items
-        document.getElementById('card-content').onclick = () => {
-            if (!inItems) showItemCard();
-        };
-        // Mouse click on item card to go to link
-        document.getElementById('item-content').onclick = () => {
-            if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
-        };
+        // Mouse wheel scroll for up/down navigation
+document.getElementById('menu-card').addEventListener('wheel', e => {
+    if (inItems) return;
+    if (e.deltaY > 0) {
+        currentCategory = (currentCategory + categories.length - 1) % categories.length;
+        updateMenuCard();
+    } else if (e.deltaY < 0) {
+        currentCategory = (currentCategory + 1) % categories.length;
+        updateMenuCard();
+    }
+    e.preventDefault();
+});
+document.getElementById('item-card').addEventListener('wheel', e => {
+    if (!inItems) return;
+    if (e.deltaY > 0) {
+        currentItem = (currentItem + 1) % categories[currentCategory].items.length;
+        updateItemCard();
+    } else if (e.deltaY < 0) {
+        currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
+        updateItemCard();
+    }
+    e.preventDefault();
+});
 
-        // Show menu after welcome text fades out
+        // Touch scroll support for mobile
+function addTouchScroll(cardId, onUp, onDown) {
+    let startY = null;
+    let threshold = 60; // Minimum swipe distance in px for one row
+
+    const card = document.getElementById(cardId);
+    card.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+            startY = e.touches[0].clientY;
+        }
+    });
+    card.addEventListener('touchmove', function(e) {
+        // Prevent scrolling the page
+        if (startY !== null) e.preventDefault();
+    }, { passive: false });
+    card.addEventListener('touchend', function(e) {
+        if (startY === null) return;
+        let endY = e.changedTouches[0].clientY;
+        let deltaY = endY - startY;
+        let steps = Math.floor(Math.abs(deltaY) / threshold);
+        if (steps > 0) {
+            for (let i = 0; i < steps; i++) {
+                if (deltaY > 0) {
+                    onUp();
+                } else {
+                    onDown();
+                }
+            }
+        }
+        startY = null;
+    });
+}
+
+addTouchScroll('menu-card',
+    () => { if (!inItems) { currentCategory = (currentCategory + categories.length - 1) % categories.length; updateMenuCard(); } },
+    () => { if (!inItems) { currentCategory = (currentCategory + 1) % categories.length; updateMenuCard(); } }
+);
+
+addTouchScroll('item-card',
+    () => { if (inItems) { currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length; updateItemCard(); } },
+    () => { if (inItems) { currentItem = (currentItem + 1) % categories[currentCategory].items.length; updateItemCard(); } }
+);
+
+// Show menu after welcome text fades out
         function fadeInCanvas() {
             canvas.style.opacity = "0";
             // Force reflow to restart transition
@@ -389,13 +551,35 @@
             text.style.opacity = "0";
             void text.offsetWidth;
             text.style.opacity = "1";
+            // Show menu card (invisible) immediately so arrows are visible
+            const menuCard = document.getElementById('menu-card');
+            menuCard.style.display = "flex"; // Always flex
+            menuCard.style.opacity = "0";
+            updateMenuCard();
+
             // Fade out text after 2.2s
             setTimeout(() => {
+                if (welcomeDone) return; // If already skipped, do nothing
                 text.style.opacity = "0";
                 // Show menu card after text fades out
-                setTimeout(showMenuCard, 1200);
+                setTimeout(() => {
+                    menuCard.style.opacity = "1";
+                    welcomeDone = true;
+                }, 1200);
             }, 2200);
         }
+
+        // Click anywhere to skip welcome animation
+        window.addEventListener('click', () => {
+            if (!welcomeDone) {
+                welcomeDone = true;
+                const text = document.getElementById('welcome-text');
+                text.style.opacity = "0";
+                const menuCard = document.getElementById('menu-card');
+                menuCard.style.display = "flex";
+                menuCard.style.opacity = "1";
+            }
+        });
 
         function redrawWithFade() {
             drawTopo();
@@ -409,6 +593,37 @@
         // window.addEventListener('click', redrawWithFade); // <-- Remove or comment out this line
 
         // --- PWA Install Prompt ---
+
+        // Helper to check if click is outside a given element
+function clickOutsideHandler(containerId, callback) {
+    document.addEventListener('mousedown', function(e) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (container.style.display !== "flex") return;
+        if (!container.contains(e.target)) {
+            callback();
+        }
+    });
+}
+
+// For menu card: (optional, if you want to close menu on outside click)
+// clickOutsideHandler('menu-card', () => { /* ... */ });
+
+// For item card: go back to menu if click outside
+clickOutsideHandler('item-card', () => {
+    if (inItems) backToMenu();
+});
+
+function add_zero(digit) {
+      return digit < 10 ? "0" + digit : digit.toString();
+    }
+
+document.addEventListener("DOMContentLoaded", function () {
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+
+       
 
     </script>
 </body>
