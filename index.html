@@ -1,631 +1,96 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Algot.fun</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topographic Canvas</title>
     <style>
         @font-face {
-  font-family: dot;
-  src: url(dot.ttf);
-}
-
-#item-card, .item-title, .item-icon, #item-content, .preview-icon {
-    font-family: 'dot' !important;
-}
-        body {
-            background-color: #000;
+            font-family: 'Dot';
+            src: url('/dot.ttf');
+        }
+        body, html {    
             margin: 0;
+            padding: 0;
             overflow: hidden;
+            background-size: cover, cover;
+            background-repeat: no-repeat, no-repeat;
+            background-attachment: fixed;
         }
 
-        canvas {
+        header {
+            font-family: 'Dot';
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: block;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        #welcome-text {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 4vw;
-            font-family: 'dot';
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 2s;
-            z-index: 10;
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgba(255, 255, 255, 0.533);
             width: 100%;
-            text-align: center;
-        }
-
-        #menu-card,
-        #item-card {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px #000a;
-            padding: 40px 80px 32px 80px;
+            height: 75px;
+            background: rgba(20, 20, 20, 0.35);
+            color: white;
+            padding-left: 2em;
             display: flex;
             align-items: center;
-            z-index: 0;
-            width: 100vw;
-            height: 100vh;
-            opacity: 0;
-            transition: opacity 0.5s;
+            justify-content: space-between;
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
-        .arrow {
-            font-size: 4vw;
-            color: #fff;
-            cursor: pointer;
-            user-select: none;
-            padding: 0 18px;
-            transition: color 0.2s;
-            filter: drop-shadow(0 0 8px #fff8);
-        }
-
-        .arrow:hover {
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1));
-        }
-
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1 1 auto;
-            min-width: 180px;
-        }
-
-        .card-icon,
-        .item-icon {
-            font-size: 5em;
-            margin-bottom: 24px;
-            user-select: none;
-            color: #fff;
-        }
-
-        .card-icon:hover,
-        .item-icon:hover {
-            filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0.533)) drop-shadow(0 0 32px rgb(255, 255, 255));
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.533), 0 0 32px rgb(255, 255, 255);
-            transition: all 0.5s;
-        }
-
-        .card-title,
-        .item-title {
+        header h1 {
+            margin: 0;
             font-size: 2em;
-            color: #fff;
-            font-family: 'dot';
-            margin-top: 12px;
-            text-align: center;
-            letter-spacing: 0.04em;
-            text-shadow: 0 2px 12px #000a;
+            letter-spacing: 0.05em;
         }
 
-        .preview-icon {
-    font-size: 2.5em;
-    margin: 0 18px;
-    opacity: 0.4;
-    filter: grayscale(1) blur(1px);
-    transition: transform 0.35s cubic-bezier(.5,1.5,.5,1), opacity 0.3s, filter 0.3s;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: transform;
-    cursor: pointer;
-    pointer-events: auto;
-    color: #fff;
-}
+        .links {
+            display: flex;
+            align-items: center;
+            gap: 1.5em;
+            margin-right: 5em;
+        }
 
-.preview-icon.scroll-up {
-    transform: translateY(-48px);
-    opacity: 0;
-}
-
-.preview-icon.scroll-down {
-    transform: translateY(48px);
-    opacity: 0;
-}
-
-#back-button {
-    z-index: 999;
-    width: 150px;
-    height: 150px;
-    position: absolute;
-    top: 10vw;
-    left: 10vw;
-    background-color: #00000000;
-    border: none;
-    color: #fff;
-}
-
-#time {
-    color: #fff;
-    font-size: 2em;
-    text-align: center;
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: block;
-    font-family: 'dot';
-}
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 0.3em 1em;
+            border-radius: 8px;
+            transition: background 0.2s;
+            background: rgba(255,255,255,0.05);
+        }
+        header a:hover {
+            background: rgba(255,255,255,0.18);
+        }
     </style>
 </head>
-
-<body>
-    <canvas id="topo"></canvas>
-    <div id="welcome-text">Welcome to Algots web-workshop</div>
-    <div id="time">00:00</div>
-    <div id="menu-card" style="display:flex;opacity:0;">
-        <div class="card-content" id="card-content" style="display:flex;flex-direction:column;align-items:center;">
-            <div class="preview-icon" id="next-category-icon"></div>
-            <div class="card-icon" id="card-icon"></div>
-            <div class="preview-icon" id="prev-category-icon"></div>
-            <div class="card-title" id="card-title"></div>
-            
+<body onload="bg()">
+    <header>
+        <h1>Algot.fun</h1>
+        <div class="links">
+            <a href="/visits.html">Chat</a>
+            <a href="/Games.html">Games</a>
         </div>
-        
-    </div>
-
-    <div id="item-card" style="display:none;">
-        
-        <div class="card-content" id="item-content" style="display:flex;flex-direction:column;align-items:center;">
-            <button id="back-button">
-            <i class="fa fa-arrow-left" style="font-size: 5em;"></i> 
-        </button>
-            <div class="preview-icon" id="next-item-icon"></div>
-            <div class="item-icon" id="item-icon"></div>
-            <div class="preview-icon" id="prev-item-icon"></div>
-            <div class="item-title" id="item-title"></div>
-        </div>
-    </div>
-
-        </button>
+    </header>
     <script>
-        function updateClock() {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
+        // Pick a random background image from the Logos folder
+        (function bg() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            const chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #000 0%, #000 100%)`;
+        })();
 
-      document.getElementById("time").innerHTML =
-        add_zero(hours) + ":" + add_zero(minutes);
-    }
- 
-        const canvas = document.getElementById('topo');
-        const ctx = canvas.getContext('2d');
-
-        function resize() {
-            const dpr = window.devicePixelRatio || 1;
-            // Use dpr for pixel size, but use dpr-adjusted width/height for drawing
-            canvas.width = Math.round(window.innerWidth * dpr);
-            canvas.height = Math.round(window.innerHeight * dpr);
-            canvas.style.width = window.innerWidth + "px";
-            canvas.style.height = window.innerHeight + "px";
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(dpr, dpr);
-        }
-
-        function randomBlobs(num, w, h) {
-            let blobs = [];
-            for (let i = 0; i < num; i++) {
-                blobs.push({
-                    x: Math.random() * w,
-                    y: Math.random() * h,
-                    r: 80 + Math.random() * 120,
-                    strength: 0.7 + Math.random() * 0.6
-                });
-            }
-            return blobs;
-        }
-
-        function field(x, y, blobs) {
-            let sum = 0;
-            for (const b of blobs) {
-                let dx = x - b.x, dy = y - b.y;
-                sum += b.strength * Math.exp(-(dx * dx + dy * dy) / (2 * b.r * b.r));
-            }
-            return sum;
-        }
-
-        function drawTopo() {
-            // Use CSS pixel size for drawing, since ctx is scaled
-            const w = window.innerWidth, h = window.innerHeight;
-            ctx.clearRect(0, 0, w, h);
-            const blobs = randomBlobs(8 + Math.floor(Math.random() * 6), w, h);
-            const lines = 18;
-            const step = 5; // Larger step for more pixelation and speed
-            for (let l = 0; l < lines; l++) {
-                const level = l / (lines - 1) * 1.5 + 0.2;
-                const alpha = 0.12 + 0.09 * Math.random();
-                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-                for (let x = 0; x < w; x += step) {
-                    for (let y = 0; y < h; y += step) {
-                        const v = field(x + step / 2, y + step / 2, blobs);
-                        if (Math.abs(v - level) < 0.03) {
-                            ctx.fillRect(x, y, step, step);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Main categories and their FontAwesome icons
-        const categories = [
-            {
-                title: "Arcade", icon: "fa-solid fa-gamepad", items: [
-                    { title: "Snake", icon: "fa-solid fa-shapes", link: "snake.html" },
-                    { title: "Tetris", icon: "fa-solid fa-cube", link: "tetris.html" },
-                    { title: "Driftr", icon: "fa-solid fa-car-side", link: "drift.html" },
-                    { title: "Stickman", icon: "fa-solid fa-person-walking", link: "stickman.html" }, // fixed
-                    { title: "Coreball", icon: "fa-solid fa-bullseye", link: "cball.html" }, // fixed
-                    { title: "Clicker", icon: "fa-solid fa-mouse-pointer", link: "clicker.html" },
-                    { title: "Slowroads", icon: "fa-solid fa-road", link: "https://slowroads.io/" } // fixed
-                ]
-            },
-            {
-                title: "Misc", icon: "fa-solid fa-asterisk", items: [
-                    { title: "DVD", icon: "fa-solid fa-compact-disc", link: "dvd.html" },
-                    { title: "Cells", icon: "fa-solid fa-border-all", link: "life.html" }, // fixed
-                    { title: "Tptest", icon: "fa-solid fa-gauge", link: "tptest.html" }, // fixed
-                    { title: "Clock", icon: "fa-solid fa-clock", link: "clock.html" }
-                ]
-            },
-            {
-                title: "Social", icon: "fa-solid fa-users", items: [
-                    { title: "Driftr", icon: "fa-solid fa-car-side", link: "/drift.html" }, // fixed (external)
-                    { title: "Chat", icon: "fa-solid fa-comments", link: "visits.html" } // fixed
-                ]
-            },
-            {
-                title: "Gambling", icon: "fa-solid fa-dice", items: [
-                    { title: "CaseClicker", icon: "fa-solid fa-box-open", link: "CSGO-Case-Clicker-master/CaseClicker.html" }, // fixed
-                    { title: "Roulette", icon: "fa-solid fa-circle-notch", link: "roulette.html" },
-                    { title: "Slots", icon: "fa-solid fa-coins", link: "slot.html" }, // fixed
-                    { title: "5050", icon: "fa-solid fa-percent", link: "5050.html" },
-                    { title: "Random", icon: "fa-solid fa-random", link: "Webbutton.html" } // fixed
-                ]
-            }
-        ];
-        let currentCategory = 0;
-        let inItems = false;
-        let currentItem = 0;
-        let welcomeDone = false; // Add this flag
-
-        // Update main menu card
-        function updateMenuCard() {
-            const icon = document.getElementById('card-icon');
-            const title = document.getElementById('card-title');
-            const prevIcon = document.getElementById('prev-category-icon');
-            const nextIcon = document.getElementById('next-category-icon');
-            const total = categories.length;
-            const prevIdx = (currentCategory + total - 1) % total;
-            const nextIdx = (currentCategory + 1) % total;
-
-            icon.innerHTML = `<i class="${categories[currentCategory].icon}"></i>`;
-            title.textContent = categories[currentCategory].title;
-            prevIcon.innerHTML = `<i class="${categories[prevIdx].icon}"></i>`;
-            nextIcon.innerHTML = `<i class="${categories[nextIdx].icon}"></i>`;
-        }
-
-        // Update item card
-        function updateItemCard() {
-            const icon = document.getElementById('item-icon');
-            const title = document.getElementById('item-title');
-            const prevIcon = document.getElementById('prev-item-icon');
-            const nextIcon = document.getElementById('next-item-icon');
-            const items = categories[currentCategory].items;
-            const total = items.length;
-            const prevIdx = (currentItem + total - 1) % total;
-            const nextIdx = (currentItem + 1) % total;
-
-            icon.innerHTML = `<i class="${items[currentItem].icon}"></i>`;
-            title.textContent = items[currentItem].title;
-            prevIcon.innerHTML = `<i class="${items[prevIdx].icon}"></i>`;
-            nextIcon.innerHTML = `<i class="${items[nextIdx].icon}"></i>`;
-        }
-
-        // Show main menu
-        function showMenuCard() {
-            inItems = false;
-            document.getElementById('menu-card').style.display = "flex";
-            document.getElementById('menu-card').style.opacity = "0";
-            updateMenuCard();
-            setTimeout(() => { document.getElementById('menu-card').style.opacity = "1"; }, 30);
-            document.getElementById('item-card').style.display = "none";
-        }
-
-        // Show item menu
-        function showItemCard() {
-            inItems = true;
-            currentItem = 0;
-            document.getElementById('menu-card').style.opacity = "0";
-            setTimeout(() => {
-                document.getElementById('menu-card').style.display = "none";
-                updateItemCard();
-                document.getElementById('item-card').style.display = "flex";
-                document.getElementById('item-card').style.opacity = "0";
-                setTimeout(() => { document.getElementById('item-card').style.opacity = "1"; }, 30);
-            }, 800);
-        }
-
-        // Hide item menu and return to main menu
-        function backToMenu() {
-            document.getElementById('item-card').style.opacity = "0";
-            setTimeout(() => {
-                document.getElementById('item-card').style.display = "none";
-                // Fix: fade in menu card after item card is hidden
-                document.getElementById('menu-card').style.display = "flex";
-                document.getElementById('menu-card').style.opacity = "0";
-                updateMenuCard();
-                setTimeout(() => { document.getElementById('menu-card').style.opacity = "1"; }, 30);
-                inItems = false;
-            }, 800);
-        }
-
-        // Make preview icons clickable for next/prev
-document.getElementById('next-category-icon').onclick = () => {
-    if (inItems) return;
-    currentCategory = (currentCategory + 1) % categories.length;
-    updateMenuCard();
-};
-document.getElementById('prev-category-icon').onclick = () => {
-    if (inItems) return;
-    currentCategory = (currentCategory + categories.length - 1) % categories.length;
-    updateMenuCard();
-};
-document.getElementById('next-item-icon').onclick = () => {
-    if (!inItems) return;
-    currentItem = (currentItem + 1) % categories[currentCategory].items.length;
-    updateItemCard();
-};
-document.getElementById('prev-item-icon').onclick = () => {
-    if (!inItems) return;
-    currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
-    updateItemCard();
-};
-document.getElementById('back-button').onclick = () => {
-    if (inItems) backToMenu();
-};
-
-function isTouchDevice() {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-}
-
-// For menu main icon
-if (isTouchDevice()) {
-    document.getElementById('card-icon').onclick = () => {
-        if (!inItems) showItemCard();
-    };
-    document.getElementById('item-icon').onclick = () => {
-        if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
-    };
-} else {
-    document.getElementById('card-icon').onclick = () => {
-        if (!inItems) {
-            // Single click: highlight or do nothing
-        }
-    };
-    document.getElementById('card-icon').ondblclick = () => {
-        if (!inItems) showItemCard();
-    };
-    document.getElementById('item-icon').onclick = () => {
-        if (inItems) {
-            // Single click: highlight or do nothing
-        }
-    };
-    document.getElementById('item-icon').ondblclick = () => {
-        if (inItems) window.location.href = categories[currentCategory].items[currentItem].link;
-    };
-}
-
-// Keyboard navigation: up/down only
-        window.addEventListener('keydown', e => {
-            const menuVisible = document.getElementById('menu-card').style.display === "flex";
-            const itemVisible = document.getElementById('item-card').style.display === "flex";
-            if (!menuVisible && !itemVisible) return;
-            if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
-                if (inItems) {
-                    currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
-                    updateItemCard();
-                } else {
-                    currentCategory = (currentCategory + categories.length - 1) % categories.length;
-                    updateMenuCard();
-                }
-                e.preventDefault();
-            }
-            if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
-                if (inItems) {
-                    currentItem = (currentItem + 1) % categories[currentCategory].items.length;
-                    updateItemCard();
-                } else {
-                    currentCategory = (currentCategory + 1) % categories.length;
-                    updateMenuCard();
-                }
-                e.preventDefault();
-            }
-            if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
-                if (inItems) {
-                    window.location.href = categories[currentCategory].items[currentItem].link;
-                } else {
-                    showItemCard();
-                }
-                e.preventDefault();
-            }
-            if (e.key === "Escape" && inItems) {
-                backToMenu();
-                e.preventDefault();
-            }
-        });
-
-        // Mouse wheel scroll for up/down navigation
-document.getElementById('menu-card').addEventListener('wheel', e => {
-    if (inItems) return;
-    if (e.deltaY > 0) {
-        currentCategory = (currentCategory + categories.length - 1) % categories.length;
-        updateMenuCard();
-    } else if (e.deltaY < 0) {
-        currentCategory = (currentCategory + 1) % categories.length;
-        updateMenuCard();
-    }
-    e.preventDefault();
-});
-document.getElementById('item-card').addEventListener('wheel', e => {
-    if (!inItems) return;
-    if (e.deltaY > 0) {
-        currentItem = (currentItem + 1) % categories[currentCategory].items.length;
-        updateItemCard();
-    } else if (e.deltaY < 0) {
-        currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length;
-        updateItemCard();
-    }
-    e.preventDefault();
-});
-
-        // Touch scroll support for mobile
-function addTouchScroll(cardId, onUp, onDown) {
-    let startY = null;
-    let threshold = 60; // Minimum swipe distance in px for one row
-
-    const card = document.getElementById(cardId);
-    card.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 1) {
-            startY = e.touches[0].clientY;
-        }
-    });
-    card.addEventListener('touchmove', function(e) {
-        // Prevent scrolling the page
-        if (startY !== null) e.preventDefault();
-    }, { passive: false });
-    card.addEventListener('touchend', function(e) {
-        if (startY === null) return;
-        let endY = e.changedTouches[0].clientY;
-        let deltaY = endY - startY;
-        let steps = Math.floor(Math.abs(deltaY) / threshold);
-        if (steps > 0) {
-            for (let i = 0; i < steps; i++) {
-                if (deltaY > 0) {
-                    onUp();
-                } else {
-                    onDown();
-                }
-            }
-        }
-        startY = null;
-    });
-}
-
-addTouchScroll('menu-card',
-    () => { if (!inItems) { currentCategory = (currentCategory + categories.length - 1) % categories.length; updateMenuCard(); } },
-    () => { if (!inItems) { currentCategory = (currentCategory + 1) % categories.length; updateMenuCard(); } }
-);
-
-addTouchScroll('item-card',
-    () => { if (inItems) { currentItem = (currentItem + categories[currentCategory].items.length - 1) % categories[currentCategory].items.length; updateItemCard(); } },
-    () => { if (inItems) { currentItem = (currentItem + 1) % categories[currentCategory].items.length; updateItemCard(); } }
-);
-
-// Show menu after welcome text fades out
-        function fadeInCanvas() {
-            canvas.style.opacity = "0";
-            // Force reflow to restart transition
-            void canvas.offsetWidth;
-            canvas.style.opacity = "1";
-            // Fade in text at the same time
-            const text = document.getElementById('welcome-text');
-            text.style.opacity = "0";
-            void text.offsetWidth;
-            text.style.opacity = "1";
-            // Show menu card (invisible) immediately so arrows are visible
-            const menuCard = document.getElementById('menu-card');
-            menuCard.style.display = "flex"; // Always flex
-            menuCard.style.opacity = "0";
-            updateMenuCard();
-
-            // Fade out text after 2.2s
-            setTimeout(() => {
-                if (welcomeDone) return; // If already skipped, do nothing
-                text.style.opacity = "0";
-                // Show menu card after text fades out
-                setTimeout(() => {
-                    menuCard.style.opacity = "1";
-                    welcomeDone = true;
-                }, 1200);
-            }, 2200);
-        }
-
-        // Click anywhere to skip welcome animation
-        window.addEventListener('click', () => {
-            if (!welcomeDone) {
-                welcomeDone = true;
-                const text = document.getElementById('welcome-text');
-                text.style.opacity = "0";
-                const menuCard = document.getElementById('menu-card');
-                menuCard.style.display = "flex";
-                menuCard.style.opacity = "1";
-            }
-        });
-
-        function redrawWithFade() {
-            drawTopo();
-            fadeInCanvas();
-        }
-
-        resize();
-        redrawWithFade();
-
-        window.addEventListener('resize', () => { resize(); redrawWithFade(); });
-        // window.addEventListener('click', redrawWithFade); // <-- Remove or comment out this line
-
-        // --- PWA Install Prompt ---
-
-        // Helper to check if click is outside a given element
-function clickOutsideHandler(containerId, callback) {
-    document.addEventListener('mousedown', function(e) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        if (container.style.display !== "flex") return;
-        if (!container.contains(e.target)) {
-            callback();
-        }
-    });
-}
-
-// For menu card: (optional, if you want to close menu on outside click)
-// clickOutsideHandler('menu-card', () => { /* ... */ });
-
-// For item card: go back to menu if click outside
-clickOutsideHandler('item-card', () => {
-    if (inItems) backToMenu();
-});
-
-function add_zero(digit) {
-      return digit < 10 ? "0" + digit : digit.toString();
-    }
-
-document.addEventListener("DOMContentLoaded", function () {
-      updateClock();
-      setInterval(updateClock, 1000);
-    });
-
-       
-
+        
     </script>
 </body>
-
 </html>

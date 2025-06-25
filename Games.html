@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Library</title>
+    <style>
+        body {
+            background: #181a20;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #eee;
+            /* Optional: subtle background pattern for more glass effect */
+            background: #000;
+            background-size: cover, cover;
+            background-repeat: no-repeat, no-repeat;
+            background-attachment: fixed;
+        }
+        .library-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            justify-content: flex-start;
+        }
+        .game-card {
+            background: rgba(255, 255, 255, 0.10);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25), 0 1.5px 8px 0 rgba(255,255,255,0.08) inset;
+            overflow: hidden;
+            width: 260px;
+            cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s, background 0.18s, border 0.18s;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(18px) saturate(180%) brightness(1.15);
+            -webkit-backdrop-filter: blur(18px) saturate(180%) brightness(1.15);
+            border: 2px solid rgba(255,255,255,0.18);
+            outline: 1.5px solid rgba(255,255,255,0.08);
+        }
+        .game-card:hover, .game-card:active {
+            transform: translateY(-8px) scale(1.035);
+            box-shadow: 0 16px 48px 0 rgba(0,0,0,0.38), 0 2px 12px 0 rgba(255,255,255,0.13) inset;
+            background: rgba(255,255,255,0.18);
+            border: 2.5px solid rgba(255,255,255,0.28);
+        }
+        .game-thumb {
+            width: 100%;
+            height: 146px;
+            border: none;
+            pointer-events: none;
+            user-select: none;
+            background: #222;
+            object-fit: cover;
+            display: block;
+            /* Optional: subtle overlay for glass shine */
+            position: relative;
+            z-index: 1;
+        }
+        .game-info {
+            padding: 18px 16px 14px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            backdrop-filter: blur(8px) saturate(90%);
+            -webkit-backdrop-filter: blur(8px) saturate(130%);
+            background: rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10) inset;
+        }
+        .game-title {
+            font-size: 1.18em;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: #fff;
+            text-shadow: 0 2px 12px #0008, 0 1px 0 #fff3;
+            letter-spacing: 0.01em;
+        }
+        .game-desc {
+            font-size: 1em;
+            color: #e0e0e0;
+            margin: 0;
+            text-shadow: 0 1px 6px #0007;
+            font-weight: 400;
+        }
+        @media (max-width: 900px) {
+            .library-container {
+                gap: 18px;
+                justify-content: center;
+            }
+            .game-card {
+                width: 45vw;
+                min-width: 180px;
+                max-width: 320px;
+            }
+        }
+        @media (max-width: 600px) {
+            .library-container {
+                gap: 12px;
+                padding: 0 4px;
+            }
+            .game-card {
+                width: 98vw;
+                min-width: 0;
+                max-width: 100vw;
+            }
+            .game-thumb {
+                height: 28vw;
+                min-height: 90px;
+                max-height: 180px;
+            }
+            .game-info {
+                padding: 12px 8px 10px 8px;
+            }
+            h1 {
+                font-size: 1.3em !important;
+                margin-top: 18px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center; margin-top:32px; font-weight:400; letter-spacing:0.03em;">Games Library</h1>
+    <div class="library-container">
+        <div class="game-card" onclick="window.location.href='drift.html'">
+            <img class="game-thumb" src="TN/Drift.png" alt="Drift">
+            <div class="game-info">
+                <div class="game-title">Drift</div>
+                <div class="game-desc">Drift with your friends!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='life.html'">
+            <img class="game-thumb" src="TN/life.png" alt="Life">
+            <div class="game-info">
+                <div class="game-title">Life</div>
+                <div class="game-desc">A simulation of cellular automata.</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='slot.html'">
+            <img class="game-thumb" src="TN/slot.png" alt="Slot">
+            <div class="game-info">
+                <div class="game-title">Slot</div>
+                <div class="game-desc">Try your luck at the slot machine!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='snake.html'">
+            <img class="game-thumb" src="TN/snake.png" alt="Snake">
+            <div class="game-info">
+                <div class="game-title">Snake</div>
+                <div class="game-desc">Classic snake game. Eat and grow!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='stickman.html'">
+            <img class="game-thumb" src="TN/Hook.png" alt="Stickman">
+            <div class="game-info">
+                <div class="game-title">Stickman</div>
+                <div class="game-desc">Swing your way to victory!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='tetris.html'">
+            <img class="game-thumb" src="TN/tetris.png" alt="Tetris">
+            <div class="game-info">
+                <div class="game-title">Tetris</div>
+                <div class="game-desc">Stack the circles and clear lines!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='https://slowroads.io/'">
+            <img class="game-thumb" src="TN/slowroads.png" alt="Slow Roads">
+            <div class="game-info">
+                <div class="game-title">Slow Roads</div>
+                <div class="game-desc">Relaxing endless driving experience.</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='webbutton.html'">
+            <img class="game-thumb" src="TN/webbutton.png" alt="Web Button">
+            <div class="game-info">
+                <div class="game-title">Web Button</div>
+                <div class="game-desc">A mysterious web button game.</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='5050.html'">
+            <img class="game-thumb" src="TN/5050.png" alt="5050">
+            <div class="game-info">
+                <div class="game-title">5050</div>
+                <div class="game-desc">Take your chances in 50/50!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='bloxd.html'">
+            <img class="game-thumb" src="TN/bloxd.png" alt="Bloxd">
+            <div class="game-info">
+                <div class="game-title">Bloxd</div>
+                <div class="game-desc">Jump and run in a blocky world.</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='cball.html'">
+            <img class="game-thumb" src="TN/cball.png" alt="Cball">
+            <div class="game-info">
+                <div class="game-title">Cball</div>
+                <div class="game-desc">Most skill based game of them all!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='clicker.html'">
+            <img class="game-thumb" src="TN/clicker.png" alt="Clicker">
+            <div class="game-info">
+                <div class="game-title">Clicker</div>
+                <div class="game-desc">Click as fast as you can!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='CSGO-Case-Clicker-master/CaseClicker.html'">
+            <img class="game-thumb" src="TN/CS.png" alt="CSGO Case Clicker">
+            <div class="game-info">
+                <div class="game-title">CSGO Case Clicker</div>
+                <div class="game-desc">Open cases and collect skins!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='roulette.html'">
+            <img class="game-thumb" src="TN/roulette.png" alt="Roulette">
+            <div class="game-info">
+                <div class="game-title">Roulette</div>
+                <div class="game-desc">All on red!</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='dvd.html'">
+            <img class="game-thumb" src="TN/dvd.png" alt="DVD screensaver">
+            <div class="game-info">
+                <div class="game-title">DVD screensaver</div>
+                <div class="game-desc">Cool down a little with the all classic dvd logo</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Pick a random background image from the Logos folder
+        (function() {
+            // List your background images here (relative to the HTML file)
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            const chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
+    </script>
+</body>
+</html>
