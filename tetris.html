@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <title>Soft Body Tetris</title>
   <style>
-    html, body { height: 100%; margin: 0; background: #222; }
+    html, body { height: 100%; margin: 0; background: #222; background-repeat: no-repeat; background-size: cover; }
     body { display: flex; align-items: center; justify-content: center; height: 100vh; }
-    #particles-js { position: fixed; width: 100vw; height: 100vh; z-index: 0; top: 0; left: 0; }
     canvas { background: #111; box-shadow: 0 0 20px #000a; touch-action: none; z-index: 1; position: relative; }
     #score, #highscore {
       position: absolute;
@@ -69,7 +68,6 @@
   </style>
 </head>
 <body>
-<div id="particles-js"></div>
 <div id="score">Score: 0</div>
 <div id="highscore">Highscore: 0</div>
 <!-- Scoreboard with player names -->
@@ -85,25 +83,7 @@
   <button class="btn" id="rotate">&#8635;</button>
   <button class="btn" id="right">&#8594;</button>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 <script>
-// --- particles.js background (like index.html) ---
-particlesJS("particles-js", {
-  "particles": {
-    "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
-    "color": { "value": "#fff" },
-    "shape": { "type": "circle" },
-    "opacity": { "value": 0.2, "random": true },
-    "size": { "value": 3, "random": true },
-    "line_linked": { "enable": true, "distance": 120, "color": "#fff", "opacity": 0.15, "width": 1 },
-    "move": { "enable": true, "speed": 1.2, "direction": "none", "random": false, "straight": false, "out_mode": "out" }
-  },
-  "interactivity": {
-    "detect_on": "canvas",
-    "events": { "onhover": { "enable": false }, "onclick": { "enable": false }, "resize": true }
-  },
-  "retina_detect": true
-});
 
 // --- Tetris code ---
 const COLS = 10, ROWS = 20, BLOCK = 30;
@@ -533,6 +513,30 @@ window.addEventListener('resize', resizeForFullscreen);
 resizeForFullscreen();
 
 update();
+</script>
+<script>
+        // Pick a random or favourite background image from the Logos folder
+        (function() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
 </script>
 </body>
 </html>

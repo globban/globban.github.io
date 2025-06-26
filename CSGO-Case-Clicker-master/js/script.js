@@ -1,4 +1,27 @@
 // New function to inspect an inventory item
+        // Pick a random or favourite background image from the Logos folder
+        (function() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
+
 function inspectItem(item) {
     const modal = document.querySelector(".modalWindow");
     const modalMain = modal.querySelector(".modalMain");

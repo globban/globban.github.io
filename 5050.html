@@ -1,69 +1,57 @@
 <html>
 	<head>
 		<title>50/50</title>
-		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 	</head>
 	<script type="module">
-		import randomButton from "./random-button.js";
-		//"load" event körs när sidan laddats klart 
-		window.addEventListener("load", (event) => {
-			//setup random button
-			randomButton("btn-random");
-		});
-		window.onload = function() {
-            const savedTextColor = localStorage.getItem('textColor') || '#ffffff';
-            document.documentElement.style.setProperty('--text-color', savedTextColor);
-            document.getElementById('textColor').value = savedTextColor;
-        };
 	</script>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+		html, body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
 		body {
 			background-color: black;
 			color: white;
+			width: 100vw;
+			height: 100vh;
+			min-height: 100vh;
+			min-width: 100vw;
+			overflow: hidden;
 			text-align: center;
-			overflow-x: hidden;
-		}
-		.center {
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			text-align: center;
+			background-size: cover;
+			background-position: center;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
 			align-items: center;
-            transform: translateY(-50%);
-            top: 50%;
 		}
-
+		#center {
+			width: 100vw;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-direction: column;
+		}
 		h1 {
 			font-family: orbitron;
 			font-size: 5em;
 			text-shadow: 0px 0px 10px #fff;
+			margin: 0.2em 0 0.2em 0;
 		}
-
 		button {
 			padding: 0em 4em;
 			transition: all 0.5s;
 		}
-
 		button:hover {
 			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
 			transition: all 0.5s;
 		}
-
-		#particles-js {
-            position: absolute;
-            width: 100%;
-            height: 99%;
-            background-color: #000;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-
 		#destination-url.glow {
             animation: glow 1s ease-in-out infinite alternate;
         }
-
         @keyframes glow {
             from {
                 text-shadow: 0 0 10px #ffffff;
@@ -72,14 +60,12 @@
                 text-shadow: 0 0 20px #FFD700;
             }
         }
-
         #grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
-
         #grid a {
             display: block;
             padding: 20px;
@@ -90,32 +76,71 @@
             border-radius: 10px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-    
-    @keyframes epicGlow {
-        0% { box-shadow: 0 0 10px 0 rgba(0,255,0,0.5); }
-        50% { box-shadow: 0 0 30px 15px rgba(0,255,0,1); }
-        100% { box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5); }
-    }
-    
-    .epic-glow {
-        animation: epicGlow 0.3s ease-in-out;
-    }
-    
+        @keyframes epicGlow {
+            0% { box-shadow: 0 0 10px 0 rgba(0,255,0,0.5); }
+            50% { box-shadow: 0 0 30px 15px rgba(0,255,0,1); }
+            100% { box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5); }
+        }
+        .epic-glow {
+            animation: epicGlow 0.3s ease-in-out;
+        }
+		#game-container {
+			width: 100vw;
+			max-width: 600px;
+			margin: 0 auto;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+		#cube {
+			width: 90vw;
+			max-width: 500px;
+			height: 30vw;
+			max-height: 300px;
+			background-color: rgba(83, 123, 83, 0);
+			border: #0f0 2px solid;
+			margin: 0 auto;
+			border-radius: 25px;
+			cursor: pointer;
+			box-sizing: border-box;
+			transition: border-color 0.3s;
+		}
+		#score-display, #highscore-display {
+			color: white;
+			font-size: 3em;
+			margin-top: 10px;
+			margin-bottom: 0;
+		}
+		#restart-btn {
+			display: none;
+			margin-top: 10px;
+			padding: 5px 10px;
+		}
+		@media (max-width: 600px) {
+			h1 {
+				font-size: 2.5em;
+			}
+			#cube {
+				height: 40vw;
+				max-height: 200px;
+			}
+			#score-display, #highscore-display {
+				font-size: 2em;
+			}
+		}
 	</style>
 	<body>
-		<div id="particles-js"></div>
 		<div id="center">
 		  <h1>50/50</h1>
-          </div>
-		<div id="game-container" style="margin: 20px auto; width: 100%; ">
-			<div id="cube" style="width: 500px; height: 500px; background-color: green; margin: 0 auto; border-radius: 25px; cursor: pointer; "></div>
-			<p id="score-display" style="color: white; font-size: 4em; margin-top: 10px;">Score: 0</p>
-			<button id="restart-btn" style="display: none; margin-top: 10px; padding: 5px 10px;">Restart</button>
-			<p id="highscore-display" style="color: white; font-size: 4em; margin-top: 10px;"></p>
+        </div>
+		<div id="game-container">
+			<div id="cube"></div>
+			<p id="score-display">Score: 0</p>
+			<button id="restart-btn">Restart</button>
+			<p id="highscore-display"></p>
 		</div>
 	</body>
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script src="/particles.js"></script>
 	<script>
 	(function(){
     const cube = document.getElementById('cube');
@@ -135,19 +160,19 @@
        const chancePercent = parseFloat(computedChance.toFixed(6));
        highscoreDisplay.textContent = 'Highscore: ' + highScore + ' (' + chancePercent + '%)';
     }
-    
+
     function restartGame() {
          score = 0;
          scoreDisplay.textContent = 'Score: ' + score;
-         cube.style.backgroundColor = 'green';
+         cube.style.borderColor = 'green';
     }
-    
+
     function handleCubeClick() {
-        if (cube.style.backgroundColor === 'red') {
+        if (cube.style.borderColor === 'red') {
             restartGame();
             return;
         }
-        
+
         if (Math.random() < pChance) {
             score++;
             scoreDisplay.textContent = 'Score: ' + score;
@@ -158,15 +183,44 @@
             const soundEffect = new Audio('/pass-sound.m4a');
             soundEffect.play();
         } else {
-            cube.style.backgroundColor = 'red';
+            cube.style.borderColor = 'red';
             localStorage.setItem('savedScore', score);
             const currentChance = parseFloat((Math.pow(pChance, score) * 100).toFixed(6));
             scoreDisplay.textContent = 'Score saved: ' + score + ' (' + currentChance + '%)';
             updateHighScore(score);
         }
     }
-    
+
     cube.addEventListener('click', handleCubeClick);
-    })();
+    // Set initial border color
+    cube.style.borderColor = 'green';
+    // Set initial highscore display
+    updateHighScore(0);
+	})();
 	</script>
+
+<script>
+        // Pick a random or favourite background image from the Logos folder
+        (function() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
+</script>
 </html>

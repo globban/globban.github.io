@@ -8,7 +8,6 @@
     import initScoreHandler from "./ClickerScore/clicker-score.js";
     initScoreHandler("clickerButton", "currentScore", "highScore");
   </script>
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 </head>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
@@ -19,6 +18,8 @@
     text-align: center;
     overflow-x: hidden;
     overflow-y: hidden;
+    background-size: cover;
+    background-repeat: no-repeat;
   }
 
   .center {
@@ -52,15 +53,37 @@
 </style>
 
 <body>
-  <div id="particles-js">
-    <div class="center">
-      <h1>Clicker game</h1>
-      <button id="clickerButton">
-        <h1>Click!</h1>
-      </button>
-      <h1>score: <span id="currentScore"></span></h1>
-      <h1>High score: <span id="highScore"></span></h1>
-    </div>
+  <div class="center">
+    <h1>Clicker game</h1>
+    <button id="clickerButton">
+      <h1>Click!</h1>
+    </button>
+    <h1>score: <span id="currentScore"></span></h1>
+    <h1>High score: <span id="highScore"></span></h1>
+  </div>
 </body>
-<script src="/particles.js"></script>
+<script>
+        // Pick a random or favourite background image from the Logos folder
+        (function() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
+</script>
 </html>

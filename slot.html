@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #111;
+      background: #0f0f0f;
       color: white;
       text-align: center;
       padding: 50px;
@@ -92,6 +92,31 @@
       color: #ff0;
     }
   </style>
+  <script>
+    // Set favourite or random background from Logos
+    document.addEventListener('DOMContentLoaded', function() {
+      const backgrounds = [
+        "Logos/export (1).png",
+        "Logos/export (2).png",
+        "Logos/export (3).png",
+        "Logos/export (4).png",
+        "Logos/export (5).png",
+        "Logos/export (6).png",
+        "Logos/export (7).png"
+      ];
+      let fav = localStorage.getItem("fav_bg");
+      let chosen;
+      if (fav && backgrounds.includes(fav)) {
+        chosen = fav;
+      } else {
+        chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      }
+      document.body.style.backgroundImage = `url('${chosen}'), linear-gradient(120deg, #000 0%, #000 100%)`;
+      document.body.style.backgroundSize = "cover, cover";
+      document.body.style.backgroundRepeat = "no-repeat, no-repeat";
+      document.body.style.backgroundAttachment = "fixed";
+    });
+  </script>
 </head>
 <body>
 

@@ -6,7 +6,6 @@
     <title>Games Library</title>
     <style>
         body {
-            background: #181a20;
             margin: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
             color: #eee;
@@ -147,7 +146,7 @@
             </div>
         </div>
         <div class="game-card" onclick="window.location.href='snake.html'">
-            <img class="game-thumb" src="TN/Snake.png" alt="Snake">
+            <img class="game-thumb" src="TN/snake.png" alt="Snake">
             <div class="game-info">
                 <div class="game-title">Snake</div>
                 <div class="game-desc">Classic snake game. Eat and grow!</div>
@@ -232,9 +231,8 @@
         </div>
     </div>
     <script>
-        // Pick a random background image from the Logos folder
+        // Pick a random or favourite background image from the Logos folder
         (function() {
-            // List your background images here (relative to the HTML file)
             const backgrounds = [
                 "Logos/export (1).png",
                 "Logos/export (2).png",
@@ -245,7 +243,13 @@
                 "Logos/export (7).png"
                 // Add more as needed
             ];
-            const chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
             document.body.style.backgroundImage =
                 `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
         })();

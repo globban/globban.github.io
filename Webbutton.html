@@ -1,7 +1,6 @@
 <html>
 	<head>
 		<title>Random website</title>
-		<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 	</head>
 	<script type="module">
 		import randomButton from "./random-button.js";
@@ -23,6 +22,8 @@
 			color: white;
 			text-align: center;
 			overflow-x: hidden;
+			background-size: cover;
+			background-repeat: no-repeat;
 		}
 		.center {
 			position: absolute;
@@ -53,15 +54,6 @@
 			transition: all 0.5s;
 		}
 
-		#particles-js {
-            position: absolute;
-            width: 100%;
-            height: 99%;
-            background-color: #000;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
 
 		#destination-url.glow {
             animation: glow 1s ease-in-out infinite alternate;
@@ -77,16 +69,36 @@
         }
 	</style>
 	<body>
-		<div id="particles-js"></div>
 		<div id="center"></div>
-		  <h1>Take me to a random website</h1>
+		  <h1 style="margin-top:30vh ;">Take me to a random website</h1>
 		  
 				<button id="btn-random"><h1>please</h1></button>
 	        <!-- New message element for showing destination -->
 	        <p id="destination-url" style="color: white; font-size: 3vw; font-family: orbitron;"></p>
 	</body>
-	
-	<script src="/particles.js"></script>
-<link rel="stylesheet" href="/style.css">
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+        // Pick a random or favourite background image from the Logos folder
+        (function() {
+            const backgrounds = [
+                "Logos/export (1).png",
+                "Logos/export (2).png",
+                "Logos/export (3).png",
+                "Logos/export (4).png",
+                "Logos/export (5).png",
+                "Logos/export (6).png",
+                "Logos/export (7).png"
+                // Add more as needed
+            ];
+            let fav = localStorage.getItem("fav_bg");
+            let chosen;
+            if (fav && backgrounds.includes(fav)) {
+                chosen = fav;
+            } else {
+                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            }
+            document.body.style.backgroundImage =
+                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+        })();
+</script>
+
 </html>
