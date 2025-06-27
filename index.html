@@ -12,13 +12,27 @@
             font-family: 'Dot';
             src: url('/dot.ttf');
         }
-        body, html {    
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100vw;
+            height: 100vh;
+            min-width: 100vw;
+            min-height: 100vh;
             overflow: hidden;
             background-size: cover, cover;
             background-repeat: no-repeat, no-repeat;
             background-attachment: fixed;
+            background-position: center center;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            min-width: 100vw;
+            min-height: 100vh;
+            /* fallback for background image scaling */
         }
 
         header {
@@ -26,7 +40,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 100vw;
             height: 75px;
             background: rgba(20, 20, 20, 0.35);
             color: white;
@@ -83,6 +97,52 @@
         #star-fav-btn.filled {
             color: #ffd700;
             text-shadow: 0 0 8px #ffd70099;
+        }
+
+        /* Responsive styles for mobile */
+        @media (max-width: 700px) {
+            html, body {
+                font-size: 3vw;
+                width: 100vw;
+                height: 100vh;
+                min-width: 100vw;
+                min-height: 100vh;
+                overflow: hidden;
+            }
+            header {
+                height: 12vw;
+                min-height: 48px;
+                padding-left: 1vw;
+            }
+            header h1 {
+                font-size: 6vw;
+            }
+            .links {
+                gap: 2vw;
+                margin-right: 2vw;
+            }
+            header a {
+                font-size: 1em;
+                padding: 0.3em 0.8em;
+            }
+            #star-fav-btn {
+                top: 14vw;
+                left: 2vw;
+                font-size: 7vw;
+            }
+        }
+
+        @media (max-width: 400px) {
+            header {
+                height: 14vw;
+                min-height: 40px;
+            }
+            header h1 {
+                font-size: 7vw;
+            }
+            #star-fav-btn {
+                font-size: 9vw;
+            }
         }
     </style>
 </head>
