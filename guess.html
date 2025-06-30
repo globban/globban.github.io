@@ -1,0 +1,103 @@
+<html>
+<head>
+    <title>Guess the Number</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000000;
+            color: #0f0;
+            align-items: center;       
+        }
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body > *:not(#matrix-canvas) {
+            position: relative;
+            z-index: 1;
+        }
+
+        #container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: monospace;
+            background-color: #000000;
+            width: 300px;
+            padding: 1em;
+            border-radius: 3px;
+            border-style: solid;
+        }
+    </style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div id="container">
+<h1>Guess the Number</h1>
+<p>I'm thinking of a number between 1 and 100. Can you guess it?</p>
+<input type="number" id="guess">
+<button onclick="checkGuess()">Guess</button>
+<p id="result"></p>
+</div>
+</script>
+
+<script>
+
+// Matrix background effect
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let fontSize = 18;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array(columns).fill(1);
+const chars = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontSize + "px monospace";
+    ctx.fillStyle = "#0F0";
+    for (let i = 0; i < drops.length; i++) {
+        let text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 40);
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+});
+</script>
+<script>
+    const target = Math.floor(Math.random() * 100) + 1;
+    let numGuesses = 0;
+
+    function checkGuess() {
+        numGuesses += 1;
+        const guess = document.getElementById("guess").value;
+        const resultParagraph = document.getElementById("result");
+
+        if (guess == target) {
+            resultParagraph.innerHTML = "You got it! It took you " + numGuesses + " guesses.";
+        } else if (guess < target) {
+            resultParagraph.innerHTML = "Your guess is too low. Try again.";
+        } else if (guess > target) {
+            resultParagraph.innerHTML = "Your guess is too high. Try again.";
+        }
+    }
+</script>
+</body>
+</html>

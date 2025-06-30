@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IP Address Viewer</title>
+  <style>
+    body {
+      background: #181c20;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      margin-top: 2em;
+      font-size: 2.2em;
+      letter-spacing: 0.05em;
+    }
+    .ip-box {
+      background: #23272e;
+      border-radius: 12px;
+      box-shadow: 0 0 16px #000a;
+      padding: 1.5em 2em;
+      margin: 2em 0 1em 0;
+      text-align: center;
+      min-width: 320px;
+    }
+    .ip-label {
+      color: #0ff;
+      font-size: 1.1em;
+      margin-bottom: 0.3em;
+      display: block;
+    }
+    .ip-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      color: #fff;
+      margin-bottom: 0.5em;
+    }
+    .note {
+      color: #aaa;
+      font-size: 0.95em;
+      margin-top: 2em;
+      max-width: 400px;
+      text-align: center;
+    }
+    .other-ips {
+      margin-top: 2em;
+      background: #23272e;
+      border-radius: 12px;
+      box-shadow: 0 0 16px #000a;
+      padding: 1em 2em;
+      min-width: 320px;
+    }
+    .other-ips ul {
+      padding-left: 1.2em;
+      margin: 0.5em 0 0 0;
+      color: #fff;
+    }
+    .other-ips li {
+      margin-bottom: 0.3em;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>IP Address Viewer</h1>
+  <div class="ip-box">
+    <span class="ip-label">Your Public IP Address:</span>
+    <span class="ip-value" id="public-ip">Loading...</span>
+    <span class="ip-label">Your Local IP Address:</span>
+    <span class="ip-value" id="local-ip">Loading...</span>
+  </div>
+  <div class="other-ips">
+    <span class="ip-label">Other Devices on Your Network:</span>
+    <ul id="other-ips-list">
+      <li>Not available in browser for privacy reasons.</li>
+    </ul>
+  </div>
+  <div class="note">
+    <strong>Note:</strong> For privacy and security, browsers do not allow web pages to scan your local network for other devices' IP addresses.<br>
+    You can see your public IP (as seen by the internet) and your local IP (as seen by your router).<br>
+    To see all devices on your network, use your router's admin page or a network scanner app.
+  </div>
+  <script>
+    // Get public IP using a public API
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('public-ip').textContent = data.ip;
+      })
+      .catch(() => {
+        document.getElementById('public-ip').textContent = "Unavailable";
+      });
+
+    // Get local IP using WebRTC (works in most modern browsers)
+    function getLocalIP(callback) {
+      let RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+      if (!RTCPeerConnection) {
+        callback('Unavailable');
+        return;
+      }
+      let pc = new RTCPeerConnection({iceServers:[]});
+      pc.createDataChannel('');
+      pc.createOffer().then(offer => pc.setLocalDescription(offer));
+      pc.onicecandidate = function(event) {
+        if (!event || !event.candidate) return;
+        let ipMatch = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(event.candidate.candidate);
+        if (ipMatch) {
+          callback(ipMatch[1]);
+          pc.onicecandidate = null;
+        }
+      };
+      setTimeout(() => callback('Unavailable'), 2000);
+    }
+    getLocalIP(function(ip) {
+      document.getElementById('local-ip').textContent = ip;
+    });
+  </script>
+</body>
+</html>

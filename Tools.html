@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tools</title>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <style>
+    @font-face {
+      font-family: 'dot';
+      src: url('/dot.ttf');
+    }
+    body {
+      margin: 0;
+      font-family: 'dot';
+      color: #eee;
+      background-color: #232526;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center center;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 1.5em;
+      font-size: 3em;
+      color: #fff;
+      width: 100%;
+      letter-spacing: 0.05em;
+      margin-bottom: 2em;
+    }
+    .tools-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2em;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .tool-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30,30,30,0.85);
+      border: 2px solid #08f;
+      border-radius: 14px;
+      padding: 1.2em 2em;
+      text-decoration: none;
+      color: #fff;
+      min-width: 120px;
+      min-height: 120px;
+      transition: background 0.2s, border 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 10px #08f2, 0 0 2px #000;
+      font-size: 1.1em;
+    }
+    .tool-link:hover {
+      background: #111;
+      border-color: #0f0;
+      color: #0f0;
+      box-shadow: 0 0 18px #0f02, 0 0 2px #000;
+    }
+    .tool-link i {
+      font-size: 2.5em;
+      margin-bottom: 0.6em;
+    }
+    .tool-link span {
+      font-size: 1.1em;
+      text-shadow: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tools</h1>
+  <div class="tools-grid">
+    <a class="tool-link" href="/tptest.html" title="Tptest">
+      <i class="fas fa-wifi"></i>
+      <span>Tptest</span>
+    </a>
+    <a class="tool-link" href="/clock.html" title="Clock">
+      <i class="fas fa-clock"></i>
+      <span>Clock</span>
+    </a>
+    <a class="tool-link" href="/cast.html" title="Cast">
+      <i class="fas fa-tv"></i>
+      <span>Cast</span>
+    </a>
+    <a class="tool-link" href="/resolution.html" title="Resolution">
+      <i class="fas fa-desktop"></i>
+      <span>Resolution</span>
+    </a>
+    <a class="tool-link" href="/calculator.html" title="Calculator">
+      <i class="fas fa-calculator"></i>
+      <span>Calculator</span>
+    </a>
+    <a class="tool-link" href="/ip.html" title="IP Address">
+      <i class="fas fa-network-wired"></i>
+      <span>IP Address</span>
+    </a>
+  </div>
+  <script>
+    (function() {
+      const backgrounds = [
+        "Logos/export (1).png",
+        "Logos/export (2).png",
+        "Logos/export (3).png",
+        "Logos/export (4).png",
+        "Logos/export (5).png",
+        "Logos/export (6).png",
+        "Logos/export (7).png"
+      ];
+      const fav = localStorage.getItem("fav_bg");
+      let chosen;
+      if (fav && backgrounds.includes(fav)) {
+        chosen = fav;
+      } else {
+        chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      }
+      document.body.style.backgroundImage =
+        `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundRepeat = "no-repeat";
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neumorphic Calculator</title>
+  <style>
+    body {
+      background: #e0e5ec;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .calc-container {
+      background: #e0e5ec;
+      border-radius: 30px;
+      box-shadow:  20px 20px 60px #bebebe,
+                   -20px -20px 60px #ffffff;
+      padding: 2em 1.5em;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .calc-display {
+      width: 90%;
+      background: #e0e5ec;
+      border-radius: 15px;
+      box-shadow: inset 4px 4px 10px #bebebe,
+                  inset -4px -4px 10px #ffffff;
+      font-size: 2em;
+      padding: 0.6em 0.8em;
+      margin-bottom: 0.2em;
+      text-align: right;
+      color: #333;
+      letter-spacing: 1px;
+      min-height: 1.5em;
+      word-break: break-all;
+      user-select: all;
+    }
+    .calc-formula {
+      width: 100%;
+      min-height: 1.2em;
+      text-align: right;
+      color: #888;
+      font-size: 1em;
+      margin-bottom: 1em;
+      letter-spacing: 1px;
+      word-break: break-all;
+      user-select: all;
+    }
+    .calc-buttons {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1em;
+    }
+    .calc-btn {
+      background: #e0e5ec;
+      border: none;
+      border-radius: 12px;
+      box-shadow:  4px 4px 10px #bebebe,
+                  -4px -4px 10px #ffffff;
+      font-size: 1.3em;
+      padding: 0.7em 0;
+      color: #333;
+      cursor: pointer;
+      transition: box-shadow 0.1s, background 0.1s;
+      outline: none;
+      user-select: none;
+    }
+    .calc-btn:active {
+      box-shadow: inset 2px 2px 6px #bebebe,
+                  inset -2px -2px 6px #ffffff;
+      background: #d1d9e6;
+    }
+    .calc-btn.op {
+      color: #1976d2;
+      font-weight: bold;
+    }
+    .calc-btn.eq {
+      background: #1976d2;
+      color: #fff;
+      font-weight: bold;
+      grid-column: span 2;
+      box-shadow:  4px 4px 10px #bebebe,
+                  -4px -4px 10px #ffffff;
+    }
+    .calc-btn.zero {
+      grid-column: span 2;
+    }
+    .calc-btn.clear {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="calc-container">
+    <div class="calc-formula" id="formula">&nbsp;</div>
+    <div class="calc-display" id="display">0</div>
+    <div class="calc-buttons">
+      <button class="calc-btn clear" onclick="clearDisplay()">C</button>
+      <button class="calc-btn op" onclick="inputOp('÷')">÷</button>
+      <button class="calc-btn op" onclick="inputOp('×')">×</button>
+      <button class="calc-btn op" onclick="inputOp('-')">-</button>
+      <button class="calc-btn" onclick="inputNum('7')">7</button>
+      <button class="calc-btn" onclick="inputNum('8')">8</button>
+      <button class="calc-btn" onclick="inputNum('9')">9</button>
+      <button class="calc-btn op" onclick="inputOp('+')">+</button>
+      <button class="calc-btn" onclick="inputNum('4')">4</button>
+      <button class="calc-btn" onclick="inputNum('5')">5</button>
+      <button class="calc-btn" onclick="inputNum('6')">6</button>
+      <button class="calc-btn" onclick="inputOp('%')">%</button>
+      <button class="calc-btn" onclick="inputNum('1')">1</button>
+      <button class="calc-btn" onclick="inputNum('2')">2</button>
+      <button class="calc-btn" onclick="inputNum('3')">3</button>
+      <button class="calc-btn eq" onclick="calculate()">=</button>
+      <button class="calc-btn zero" onclick="inputNum('0')">0</button>
+      <button class="calc-btn" onclick="inputDot()">.</button>
+    </div>
+  </div>
+  <script>
+    let display = document.getElementById('display');
+    let formula = document.getElementById('formula');
+    let current = '0';
+    let operator = '';
+    let operand = null;
+    let resetNext = false;
+
+    function updateDisplay() {
+      display.textContent = current;
+      if (operator && operand !== null) {
+        formula.textContent = operand + ' ' + operator;
+      } else {
+        formula.innerHTML = '&nbsp;';
+      }
+    }
+
+    function inputNum(num) {
+      if (resetNext) {
+        current = num;
+        resetNext = false;
+      } else {
+        if (current === '0') current = num;
+        else current += num;
+      }
+      updateDisplay();
+    }
+
+    function inputDot() {
+      if (resetNext) {
+        current = '0.';
+        resetNext = false;
+      } else if (!current.includes('.')) {
+        current += '.';
+      }
+      updateDisplay();
+    }
+
+    function clearDisplay() {
+      current = '0';
+      operator = '';
+      operand = null;
+      resetNext = false;
+      updateDisplay();
+    }
+
+    function inputOp(op) {
+      if (operator && !resetNext) {
+        calculate();
+      }
+      operand = parseFloat(current);
+      operator = op;
+      resetNext = true;
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!operator) return;
+      let result;
+      let num = parseFloat(current);
+      switch (operator) {
+        case '+': result = operand + num; break;
+        case '-': result = operand - num; break;
+        case '×': result = operand * num; break;
+        case '÷': result = num === 0 ? 'Error' : operand / num; break;
+        case '%': result = operand % num; break;
+        default: return;
+      }
+      current = (result === 'Error') ? 'Error' : String(+parseFloat(result.toFixed(10)));
+      operator = '';
+      operand = null;
+      resetNext = true;
+      updateDisplay();
+    }
+
+    // Initialize formula display
+    updateDisplay();
+  </script>
+</body>
+</html>

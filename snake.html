@@ -53,7 +53,9 @@
 const GRID = 16;
 const SIZE = 20;
 const SNAKE_COLOR = "#2ecc40"; // green
-const SNAKE_SPEED = 180; // ms per step (slower than before)
+const SNAKE_SPEED_START = 180; // ms per step (initial)
+const SNAKE_SPEED_MIN = 60;    // ms per step (fastest)
+const SNAKE_SPEED_STEP = 8;    // speed up per apple
 
 // --- Canvas and state ---
 const canvas = document.getElementById('game');
@@ -65,7 +67,8 @@ let apples = [];
 let score = 0;
 let gameOver = false;
 let waitingToStart = true;
-let intervalId;
+let snakeSpeed = SNAKE_SPEED_START;
+let timeoutId;
 
 // --- Place two apples at random empty spots ---
 function placeApples() {
@@ -82,6 +85,23 @@ function placeApples() {
 // --- Draw everything ---
 function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Draw grid
+  ctx.save();
+  ctx.strokeStyle = "#444";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= GRID; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * SIZE, 0);
+    ctx.lineTo(i * SIZE, GRID * SIZE);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i * SIZE);
+    ctx.lineTo(GRID * SIZE, i * SIZE);
+    ctx.stroke();
+  }
+  ctx.restore();
+
   // Draw apples
   for (const a of apples) {
     ctx.beginPath();
@@ -131,6 +151,8 @@ function step() {
       score++;
       apples.splice(i,1);
       ate = true;
+      // Speed up!
+      snakeSpeed = Math.max(SNAKE_SPEED_MIN, snakeSpeed - SNAKE_SPEED_STEP);
       break;
     }
   }
@@ -147,27 +169,39 @@ function step() {
   }
   document.getElementById('scoreboard').textContent = "Score: " + score;
   draw();
+  // Use setTimeout for dynamic speed
+  if (!gameOver) timeoutId = setTimeout(step, snakeSpeed);
 }
 
 // --- Controls (keyboard) ---
-function startGame() {
+function startGame(startDirection) {
   snake = [{x:8, y:8}];
-  dir = {x:1, y:0};
-  nextDir = {x:1, y:0};
+  dir = startDirection;
+  nextDir = startDirection;
   score = 0;
   gameOver = false;
   waitingToStart = false;
+  snakeSpeed = SNAKE_SPEED_START;
   placeApples();
   document.getElementById('scoreboard').textContent = "Score: 0";
   draw();
-  intervalId = setInterval(step, SNAKE_SPEED);
+  clearTimeout(timeoutId);
+  timeoutId = setTimeout(step, snakeSpeed);
 }
 
 function handleKey(e) {
   if (waitingToStart) {
-    waitingToStart = false;
-    showStartMessage();
-    startGame();
+    // Set direction based on first key
+    let d = null;
+    if (e.key === "ArrowUp" || e.key === "w") d = {x:0, y:-1};
+    else if (e.key === "ArrowDown" || e.key === "s") d = {x:0, y:1};
+    else if (e.key === "ArrowLeft" || e.key === "a") d = {x:-1, y:0};
+    else if (e.key === "ArrowRight" || e.key === "d") d = {x:1, y:0};
+    if (d) {
+      waitingToStart = false;
+      showStartMessage();
+      startGame(d);
+    }
     return;
   }
   if (gameOver) return;
@@ -182,9 +216,11 @@ document.addEventListener('keydown', handleKey);
 let touchStartX = 0, touchStartY = 0;
 function handleTouchStart(e) {
   if (waitingToStart) {
-    waitingToStart = false;
-    showStartMessage();
-    startGame();
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+    // Don't start game yet, wait for swipe direction
     return;
   }
   if (e.touches.length === 1) {
@@ -195,7 +231,27 @@ function handleTouchStart(e) {
 canvas.addEventListener('touchstart', handleTouchStart);
 
 function handleTouchEnd(e) {
-  if (waitingToStart || gameOver) return;
+  if (waitingToStart) {
+    if (e.changedTouches.length === 1) {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      let d = null;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 10) d = {x:1, y:0};
+        else if (dx < -10) d = {x:-1, y:0};
+      } else {
+        if (dy > 10) d = {x:0, y:1};
+        else if (dy < -10) d = {x:0, y:-1};
+      }
+      if (d) {
+        waitingToStart = false;
+        showStartMessage();
+        startGame(d);
+      }
+    }
+    return;
+  }
+  if (gameOver) return;
   if (e.changedTouches.length === 1) {
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
@@ -295,7 +351,7 @@ function startGame() {
   placeApples();
   document.getElementById('scoreboard').textContent = "Score: 0";
   draw();
-  intervalId = setInterval(step, SNAKE_SPEED);
+  timeoutId = setTimeout(step, snakeSpeed);
 }
 
 // --- End game and update online scoreboard ---
@@ -305,10 +361,9 @@ function endGame() {
     let playerName = promptPlayerName();
     await updateOnlineScoreboard(score, playerName);
     alert("Game Over! Score: " + score);
-    clearInterval(intervalId);
+    clearTimeout(timeoutId);
     waitingToStart = true;
     showStartMessage();
-    // No need to re-add listeners!
   }, 100);
 }
 
@@ -316,7 +371,7 @@ function endGame() {
 placeApples();
 draw();
 showStartMessage();
-</script>
+  </script>
 <script>
         // Pick a random or favourite background image from the Logos folder
         (function() {

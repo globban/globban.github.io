@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is my Screen Resolution</title>
+    <style>
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #353535;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        main {
+            border-radius: 2em;
+            padding: 20px;
+            background: #353535;
+            box-shadow:
+            8px 8px 24px #232323,
+            -8px -8px 24px #474747,
+            inset 2px 2px 6px #232323,
+            inset -2px -2px 6px #474747;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div class="container">
+            <h2>Your Screen Resolution is <br />
+                <span id="resolution"></span>
+            </h2>
+        </div>
+        <h3>Screen Width : <span id="width"></span></h3>
+        <h3>Screen Height : <span id="height"></span></h3>
+        <h3>Available Screen Width : <span id="awidth"></span></h3>
+        <h3>Available Screen Height : <span id="aheight"></span></h3>
+        <h3>Screen Color Depth : <span id="color"></span></h3>
+        <h3>Screen Pixal Depth : <span id="pixal"></span></h3>
+    </main>
+
+    <script>
+        window.onload = () => {
+
+            document.getElementById("width").innerText = screen.width + " px";
+            document.getElementById("height").innerText = screen.height + " px";
+            document.getElementById("resolution").innerText = screen.width + " X " + screen.height + " px";
+            document.getElementById("aheight").innerText = screen.availHeight + " px";
+            document.getElementById("awidth").innerText = screen.availWidth + " px";
+            document.getElementById("color").innerText = screen.colorDepth + " px";
+            document.getElementById("pixal").innerText = screen.pixelDepth + " px";
+
+        }
+    </script>
+</body>
+
+</html>

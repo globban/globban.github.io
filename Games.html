@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Games Library</title>
     <style>
+        @font-face {
+      font-family: 'dot';
+      src: url('/dot.ttf');
+    }
         body {
             margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            
             color: #eee;
             /* Optional: subtle background pattern for more glass effect */
             background: #000;
@@ -78,6 +82,7 @@
             color: #fff;
             text-shadow: 0 2px 12px #0008, 0 1px 0 #fff3;
             letter-spacing: 0.01em;
+            font-family: 'dot';
         }
         .game-desc {
             font-size: 1em;
@@ -123,7 +128,7 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin-top:32px; font-weight:400; letter-spacing:0.03em;">Games Library</h1>
+    <h1 style="text-align:center; margin-top:32px; font-weight:400; letter-spacing:0.03em;font-family: 'dot';">Games Library</h1>
     <div class="library-container">
         <div class="game-card" onclick="window.location.href='drift.html'">
             <img class="game-thumb" src="TN/Drift.png" alt="Drift">
@@ -147,7 +152,7 @@
             </div>
         </div>
         <div class="game-card" onclick="window.location.href='snake.html'">
-            <img class="game-thumb" src="TN/snake.png" alt="Snake">
+            <img class="game-thumb" src="TN/Snake.png" alt="Snake">
             <div class="game-info">
                 <div class="game-title">Snake</div>
                 <div class="game-desc">Classic snake game. Eat and grow!</div>
@@ -228,6 +233,13 @@
             <div class="game-info">
                 <div class="game-title">DVD screensaver</div>
                 <div class="game-desc">Cool down a little with the all classic dvd logo</div>
+            </div>
+        </div>
+        <div class="game-card" onclick="window.location.href='guess.html'">
+            <img class="game-thumb" src="TN/guess.png" alt="Guess the Number">
+            <div class="game-info">
+                <div class="game-title">Guess the Number</div>
+                <div class="game-desc">Can you guess the number?</div> 
             </div>
         </div>
     </div>
