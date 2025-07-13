@@ -10,15 +10,73 @@
     background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 4px;
     user-select: none;
   }
+  #menuBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 12px;
+  background: #444;
+  color: white;
+  border: none;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#menuPanel {
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-family: sans-serif;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 1000;
+}
+#menuPanel input[type="color"],
+#menuPanel input[type="range"] {
+  margin: 4px 0;
+  width: 100%;
+}
+
 </style>
 </head>
 <body>
-<div id="info">Use A/D or ←/→ to carve left/right, Space to brake</div>
+<div id="info">
+  Distance: <span id="distance">0</span> m<br>
+  Speed: <span id="speed">0</span> km/h
+</div>
+<button id="menuBtn">⚙️ Menu</button>
+<div id="menuPanel" style="display:none;">
+  <h3>Graphics Settings</h3>
+  <label>Sky Color: <input type="color" id="skyColor" value="#87ceeb"></label><br>
+  <label>Ground Color: <input type="color" id="groundColor" value="#f0f8ff"></label><br>
+  <label>Tree Color: <input type="color" id="treeColor" value="#228822"></label><br>
+  <label>Fog Density: <input type="range" id="fogDensity" min="0" max="0.1" step="0.001" value="0.03"></label><br>
+  <label>Light Color: <input type="color" id="lightColor" value="#ffffff"></label><br>
+  <label>Light Intensity: <input type="range" id="lightIntensity" min="0" max="3" step="0.1" value="1.2"></label>
+</div>
+
+<div id="container"></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script>
 let ramps = [];
 let scene, camera, renderer;
 let clock = new THREE.Clock();
+let cameraTilt = 0; // stores smoothed tilt
+let strafeDir = 0;
+
+let flipRotation = 0;   // current flip rotation (radians), positive = frontflip, negative = backflip
+let flipSpeed = 0;      // angular speed of flip rotation
+
+let spinRotation = 0;     // current spin rotation (Y-axis), in radians
+let spinSpeed = 0;        // angular speed in air (radians/sec)
+
+
+let currentTreeColor = 0x228822;
+
 
 const slopeAngle = THREE.MathUtils.degToRad(15);
 
@@ -27,6 +85,10 @@ const playerHeight = 0.9;       // Player camera height from ground
 const acceleration = 5;        // How fast player accelerates (units/s²)
 const maxSpeed = 60;            // Maximum forward speed
 const strafeSpeed = 5;         // Sideways speed
+
+let totalDistance = 0;
+let previousPosition = null;
+
 
 let player = {
   position: new THREE.Vector3(0, 5, 0),
@@ -40,7 +102,10 @@ let player = {
   jumpVelocity: 0,
 };
 
+
+
 let keys = {};
+let wasJumpPressed = false; // used to detect spacebar press events
 
 const GRAVITY = -40;
 const JUMP_FORCE = 25;
@@ -141,17 +206,17 @@ function createObstacle(type, x, z) {
     scene.add(tree);
     const hitboxOffset = new THREE.Vector3(0, 0, -4); // push hitbox *backward* (adjust as needed)
     const hitboxPos = tree.position.clone().add(hitboxOffset);
-    obstacles.push({ mesh: tree, radius: 2, position: hitboxPos });
+    obstacles.push({ mesh: tree, radius: 2.4, position: hitboxPos });
   }
 }
 
 
 
-function createRamp(x, z, width = 5, length = 10, height = 3) {
+function createRamp(x, z, width = 9, length = 10, height = 6) {
   const rampGeo = new THREE.BoxGeometry(width, height, length);
   const rampMat = new THREE.MeshLambertMaterial({ color: 0xffffff }); // white ramp
   const rampMesh = new THREE.Mesh(rampGeo, rampMat);
-  rampMesh.position.set(x, getTerrainHeight(x, z), z);
+  rampMesh.position.set(x, getTerrainHeight(x, z) - 1, z);  
   rampMesh.rotation.x = 180; // Rotate to face forward
   scene.add(rampMesh);
   ramps.push({ mesh: rampMesh, position: rampMesh.position, width, length, height });
@@ -211,13 +276,32 @@ function animate() {
   groundMesh.position.x = player.position.x;
   groundMesh.position.z = player.position.z;
 
+  // === DISTANCE TRACKING ===
+if (previousPosition) {
+  const delta = player.position.clone().sub(previousPosition);
+  delta.y = 0; // ignore vertical movement
+  totalDistance += delta.length();
+}
+previousPosition = player.position.clone();
+
   
   // Smooth FOV increase based on current speed and acceleration ratio
+  // Calculate speed ratio for normal speed range
+let targetFov;
+if (keys['KeyW'] && player.onGround || keys['ArrowUp'] && player.onGround) {
+  // Force rapid FOV boost when W is held
+  targetFov = 100;
+} else {
+  // Normal FOV based on speed
   let speedRatio = (player.speed - 10) / (player.maxSpeed - 10);
   speedRatio = THREE.MathUtils.clamp(speedRatio, 0, 1);
+  targetFov = THREE.MathUtils.lerp(75, 95, speedRatio);
+}
 
-  camera.fov = THREE.MathUtils.lerp(75, 95, speedRatio)*1.2;
-  camera.updateProjectionMatrix();
+// Smooth interpolation toward target FOV
+camera.fov += (targetFov - camera.fov) * 0.2;
+camera.updateProjectionMatrix();
+
 
   const forward = new THREE.Vector3(0, 0, -1);
   const cameraOffset = new THREE.Vector3(
@@ -228,6 +312,73 @@ function animate() {
   let lookAtPos = player.position.clone().add(forward.multiplyScalar(10));
   lookAtPos.y += playerHeight;
   camera.lookAt(lookAtPos);
+
+  // === SPIN / FLIP LOGIC ===
+spinRotation += spinSpeed * dt;
+spinSpeed *= 0.96; // apply damping
+
+// LANDING SNAP
+if (player.onGround) {
+  // Snap to nearest 180 degrees (0 or π)
+  const snapped = Math.round(spinRotation / Math.PI) * Math.PI;
+  spinRotation += (snapped - spinRotation) * 0.2; // smooth but fast snap
+  if (Math.abs(snapped - spinRotation) < 0.01) {
+    spinRotation = snapped;
+    spinSpeed = 0;
+  }
+}
+
+// Apply all camera rotations
+camera.rotation.x = flipRotation;
+camera.rotation.z = cameraTilt;
+camera.rotation.y = spinRotation;
+
+  
+// === CAMERA TILT WHEN TURNING ===
+const maxTilt = Math.PI / 32  ; // ~11 degrees
+const tiltTarget = -strafeDir * maxTilt;
+cameraTilt += (tiltTarget - cameraTilt) * 0.1; // smoothing
+camera.rotation.z = cameraTilt;
+
+// Update flip rotation and apply damping
+flipRotation += flipSpeed * dt;
+flipSpeed *= 0.95;  // dampen flip speed gradually
+
+// Keep rotation angle normalized (optional)
+if (flipRotation > Math.PI * 2) flipRotation -= Math.PI * 2;
+if (flipRotation < -Math.PI * 2) flipRotation += Math.PI * 2;
+
+// Smoothly reset rotation when on ground
+function normalizeAngle(angle) {
+  while (angle > Math.PI) angle -= Math.PI * 2;
+  while (angle < -Math.PI) angle += Math.PI * 2;
+  return angle;
+}
+
+if (player.onGround) {
+  // Normalize current flipRotation first
+  flipRotation = normalizeAngle(flipRotation);
+
+  // Calculate shortest difference to zero
+  const diff = normalizeAngle(0 - flipRotation);
+
+  // Smoothly ease rotation back to zero
+  flipRotation += diff * 0.1;
+
+  // Stop flipping if close enough
+  if (Math.abs(diff) < 0.01) flipSpeed = 0;
+}
+
+// === UPDATE UI ===
+document.getElementById('distance').textContent = Math.floor(totalDistance * 0.5).toLocaleString();
+const kmh = player.speed * 1.5;
+document.getElementById('speed').textContent = Math.round(kmh);
+// === RENDER SCENE ===
+
+
+// Apply flip rotation as camera pitch (rotation around X-axis)
+camera.rotation.x = flipRotation;
+
 
   renderer.render(scene, camera);
 }
@@ -240,10 +391,64 @@ function updatePlayer(dt) {
   } else {
     groundMesh.position.y = player.position.y - player.jumpOffset; // Slightly raised when in air
   }
-  let strafeDir = 0;
-  if (keys['KeyA'] || keys['ArrowLeft']) strafeDir -= 2
-  if (keys['KeyD'] || keys['ArrowRight']) strafeDir += 2
-  if (keys['Space'] || keys['ArrowDown']) player.speed = player.speed * 0.99; // Stop forward movement when jumping
+  // Calculate desired target strafe dir
+let targetStrafeDir = 0;
+if (player.onGround) {
+  if (keys['KeyA'] || keys['ArrowLeft']) targetStrafeDir = -2 * player.speed / 16;
+  else if (keys['KeyD'] || keys['ArrowRight']) targetStrafeDir = 2 * player.speed/ 16 ;
+  else targetStrafeDir = 0;
+  let boosting = false;
+  // JUMP on spacebar press
+if ((keys['Space'] || keys['ArrowUp']) && player.onGround && !wasJumpPressed) {
+  player.jumpVelocity = JUMP_FORCE;
+  player.onGround = false;
+  wasJumpPressed = true;
+}
+if (!keys['Space'] && !keys['ArrowUp']) {
+  wasJumpPressed = false;
+}
+
+
+if (keys['KeyW']  && player.onGround || keys['ArrowUp'] && player.onGround  ) {
+  boosting = true;
+  player.speed += player.acceleration * 2 * dt;  // boost acceleration (e.g. double)
+  if (player.speed > player.maxSpeed * 1.5) player.speed = player.maxSpeed * 1.5; // cap boosted max speed
+} else {
+  // normal acceleration
+  if (player.speed < player.maxSpeed) {
+    player.speed += player.acceleration * dt;
+    if (player.speed > player.maxSpeed) player.speed = player.maxSpeed;
+  }
+}
+
+  if (keys['KeyS'] || keys['ArrowDown']) player.speed *= 0.95; // slow down when braking
+} else {
+  targetStrafeDir = 0; // no strafing in air, optional
+}
+
+
+
+if (!player.onGround) {
+  if (keys['KeyA']) {
+    spinSpeed += Math.PI * 8 * dt;   // left spin (360° per second)
+  }
+  if (keys['KeyD']) {
+    spinSpeed -= Math.PI * 8 * dt;   // right spin
+  }
+
+  if (keys['KeyW']) {
+    flipSpeed -= Math.PI * 8 * dt;   // frontflip
+  }
+  if (keys['KeyS']) {
+    flipSpeed += Math.PI * 8 * dt;   // backflip
+  }
+}
+
+
+// Smoothly approach target strafe dir
+const strafeLerpSpeed = 3; // adjust to taste
+strafeDir += (targetStrafeDir - strafeDir) * strafeLerpSpeed * dt;
+
 
   // Gradually accelerate forward speed if below maxSpeed
   if (player.speed < player.maxSpeed) {
@@ -313,6 +518,50 @@ function updatePlayer(dt) {
     player.onGround = false;
   }
 }
+
+document.getElementById("menuBtn").addEventListener("click", () => {
+  const panel = document.getElementById("menuPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+});
+
+document.getElementById("skyColor").addEventListener("input", (e) => {
+  const c = new THREE.Color(e.target.value);
+  renderer.setClearColor(c);
+  scene.fog.color.copy(c);
+});
+
+document.getElementById("groundColor").addEventListener("input", (e) => {
+  const c = new THREE.Color(e.target.value);
+  groundMesh.material.color.set(c);
+});
+
+
+document.getElementById("treeColor").addEventListener("input", (e) => {
+  const color = new THREE.Color(e.target.value);
+  obstacles.forEach(obj => {
+    if (obj.mesh && obj.mesh.children) {
+      obj.mesh.children.forEach(child => {
+        if (child.geometry.type === "ConeGeometry") {
+          child.material.color.set(color);
+        }
+      });
+    }
+  });
+});
+
+document.getElementById("fogDensity").addEventListener("input", (e) => {
+  const d = parseFloat(e.target.value);
+  scene.fog.density = d;
+});
+
+document.getElementById("lightColor").addEventListener("input", (e) => {
+  sunLight.color.set(e.target.value);
+});
+
+document.getElementById("lightIntensity").addEventListener("input", (e) => {
+  sunLight.intensity = parseFloat(e.target.value);
+});
+
 
 </script>
 </body>
