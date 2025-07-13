@@ -41,6 +41,12 @@
   width: 100%;
 }
 
+h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: #ffffff81;
+}
+
 </style>
 </head>
 <body>
@@ -55,6 +61,8 @@
   <label>Ground Color: <input type="color" id="groundColor" value="#f0f8ff"></label><br>
   <label>Tree Color: <input type="color" id="treeColor" value="#228822"></label><br>
   <label>Fog Density: <input type="range" id="fogDensity" min="0" max="0.1" step="0.001" value="0.03"></label><br>
+  <label>Render Distance: <input type="range" id="renderDistance" min="1" max="10" step="1" value="1"></label><br>
+  <h3>Reload to see changes</h3>
   <label>Light Color: <input type="color" id="lightColor" value="#ffffff"></label><br>
   <label>Light Intensity: <input type="range" id="lightIntensity" min="0" max="3" step="0.1" value="1.2"></label>
 </div>
@@ -68,6 +76,11 @@ let clock = new THREE.Clock();
 let cameraTilt = 0; // stores smoothed tilt
 let strafeDir = 0;
 
+let sunLight;
+
+let treeangle = 0.22 + Math.random() * (0.8 - 0.22);
+
+
 let flipRotation = 0;   // current flip rotation (radians), positive = frontflip, negative = backflip
 let flipSpeed = 0;      // angular speed of flip rotation
 
@@ -75,13 +88,14 @@ let spinRotation = 0;     // current spin rotation (Y-axis), in radians
 let spinSpeed = 0;        // angular speed in air (radians/sec)
 
 
-let currentTreeColor = 0x228822;
+
+
 
 
 const slopeAngle = THREE.MathUtils.degToRad(15);
 
 // === CUSTOMIZABLE VARIABLES ===
-const playerHeight = 0.9;       // Player camera height from ground
+const playerHeight = 0.4;       // Player camera height from ground
 const acceleration = 5;        // How fast player accelerates (units/s²)
 const maxSpeed = 60;            // Maximum forward speed
 const strafeSpeed = 5;         // Sideways speed
@@ -89,9 +103,10 @@ const strafeSpeed = 5;         // Sideways speed
 let totalDistance = 0;
 let previousPosition = null;
 
+let chunks = localStorage.getItem("chunks") || 1; // Number of chunks to load in each direction
 
 let player = {
-  position: new THREE.Vector3(0, 5, 0),
+  position: new THREE.Vector3(0, 0, 0),
   velocity: new THREE.Vector3(0, 0, 0),
   speed: 10,                   // Start speed lower for acceleration effect
   maxSpeed: maxSpeed,
@@ -112,18 +127,64 @@ const JUMP_FORCE = 25;
 
 let obstacles = [];
 const chunkSize = 50;
-const visibleChunks = 1;
+const visibleChunks = chunks;
 
 let loadedChunks = new Set();
 
 let groundMesh;
 
+const settings = JSON.parse(localStorage.getItem('skiGameSettings')) || {};
+function loadSettingsFromLocalStorage() {
+  
+  if (settings.skyColor) {
+    document.getElementById("skyColor").value = settings.skyColor;
+    const c = new THREE.Color(settings.skyColor);
+    renderer.setClearColor(c);
+    scene.fog.color.copy(c);
+  }
+  if (settings.groundColor) {
+    document.getElementById("groundColor").value = settings.groundColor;
+    groundMesh.material.color.set(settings.groundColor);
+  }
+  if (settings.treeColor) {
+    document.getElementById("treeColor").value = settings.treeColor;
+    currentTreeColor = new THREE.Color(settings.treeColor);
+  }
+  if (settings.fogDensity) {
+    document.getElementById("fogDensity").value = settings.fogDensity;
+    scene.fog.density = parseFloat(settings.fogDensity);
+  }
+  if (settings.renderDistance) {
+    document.getElementById("renderDistance").value = settings.renderDistance;
+    chunks = parseInt(settings.renderDistance);
+  }
+  if (settings.lightColor) {
+    document.getElementById("lightColor").value = settings.lightColor;
+    sunLight.color.set(settings.lightColor);
+  }
+  if (settings.lightIntensity) {
+    document.getElementById("lightIntensity").value = settings.lightIntensity;
+    sunLight.intensity = parseFloat(settings.lightIntensity);
+  }
+}
+
+if (settings.treeColor) {
+  currentTreeColor = new THREE.Color(settings.treeColor);
+}
+
 init();
+loadSettingsFromLocalStorage();
 animate();
+
 
 function init() {
   scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x87ceeb, 0.03);
+
+  setInterval(() => {
+  treeangle = 0.22 + Math.random() * (0.8 - 0.22); // update every 5 seconds
+}, 5000);
+
 
 
   renderer = new THREE.WebGLRenderer({antialias:true});
@@ -133,10 +194,15 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 
-  let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-  directionalLight.position.set(10, 20, 10);
-  scene.add(directionalLight);
-  scene.add(new THREE.AmbientLight(0x888888));
+  sunLight = new THREE.DirectionalLight(0xffffff, 1);
+sunLight.position.set(10, 20, 10);
+scene.add(sunLight);
+
+// Add soft ambient light to reduce black shadows
+const ambientLight = new THREE.AmbientLight(lightColor, 0.2); // soft white light
+scene.add(ambientLight);
+
+
 
   // Large ground plane, no seams
   const size = chunkSize * visibleChunks * 10;
@@ -191,18 +257,22 @@ function spawnObstaclesChunk(chunkX, chunkZ) {
 function createObstacle(type, x, z) {
   if (type === 'tree') {
     const tree = new THREE.Group();
+
+    // Use the global currentTreeColor THREE.Color instance here
     const coneGeo = new THREE.ConeGeometry(0.8, 3, 8);
-    const coneMat = new THREE.MeshLambertMaterial({color: 0x228822});
+    const coneMat = new THREE.MeshLambertMaterial({ color: currentTreeColor });
     const cone = new THREE.Mesh(coneGeo, coneMat);
+
     const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
     const trunkMat = new THREE.MeshLambertMaterial({color: 0x8b4513});
     const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 1.5;
-    cone.position.y = 3;
+    trunk.position.y = 1;
+    cone.position.y = 2.5; // Position cone above trunk
+
     tree.add(trunk);
     tree.add(cone);
     tree.position.set(x, getTerrainHeight(x,z), z);
-    tree.rotation.x = slopeAngle* 1.3; // Tilt trees slightly
+    tree.rotation.x = treeangle; // Tilt trees slightly
     scene.add(tree);
     const hitboxOffset = new THREE.Vector3(0, 0, -4); // push hitbox *backward* (adjust as needed)
     const hitboxPos = tree.position.clone().add(hitboxOffset);
@@ -212,9 +282,10 @@ function createObstacle(type, x, z) {
 
 
 
-function createRamp(x, z, width = 9, length = 10, height = 6) {
+
+function createRamp(x, z, width = 5, length = 5, height = 5) {
   const rampGeo = new THREE.BoxGeometry(width, height, length);
-  const rampMat = new THREE.MeshLambertMaterial({ color: 0xffffff }); // white ramp
+  const rampMat = new THREE.MeshLambertMaterial({ color: settings.groundColor }); // white ramp
   const rampMesh = new THREE.Mesh(rampGeo, rampMat);
   rampMesh.position.set(x, getTerrainHeight(x, z) - 1, z);  
   rampMesh.rotation.x = 180; // Rotate to face forward
@@ -524,20 +595,35 @@ document.getElementById("menuBtn").addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 });
 
+function saveSettingsToLocalStorage() {
+  const settings = {
+    skyColor: document.getElementById("skyColor").value,
+    groundColor: document.getElementById("groundColor").value,
+    treeColor: document.getElementById("treeColor").value,
+    fogDensity: document.getElementById("fogDensity").value,
+    renderDistance: document.getElementById("renderDistance").value,
+    lightColor: document.getElementById("lightColor").value,
+    lightIntensity: document.getElementById("lightIntensity").value
+  };
+  localStorage.setItem('skiGameSettings', JSON.stringify(settings));
+}
+
 document.getElementById("skyColor").addEventListener("input", (e) => {
   const c = new THREE.Color(e.target.value);
   renderer.setClearColor(c);
   scene.fog.color.copy(c);
+  saveSettingsToLocalStorage();
 });
 
 document.getElementById("groundColor").addEventListener("input", (e) => {
   const c = new THREE.Color(e.target.value);
   groundMesh.material.color.set(c);
+  saveSettingsToLocalStorage();
 });
-
 
 document.getElementById("treeColor").addEventListener("input", (e) => {
   const color = new THREE.Color(e.target.value);
+  currentTreeColor = color;
   obstacles.forEach(obj => {
     if (obj.mesh && obj.mesh.children) {
       obj.mesh.children.forEach(child => {
@@ -547,21 +633,36 @@ document.getElementById("treeColor").addEventListener("input", (e) => {
       });
     }
   });
+  saveSettingsToLocalStorage();
 });
 
 document.getElementById("fogDensity").addEventListener("input", (e) => {
   const d = parseFloat(e.target.value);
   scene.fog.density = d;
+  saveSettingsToLocalStorage();
+});
+
+document.getElementById("renderDistance").addEventListener("input", (e) => {
+  chunks = parseInt(e.target.value);
+  localStorage.setItem("chunks", chunks); // still storing this directly
+  saveSettingsToLocalStorage();
 });
 
 document.getElementById("lightColor").addEventListener("input", (e) => {
   sunLight.color.set(e.target.value);
+  saveSettingsToLocalStorage();
 });
 
 document.getElementById("lightIntensity").addEventListener("input", (e) => {
   sunLight.intensity = parseFloat(e.target.value);
+  saveSettingsToLocalStorage();
 });
 
+
+document.getElementById("renderDistance").addEventListener("input", (e) => {
+  chunks = parseInt(e.target.value);
+  localStorage.setItem("chunks", chunks);
+});
 
 </script>
 </body>
