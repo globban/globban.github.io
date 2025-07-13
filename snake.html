@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <title>Snake Game</title>
   <style>
-    body { background-repeat: no-repeat; background-size: cover; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    body { background-repeat: no-repeat; background-size: cover; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
     #scoreboard {
       color: #fff;
       font-family: monospace;
       margin-bottom: 10px;
-      font-size: 1.5em;
+      font-size: 2.5em;
       text-align: center;
     }
     canvas {
@@ -23,13 +23,14 @@
       font-family: monospace;
       background: #222c;
       border-radius: 10px;
-      padding: 10px 18px;
+      padding: 20px 28px;
       min-width: 120px;
       box-shadow: 0 2px 8px #000a;
       margin-top: 10px;
+      font-size: 2em;
     }
     #highscores-title {
-      font-size: 1.1em;
+      font-size: 2.1em;
       font-weight: bold;
       margin-bottom: 6px;
     }
@@ -41,7 +42,7 @@
 </head>
 <body>
 <div id="scoreboard">Score: 0</div>
-<canvas id="game" width="320" height="320"></canvas>
+<canvas id="game" width="576" height="576"></canvas>
 <div id="highscores">
   <div id="highscores-title">Online Scoreboard</div>
   <ol id="highscores-list"></ol>
@@ -51,7 +52,7 @@
 <script>
 // --- Config ---
 const GRID = 16;
-const SIZE = 20;
+const SIZE = 36;
 const SNAKE_COLOR = "#2ecc40"; // green
 const SNAKE_SPEED_START = 180; // ms per step (initial)
 const SNAKE_SPEED_MIN = 60;    // ms per step (fastest)
@@ -348,6 +349,7 @@ function startGame() {
   score = 0;
   gameOver = false;
   waitingToStart = false;
+  snakeSpeed = SNAKE_SPEED_START; // <-- Add this line to reset speed!
   placeApples();
   document.getElementById('scoreboard').textContent = "Score: 0";
   draw();
@@ -360,7 +362,6 @@ function endGame() {
   setTimeout(async () => {
     let playerName = promptPlayerName();
     await updateOnlineScoreboard(score, playerName);
-    alert("Game Over! Score: " + score);
     clearTimeout(timeoutId);
     waitingToStart = true;
     showStartMessage();

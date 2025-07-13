@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>3D Skiing Game</title>
+<style>
+  body { margin: 0; overflow: hidden; background: #ffffff; }
+  #info {
+    position: absolute; top: 10px; left: 10px; color: white; font-family: sans-serif; font-size: 14px;
+    background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 4px;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<div id="info">Use A/D or ←/→ to carve left/right, Space to brake</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script>
+let ramps = [];
+let scene, camera, renderer;
+let clock = new THREE.Clock();
+
+const slopeAngle = THREE.MathUtils.degToRad(15);
+
+// === CUSTOMIZABLE VARIABLES ===
+const playerHeight = 0.9;       // Player camera height from ground
+const acceleration = 5;        // How fast player accelerates (units/s²)
+const maxSpeed = 60;            // Maximum forward speed
+const strafeSpeed = 5;         // Sideways speed
+
+let player = {
+  position: new THREE.Vector3(0, 5, 0),
+  velocity: new THREE.Vector3(0, 0, 0),
+  speed: 10,                   // Start speed lower for acceleration effect
+  maxSpeed: maxSpeed,
+  acceleration: acceleration,
+  friction: 15,
+  strafeSpeed: strafeSpeed,
+  onGround: true,
+  jumpVelocity: 0,
+};
+
+let keys = {};
+
+const GRAVITY = -40;
+const JUMP_FORCE = 25;
+
+let obstacles = [];
+const chunkSize = 50;
+const visibleChunks = 1;
+
+let loadedChunks = new Set();
+
+let groundMesh;
+
+init();
+animate();
+
+function init() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x87ceeb, 0.03);
+
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setClearColor(0x87ceeb);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+  let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(10, 20, 10);
+  scene.add(directionalLight);
+  scene.add(new THREE.AmbientLight(0x888888));
+
+  // Large ground plane, no seams
+  const size = chunkSize * visibleChunks * 10;
+  const segments = 64;
+  let groundGeo = new THREE.PlaneGeometry(size, size, segments, segments);
+  let groundMat = new THREE.MeshLambertMaterial({color: 0xf0f8ff});
+  groundMesh = new THREE.Mesh(groundGeo, groundMat);
+  groundMesh.rotation.x = -Math.PI/2 + slopeAngle;
+  groundMesh.position.y = player.position.y - playerHeight;
+  scene.add(groundMesh);
+
+  // Initial player height based on custom playerHeight
+  player.position.y = getTerrainHeight(player.position.x, player.position.z) + playerHeight;
+
+  // Spawn obstacles initially (randomized)
+  for (let dx = -visibleChunks; dx <= visibleChunks; dx++) {
+    for (let dz = -visibleChunks; dz <= visibleChunks; dz++) {
+      spawnObstaclesChunk(dx, dz);
+    }
+  }
+
+  window.addEventListener('keydown', (e) => keys[e.code] = true);
+  window.addEventListener('keyup', (e) => keys[e.code] = false);
+  window.addEventListener('resize', onWindowResize);
+}
+
+function getTerrainHeight(x, z) {
+  return Math.tan(-slopeAngle) * z;
+}
+
+// Fully random obstacle generation per chunk
+function spawnObstaclesChunk(chunkX, chunkZ) {
+  const chunkKey = `${chunkX},${chunkZ}`;
+  if (loadedChunks.has(chunkKey)) return;
+  loadedChunks.add(chunkKey);
+
+  const numObstacles = 10 + Math.floor(Math.random() * 5);
+
+  for (let i = 0; i < numObstacles; i++) {
+    const x = chunkX * chunkSize + Math.random() * chunkSize;
+    const z = chunkZ * chunkSize + Math.random() * chunkSize;
+
+    const r = Math.random();
+    if (r < 0.6) {
+      createObstacle('tree', x, z);
+    } else if (r < 0.65) {
+      createRamp(x, z, 5, 5, 5);
+    }
+  }
+}
+
+function createObstacle(type, x, z) {
+  if (type === 'tree') {
+    const tree = new THREE.Group();
+    const coneGeo = new THREE.ConeGeometry(0.8, 3, 8);
+    const coneMat = new THREE.MeshLambertMaterial({color: 0x228822});
+    const cone = new THREE.Mesh(coneGeo, coneMat);
+    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
+    const trunkMat = new THREE.MeshLambertMaterial({color: 0x8b4513});
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.y = 1.5;
+    cone.position.y = 3;
+    tree.add(trunk);
+    tree.add(cone);
+    tree.position.set(x, getTerrainHeight(x,z), z);
+    tree.rotation.x = slopeAngle* 1.3; // Tilt trees slightly
+    scene.add(tree);
+    const hitboxOffset = new THREE.Vector3(0, 0, -4); // push hitbox *backward* (adjust as needed)
+    const hitboxPos = tree.position.clone().add(hitboxOffset);
+    obstacles.push({ mesh: tree, radius: 2, position: hitboxPos });
+  }
+}
+
+
+
+function createRamp(x, z, width = 5, length = 10, height = 3) {
+  const rampGeo = new THREE.BoxGeometry(width, height, length);
+  const rampMat = new THREE.MeshLambertMaterial({ color: 0xffffff }); // white ramp
+  const rampMesh = new THREE.Mesh(rampGeo, rampMat);
+  rampMesh.position.set(x, getTerrainHeight(x, z), z);
+  rampMesh.rotation.x = 180; // Rotate to face forward
+  scene.add(rampMesh);
+  ramps.push({ mesh: rampMesh, position: rampMesh.position, width, length, height });
+}
+
+
+function updateTerrainChunks() {
+  const playerChunkX = Math.floor(player.position.x / chunkSize);
+  const playerChunkZ = Math.floor(player.position.z / chunkSize);
+
+  for (let dx = -visibleChunks; dx <= visibleChunks; dx++) {
+    for (let dz = -visibleChunks; dz <= visibleChunks; dz++) {
+      const chunkX = playerChunkX + dx;
+      const chunkZ = playerChunkZ + dz;
+      spawnObstaclesChunk(chunkX, chunkZ);
+    }
+  }
+}
+
+function despawnObsoleteObjects() {
+  const despawnZ = player.position.z + 50; // Anything behind this Z is removed
+
+  // Remove obstacles
+  obstacles = obstacles.filter(obj => {
+    if (obj.position.z > despawnZ) {
+      scene.remove(obj.mesh);
+      return false; // Remove from array
+    }
+    return true; // Keep in array
+  });
+
+  // Remove ramps
+  ramps = ramps.filter(ramp => {
+    if (ramp.position.z > despawnZ) {
+      scene.remove(ramp.mesh);
+      return false;
+    }
+    return true;
+  });
+}
+
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  let dt = clock.getDelta();
+  
+  updatePlayer(dt);
+  updateTerrainChunks();
+  despawnObsoleteObjects();
+  // Move ground to stay centered under player
+  groundMesh.position.x = player.position.x;
+  groundMesh.position.z = player.position.z;
+
+  
+  // Smooth FOV increase based on current speed and acceleration ratio
+  let speedRatio = (player.speed - 10) / (player.maxSpeed - 10);
+  speedRatio = THREE.MathUtils.clamp(speedRatio, 0, 1);
+
+  camera.fov = THREE.MathUtils.lerp(75, 95, speedRatio)*1.2;
+  camera.updateProjectionMatrix();
+
+  const forward = new THREE.Vector3(0, 0, -1);
+  const cameraOffset = new THREE.Vector3(
+    0, playerHeight + Math.sin(clock.elapsedTime * 6) * 0.07, 6
+  );
+  camera.position.copy(player.position).add(cameraOffset);
+
+  let lookAtPos = player.position.clone().add(forward.multiplyScalar(10));
+  lookAtPos.y += playerHeight;
+  camera.lookAt(lookAtPos);
+
+  renderer.render(scene, camera);
+}
+
+function updatePlayer(dt) {
+  const forward = new THREE.Vector3(0, 0, -1);
+  const right = new THREE.Vector3(1, 0, 0);
+  if (player.onGround === true) {
+    groundMesh.position.y = player.position.y;
+  } else {
+    groundMesh.position.y = player.position.y - player.jumpOffset; // Slightly raised when in air
+  }
+  let strafeDir = 0;
+  if (keys['KeyA'] || keys['ArrowLeft']) strafeDir -= 2
+  if (keys['KeyD'] || keys['ArrowRight']) strafeDir += 2
+  if (keys['Space'] || keys['ArrowDown']) player.speed = player.speed * 0.99; // Stop forward movement when jumping
+
+  // Gradually accelerate forward speed if below maxSpeed
+  if (player.speed < player.maxSpeed) {
+    player.speed += player.acceleration * dt;
+    if (player.speed > player.maxSpeed) player.speed = player.maxSpeed;
+  }
+  let strafeVelocity = right.clone().multiplyScalar(strafeDir * player.strafeSpeed);
+  let forwardVelocity = forward.clone().multiplyScalar(player.speed);
+
+  let nextPos = player.position.clone().add(forwardVelocity.clone().add(strafeVelocity).multiplyScalar(dt));
+
+  // Collision detection: prevent moving into obstacles
+  for (let obj of obstacles) {
+    let dist = obj.position.distanceTo(nextPos);
+    if (dist < obj.radius && nextPos.y <= getTerrainHeight(nextPos.x, nextPos.z) + 3) {
+      let pushDir = nextPos.clone().sub(obj.position);
+      pushDir.y = 0;
+      player.speed = player.speed * 0.95; // Reduce speed on collision
+      if (pushDir.length() === 0) {
+        pushDir = forward.clone().negate();
+      } else {
+        pushDir.normalize();
+      }
+      let velVec = forwardVelocity.clone().add(strafeVelocity);
+      let dot = velVec.dot(pushDir);
+      if (dot < 0) {
+        let correction = pushDir.multiplyScalar(dot);
+        velVec.sub(correction);
+        forwardVelocity = velVec.clone().projectOnVector(forward).multiplyScalar(1);
+        strafeVelocity = velVec.clone().projectOnVector(right).multiplyScalar(1);
+      }
+    }
+  }
+
+  // RAMP JUMPING: Check if player hits front edge of any ramp
+  for (const ramp of ramps) {
+    let dx = nextPos.x - ramp.position.x;
+    let dz = nextPos.z - ramp.position.z;
+    if (
+      Math.abs(dx) <= ramp.width / 2 &&
+      dz > -ramp.length / 2 - 1 && dz < -ramp.length / 2 + 1 &&
+      player.onGround
+    ) {
+      player.jumpVelocity = player.speed * 0.7; // Boost jump based on speed
+      player.onGround = false;
+    }
+  }
+
+  player.velocity.copy(forwardVelocity).add(strafeVelocity);
+
+  if (player.onGround) {
+    player.velocity.y = Math.sin(slopeAngle) * player.speed;
+  } else {
+    player.jumpVelocity += GRAVITY * dt;
+    player.velocity.y = player.jumpVelocity;
+  }
+
+  player.position.addScaledVector(player.velocity, dt);
+
+  const groundHeight = getTerrainHeight(player.position.x, player.position.z) + playerHeight;
+  player.jumpOffset = player.position.y - groundHeight;
+  if (player.position.y <= groundHeight) {
+    player.position.y = groundHeight;
+    player.onGround = true;
+    player.jumpVelocity = 0;
+  } else {
+    player.onGround = false;
+  }
+}
+
+</script>
+</body>
+</html>

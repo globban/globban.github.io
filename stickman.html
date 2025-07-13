@@ -1,9 +1,59 @@
 <html>
 	<head>
-		<title>stickman hook</title>
+		<title>Stickman hook</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 	</head>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #000;
+			color: #fff;
+			font-family: Arial, sans-serif;
+			overflow: hidden;
+		}
+		iframe {
+			border-radius: 1em 1em 0 0;
+			display: block;
+			margin: 10px auto;
+			border: none;
+		}
+		#iframebar {
+			width: 50%;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			margin: -14px auto;
+			background: #292929;
+			border-radius: 0 0 1em 1em;
+		}
+	</style>
 	<body>
-              <iframe src="https://stickmanhook.glitch.me/stickman/" 
-              style="width:100vw; height:100vh; 
-              border:none; margin:0; padding:0px 0px; z-index:999999; left: 0px; top: 0px; position: fixed;">
-		</body>
+		<iframe id="iframehtml5" width="50%" height="50%" frameborder="0" scrolling="no" class="iframe-default" allowfullscreen="true" src="https://stickmanhook2.io/game/stickman-hook/"></iframe>
+
+		<div id="iframebar">
+			<p style="margin-left:1em;">Stickman Hook Game</p>
+			<div id="fullscreenbutton" style="margin-left:auto; display: flex; align-items: center; height: 100%;">
+				<button style="display:flex;align-items:center;gap:0.5em;background:#22222200;color:#fff;border:none;padding:0px 15px;border-radius:6px;cursor:pointer;font-size:1em;">
+					<i class="fas fa-expand"></i> Fullscreen
+				</button>
+			</div>
+		</div>	
+		<script>
+			document.getElementById('fullscreenbutton').addEventListener('click', function() {
+				const iframe = document.getElementById('iframehtml5');
+				if (iframe.requestFullscreen) {
+					iframe.requestFullscreen();
+				} else if (iframe.mozRequestFullScreen) { // Firefox
+					iframe.mozRequestFullScreen();
+				} else if (iframe.webkitRequestFullscreen) { // Chrome, Safari and Opera
+					iframe.webkitRequestFullscreen();
+				} else if (iframe.msRequestFullscreen) { // IE/Edge
+					iframe.msRequestFullscreen();
+				}
+			});
+			</script>
+	</body>
+</html>

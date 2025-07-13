@@ -92,8 +92,11 @@ const ctx = canvas.getContext('2d');
 const scoreDiv = document.getElementById('score');
 const highscoreDiv = document.getElementById('highscore');
 let score = 0;
+let lines = 0;
+let level = 0;
 let highscore = Number(localStorage.tetrisHighscore || 0);
 highscoreDiv.textContent = "Highscore: " + highscore;
+let dropInterval = 500;
 
 // Tetromino shapes
 const SHAPES = [
@@ -241,7 +244,7 @@ for (let r=0; r<ROWS; ++r) {
 }
 
 let current = spawn();
-let dropCounter = 0, dropInterval = 500, lastTime = 0;
+let dropCounter = 0, lastTime = 0;
 let gameOver = false;
 
 function spawn() {
@@ -263,17 +266,26 @@ function merge(tet) {
 }
 
 function sweep() {
-  let lines = 0;
+  let linesCleared = 0;
   outer: for (let r=ROWS-1; r>=0; --r) {
     for (let c=0; c<COLS; ++c) if (!board[r][c]) continue outer;
     board.splice(r,1);
     board.unshift(Array(COLS).fill(0));
     r++;
-    lines++;
+    linesCleared++;
   }
-  if (lines > 0) {
-    score += [0, 40, 100, 300, 1200][lines] || lines*100;
-    scoreDiv.textContent = "Score: " + score;
+  if (linesCleared > 0) {
+    lines += linesCleared;
+    // Level up every 10 lines
+    let newLevel = Math.floor(lines / 10);
+    if (newLevel > level) {
+      level = newLevel;
+      dropInterval = Math.max(80, 500 - level * 40); // minimum speed
+    }
+    // Scoring: base points * lines cleared * (level+1)
+    const linePoints = [0, 100, 300, 700, 1500];
+    score += (linePoints[linesCleared] || linesCleared*500) * (level+1);
+    scoreDiv.textContent = `Score: ${score}  |  Level: ${level+1}`;
     if (score > highscore) {
       highscore = score;
       localStorage.tetrisHighscore = highscore;

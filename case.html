@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CS Skin Search</title>
+  <style>
+    body {
+      background: #23272e;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .container {
+      margin: 2em auto;
+      padding: 2em 2em 1em 2em;
+    }
+    #searchBar, .filter-select {
+      width: 100%;
+      padding: 0.7em 1em;
+      border-radius: 0.7em;
+      border: none;
+      font-size: 1.1em;
+      margin-bottom: 1em;
+      background: #23272e;
+      color: #fff;
+      box-shadow: 0 2px 8px #0006;
+      outline: none;
+    }
+    .filters-row {
+      display: flex;
+      gap: 1em;
+      margin-bottom: 1.5em;
+    }
+    .filter-select {
+      width: auto;
+      min-width: 160px;
+      flex: 1;
+    }
+    .grid {
+      display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1em;
+      margin-bottom: 2em;
+    }
+    .thumb {
+      background: #23272e00;
+      border-radius: 0.7em;
+      padding: 0.5em;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .thumb:hover {
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.533);
+      transform: scale(1.07);
+      z-index: 2;
+    }
+    .thumb img {
+      width: 200px;
+      border-radius: 0.5em;
+      margin-bottom: 0.3em;
+    }
+    .popup-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(24,28,32,0.92);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s;
+    }
+    .popup-card {
+      background: #2c2f33;
+      border-radius: 0.7em;
+      padding: 1.5em;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 4px 16px #000a;
+    }
+    .popup-card img {
+      width: 30vw;
+      border-radius: 0.7em;
+      box-shadow: 0 0 12px #000a;
+      margin-bottom: 1em;
+      background: #111;
+    }
+    .popup-card h2 {
+      margin: 0 0 0.4em 0;
+      font-size: 1.3em;
+    }
+    .popup-card .rarity {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 0.7em;
+      display: block;
+    }
+    .popup-card .value {
+      font-size: 1.1em;
+      color: #ffd700;
+      margin-bottom: 0.7em;
+      display: block;
+      font-weight: bold;
+    }
+    .popup-card .case {
+      margin-top: 1em;
+      font-size: 1em;
+      color: #0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5em;
+      flex-wrap: wrap;
+    }
+    .popup-card .case img {
+      width: 32px;
+      margin: 0;
+      border-radius: 0.3em;
+      box-shadow: none;
+      background: none;
+    }
+    .popup-close {
+      position: absolute;
+      top: 0.7em;
+      right: 1.1em;
+      font-size: 2em;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .popup-close:hover {
+      opacity: 1;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .popup-info {
+      text-align: left;
+      margin: 1.2em 0 0 0;
+      font-size: 1em;
+      color: #ccc;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .popup-info b {
+      color: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <input id="searchBar" type="text" placeholder="Search for a skin by name...">
+    <div class="filters-row">
+      <select id="filterRarity" class="filter-select">
+        <option value="">All Rarities</option>
+      </select>
+      <select id="filterWeapon" class="filter-select">
+        <option value="">All Weapons</option>
+      </select>
+      <select id="filterCase" class="filter-select">
+        <option value="">All Cases</option>
+      </select>
+    </div>
+    <div id="results" class="grid"></div>
+  </div>
+  <div id="popup"></div>
+  <script>
+    let skins = [];
+    let allRarities = new Set();
+    let allWeapons = new Set();
+    let allCases = new Set();
+
+    // Load skins.json
+    fetch('https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json')
+      .then(res => res.json())
+      .then(data => {
+        skins = data;
+        collectFilters();
+        populateFilters();
+        showResults('');
+      });
+
+    function collectFilters() {
+      allRarities.clear();
+      allWeapons.clear();
+      allCases.clear();
+      skins.forEach(skin => {
+        if (skin.rarity?.name) allRarities.add(skin.rarity.name);
+        if (skin.weapon?.name) allWeapons.add(skin.weapon.name);
+        if (skin.crates) skin.crates.forEach(c => allCases.add(c.name));
+      });
+    }
+
+    function populateFilters() {
+      const raritySel = document.getElementById('filterRarity');
+      const weaponSel = document.getElementById('filterWeapon');
+      const caseSel = document.getElementById('filterCase');
+      raritySel.innerHTML = `<option value="">All Rarities</option>` + [...allRarities].sort().map(r => `<option value="${r}">${r}</option>`).join('');
+      weaponSel.innerHTML = `<option value="">All Weapons</option>` + [...allWeapons].sort().map(w => `<option value="${w}">${w}</option>`).join('');
+    }
+
+    document.getElementById('searchBar').addEventListener('input', function() {
+      showResults(this.value.trim());
+    });
+    document.getElementById('filterRarity').addEventListener('change', () => showResults(document.getElementById('searchBar').value.trim()));
+    document.getElementById('filterWeapon').addEventListener('change', () => showResults(document.getElementById('searchBar').value.trim()));
+    document.getElementById('filterCase').addEventListener('change', () => showResults(document.getElementById('searchBar').value.trim()));
+
+    function showResults(query) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      let filtered = skins.slice();
+
+      // Filters
+      const rarity = document.getElementById('filterRarity').value;
+      const weapon = document.getElementById('filterWeapon').value;
+      const caseName = document.getElementById('filterCase').value;
+
+      if (query) {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(skin => skin.name.toLowerCase().includes(q));
+      }
+      if (rarity) filtered = filtered.filter(skin => skin.rarity?.name === rarity);
+      if (weapon) filtered = filtered.filter(skin => skin.weapon?.name === weapon);
+      if (caseName) filtered = filtered.filter(skin => skin.crates && skin.crates.some(c => c.name === caseName));
+
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = `<div style="color:#f66;text-align:center;">No skins found.</div>`;
+        return;
+      }
+      filtered.forEach((skin, idx) => {
+        const div = document.createElement('div');
+        div.className = 'thumb';
+        div.innerHTML = `<img src="${skin.image}" alt="${skin.name}" title="${skin.name}">`;
+        div.onclick = () => showPopup(skin);
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function showPopup(skin) {
+      const popup = document.getElementById('popup');
+      popup.innerHTML = `
+        <div class="popup-bg" onclick="if(event.target===this)closePopup()">
+          <div class="popup-card">
+            <button class="popup-close" onclick="closePopup()">&times;</button>
+            <img src="${skin.image}" alt="${skin.name}">
+            <h2>${skin.name}</h2>
+            <span class="rarity" style="color:${skin.rarity?.color || '#fff'}">${skin.rarity?.name || ''}</span>
+            ${skin.value !== undefined ? `<span class="value">Value: $${Number(skin.value).toFixed(2)}</span>` : ''}
+            <div style="font-size:1.05em;margin-bottom:0.7em;">${skin.weapon?.name || ''}</div>
+            <div style="font-size:0.97em;margin-bottom:0.7em;">${(skin.description || '').replace(/\\n/g, "<br>")}</div>
+            ${skin.crates && skin.crates.length ? `
+              <div class="case">
+                <b>Available in:</b>
+                ${skin.crates.map(crate => `<span><img src="${crate.image}" alt="${crate.name}">${crate.name}</span>`).join('')}
+              </div>
+            ` : ''}
+            <div class="popup-info">
+              ${skin.release_date ? `<div><b>Release Date:</b> ${new Date(skin.release_date * 1000).toLocaleDateString()}</div>` : ''}
+              ${skin.paint_index !== undefined ? `<div><b>Paint Index:</b> ${skin.paint_index}</div>` : ''}
+              ${skin.rarity?.id ? `<div><b>Rarity ID:</b> ${skin.rarity.id}</div>` : ''}
+              ${skin.weapon?.id ? `<div><b>Weapon ID:</b> ${skin.weapon.id}</div>` : ''}
+              ${skin.stattrak !== undefined ? `<div><b>StatTrak:</b> ${skin.stattrak ? 'Yes' : 'No'}</div>` : ''}
+              ${skin.pattern !== undefined ? `<div><b>Pattern:</b> ${skin.pattern}</div>` : ''}
+              ${skin.wears && skin.wears.length ? `<div><b>Wears:</b> ${skin.wears.map(w => w.name).join(', ')}</div>` : ''}
+              ${skin.collection ? `<div><b>Collection:</b> ${skin.collection}</div>` : ''}
+              ${skin.origin ? `<div><b>Origin:</b> ${skin.origin}</div>` : ''}
+              ${skin.first_sale_date ? `<div><b>First Sale:</b> ${new Date(skin.first_sale_date * 1000).toLocaleDateString()}</div>` : ''}
+              ${skin.last_sale_date ? `<div><b>Last Sale:</b> ${new Date(skin.last_sale_date * 1000).toLocaleDateString()}</div>` : ''}
+              ${skin.updated_at ? `<div><b>Updated:</b> ${new Date(skin.updated_at * 1000).toLocaleDateString()}</div>` : ''}
+              ${skin.id ? `<div><b>Skin ID:</b> ${skin.id}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function closePopup() {
+      document.getElementById('popup').innerHTML = '';
+    }
+    window.closePopup = closePopup;
+  </script>
+</body>
+</html>
