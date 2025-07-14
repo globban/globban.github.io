@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>3D Skiing Game</title>
+<title>Alpine Madness</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
   body { margin: 0; overflow: hidden; background: #ffffff; }
   #info {
@@ -15,7 +17,11 @@
   top: 10px;
   right: 10px;
   padding: 6px 12px;
-  background: #444;
+  background: rgba(20, 20, 20, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   color: white;
   border: none;
   font-size: 14px;
@@ -28,11 +34,14 @@
   position: absolute;
   top: 50px;
   right: 10px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(20, 20, 20, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   color: white;
   font-family: sans-serif;
   padding: 10px;
-  border-radius: 6px;
   z-index: 1000;
 }
 #menuPanel input[type="color"],
@@ -45,6 +54,37 @@ h3 {
   margin: 0 0 4px;
   font-size: 16px;
   color: #ffffff81;
+}
+
+#music-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: 80px;
+    background: rgba(20, 20, 20, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#play-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.4em;
+    cursor: pointer;
+}
+
+#visualizer {
+    flex: 1;
+    height: 40px;
 }
 
 </style>
@@ -60,16 +100,77 @@ h3 {
   <label>Sky Color: <input type="color" id="skyColor" value="#87ceeb"></label><br>
   <label>Ground Color: <input type="color" id="groundColor" value="#f0f8ff"></label><br>
   <label>Tree Color: <input type="color" id="treeColor" value="#228822"></label><br>
+  <label>Ramp Color: <input type="color" id="rampColor" value="#ffffff"></label><br>
+  <h3>Fog Settings</h3>
   <label>Fog Density: <input type="range" id="fogDensity" min="0" max="0.1" step="0.001" value="0.03"></label><br>
-  <label>Render Distance: <input type="range" id="renderDistance" min="1" max="10" step="1" value="1"></label><br>
+  <label>Render Distance: <input type="range" id="renderDistance" min="1" max="20" step="1" value="1"></label><br>
   <h3>Reload to see changes</h3>
   <label>Light Color: <input type="color" id="lightColor" value="#ffffff"></label><br>
   <label>Light Intensity: <input type="range" id="lightIntensity" min="0" max="3" step="0.1" value="1.2"></label>
 </div>
+<div id="music-player">
+    <canvas id="visualizer"></canvas>
+    <audio id="audio" src="Track.mp3"></audio>
+    <button id="play-btn"><i class="fa fa-play"></i></button>
+</div>
 
+<script>
+    const audio = document.getElementById("audio");
+    const canvas = document.getElementById("visualizer");
+    const ctx = canvas.getContext("2d");
+    const playBtn = document.getElementById("play-btn");
+
+    let isPlaying = false;
+    let audioCtx, analyser, source, dataArray;
+
+    playBtn.addEventListener("click", () => {
+        if (!audioCtx) initVisualizer();
+        if (isPlaying) {
+            audio.pause();
+            playBtn.innerHTML = '<i class="fa fa-play"></i>';
+        } else {
+            audio.play();
+            playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+        }
+        isPlaying = !isPlaying;
+    });
+
+    function initVisualizer() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        analyser.fftSize = 64;
+        const bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+
+        canvas.width = 120;
+        canvas.height = 40;
+
+        function draw() {
+            requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const barWidth = 4;
+            const gap = 2;
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = dataArray[i] / 8;
+                const x = i * (barWidth + gap);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            }
+        }
+        draw();
+    }
+</script>
 <div id="container"></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script>
+
+
+
 let ramps = [];
 let scene, camera, renderer;
 let clock = new THREE.Clock();
@@ -88,6 +189,7 @@ let spinRotation = 0;     // current spin rotation (Y-axis), in radians
 let spinSpeed = 0;        // angular speed in air (radians/sec)
 
 
+let rampMaterial;
 
 
 
@@ -149,6 +251,10 @@ function loadSettingsFromLocalStorage() {
   if (settings.treeColor) {
     document.getElementById("treeColor").value = settings.treeColor;
     currentTreeColor = new THREE.Color(settings.treeColor);
+  }
+  if (settings.rampColor) {
+    document.getElementById("rampColor").value = settings.rampColor;
+    rampMaterial.color.set(settings.rampColor);
   }
   if (settings.fogDensity) {
     document.getElementById("fogDensity").value = settings.fogDensity;
@@ -214,6 +320,8 @@ scene.add(ambientLight);
   groundMesh.position.y = player.position.y - playerHeight;
   scene.add(groundMesh);
 
+  rampMaterial = new THREE.MeshLambertMaterial({ color: settings.rampColor || 0xffffff });
+
   // Initial player height based on custom playerHeight
   player.position.y = getTerrainHeight(player.position.x, player.position.z) + playerHeight;
 
@@ -249,7 +357,7 @@ function spawnObstaclesChunk(chunkX, chunkZ) {
     if (r < 0.6) {
       createObstacle('tree', x, z);
     } else if (r < 0.65) {
-      createRamp(x, z, 5, 5, 5);
+      createRamp(x, z, 7, 5, 5);
     }
   }
 }
@@ -283,14 +391,14 @@ function createObstacle(type, x, z) {
 
 
 
-function createRamp(x, z, width = 5, length = 5, height = 5) {
+function createRamp(x, z, width = 7, length = 5, height = 5) {
   const rampGeo = new THREE.BoxGeometry(width, height, length);
-  const rampMat = new THREE.MeshLambertMaterial({ color: settings.groundColor }); // white ramp
+  const rampMat = rampMaterial;
   const rampMesh = new THREE.Mesh(rampGeo, rampMat);
   rampMesh.position.set(x, getTerrainHeight(x, z) - 1, z);  
   rampMesh.rotation.x = 180; // Rotate to face forward
   scene.add(rampMesh);
-  ramps.push({ mesh: rampMesh, position: rampMesh.position, width, length, height });
+  ramps.push({ mesh: rampMesh, position: rampMesh.position, width: 10, length, height });
 }
 
 
@@ -361,7 +469,7 @@ previousPosition = player.position.clone();
 let targetFov;
 if (keys['KeyW'] && player.onGround || keys['ArrowUp'] && player.onGround) {
   // Force rapid FOV boost when W is held
-  targetFov = 100;
+  targetFov = 110;
 } else {
   // Normal FOV based on speed
   let speedRatio = (player.speed - 10) / (player.maxSpeed - 10);
@@ -434,7 +542,7 @@ if (player.onGround) {
   const diff = normalizeAngle(0 - flipRotation);
 
   // Smoothly ease rotation back to zero
-  flipRotation += diff * 0.1;
+  flipRotation += diff * 0.08;
 
   // Stop flipping if close enough
   if (Math.abs(diff) < 0.01) flipSpeed = 0;
@@ -600,6 +708,7 @@ function saveSettingsToLocalStorage() {
     skyColor: document.getElementById("skyColor").value,
     groundColor: document.getElementById("groundColor").value,
     treeColor: document.getElementById("treeColor").value,
+    rampColor: document.getElementById("rampColor").value,
     fogDensity: document.getElementById("fogDensity").value,
     renderDistance: document.getElementById("renderDistance").value,
     lightColor: document.getElementById("lightColor").value,
@@ -607,6 +716,7 @@ function saveSettingsToLocalStorage() {
   };
   localStorage.setItem('skiGameSettings', JSON.stringify(settings));
 }
+
 
 document.getElementById("skyColor").addEventListener("input", (e) => {
   const c = new THREE.Color(e.target.value);
@@ -636,6 +746,16 @@ document.getElementById("treeColor").addEventListener("input", (e) => {
   saveSettingsToLocalStorage();
 });
 
+document.getElementById("rampColor").addEventListener("input", (e) => {
+  const color = new THREE.Color(e.target.value);
+  rampMaterial.color.set(color);
+  // Update all existing ramp meshes
+ramps.forEach(r => r.mesh.material.color.set(color));
+
+  saveSettingsToLocalStorage();
+});
+
+
 document.getElementById("fogDensity").addEventListener("input", (e) => {
   const d = parseFloat(e.target.value);
   scene.fog.density = d;
@@ -663,6 +783,109 @@ document.getElementById("renderDistance").addEventListener("input", (e) => {
   chunks = parseInt(e.target.value);
   localStorage.setItem("chunks", chunks);
 });
+
+
+// === MOBILE TOUCH CONTROLS (Diagonal Filtering) ===
+
+
+let touchState = {
+  lastTap: 0,
+  activeTouches: {},
+};
+
+function simulateKey(code, isDown) {
+  keys[code] = isDown;
+}
+
+function handleTouchStart(e) {
+  const now = performance.now();
+  for (const touch of e.changedTouches) {
+    const { clientX, clientY, identifier } = touch;
+    const halfWidth = window.innerWidth / 2;
+    const zone = clientX < halfWidth ? "left" : "right";
+
+    touchState.activeTouches[identifier] = {
+      startX: clientX,
+      startY: clientY,
+      zone,
+      startTime: now,
+      activeKeys: {},
+    };
+
+    // Tap detection (quick double tap = jump)
+    if (now - touchState.lastTap < 300) {
+      simulateKey("Space", true);
+      touchState.activeTouches[identifier].activeKeys["Space"] = true;
+    }
+
+    touchState.lastTap = now;
+  }
+}
+
+function handleTouchMove(e) {
+  for (const touch of e.changedTouches) {
+    const id = touch.identifier;
+    const state = touchState.activeTouches[id];
+    if (!state) continue;
+
+    const dx = touch.clientX - state.startX;
+    const dy = touch.clientY - state.startY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    // Reset all previously simulated keys
+    for (const key in state.activeKeys) {
+      simulateKey(key, false);
+    }
+    state.activeKeys = {};
+
+    const horizontalThreshold = 30;
+    const verticalThreshold = 30;
+
+    if (absDx > absDy * 1.5 && absDx > horizontalThreshold) {
+      // Strong horizontal drag (left/right)
+      if (dx < 0 && state.zone === "left") {
+        simulateKey("KeyA", true);
+        state.activeKeys["KeyA"] = true;
+      } else if (dx > 0 && state.zone === "right") {
+        simulateKey("KeyD", true);
+        state.activeKeys["KeyD"] = true;
+      }
+    } else if (absDy > absDx * 1.5 && absDy > verticalThreshold) {
+      // Strong vertical drag (up/down)
+      if (dy > 0) {
+        simulateKey("KeyS", true); // drag down
+        state.activeKeys["KeyS"] = true;
+      } else {
+        simulateKey("KeyW", true); // drag up
+        state.activeKeys["KeyW"] = true;
+      }
+    }
+  }
+}
+
+function handleTouchEnd(e) {
+  for (const touch of e.changedTouches) {
+    const id = touch.identifier;
+    const state = touchState.activeTouches[id];
+    if (!state) continue;
+
+    for (const key in state.activeKeys) {
+      simulateKey(key, false);
+    }
+    delete touchState.activeTouches[id];
+  }
+
+  // Always release Space (jump) if it was triggered
+  simulateKey("Space", false);
+}
+
+// Register
+window.addEventListener("touchstart", handleTouchStart, { passive: false });
+window.addEventListener("touchmove", handleTouchMove, { passive: false });
+window.addEventListener("touchend", handleTouchEnd, { passive: false });
+
+
 
 </script>
 </body>

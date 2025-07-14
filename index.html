@@ -12,27 +12,17 @@
             font-family: 'Dot';
             src: url('/dot.ttf');
         }
-        html, body {
+        body {
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100vh;
-            min-width: 100vw;
-            min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: scroll;
             background-size: cover, cover;
             background-repeat: no-repeat, no-repeat;
             background-attachment: fixed;
             background-position: center center;
             box-sizing: border-box;
-        }
-
-        body {
-            width: 100vw;
-            height: 100vh;
-            min-width: 100vw;
-            min-height: 100vh;
-            /* fallback for background image scaling */
+            overflow-y: hidden;
         }
 
         header {
@@ -144,6 +134,62 @@
                 font-size: 9vw;
             }
         }
+
+        main {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Dot', sans-serif;
+    overflow: hidden;
+}
+
+.game-section {
+    width: 90%;
+    max-width: 1000px;
+    padding: 2em;
+    background: rgba(20, 20, 20, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    color: white;
+    text-align: center;
+    margin-bottom: 2em;
+    
+}
+
+.game-section h2 {
+    font-size: 2.5em;
+    margin-bottom: 0.2em;
+}
+
+.game-section p {
+    font-size: 1.2em;
+    max-width: 600px;
+    margin: auto;
+}
+
+.thumbnail-gallery {
+    width: 90%;
+    max-width: 1000px;
+    padding: 1em;
+    background: rgba(20, 20, 20, 0.25);
+    border-radius: 12px;
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    color: white;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+
+.thumbnail-gallery img {
+    height: 160px;
+    margin-right: 1em;
+    border-radius: 10px;
+}
+
     </style>
 </head>
 <body onload="bg()">
@@ -159,6 +205,24 @@
             <a href="/Tools.html">Tools</a>
         </div>
     </header>
+    <main>
+    <section class="game-section">
+        <h2>Alpine madness:</h2>
+        <p>
+            Ever wondered what skiing at 100 km/h through a jungle of pines feels like — No? well now you do!
+            <br><br>
+            <strong>Alpine Madness</strong> is chaotic, fast, snowy, and slightly Nauseating. Now with kickass ramps, FOV madness, trick jumps and of course, Customization!.
+        </p>
+    </section>
+
+    <section class="thumbnail-gallery">
+        <video width="100%" height="auto" controls>
+            <source src="/Alpine/ski.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </section>
+</main>
+
     <script>
         // Pick a random background image from the Logos folder
         function bg() {
