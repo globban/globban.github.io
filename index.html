@@ -1,281 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algot.fun</title>
-    <link rel="icon" href="/logosmall.svg">
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        @font-face {
-            font-family: 'Dot';
-            src: url('/dot.ttf');
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            background-size: cover, cover;
-            background-repeat: no-repeat, no-repeat;
-            background-attachment: fixed;
-            background-position: center center;
-            box-sizing: border-box;
-            overflow-y: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algot.fun</title>
+  <link rel="icon" href="/logosmall.svg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: 'Dot';
+      src: url('/dot.ttf');
+    }
 
-        header {
-            font-family: 'Dot';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 75px;
-            background: rgba(20, 20, 20, 0.35);
-            color: white;
-            padding-left: 2em;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            backdrop-filter: blur(12px) saturate(180%);
-            -webkit-backdrop-filter: blur(12px) saturate(180%);
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.15);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-size: cover, cover;
+      background-repeat: no-repeat, no-repeat;
+      background-attachment: fixed;
+      background-position: center center;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
 
-        header h1 {
-            margin: 0;
-            font-size: 2em;
-            letter-spacing: 0.05em;
-        }
+    header {
+      font-family: 'Dot';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 75px;
+      background: rgba(20, 20, 20, 0.35);
+      color: white;
+      padding-left: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+    }
 
-        .links {
-            display: flex;
-            align-items: center;
-            gap: 1.5em;
-            margin-right: 5em;
-        }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      letter-spacing: 0.05em;
+    }
 
-        header a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.1em;
-            padding: 0.3em 1em;
-            border-radius: 8px;
-            transition: background 0.2s;
-            background: rgba(255,255,255,0.05);
-        }
-        header a:hover {
-            background: rgba(255,255,255,0.18);
-        }
-        /* Star icon styles */
-        #star-fav-btn {
-            position: fixed;
-            top: 93px;
-            left: 18px;
-            z-index: 100;
-            cursor: pointer;
-            font-size: 2.1em;
-            color: #fff;
-            filter: drop-shadow(0 2px 8px #0007);
-            transition: color 0.2s;
-            background: none;
-            border: none;
-            outline: none;
-        }
-        #star-fav-btn.filled {
-            color: #ffd700;
-            text-shadow: 0 0 8px #ffd70099;
-        }
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 1.5em;
+      margin-right: 5em;
+      transition: all 0.3s ease;
+    }
 
-        /* Responsive styles for mobile */
-        @media (max-width: 700px) {
-            html, body {
-                font-size: 3vw;
-                width: 100vw;
-                height: 100vh;
-                min-width: 100vw;
-                min-height: 100vh;
-                overflow: hidden;
-            }
-            header {
-                height: 12vw;
-                min-height: 48px;
-                padding-left: 1vw;
-            }
-            header h1 {
-                font-size: 6vw;
-            }
-            .links {
-                gap: 2vw;
-                margin-right: 2vw;
-            }
-            header a {
-                font-size: 1em;
-                padding: 0.3em 0.8em;
-            }
-            #star-fav-btn {
-                top: 14vw;
-                left: 2vw;
-                font-size: 7vw;
-            }
-        }
+    header a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      padding: 0.3em 1em;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: background 0.2s;
+    }
 
-        @media (max-width: 400px) {
-            header {
-                height: 14vw;
-                min-height: 40px;
-            }
-            header h1 {
-                font-size: 7vw;
-            }
-            #star-fav-btn {
-                font-size: 9vw;
-            }
-        }
+    header a:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
 
-        main {
-    margin-top: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: 'Dot', sans-serif;
-    overflow: hidden;
-}
+    #star-fav-btn {
+      position: fixed;
+      top: 93px;
+      left: 18px;
+      z-index: 100;
+      cursor: pointer;
+      font-size: 2.1em;
+      color: #fff;
+      filter: drop-shadow(0 2px 8px #0007);
+      background: none;
+      border: none;
+      outline: none;
+    }
 
-.game-section {
-    width: 90%;
-    max-width: 1000px;
-    padding: 2em;
-    background: rgba(20, 20, 20, 0.3);
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
-    color: white;
-    text-align: center;
-    margin-bottom: 2em;
-    
-}
+    #star-fav-btn.filled {
+      color: #ffd700;
+      text-shadow: 0 0 8px #ffd70099;
+    }
 
-.game-section h2 {
-    font-size: 2.5em;
-    margin-bottom: 0.2em;
-}
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      margin-right: 2em;
+      cursor: pointer;
+    }
 
-.game-section p {
-    font-size: 1.2em;
-    max-width: 600px;
-    margin: auto;
-}
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+    }
 
-.thumbnail-gallery {
-    width: 90%;
-    max-width: 1000px;
-    padding: 1em;
-    background: rgba(20, 20, 20, 0.25);
-    border-radius: 12px;
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    color: white;
-    overflow-x: auto;
-    white-space: nowrap;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-}
+    main {
+      margin-top: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Dot', sans-serif;
+    }
 
-.thumbnail-gallery img {
-    height: 160px;
-    margin-right: 1em;
-    border-radius: 10px;
-}
+    .game-section {
+      width: 90%;
+      max-width: 1000px;
+      padding: 2em;
+      background: rgba(20, 20, 20, 0);
+      border-radius: 16px;
+      color: white;
+      text-align: center;
+      margin-bottom: 2em;
+    }
 
-    </style>
+    .game-section h2 {
+      font-size: 2.5em;
+      margin-bottom: 0.2em;
+    }
+
+    .game-section p {
+      font-size: 1.2em;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .thumbnail-gallery {
+      width: 90%;
+      max-width: 1000px;
+      padding: 1em;
+      background: rgba(20, 20, 20, 0.25);
+      border-radius: 12px;
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      color: white;
+      overflow-x: auto;
+      white-space: nowrap;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .thumbnail-gallery img {
+      height: 160px;
+      margin-right: 1em;
+      border-radius: 10px;
+      scroll-snap-align: start;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 700px) {
+      html, body {
+        font-size: 3vw;
+        width: 100vw;
+        height: 100vh;
+        min-width: 100vw;
+        min-height: 100vh;
+      }
+
+      header {
+        height: 12vw;
+        min-height: 48px;
+        padding-left: 1vw;
+      }
+
+      header h1 {
+        font-size: 6vw;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 75px;
+        right: 0;
+        width: 100vw;
+         background: rgba(20, 20, 20, 0.25);
+      border-radius: 12px;
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+        text-align: center;
+        padding: 1em 0;
+      }
+
+      .links.show {
+        display: flex;
+      }
+
+      header a {
+        font-size: 1.1em;
+        padding: 0.6em 1em;
+      }
+
+      #star-fav-btn {
+        top: 14vw;
+        left: 2vw;
+        font-size: 7vw;
+      }
+    }
+
+    @media (max-width: 400px) {
+      header {
+        height: 14vw;
+        min-height: 40px;
+      }
+
+      header h1 {
+        font-size: 7vw;
+      }
+
+      #star-fav-btn {
+        font-size: 9vw;
+      }
+    }
+  </style>
 </head>
 <body onload="bg()">
-    <!-- Star icon OUTSIDE the header -->
-    <button id="star-fav-btn" title="Favourite background">
-        <i id="star-fav-icon" class="fa-regular fa-star"></i>
-    </button>
-    <header>
-        <h1>Algot.fun</h1>
-        <div class="links">
-            <a href="/visits.html">Chat</a>
-            <a href="/Games.html">Games</a>
-            <a href="/Tools.html">Tools</a>
-        </div>
-    </header>
-    <main>
+  <button id="star-fav-btn" title="Favourite background">
+    <i id="star-fav-icon" class="fa-regular fa-star"></i>
+  </button>
+
+  <header>
+    <h1>Algot.fun</h1>
+    <div class="hamburger" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="links">
+      <a href="/visits.html">Chat</a>
+      <a href="/Games.html">Games</a>
+      <a href="/Tools.html">Tools</a>
+    </div>
+  </header>
+
+  <main>
     <section class="game-section">
-    <a href="/ski.html"><img src="Ski.png" alt="Alpine Madness Logo" style="width: 100%; max-width: 600px; border-radius: 12px; margin-top: 1em;"></a>
-        <p>
-            Ever wondered what skiing at 100 km/h through a jungle of pines feels like — No? well now you do!
-            <br><br> 
-            <strong>Alpine Madness</strong> is chaotic, fast, snowy, and slightly Nauseating. Now with kickass ramps, FOV madness, trick jumps and of course, Customization!.
-        </p>
-       
+      <a href="/ski.html">
+        <img src="Ski.png" alt="Alpine Madness Logo" style="width: 100%; max-width: 600px; border-radius: 12px; margin-top: 1em;">
+      </a>
+      <p>
+        Ever wondered what skiing at 100 km/h through a jungle of pines feels like — No? well now you do!
+        <br><br>
+        <strong>Alpine Madness</strong> is chaotic, fast, snowy, and slightly Nauseating. Now with kickass ramps, FOV madness, trick jumps and of course, Customization!
+      </p>
     </section>
-</main>
+  </main>
 
-    <script>
-        // Pick a random background image from the Logos folder
-        function bg() {
-            const backgrounds = [
-                "Logos/export (1).png",
-                "Logos/export (2).png",
-                "Logos/export (3).png",
-                "Logos/export (4).png",
-                "Logos/export (5).png",
-                "Logos/export (6).png",
-                "Logos/export (7).png"
-            ];
-            let fav = localStorage.getItem("fav_bg");
-            let chosen;
-            if (fav && backgrounds.includes(fav)) {
-                chosen = fav;
-            } else {
-                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-            }
-            document.body.style.backgroundImage =
-                `url('${chosen}'), linear-gradient(120deg, #000 0%, #000 100%)`;
-            // Set star filled if favourite
-            updateStar(chosen, fav);
-            // Store current background for star click
-            window._currentBg = chosen;
+  <script>
+    function bg() {
+      const backgrounds = [
+        "Logos/export (1).png",
+        "Logos/export (2).png",
+        "Logos/export (3).png",
+        "Logos/export (4).png",
+        "Logos/export (5).png",
+        "Logos/export (6).png",
+        "Logos/export (7).png"
+      ];
+      let fav = localStorage.getItem("fav_bg");
+      let chosen;
+      if (fav && backgrounds.includes(fav)) {
+        chosen = fav;
+      } else {
+        chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      }
+      document.body.style.backgroundImage =
+        `url('${chosen}'), linear-gradient(120deg, #000 0%, #000 100%)`;
+      updateStar(chosen, fav);
+      window._currentBg = chosen;
+    }
+
+    function updateStar(current, fav) {
+      const starBtn = document.getElementById("star-fav-btn");
+      const starIcon = document.getElementById("star-fav-icon");
+      if (fav === current) {
+        starBtn.classList.add("filled");
+        starIcon.classList.remove("fa-regular");
+        starIcon.classList.add("fa-solid");
+        starIcon.style.color = "#fff";
+      } else {
+        starBtn.classList.remove("filled");
+        starIcon.classList.remove("fa-solid");
+        starIcon.classList.add("fa-regular");
+        starIcon.style.color = "#fff";
+      }
+    }
+
+    function toggleMenu() {
+      const links = document.querySelector('.links');
+      links.classList.toggle('show');
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const starBtn = document.getElementById("star-fav-btn");
+      starBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const bg = window._currentBg;
+        const isFav = localStorage.getItem("fav_bg") === bg;
+        if (isFav) {
+          localStorage.removeItem("fav_bg");
+        } else {
+          localStorage.setItem("fav_bg", bg);
         }
-
-        function updateStar(current, fav) {
-            const starBtn = document.getElementById("star-fav-btn");
-            const starIcon = document.getElementById("star-fav-icon");
-            if (fav === current) {
-                starBtn.classList.add("filled");
-                starIcon.classList.remove("fa-regular");
-                starIcon.classList.add("fa-solid");
-                starIcon.style.color = "#fff";
-            } else {
-                starBtn.classList.remove("filled");
-                starIcon.classList.remove("fa-solid");
-                starIcon.classList.add("fa-regular");
-                starIcon.style.color = "#fff";
-            }
-        }
-
-        // Star click handler
-        document.addEventListener("DOMContentLoaded", function() {
-            const starBtn = document.getElementById("star-fav-btn");
-            starBtn.addEventListener("click", function(e) {
-                e.stopPropagation();
-                const bg = window._currentBg;
-                const isFav = localStorage.getItem("fav_bg") === bg;
-                if (isFav) {
-                    localStorage.removeItem("fav_bg");
-                } else {
-                    localStorage.setItem("fav_bg", bg);
-                }
-                // Update star immediately
-                updateStar(bg, localStorage.getItem("fav_bg"));
-            });
-        });
-    </script>
+        updateStar(bg, localStorage.getItem("fav_bg"));
+      });
+    });
+  </script>
 </body>
 </html>
