@@ -106,10 +106,12 @@ h3 {
   <label>Ground Color: <input type="color" id="groundColor" value="#f0f8ff"></label><br>
   <label>Tree Color: <input type="color" id="treeColor" value="#228822"></label><br>
   <label>Ramp Color: <input type="color" id="rampColor" value="#ffffff"></label><br>
-  <h3>Fog Settings</h3>
+  <h3>render settings</h3>
   <label>Fog Density: <input type="range" id="fogDensity" min="0" max="0.1" step="0.001" value="0.03"></label><br>
-  <label>Render Distance: <input type="range" id="renderDistance" min="1" max="20" step="1" value="1"></label><br>
+  <label>Render Distance: <input type="range" id="renderDistance" min="1" max="20" step="1" value="1"></label>
   <h3>Reload to see changes</h3>
+  <label>Spawn rate: <input type="range" id="SpawnRate" min="0" max="100" step="1" value=""></label><br>  
+  <h3>Light Settings:</h3>
   <label>Light Color: <input type="color" id="lightColor" value="#ffffff"></label><br>
   <label>Light Intensity: <input type="range" id="lightIntensity" min="0" max="3" step="0.1" value="1.2"></label>
 </div>
@@ -185,7 +187,7 @@ let strafeDir = 0;
 let sunLight;
 
 let treeangle = 0.22 + Math.random() * (0.8 - 0.22);
-
+let SpawnRate = 10; // default spawn rate, can be adjusted later
 
 let flipRotation = 0;   // current flip rotation (radians), positive = frontflip, negative = backflip
 let flipSpeed = 0;      // angular speed of flip rotation
@@ -216,13 +218,13 @@ let chunks = localStorage.getItem("chunks") || 1; // Number of chunks to load in
 let player = {
   position: new THREE.Vector3(0, 0, 0),
   velocity: new THREE.Vector3(0, 0, 0),
-  speed: 10,                   // Start speed lower for acceleration effect
+  speed: 20,                   // Start speed lower for acceleration effect
   maxSpeed: maxSpeed,
   acceleration: acceleration,
   friction: 15,
   strafeSpeed: strafeSpeed,
   onGround: true,
-  jumpVelocity: 0,
+  jumpVelocity: 60, // Initial jump velocity
 };
 
 
@@ -353,16 +355,16 @@ function spawnObstaclesChunk(chunkX, chunkZ) {
   if (loadedChunks.has(chunkKey)) return;
   loadedChunks.add(chunkKey);
 
-  const numObstacles = 10 + Math.floor(Math.random() * 5);
+  
 
-  for (let i = 0; i < numObstacles; i++) {
+  for (let i = 0; i < SpawnRate; i++) {
     const x = chunkX * chunkSize + Math.random() * chunkSize;
     const z = chunkZ * chunkSize + Math.random() * chunkSize;
-
+    console.log(SpawnRate);
     const r = Math.random();
     if (r < 0.6) {
       createObstacle('tree', x, z);
-    } else if (r < 0.65) {
+    } else if (r < 0.62) {
       createRamp(x, z, 7, 5, 5);
     }
   }
@@ -597,7 +599,7 @@ if (!keys['Space'] && !keys['ArrowUp']) {
 if (keys['KeyW']  && player.onGround || keys['ArrowUp'] && player.onGround  ) {
   boosting = true;
   player.speed += player.acceleration * 2 * dt;  // boost acceleration (e.g. double)
-  if (player.speed > player.maxSpeed * 1.5) player.speed = player.maxSpeed * 1.5; // cap boosted max speed
+  if (player.speed > player.maxSpeed * 2) player.speed = player.maxSpeed * 2; // cap boosted max speed
 } else {
   // normal acceleration
   if (player.speed < player.maxSpeed) {
@@ -615,17 +617,17 @@ if (keys['KeyW']  && player.onGround || keys['ArrowUp'] && player.onGround  ) {
 
 if (!player.onGround) {
   if (keys['KeyA']) {
-    spinSpeed += Math.PI * 8 * dt;   // left spin (360° per second)
+    spinSpeed += Math.PI * 4 * dt;   // left spin (360° per second)
   }
   if (keys['KeyD']) {
-    spinSpeed -= Math.PI * 8 * dt;   // right spin
+    spinSpeed -= Math.PI * 4 * dt;   // right spin
   }
 
   if (keys['KeyW']) {
-    flipSpeed -= Math.PI * 8 * dt;   // frontflip
+    flipSpeed -= Math.PI * 4 * dt;   // frontflip
   }
   if (keys['KeyS']) {
-    flipSpeed += Math.PI * 8 * dt;   // backflip
+    flipSpeed += Math.PI * 4 * dt;   // backflip
   }
 }
 
@@ -677,7 +679,7 @@ strafeDir += (targetStrafeDir - strafeDir) * strafeLerpSpeed * dt;
       dz > -ramp.length / 2 - 1 && dz < -ramp.length / 2 + 1 &&
       player.onGround
     ) {
-      player.jumpVelocity = player.speed * 0.7; // Boost jump based on speed
+      player.jumpVelocity = player.speed * 0.8; // Boost jump based on speed
       player.onGround = false;
     }
   }
@@ -771,6 +773,12 @@ document.getElementById("fogDensity").addEventListener("input", (e) => {
 document.getElementById("renderDistance").addEventListener("input", (e) => {
   chunks = parseInt(e.target.value);
   localStorage.setItem("chunks", chunks); // still storing this directly
+  saveSettingsToLocalStorage();
+});
+
+document.getElementById("SpawnRate").addEventListener("input", (e) => {
+  SpawnRate = parseInt(e.target.value);
+  localStorage.setItem("Spawnrate", SpawnRate); // still storing this directly
   saveSettingsToLocalStorage();
 });
 
