@@ -132,13 +132,12 @@
 
   <input type="number" id="betAmount" placeholder="Enter Bet" min="1" max="100">
   <button onclick="spin()">Spin</button>
-  <button id="getCoinButton" onclick="getCoin()">Get 1 Coin</button>
 
   <p id="result"></p>
   <p id="waitMessage"></p>
 
   <script>
-    const symbols = ["🍒", "🍋", "🍊", "🍉", "⭐", "🔔"];
+    const symbols = ["🍒", "🍋", "🍊", "🍉", "🍎", "🍌"];
     const reels = [
       document.querySelector('#reel1 .symbols'),
       document.querySelector('#reel2 .symbols'),
@@ -159,25 +158,10 @@
     function checkBankruptcy() {
       const currentTime = Date.now();
       if (balance <= 0) {
-        // Check if the player is in the waiting period
-        if (currentTime - lastBankruptTime < 30000) {
-          // Display wait message
-          waitMessage.textContent = `You are bankrupt. Please wait ${(30 - Math.floor((currentTime - lastBankruptTime) / 1000))} seconds.`;
-          return false;
-        } else if (currentTime - lastBankruptTime >= 30000) {
-          // After 30 seconds, allow the player to spin again but with no reset
-          waitMessage.textContent = "You are still bankrupt. Please add more coins to continue.";
-          return false;
-        }
+       localStorage.setItem('balance', 1000)
       }
       return true;
     }
-
-    function getCoin() {
-  balance += 1; // Add 1 coin to the balance
-  balanceText.textContent = `${balance} 🪙`; // Update the balance display
-  localStorage.setItem('balance', balance); // Save the updated balance to localStorage
-}
 
     function createReelStrip(endSymbol) {
       const strip = [];

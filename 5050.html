@@ -1,226 +1,457 @@
-<html>
-	<head>
-		<title>50/50</title>
-	</head>
-	<script type="module">
-	</script>
-	<style>
-		@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-		html, body {
-			height: 100%;
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-		body {
-			background-color: black;
-			color: white;
-			width: 100vw;
-			height: 100vh;
-			min-height: 100vh;
-			min-width: 100vw;
-			overflow: hidden;
-			text-align: center;
-			background-size: cover;
-			background-position: center;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-		}
-		#center {
-			width: 100vw;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			flex-direction: column;
-		}
-		h1 {
-			font-family: orbitron;
-			font-size: 5em;
-			text-shadow: 0px 0px 10px #fff;
-			margin: 0.2em 0 0.2em 0;
-		}
-		button {
-			padding: 0em 4em;
-			transition: all 0.5s;
-		}
-		button:hover {
-			box-shadow: 0px 0px 40px 19px rgb(163, 75, 221);
-			transition: all 0.5s;
-		}
-		#destination-url.glow {
-            animation: glow 1s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 10px #ffffff;
-            }
-            to {
-                text-shadow: 0 0 20px #FFD700;
-            }
-        }
-        #grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-        }
-        #grid a {
-            display: block;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            text-decoration: none;
-            text-align: center;
-            border-radius: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        @keyframes epicGlow {
-            0% { box-shadow: 0 0 10px 0 rgba(0,255,0,0.5); }
-            50% { box-shadow: 0 0 30px 15px rgba(0,255,0,1); }
-            100% { box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5); }
-        }
-        .epic-glow {
-            animation: epicGlow 0.3s ease-in-out;
-        }
-		#game-container {
-			width: 100vw;
-			max-width: 600px;
-			margin: 0 auto;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-		}
-		#cube {
-			width: 90vw;
-			max-width: 500px;
-			height: 30vw;
-			max-height: 300px;
-			background-color: rgba(83, 123, 83, 0);
-			border: #0f0 2px solid;
-			margin: 0 auto;
-			border-radius: 25px;
-			cursor: pointer;
-			box-sizing: border-box;
-			transition: border-color 0.3s;
-		}
-		#score-display, #highscore-display {
-			color: white;
-			font-size: 3em;
-			margin-top: 10px;
-			margin-bottom: 0;
-		}
-		#restart-btn {
-			display: none;
-			margin-top: 10px;
-			padding: 5px 10px;
-		}
-		@media (max-width: 600px) {
-			h1 {
-				font-size: 2.5em;
-			}
-			#cube {
-				height: 40vw;
-				max-height: 200px;
-			}
-			#score-display, #highscore-display {
-				font-size: 2em;
-			}
-		}
-	</style>
-	<body>
-		<div id="center">
-		  <h1>50/50</h1>
-        </div>
-		<div id="game-container">
-			<div id="cube"></div>
-			<p id="score-display">Score: 0</p>
-			<button id="restart-btn">Restart</button>
-			<p id="highscore-display"></p>
-		</div>
-	</body>
-	<script>
-	(function(){
-    const cube = document.getElementById('cube');
-    const scoreDisplay = document.getElementById('score-display');
-    const highscoreDisplay = document.getElementById('highscore-display');
-    let score = 0;
-    const pChance = 0.5; // probability of staying green per click
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Mines Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  * { box-sizing: border-box; }
 
-    function updateHighScore(currentScore) {
-       let highScore = localStorage.getItem('highScore');
-       highScore = highScore ? parseInt(highScore, 10) : 0;
-       if (currentScore > highScore) {
-           localStorage.setItem('highScore', currentScore);
-           highScore = currentScore;
-       }
-       const computedChance = Math.pow(pChance, highScore) * 100;
-       const chancePercent = parseFloat(computedChance.toFixed(6));
-       highscoreDisplay.textContent = 'Highscore: ' + highScore + ' (' + chancePercent + '%)';
-    }
+  body {
+    background: #111;
+    color: white;
+    font-family: sans-serif;
+    margin: 0; padding: 0;
+    text-align: center;
+  }
 
-    function restartGame() {
-         score = 0;
-         scoreDisplay.textContent = 'Score: ' + score;
-         cube.style.borderColor = 'green';
-    }
+  h1 { margin: 20px 0; }
 
-    function handleCubeClick() {
-        if (cube.style.borderColor === 'red') {
-            restartGame();
-            return;
-        }
+  #controls {
+    margin-bottom: 10px;
+  }
 
-        if (Math.random() < pChance) {
-            score++;
-            scoreDisplay.textContent = 'Score: ' + score;
-            // Add the epic glow effect
-            cube.classList.add('epic-glow');
-            setTimeout(() => cube.classList.remove('epic-glow'), 300);
-            // Play sound effect on successful pass
-            const soundEffect = new Audio('/pass-sound.m4a');
-            soundEffect.play();
-        } else {
-            cube.style.borderColor = 'red';
-            localStorage.setItem('savedScore', score);
-            const currentChance = parseFloat((Math.pow(pChance, score) * 100).toFixed(6));
-            scoreDisplay.textContent = 'Score saved: ' + score + ' (' + currentChance + '%)';
-            updateHighScore(score);
-        }
-    }
+  input, select {
+    background: #222;
+    color: #0f0;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 16px;
+    padding: 6px 10px;
+    margin: 5px;
+  }
 
-    cube.addEventListener('click', handleCubeClick);
-    // Set initial border color
-    cube.style.borderColor = 'green';
-    // Set initial highscore display
-    updateHighScore(0);
-	})();
-	</script>
+  button {
+    background: #0a0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+  }
+
+  button:disabled {
+    background: #333;
+    cursor: not-allowed;
+  }
+
+  #grid-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  #grid {
+    display: grid;
+    gap: 4px;
+    width: min(90vmin, 500px);
+    aspect-ratio: 1/1;
+  }
+
+  .tile {
+    background: #222;
+    color: #0f0;
+    border: 2px solid #333;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    aspect-ratio: 1/1;
+    user-select: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .tile.clicked { cursor: default; }
+  .tile.bomb { background: #900; color: white; }
+  .tile.safe { background: #003300; }
+  .tile.autobet { background: #004; color: #0af; border-color: #0af; }
+
+  /* Autobet highlight animation */
+  .highlight {
+    animation: highlightAnim 0.3s ease forwards;
+  }
+
+  @keyframes highlightAnim {
+    0% { transform: scale(1); background-color: #006600; }
+    50% { transform: scale(1.2); background-color: #00cc00; }
+    100% { transform: scale(1); background-color: #003300; }
+  }
+
+  #status {
+    margin-top: 10px;
+    font-size: 18px;
+    min-height: 24px;
+  }
+
+  #autobetSpeedContainer {
+    margin-top: 10px;
+  }
+
+  label {
+    font-size: 14px;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+  <h1>💣 Mines</h1>
+
+  <div id="controls">
+    Bet: $<input type="number" id="bet" value="100" min="1" />
+    Mines: <input type="number" id="mineCount" min="1" max="99" value="3" />
+    Grid:
+    <select id="gridSize">
+      <option value="2">2×2</option>
+      <option value="3">3×3</option>
+      <option value="4">4×4</option>
+      <option value="5" selected>5×5</option>
+      <option value="6">6×6</option>
+      <option value="7">7×7</option>
+      <option value="8">8×8</option>
+      <option value="9">9×9</option>
+      <option value="10">10×10</option>
+    </select>
+    Autobet:
+    <select id="autobetToggle">
+      <option value="off">Off</option>
+      <option value="on">On</option>
+    </select>
+    <br />
+
+    <div id="autobetSpeedContainer" style="display:none;">
+      <label for="autobetSpeed">Autobet speed (ms delay):</label>
+      <input type="range" id="autobetSpeed" min="50" max="500" value="100" />
+      <span id="autobetSpeedValue">100</span> ms
+    </div>
+
+    <button id="startBtn" onclick="startGame()">Start Game</button>
+    <button id="cashoutBtn" onclick="cashOut()" disabled>Cash Out</button>
+    <button id="stopAutobetBtn" onclick="stopAutobet()" style="display:none; background:#a00;">Stop Autobet</button>
+    <p id="balanceDisplay">Balance: $1000</p>
+    <p id="status">Set up your game and start.</p>
+  </div>
+
+  <div id="grid-container"><div id="grid"></div></div>
 
 <script>
-        // Pick a random or favourite background image from the Logos folder
-        (function() {
-            const backgrounds = [
-                "Logos/export (1).png",
-                "Logos/export (2).png",
-                "Logos/export (3).png",
-                "Logos/export (4).png",
-                "Logos/export (5).png",
-                "Logos/export (6).png",
-                "Logos/export (7).png"
-                // Add more as needed
-            ];
-            let fav = localStorage.getItem("fav_bg");
-            let chosen;
-            if (fav && backgrounds.includes(fav)) {
-                chosen = fav;
-            } else {
-                chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-            }
-            document.body.style.backgroundImage =
-                `url('${chosen}'), linear-gradient(120deg, #232526 0%, #414345 100%)`;
-        })();
+  const grid = document.getElementById('grid');
+  const balanceDisplay = document.getElementById('balanceDisplay');
+  const status = document.getElementById('status');
+  const cashoutBtn = document.getElementById('cashoutBtn');
+  const startBtn = document.getElementById('startBtn');
+  const stopAutobetBtn = document.getElementById('stopAutobetBtn');
+
+  const mineInput = document.getElementById('mineCount');
+  const sizeSelect = document.getElementById('gridSize');
+  const betInput = document.getElementById('bet');
+  const autobetToggle = document.getElementById('autobetToggle');
+  const autobetSpeedInput = document.getElementById('autobetSpeed');
+  const autobetSpeedValue = document.getElementById('autobetSpeedValue');
+  const autobetSpeedContainer = document.getElementById('autobetSpeedContainer');
+
+  let playerBalance = parseInt(localStorage.getItem('balance')) || 1000;
+
+  let gridSize = 5;
+  let totalTiles = 25;
+  let mines = 3;
+  let bet = 100;
+  let bombSet = new Set();
+  let safeClicks = 0;
+  let gameActive = false;
+  let currentMultiplier = 1;
+  let autoTiles = new Set();
+  let autobetMode = false;
+  let tileElements = [];
+  let autobetRunning = false;
+
+  autobetToggle.addEventListener('change', () => {
+    if (autobetToggle.value === 'on') {
+      autobetSpeedContainer.style.display = 'inline-block';
+    } else {
+      autobetSpeedContainer.style.display = 'none';
+    }
+  });
+
+  autobetSpeedInput.addEventListener('input', () => {
+    autobetSpeedValue.textContent = autobetSpeedInput.value;
+  });
+
+  function updateBalanceDisplay() {
+    balanceDisplay.textContent = `Balance: $${playerBalance}`;
+    localStorage.setItem('balance', playerBalance);
+  }
+
+  function generateBombs(count) {
+    const set = new Set();
+    while (set.size < count) {
+      set.add(Math.floor(Math.random() * totalTiles));
+    }
+    return set;
+  }
+
+  function calcSurvivalProb(x, total, mines) {
+    let prob = 1;
+    for (let n = 0; n < x; n++) {
+      prob *= (total - mines - n) / (total - n);
+    }
+    return prob;
+  }
+
+  function setupGrid(size) {
+  gridSize = size;
+  totalTiles = size * size;
+  grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  tileElements = [];
+  autoTiles.clear();
+
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < totalTiles; i++) {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.index = i;
+
+    tile.onclick = () => {
+      if (gameActive) {
+        handleTileClick(tile);
+      } else if (autobetToggle.value === 'on') {
+        toggleAutobet(tile);
+      }
+    };
+
+    frag.appendChild(tile);
+    tileElements.push(tile);
+  }
+
+  grid.innerHTML = '';
+  grid.appendChild(frag);
+
+  mineInput.max = totalTiles - 1;
+}
+
+
+  function toggleAutobet(tile) {
+    const i = parseInt(tile.dataset.index);
+    if (tile.classList.contains('autobet')) {
+      tile.classList.remove('autobet');
+      autoTiles.delete(i);
+    } else {
+      tile.classList.add('autobet');
+      autoTiles.add(i);
+    }
+  }
+
+async function startGame() {
+  if (autobetRunning) return; // prevent double start
+
+  // Save current autobet selection (in case grid resets)
+  let savedAutobet = new Set();
+  tileElements.forEach((tile, i) => {
+    if (tile.classList.contains('autobet')) savedAutobet.add(i);
+  });
+
+  gridSize = parseInt(sizeSelect.value);
+  setupGrid(gridSize);
+  totalTiles = gridSize * gridSize;
+
+  mines = parseInt(mineInput.value);
+  bet = parseInt(betInput.value);
+  autobetMode = autobetToggle.value === 'on';
+
+  // Restore autobet selection
+  autoTiles.clear();
+  if (autobetMode) {
+    savedAutobet.forEach(i => {
+      if (i < totalTiles) {
+        tileElements[i].classList.add('autobet');
+        autoTiles.add(i);
+      }
+    });
+
+    if (autoTiles.size === 0) {
+      alert("Select tiles to autobet by clicking them before starting.");
+      endGame(false);
+      enableControls();
+      return;
+    }
+  }
+
+  if (mines < 1 || mines >= totalTiles) {
+    alert("Invalid mine count.");
+    return;
+  }
+  if (bet <= 0 || isNaN(bet)) {
+    alert("Invalid bet.");
+    return;
+  }
+  if (bet > playerBalance) {
+    alert("Insufficient funds.");
+    return;
+  }
+
+  playerBalance -= bet;
+  updateBalanceDisplay();
+  status.textContent = `Game started${autobetMode ? ' (Auto)' : ''}`;
+  cashoutBtn.disabled = false;
+
+  // Disable controls
+  startBtn.disabled = true;
+  mineInput.disabled = true;
+  sizeSelect.disabled = true;
+  betInput.disabled = true;
+  autobetToggle.disabled = true;
+
+  if (autobetMode) {
+    stopAutobetBtn.style.display = 'inline-block';
+  }
+
+  gameActive = true;
+  autobetRunning = false;
+  safeClicks = 0;
+  currentMultiplier = 1;
+  bombSet = generateBombs(mines);
+
+  tileElements.forEach(tile => {
+    tile.classList.remove('clicked', 'safe', 'bomb', 'highlight');
+    tile.textContent = '';
+  });
+
+  if (autobetMode) {
+    autobetRunning = true;
+    await runAutobetSequence();
+  }
+}
+
+
+ async function runAutobetSequence() {
+  const delay = parseInt(autobetSpeedInput.value) || 100;
+
+  for (const i of autoTiles) {
+    if (!gameActive || !autobetRunning) return;
+
+    const tile = tileElements[i];
+    tile.classList.add('highlight');
+    await sleep(delay / 2);
+    tile.classList.remove('highlight');
+
+    handleTileClick(tile);
+
+    // 💥 If bomb hit, wait & restart automatically
+    if (!gameActive && autobetRunning) {
+      status.textContent = "💥 Bomb hit. Restarting autobet...";
+      await sleep(1000);
+      startGame(); // restart automatically
+      return;
+    }
+
+    await sleep(delay / 2);
+  }
+
+  // ✅ All safe, auto-cash out and restart
+  if (gameActive && autobetRunning) {
+    status.textContent = "✅ Autobet complete. Auto cashing out...";
+    await sleep(300);
+    cashOut();
+
+    status.textContent = "🔁 Starting new round...";
+    await sleep(600);
+    if (autobetRunning) startGame(); // safe auto-loop
+  }
+}
+
+
+
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function handleTileClick(tile) {
+    if (!gameActive || tile.classList.contains('clicked')) return;
+
+    const i = parseInt(tile.dataset.index);
+    tile.classList.add('clicked');
+
+    if (bombSet.has(i)) {
+      tile.classList.add('bomb');
+      tile.textContent = '💣';
+      status.textContent = `💥 You hit a bomb! Lost $${bet}`;
+      endGame(false);
+    } else {
+      tile.classList.add('safe');
+      tile.textContent = '💎';
+      safeClicks++;
+
+      const prob = calcSurvivalProb(safeClicks, totalTiles, mines);
+      currentMultiplier = (1 / prob).toFixed(2);
+      status.textContent = `Safe: ${safeClicks} | Multiplier: x${currentMultiplier}`;
+    }
+  }
+
+  function cashOut() {
+    if (!gameActive || safeClicks === 0) return;
+    const payout = Math.floor(bet * currentMultiplier);
+    playerBalance += payout;
+    updateBalanceDisplay();
+    status.textContent = `✅ Cashed out $${payout} (x${currentMultiplier})`;
+    endGame(true);
+  }
+
+  function endGame() {
+    gameActive = false;
+    autobetRunning = false;
+    cashoutBtn.disabled = true;
+
+    stopAutobetBtn.style.display = 'none';
+    enableControls();
+
+    tileElements.forEach((tile, i) => {
+      if (!tile.classList.contains('clicked') && bombSet.has(i)) {
+        tile.textContent = '💣';
+        tile.classList.add('bomb');
+      }
+    });
+  }
+
+  function stopAutobet() {
+  if (!autobetRunning) return;
+  autobetRunning = false;
+  gameActive = false;
+  stopAutobetBtn.style.display = 'none';
+  status.textContent = "⏸ Autobet stopped.";
+  enableControls();
+}
+
+  function enableControls() {
+    startBtn.disabled = false;
+    mineInput.disabled = false;
+    sizeSelect.disabled = false;
+    betInput.disabled = false;
+    autobetToggle.disabled = false;
+  }
+
+  sizeSelect.addEventListener('change', () => {
+  const newSize = parseInt(sizeSelect.value);
+  setupGrid(newSize);
+});
+
+
+  // Initialize UI on page load
+  setupGrid(5);
+  updateBalanceDisplay();
+  sizeSelect.value = "5";
 </script>
+</body>
 </html>

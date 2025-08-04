@@ -878,7 +878,7 @@
   <script>
 
 
-   let bankValue = 1000;
+   let bankValue = localStorage.getItem('balance') || 1000;
 let currentBet = 0;
 let wager = 5;
 let lastWager = 0;
@@ -1265,6 +1265,7 @@ function buildBettingBoard(){
 				wager = parseInt(chip.childNodes[0].innerText);
 			}else{
 				bankValue = bankValue + currentBet;
+				localStorage.setItem('balance', bankValue);
 				currentBet = 0;
 				document.getElementById('bankSpan').innerText = '' + bankValue.toLocaleString("en-GB") + '';
 				document.getElementById('betSpan').innerText = '' + currentBet.toLocaleString("en-GB") + '';
@@ -1334,6 +1335,8 @@ function setBet(e, n, t, o){
 			container.append(spinBtn);
 		}
 		bankValue = bankValue - wager;
+		localStorage.setItem('balance', bankValue);
+
 		currentBet = currentBet + wager;
 		document.getElementById('bankSpan').innerText = '' + bankValue.toLocaleString("en-GB") + '';
 		document.getElementById('betSpan').innerText = '' + currentBet.toLocaleString("en-GB") + '';
@@ -1411,6 +1414,7 @@ function spin(){
 		removeChips();
 		wager = lastWager;
 		if(bankValue == 0 && currentBet == 0){
+			localStorage.setItem('balance', bankValue);
 			gameOver();
 		}
 	}, 10000);
