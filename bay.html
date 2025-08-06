@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algot.fun</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: 'Dot';
+      src: url('/dot.ttf');
+    }
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: 'Dot', Arial, sans-serif;
+      background: #000000;
+      background-size: cover, cover;
+    }  
+
+    header {
+      color: white;
+      position: fixed;
+      top: 10px;
+      left: 50vw;
+      transform: translateX(-50%);
+      width: 100%;
+      text-align: center;
+      font-size: 2em;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      margin-top: 100px;
+    }
+
+    #grid img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    #iframe-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #iframe-popup iframe {
+      width: 80vw;
+      height: 80vh;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    #close-btn {
+      color: white;
+      font-size: 2em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to the Game bay</h1>
+  </header>
+
+  <div id="grid">
+    <img id="sky-riders" src="https://imgs.crazygames.com/sky-riders-buk_16x9/20240206045724/sky-riders-buk_16x9-cover?metadata=none&quality=85&width=273&fit=crop.png" alt="Sky Riders">
+    <img id="ragdoll-archers" src="https://imgs.crazygames.com/ragdoll-archers_16x9/20250711092019/ragdoll-archers_16x9-cover?metadata=none&quality=85&width=273&fit=crop.png" alt="Ragdoll Archers">
+    <img id="crazy-office-slap-and-smash" src="https://imgs.crazygames.com/crazy-office-slap-and-smash_16x9/20250425071328/crazy-office-slap-and-smash_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Crazy Office Slap and Smash">
+    <img id="count-masters-stickman-games" src="https://imgs.crazygames.com/count-masters-stickman-games_16x9/20250220041115/count-masters-stickman-games_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Count Masters Stickman Games">
+  </div>
+
+  <!-- Wireframe background container -->
+  <div id="background"></div>
+
+  <!-- Iframe Popup -->
+  <div id="iframe-popup">
+    <button id="close-btn"><i class="fa fa-times"></i></button>
+    <iframe id="game-frame" src="" allow="gamepad; fullscreen"  sandbox="allow-same-origin allow-scripts allow-pointer-lock"></iframe>
+  </div>
+
+  <script type="module">
+    import { createWireframeWater } from './wireframeWater.js';
+
+    createWireframeWater({
+      color: 0x8800ff,
+      waveAmplitude: 0.3,
+      waveFrequency: 0.1,
+      container: document.getElementById('background')
+    });
+
+    // Handle iframe popup
+    const popup = document.getElementById('iframe-popup');
+    const iframe = document.getElementById('game-frame');
+    const closeBtn = document.getElementById('close-btn');
+
+    document.getElementById('sky-riders').addEventListener('click', () => {
+      iframe.src = "https://games.crazygames.com/en_US/sky-riders-buk/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
+      popup.style.display = "flex";
+    });
+
+    document.getElementById('ragdoll-archers').addEventListener('click', () => {
+      iframe.src = "https://games.crazygames.com/en_US/ragdoll-archers/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
+      popup.style.display = "flex";
+    });
+
+    document.getElementById('crazy-office-slap-and-smash').addEventListener('click', () => {
+      iframe.src = "https://games.crazygames.com/en_US/crazy-office-slap-and-smash/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
+      popup.style.display = "flex";
+    });
+
+    document.getElementById('count-masters-stickman-games').addEventListener('click', () => {
+      iframe.src = "https://games.crazygames.com/en_US/count-masters-stickman-games/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
+      popup.style.display = "flex";
+    });
+
+    closeBtn.addEventListener('click', () => {
+      iframe.src = "";
+      popup.style.display = "none";
+    });
+  </script>
+</body>
+</html>
