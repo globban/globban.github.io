@@ -2,49 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Algot.fun</title>
-  <link rel="icon" href="/favicon.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="icon" href="/favicon.png"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
   <style>
     @font-face {
       font-family: 'Dot';
       src: url('/dot.ttf');
     }
+
     body {
       overflow-x: hidden;
       overflow-y: auto;
       font-family: 'Dot', Arial, sans-serif;
       background: #000000;
-      background-size: cover, cover;
-    }  
+      margin: 0;
+    }
 
     header {
       color: white;
-      position: fixed;
-      top: 10px;
-      left: 50vw;
-      transform: translateX(-50%);
-      width: 100%;
       text-align: center;
-      font-size: 2em;
+      font-size: 3vw;
+      margin: 20px 0;
     }
 
     #grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-      gap: 20px;
-      padding: 20px;
-      margin-top: 100px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 50px;
+      padding: 50px;
     }
 
-    #grid img {
+    .card {
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .card img {
       width: 100%;
       height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease;
+      border-radius: 15px;
+      transition: all 0.3s ease;
       cursor: pointer;
+    }
+
+    .card img:hover {
+      box-shadow: 0 0px 30px rgb(225, 176, 255);
     }
 
     #iframe-popup {
@@ -61,14 +66,6 @@
       flex-direction: column;
     }
 
-    #iframe-popup iframe {
-      width: 80vw;
-      height: 80vh;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    }
-
     #close-btn {
       color: white;
       font-size: 2em;
@@ -76,6 +73,56 @@
       border: none;
       cursor: pointer;
       margin-bottom: 10px;
+    }
+
+    #iframe-wrapper {
+      position: relative;
+      width: 80vw;
+      height: 80vh;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    #game-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #control-box {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 400px;
+      height: 45px;
+      background-color: #212232;
+      z-index: 10;
+    }
+
+    #iframe-menu {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45px;
+      background: #212232;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 15px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    #fullscreen-btn {
+      background: none;
+      color: white;
+      border: 1px solid white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      cursor: pointer;
     }
 
     #background {
@@ -90,23 +137,17 @@
 </head>
 <body>
   <header>
-    <h1>Welcome to the Game bay</h1>
+    <h1>Welcome to the Game Bay</h1>
   </header>
 
-  <div id="grid">
-    <img id="sky-riders" src="https://imgs.crazygames.com/sky-riders-buk_16x9/20240206045724/sky-riders-buk_16x9-cover?metadata=none&quality=85&width=273&fit=crop.png" alt="Sky Riders">
-    <img id="ragdoll-archers" src="https://imgs.crazygames.com/ragdoll-archers_16x9/20250711092019/ragdoll-archers_16x9-cover?metadata=none&quality=85&width=273&fit=crop.png" alt="Ragdoll Archers">
-    <img id="crazy-office-slap-and-smash" src="https://imgs.crazygames.com/crazy-office-slap-and-smash_16x9/20250425071328/crazy-office-slap-and-smash_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Crazy Office Slap and Smash">
-    <img id="count-masters-stickman-games" src="https://imgs.crazygames.com/count-masters-stickman-games_16x9/20250220041115/count-masters-stickman-games_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Count Masters Stickman Games">
-  </div>
-
-  <!-- Wireframe background container -->
+  <div id="grid"></div>
   <div id="background"></div>
 
-  <!-- Iframe Popup -->
   <div id="iframe-popup">
     <button id="close-btn"><i class="fa fa-times"></i></button>
-    <iframe id="game-frame" src="" allow="gamepad; fullscreen"  sandbox="allow-same-origin allow-scripts allow-pointer-lock"></iframe>
+    <div id="iframe-wrapper">
+      <iframe id="game-frame" allow="fullscreen" sandbox="allow-same-origin allow-scripts allow-pointer-lock"></iframe>
+    </div>
   </div>
 
   <script type="module">
@@ -119,34 +160,107 @@
       container: document.getElementById('background')
     });
 
-    // Handle iframe popup
     const popup = document.getElementById('iframe-popup');
     const iframe = document.getElementById('game-frame');
     const closeBtn = document.getElementById('close-btn');
+    const wrapper = document.getElementById('iframe-wrapper');
+    const grid = document.getElementById('grid');
 
-    document.getElementById('sky-riders').addEventListener('click', () => {
-      iframe.src = "https://games.crazygames.com/en_US/sky-riders-buk/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
-      popup.style.display = "flex";
-    });
+    // Load games from external JSON file
+    const response = await fetch('./games.json');
+    const games = await response.json();
 
-    document.getElementById('ragdoll-archers').addEventListener('click', () => {
-      iframe.src = "https://games.crazygames.com/en_US/ragdoll-archers/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
-      popup.style.display = "flex";
-    });
+    games.forEach(game => {
+      const card = document.createElement('div');
+      card.className = 'card';
 
-    document.getElementById('crazy-office-slap-and-smash').addEventListener('click', () => {
-      iframe.src = "https://games.crazygames.com/en_US/crazy-office-slap-and-smash/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
-      popup.style.display = "flex";
-    });
+      const img = document.createElement('img');
+      img.src = game.thumbnail;
+      img.alt = game.title || game.gameid;
+      img.dataset.gameid = game.gameid;
 
-    document.getElementById('count-masters-stickman-games').addEventListener('click', () => {
-      iframe.src = "https://games.crazygames.com/en_US/count-masters-stickman-games/index.html?skipPrerollFirstSession=true&v=1.337"; // Change to your desired game URL
-      popup.style.display = "flex";
+      card.appendChild(img);
+      grid.appendChild(card);
+
+      img.addEventListener('click', () => {
+        const id = img.dataset.gameid;
+        const customUrl = game.customurl;
+
+        // Set iframe src
+        iframe.src = customUrl
+          ? customUrl
+          : `https://games.crazygames.com/en_US/${id}/index.html?skipPrerollFirstSession=true&v=1.337`;
+
+        // Remove any existing controls
+        const existingControl = document.getElementById('control-box');
+        const existingMenu = document.getElementById('iframe-menu');
+        if (existingControl) existingControl.remove();
+        if (existingMenu) existingMenu.remove();
+
+        // Add appropriate UI
+        if (customUrl) {
+          const menu = document.createElement('div');
+          menu.id = 'iframe-menu';
+
+          const fullscreenBtn = document.createElement('button');
+          fullscreenBtn.id = 'fullscreen-btn';
+          fullscreenBtn.innerHTML = '<i class="fa fa-expand"></i> Fullscreen';
+
+          let isFullscreen = false;
+          fullscreenBtn.addEventListener('click', () => {
+              if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+              }
+          });
+
+          menu.appendChild(fullscreenBtn);
+          wrapper.appendChild(menu);
+        } else {
+          const control = document.createElement('div');
+          control.id = 'control-box';
+          wrapper.appendChild(control);
+        }
+
+        popup.style.display = 'flex';
+      });
     });
 
     closeBtn.addEventListener('click', () => {
       iframe.src = "";
       popup.style.display = "none";
+
+      // Clean up UI
+      const existingControl = document.getElementById('control-box');
+      const existingMenu = document.getElementById('iframe-menu');
+      if (existingControl) existingControl.remove();
+      if (existingMenu) existingMenu.remove();
+    });
+
+    // Add 3D effect to each card
+    document.addEventListener('mousemove', e => {
+      document.querySelectorAll('.card').forEach($card => {
+        const rect = $card.getBoundingClientRect();
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        if (
+          mouseX >= rect.left &&
+          mouseX <= rect.right &&
+          mouseY >= rect.top &&
+          mouseY <= rect.bottom
+        ) {
+          const centerX = mouseX - rect.left - rect.width / 2;
+          const centerY = mouseY - rect.top - rect.height / 2;
+          const distance = Math.sqrt(centerX ** 2 + centerY ** 2);
+
+          $card.querySelector('img').style.transform = `
+            scale3d(1.07, 1.07, 1.07)
+            rotate3d(${centerY / 100}, ${-centerX / 100}, 0, ${Math.log(distance + 1) * -2}deg)
+          `;
+        } else {
+          $card.querySelector('img').style.transform = '';
+        }
+      });
     });
   </script>
 </body>
