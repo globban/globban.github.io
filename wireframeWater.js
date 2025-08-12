@@ -8,10 +8,14 @@ import { UnrealBloomPass } from "https://esm.sh/three@0.160.0/examples/jsm/postp
 export function createWireframeWater({
   width = window.innerWidth,
   height = window.innerHeight,
-  color = 0x00ccff,
-  waveAmplitude = 0.1,
-  waveFrequency = 1,
+  color = 0x007700,
+  waveAmplitude = 0.5,
   waveSpeed = 1,
+  bloomStrength = 1,
+  bloomRadius = 0.2,
+  bloomThreshold = 0.1,
+  cameraMove = 'static', // 'static' or 'orbit'
+  centerShape = 'sphere', // 'cube', 'sphere', 'cone', 'torus', 'torusKnot'
   container = document.body
 } = {}) {
   let scene = new THREE.Scene();
@@ -29,30 +33,50 @@ export function createWireframeWater({
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(width, height),
-    1, // strength
-    0.1, // radius
-    0.1 // threshold
+    bloomStrength,
+    bloomRadius,
+    bloomThreshold
   );
   composer.addPass(bloomPass);
 
   const geometry = new THREE.PlaneGeometry(100, 100, 100, 100);
   const material = new THREE.MeshBasicMaterial({ color, wireframe: true });
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.rotation.x = -Math.PI / 2;
+  mesh.rotation.x = -Math.PI / 1.3;
   scene.add(mesh);
 
-  // Create central cube
-  const cubeGeometry = new THREE.TorusKnotGeometry(0.7, 0.2, 100, 16);
-  const cubeMaterial = new THREE.MeshStandardMaterial({ 
-  color: 0xff4444, 
-  emissive: 0xffffff, 
-  emissiveIntensity: 0.5,
-  roughness: 0.5,
-  metalness: 0.5
-});
-  const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-  cube.position.set(0, 0.5, 0); // Slightly above the plane
-  scene.add(cube);
+  // Central shape selection
+  let centerMesh = null;
+  if (centerShape === 'cube') {
+    centerMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 1.2, 1.2),
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5 })
+    );
+  } else if (centerShape === 'sphere') {
+    centerMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.9, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5, wireframe: true })
+    );
+  } else if (centerShape === 'cone') {
+    centerMesh = new THREE.Mesh(
+      new THREE.ConeGeometry(0.9, 1.5, 32),
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5 })
+    );
+  } else if (centerShape === 'torus') {
+    centerMesh = new THREE.Mesh(
+      new THREE.TorusGeometry(0.7, 0.3, 16, 100),
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5 })
+    );
+  } else if (centerShape === 'torusKnot') {
+    centerMesh = new THREE.Mesh(
+      new THREE.TorusKnotGeometry(0.7, 0.2, 100, 16),
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5 })
+    );
+  }
+  if (centerMesh) {
+    centerMesh.position.set(0, 0.5, 0);
+    scene.add(centerMesh);
+  }
 
   const positions = geometry.attributes.position;
   const randomOffsets = new Float32Array(positions.count);
@@ -67,23 +91,29 @@ export function createWireframeWater({
     requestAnimationFrame(animate);
     const time = clock.getElapsedTime();
 
-    cube.rotation.y -= 0.002; // Rotate the cube
+    if (centerMesh) centerMesh.rotation.y -= 0.002;
+    if (centerMesh) centerMesh.rotation.x -= 0.002;
 
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
       const y = positions.getY(i);
       const offset = randomOffsets[i];
-      const z = Math.sin(x * waveFrequency + time * waveSpeed + offset) *
-                Math.cos(y * waveFrequency + time * waveSpeed + offset) * waveAmplitude;
+      const z = Math.sin(x + time * waveSpeed + offset) *
+                Math.cos(y + time * waveSpeed + offset) * waveAmplitude;
       positions.setZ(i, z);
     }
     positions.needsUpdate = true;
 
-    camera.position.x = Math.sin(time * 0.1) * 10;
-    camera.position.z = Math.cos(time * 0.1) * 10;
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    if (cameraMove === 'orbit') {
+      camera.position.x = Math.sin(time * 0.1) * 10;
+      camera.position.z = Math.cos(time * 0.1) * 10;
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    } else {
+      camera.position.set(0, 10, 0);
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    }
 
-    composer.render();  // Use composer instead of renderer for bloom effect
+    composer.render();
   }
 
   animate();
@@ -92,8 +122,8 @@ export function createWireframeWater({
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight); // Update composer size too
+    composer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  return { scene, camera, renderer, mesh, cube, composer };
+  return { scene, camera, renderer, mesh, centerMesh, composer };
 }

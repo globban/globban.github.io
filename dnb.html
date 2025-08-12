@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DnB Radio Stream</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    body {
+      background: #18181f;
+      color: #eee;
+      font-family: 'dot', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    #eq-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .center-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-top: 48px;
+      font-size: 2.7em;
+      font-family: 'dot', Arial, sans-serif;
+      letter-spacing: 0.04em;
+      text-align: center;
+      color: #eee;
+      text-shadow: 0 2px 16px #23243a88;
+    }
+    .player {
+      margin: 32px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      background: #23243aee;
+      border-radius: 18px;
+      padding: 20px 12px 14px 12px;
+      max-width: 520px;
+      box-shadow: 0 4px 32px #000a;
+    }
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0 0 0;
+    }
+    .play-btn {
+      background: #3a3a6c;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.6em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #23243a66;
+      margin: 0 2px;
+    }
+    .play-btn:hover {
+      background: #5a5ad1;
+      box-shadow: 0 4px 16px #5a5ad188;
+    }
+    span#status {
+      font-size: 1.1em;
+      color: #b6b6d6;
+      margin-left: 8px;
+    }
+    input[type="color"] {
+      margin-left:8px;width:32px;height:32px;border:none;border-radius:50%;box-shadow:0 2px 8px #23243a44;cursor:pointer;vertical-align:middle;
+    }
+    input[type="range"] {
+      margin-left:8px;width:80px;vertical-align:middle;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+        margin-top: 24px;
+      }
+      .player {
+        max-width: 99vw;
+        padding: 8px 2vw 8px 2vw;
+      }
+      .controls {
+        gap: 8px 8px;
+        padding: 4px 0 0 0;
+      }
+      input[type="color"] {
+        width: 28px;
+        height: 28px;
+      }
+      input[type="range"] {
+        width: 60px;
+      }
+      #eq-bg {
+        height: 60vh;
+      }
+    }
+  </style>
+  </style>
+</head>
+<body>
+  <canvas id="eq-bg"></canvas>
+  <div class="center-content">
+    <h1>DnB Radio</h1>
+    <div class="player">
+      <audio id="audio" src="https://azura.drmnbss.org/listen/dnbradio/radio.mp3" crossorigin="anonymous"></audio>
+      <div class="controls">
+        <input type="range" id="volSlider" min="0" max="100" step="1" value="100" title="Volume" style="margin-left:8px;width:80px; height: 50%;">
+        <button class="play-btn" id="playBtn"><i class="fa fa-play"></i></button>
+        <button class="play-btn" id="styleBtn" title="Toggle Equalizer Style" style="font-size:1.3em;width:44px;height:44px;border-radius:50%;margin-left:8px;"><i class="fa fa-sliders-h"></i></button>
+        <button class="play-btn" id="volBtn" title="Mute/Unmute" style="font-size:1.3em;width:44px;height:44px;border-radius:50%;margin-left:8px;"><i class="fa fa-volume-up"></i></button>
+        <input type="color" id="colorPicker" value="#5a5ad1" title="Visualizer Color" style="margin-left:8px;width:32px;height:32px;border:none;border-radius:50%;box-shadow:0 2px 8px #23243a44;cursor:pointer;">
+        <input type="range" id="fftSlider" min="32" max="2048" step="32" value="2048" title="FFT Size" style="margin-left:8px;width:80px; height: 50%;">
+        <br>
+        <span id="status"></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const status = document.getElementById('status');
+    const eqBg = document.getElementById('eq-bg');
+    const ctx = eqBg.getContext('2d');
+    const styleBtn = document.getElementById('styleBtn');
+    let audioCtx, analyser, source;
+    let isPlaying = false;
+    let eqStyle = 0; // 0: bars, 1: lines, 2: dots
+    let eqColor = '#5a5ad1';
+    let fftSize = 2048;
+    let isMuted = false;
+    const volBtn = document.getElementById('volBtn');
+    const colorPicker = document.getElementById('colorPicker');
+    const fftSlider = document.getElementById('fftSlider');
+    const volSlider = document.getElementById('volSlider');
+
+    styleBtn.onclick = () => {
+      eqStyle = (eqStyle + 1) % 8;
+      // Change icon for style
+      if (eqStyle === 0) styleBtn.innerHTML = '<i class="fa fa-sliders-h"></i>';
+      else if (eqStyle === 1) styleBtn.innerHTML = '<i class="fa fa-wave-square"></i>';
+      else if (eqStyle === 2) styleBtn.innerHTML = '<i class="fa fa-circle"></i>';
+      else if (eqStyle === 3) styleBtn.innerHTML = '<i class="fa fa-grip-lines"></i>';
+      else if (eqStyle === 4) styleBtn.innerHTML = '<i class="fa fa-burst"></i>';
+      else if (eqStyle === 5) styleBtn.innerHTML = '<i class="fa fa-align-center"></i>';
+      else if (eqStyle === 6) styleBtn.innerHTML = '<i class="fa fa-compact-disc"></i>';
+      else styleBtn.innerHTML = '<i class="fa fa-circle-notch"></i>';
+    };
+
+    // Resize canvas to fill window
+    function resizeCanvas() {
+      eqBg.width = window.innerWidth;
+      eqBg.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    playBtn.onclick = async () => {
+      if (!isPlaying) {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (!analyser || !source) {
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 32; // Set to 32 first
+          source = audioCtx.createMediaElementSource(audio);
+          source.connect(analyser);
+          analyser.connect(audioCtx.destination);
+          // Now set to user input after a short delay
+          analyser.fftSize = 32;
+          setTimeout(() => {
+            analyser.fftSize = fftSize;
+          }, 0);
+        }
+        // If audio is paused, resume from current time
+        if (audio.paused) {
+          await audio.play();
+        }
+        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+        status.textContent = 'Streaming...';
+        isPlaying = true;
+        drawEq();
+      } else {
+        audio.pause();
+        playBtn.innerHTML = '<i class="fa fa-play"></i>';
+        status.textContent = 'Paused';
+        isPlaying = false;
+      }
+    // Volume button logic
+    volBtn.onclick = () => {
+      isMuted = !isMuted;
+      audio.muted = isMuted;
+      volBtn.innerHTML = isMuted ? '<i class="fa fa-volume-mute"></i>' : '<i class="fa fa-volume-up"></i>';
+    };
+
+    // Settings persistence
+    function saveSettings() {
+      localStorage.setItem('dnb_eq_color', colorPicker.value);
+      localStorage.setItem('dnb_eq_fft', fftSlider.value);
+      localStorage.setItem('dnb_eq_vol', volSlider.value);
+    }
+    function loadSettings() {
+      if (localStorage.getItem('dnb_eq_color')) colorPicker.value = localStorage.getItem('dnb_eq_color');
+      if (localStorage.getItem('dnb_eq_fft')) fftSlider.value = localStorage.getItem('dnb_eq_fft');
+      if (localStorage.getItem('dnb_eq_vol')) volSlider.value = localStorage.getItem('dnb_eq_vol');
+      eqColor = colorPicker.value;
+      fftSize = parseInt(fftSlider.value);
+      audio.volume = parseInt(volSlider.value) / 100;
+    }
+    loadSettings();
+
+    // Color picker logic
+    colorPicker.oninput = (e) => {
+      eqColor = e.target.value;
+      saveSettings();
+    };
+
+    // FFT size slider logic
+    fftSlider.oninput = (e) => {
+      fftSize = parseInt(e.target.value);
+      if (analyser) {
+        analyser.fftSize = fftSize;
+      }
+      saveSettings();
+    };
+
+    // Volume slider logic
+    volSlider.oninput = (e) => {
+      const v = parseInt(e.target.value);
+      audio.volume = v / 100;
+      if (v === 0) {
+        isMuted = true;
+        volBtn.innerHTML = '<i class="fa fa-volume-mute"></i>';
+      } else {
+        isMuted = false;
+        volBtn.innerHTML = '<i class="fa fa-volume-up"></i>';
+      }
+      saveSettings();
+    };
+    };
+
+    function drawEq() {
+      if (!isPlaying) return;
+      requestAnimationFrame(drawEq);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      ctx.clearRect(0, 0, eqBg.width, eqBg.height);
+      const barWidth = eqBg.width / data.length;
+      if (eqStyle === 0) {
+        // Bars
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          ctx.fillStyle = eqColor;
+          ctx.fillRect(i * barWidth, eqBg.height - val * 3, barWidth - 2, val * 3);
+        }
+      } else if (eqStyle === 1) {
+        // Lines
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const x = i * barWidth + barWidth / 2;
+          const y = eqBg.height - val * 3;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = eqColor;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#23243a';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      } else if (eqStyle === 2) {
+        // Dots
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const x = i * barWidth + barWidth / 2;
+          const y = eqBg.height - val * 3;
+          ctx.beginPath();
+          ctx.arc(x, y, Math.max(4, barWidth / 2.5), 0, 2 * Math.PI);
+          ctx.fillStyle = eqColor;
+          ctx.fill();
+        }
+      } else if (eqStyle === 3) {
+        // Gradient wave
+        ctx.save();
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const x = i * barWidth + barWidth / 2;
+          const y = eqBg.height - val * 3;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.lineTo(eqBg.width, eqBg.height);
+        ctx.lineTo(0, eqBg.height);
+        ctx.closePath();
+        const grad = ctx.createLinearGradient(0, eqBg.height / 2, eqBg.width, eqBg.height);
+        grad.addColorStop(0, eqColor);
+        grad.addColorStop(1, '#b6b6d6');
+        ctx.fillStyle = grad;
+        ctx.globalAlpha = 0.7;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      } else if (eqStyle === 4) {
+        // Radial burst
+        ctx.save();
+        const cx = eqBg.width / 2;
+        const cy = eqBg.height / 2;
+        const radius = Math.min(eqBg.width, eqBg.height) / 2.2;
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const angle = (i / data.length) * Math.PI * 2;
+          const r = radius + val * 1.5;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(x, y);
+          ctx.strokeStyle = eqColor;
+          ctx.lineWidth = 2.5;
+          ctx.globalAlpha = 0.8;
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      } else if (eqStyle === 5) {
+        // Mirrored bars
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          ctx.fillStyle = eqColor;
+          // Top
+          ctx.fillRect(i * barWidth, eqBg.height / 2 - val * 1.5, barWidth - 2, val * 1.5);
+          // Bottom
+          ctx.fillRect(i * barWidth, eqBg.height / 2, barWidth - 2, val * 1.5);
+        }
+      } else if (eqStyle === 6) {
+        // Spiral
+        ctx.save();
+        const cx = eqBg.width / 2;
+        const cy = eqBg.height / 2;
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const angle = (i / data.length) * Math.PI * 4 + (Date.now() / 800);
+          const r = 60 + val * 2.5 + i * 2.5;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          ctx.beginPath();
+          ctx.arc(x, y, Math.max(3, barWidth / 3), 0, 2 * Math.PI);
+          ctx.fillStyle = eqColor;
+          ctx.globalAlpha = 0.8;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      } else {
+        // Circular waveform (YouTube-style ring)
+        ctx.save();
+        const cx = eqBg.width / 2;
+        const cy = eqBg.height / 2;
+        const baseRadius = Math.min(eqBg.width, eqBg.height) / 3.2;
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const angle = (i / data.length) * Math.PI * 2;
+          const r = baseRadius + val * 2.2;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = eqColor;
+        ctx.lineWidth = 5;
+        ctx.shadowColor = eqColor;
+        ctx.shadowBlur = 16;
+        ctx.globalAlpha = 0.9;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
+  </script>
+</body>
+</html>
