@@ -16,24 +16,23 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-      overflow-y: auto;
-      background-size: cover, cover;
-      background-repeat: no-repeat, no-repeat;
-      background-attachment: fixed;
-      background-position: center center;
+      background: #000;
       box-sizing: border-box;
       touch-action: manipulation;
+      font-family: 'Dot', Arial, sans-serif;
+      color: #eee;
+      min-height: 100vh;
     }
 
     header {
-      font-family: 'Dot';
+      font-family: 'Dot', Arial, sans-serif;
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 75px;
       background: rgba(20, 20, 20, 0.35);
-      color: white;
+      color: #fff;
       padding-left: 2em;
       display: flex;
       align-items: center;
@@ -56,273 +55,104 @@
       align-items: center;
       gap: 1.5em;
       margin-right: 5em;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
     }
 
     header a {
-      color: white;
+      color: #fff;
       text-decoration: none;
       font-size: 1.1em;
       padding: 0.3em 1em;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       transition: background 0.2s;
     }
-
     header a:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255,255,255,0.18);
     }
 
-    #star-fav-btn {
-      position: fixed;
-      top: 93px;
-      left: 18px;
-      z-index: 100;
-      cursor: pointer;
-      font-size: 2.1em;
-      color: #fff;
-      filter: drop-shadow(0 2px 8px #0007);
-      background: none;
-      border: none;
-      outline: none;
-    }
-
-    #star-fav-btn.filled {
-      color: #ffd700;
-      text-shadow: 0 0 8px #ffd70099;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      margin-right: 2em;
-      cursor: pointer;
-    }
-
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background: white;
-      border-radius: 2px;
-    }
-
-    main {
-      margin-top: 100px;
+    .mobile-nav {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-family: 'Dot', sans-serif;
+      gap: 1.2em;
+      margin: 2em auto 0 auto;
+      padding: 1.2em 0.5em 1.2em 0.5em;
+      max-width: 90vw;
+      background: rgba(30, 30, 40, 0); /* more transparent */
+      border-radius: 18px;
+      position: relative;
+      top: 85px;
+      z-index: 1002; /* above #background and header */
+     
+
     }
-
-    .game-section {
-      width: 90%;
-      max-width: 1000px;
-      padding: 2em;
-      background: rgba(20, 20, 20, 0);
-      border-radius: 16px;
-      color: white;
-      text-align: center;
-      margin-bottom: 2em;
-    }
-
-    .game-section h2 {
-      font-size: 2.5em;
-      margin-bottom: 0.2em;
-    }
-
-    .game-section p {
-      font-size: 1.2em;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    .thumbnail-gallery {
-      width: 90%;
-      max-width: 1000px;
-      padding: 1em;
-      background: rgba(20, 20, 20, 0.25);
-      border-radius: 12px;
-      backdrop-filter: blur(10px) saturate(160%);
-      -webkit-backdrop-filter: blur(10px) saturate(160%);
-      color: white;
-      overflow-x: auto;
-      white-space: nowrap;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-    }
-
-    .thumbnail-gallery img {
-      height: 160px;
-      margin-right: 1em;
-      border-radius: 10px;
-      scroll-snap-align: start;
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 700px) {
-      html, body {
-        font-size: 3vw;
-        width: 100vw;
-        height: 100vh;
-        min-width: 100vw;
-        min-height: 100vh;
-      }
-
-      header {
-        height: 12vw;
-        min-height: 48px;
-        padding-left: 1vw;
-      }
-
-      header h1 {
-        font-size: 6vw;
-      }
-
-      .hamburger {
-        display: flex;
-      }
-
-      .links {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 75px;
-        right: 0;
-        width: 100vw;
-         background: rgba(20, 20, 20, 0.25);
-      border-radius: 12px;
-      backdrop-filter: blur(10px) saturate(160%);
-      -webkit-backdrop-filter: blur(10px) saturate(160%);
+    @media (max-width: 600px) {
+      .mobile-nav a {
+        padding: 0.7em 1.2em;
+        margin: 0.2em 0;
+        color: #fff;
+        font-size: 1.6em;
         text-align: center;
-        padding: 1em 0;
+        width: 70%;
+        text-decoration: none;
+        border-radius: 10px;
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+       transition: all 0.3s ease;
       }
-
-      .links.show {
-        display: flex;
-      }
-
-      header a {
-        font-size: 1.1em;
-        padding: 0.6em 1em;
-      }
-
-      #star-fav-btn {
-        top: 14vw;
-        left: 2vw;
-        font-size: 7vw;
+      .mobile-nav a:hover {
+       width: 75%;
+        background: rgba(255, 255, 255, 0.15);
       }
     }
 
-    @media (max-width: 400px) {
-      header {
-        height: 14vw;
-        min-height: 40px;
-      }
-
-      header h1 {
-        font-size: 7vw;
-      }
-
-      #star-fav-btn {
-        font-size: 9vw;
-      }
-    }
   </style>
 </head>
-<body onload="bg()">
-  <button id="star-fav-btn" title="Favourite background">
-    <i id="star-fav-icon" class="fa-regular fa-star"></i>
-  </button>
 
   <header>
     <h1>Algot.fun</h1>
-    <div class="hamburger" onclick="toggleMenu()">
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-    <div class="links">
+    <div class="links" id="navLinks">
       <a href="/visits.html">Chat</a>
       <a href="/Games.html">Games</a>
       <a href="/Tools.html">Tools</a>
     </div>
   </header>
 
-  <main>
-    <section class="game-section">
-      <a href="/ski.html">
-        <img src="Ski.png" alt="Alpine Madness Logo" style="width: 100%; max-width: 600px; border-radius: 12px; margin-top: 1em;">
-      </a>
-      <p>
-        Ever wondered what skiing at 100 km/h through a jungle of pines feels like — No? well now you do!
-        <br><br>
-        <strong>Alpine Madness</strong> is chaotic, fast, snowy, and slightly Nauseating. Now with kickass ramps, FOV madness, trick jumps and of course, Customization!
-      </p>
-    </section>
-  </main>
+  <!-- Mobile nav will be injected here if needed -->
+  <div id="background" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;"></div>
+</body>
+ <script type="module">
+    import { createWireframeWater } from './wireframeWater.js';
 
-  <script>
-    function bg() {
-      const backgrounds = [
-        "Logos/export (1).png",
-        "Logos/export (2).png",
-        "Logos/export (3).png",
-        "Logos/export (4).png",
-        "Logos/export (5).png",
-        "Logos/export (6).png",
-        "Logos/export (7).png"
-      ];
-      let fav = localStorage.getItem("fav_bg");
-      let chosen;
-      if (fav && backgrounds.includes(fav)) {
-        chosen = fav;
-      } else {
-        chosen = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-      }
-      document.body.style.backgroundImage =
-        `url('${chosen}'), linear-gradient(120deg, #000 0%, #000 100%)`;
-      updateStar(chosen, fav);
-      window._currentBg = chosen;
-    }
-
-    function updateStar(current, fav) {
-      const starBtn = document.getElementById("star-fav-btn");
-      const starIcon = document.getElementById("star-fav-icon");
-      if (fav === current) {
-        starBtn.classList.add("filled");
-        starIcon.classList.remove("fa-regular");
-        starIcon.classList.add("fa-solid");
-        starIcon.style.color = "#fff";
-      } else {
-        starBtn.classList.remove("filled");
-        starIcon.classList.remove("fa-solid");
-        starIcon.classList.add("fa-regular");
-        starIcon.style.color = "#fff";
-      }
-    }
-
-    function toggleMenu() {
-      const links = document.querySelector('.links');
-      links.classList.toggle('show');
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const starBtn = document.getElementById("star-fav-btn");
-      starBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        const bg = window._currentBg;
-        const isFav = localStorage.getItem("fav_bg") === bg;
-        if (isFav) {
-          localStorage.removeItem("fav_bg");
-        } else {
-          localStorage.setItem("fav_bg", bg);
-        }
-        updateStar(bg, localStorage.getItem("fav_bg"));
-      });
+    createWireframeWater({
+      color: 0x8800ff,
+      waveAmplitude: 0.3,
+      waveFrequency: 0.1,
+      container: document.getElementById('background')
     });
   </script>
-</body>
+  <script>
+    // Mobile support: pop out nav links to main if width is too small
+    function handleMobileNav() {
+      const nav = document.getElementById('navLinks');
+      const header = document.querySelector('header');
+      if (window.innerWidth <= 600) {
+        if (!document.getElementById('mobileNavLinks')) {
+          const mobileNav = nav.cloneNode(true);
+          mobileNav.id = 'mobileNavLinks';
+          mobileNav.className = 'mobile-nav';
+          // Insert mobile nav after header
+          header.insertAdjacentElement('afterend', mobileNav);
+        }
+        nav.style.display = 'none';
+      } else {
+        const mobileNav = document.getElementById('mobileNavLinks');
+        if (mobileNav) mobileNav.remove();
+        nav.style.display = 'flex';
+      }
+    }
+    window.addEventListener('resize', handleMobileNav);
+    window.addEventListener('DOMContentLoaded', handleMobileNav);
+  </script>
 </html>
