@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple 3D Drift Game</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; color: #fff; font-family: sans-serif; }
+    #hud { position: fixed; top: 10px; left: 10px; font-size: 18px; background: rgba(0,0,0,.4); padding: 8px 12px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div id="hud">Speed: <span id="speed">0</span> km/h</div>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x222);
+
+    const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+    camera.position.set(0, 5, 10);
+
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(innerWidth, innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7);
+    scene.add(light);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambient);
+
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.MeshStandardMaterial({color:0x333333})
+    );
+    ground.rotation.x = -Math.PI/2;
+    scene.add(ground);
+
+    // Obstacles (boxes)
+    const obstacles = [];
+    for(let i=0;i<15;i++){
+      const box = new THREE.Mesh(
+        new THREE.BoxGeometry(2,2,2),
+        new THREE.MeshStandardMaterial({color:0x4477ff})
+      );
+      box.position.set(
+        (Math.random()-0.5)*180,
+        1,
+        (Math.random()-0.5)*180
+      );
+      scene.add(box);
+      obstacles.push(box);
+    }
+
+    // Trees (cylinders + spheres)
+    for(let i=0;i<20;i++){
+      const trunk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2,0.3,2,8),
+        new THREE.MeshStandardMaterial({color:0x8B5A2B})
+      );
+      const leaves = new THREE.Mesh(
+        new THREE.SphereGeometry(0.9,8,8),
+        new THREE.MeshStandardMaterial({color:0x228B22})
+      );
+      const x = (Math.random()-0.5)*180;
+      const z = (Math.random()-0.5)*180;
+      trunk.position.set(x,1,z);
+      leaves.position.set(x,2.2,z);
+      scene.add(trunk);
+      scene.add(leaves);
+    }
+
+    // Fun ramps
+    for(let i=0;i<3;i++){
+      const ramp = new THREE.Mesh(
+        new THREE.BoxGeometry(4,0.5,8),
+        new THREE.MeshStandardMaterial({color:0xffcc00})
+      );
+      ramp.position.set(
+        (Math.random()-0.5)*160,
+        0.25,
+        (Math.random()-0.5)*160
+      );
+      ramp.rotation.x = -Math.PI/8;
+      scene.add(ramp);
+    }
+
+    // Car
+    const car = new THREE.Mesh(
+      new THREE.BoxGeometry(1,0.5,2),
+      new THREE.MeshStandardMaterial({color:0xff3333})
+    );
+    car.position.y = 0.25;
+    scene.add(car);
+
+    const keys = {};
+    addEventListener('keydown', e => keys[e.code] = true);
+    addEventListener('keyup', e => keys[e.code] = false);
+
+    const state = {pos: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: 0, steer: 0};
+    const maxSteer = 0.5;      // max steering angle in radians
+    const steerSpeed = -0.002;   // how fast you can steer (radians per frame)
+    const steerReturn = 0.03;  // how fast steering returns to center
+
+    const speedEl = document.getElementById('speed');
+
+    function loop(){
+      requestAnimationFrame(loop);
+
+      let forward = new THREE.Vector3(Math.sin(state.yaw),0,Math.cos(state.yaw));
+      let right = new THREE.Vector3(Math.cos(state.yaw),0,-Math.sin(state.yaw));
+
+      if(keys['KeyW']) state.vel.addScaledVector(forward,0.003);
+      if(keys['KeyS']) state.vel.addScaledVector(forward,-0.003);
+
+      // Steering input
+      if(keys['KeyA']) state.steer += steerSpeed;
+      else if(keys['KeyD']) state.steer -= steerSpeed;
+      else {
+        // Return steering to center when not pressing A/D
+        if(state.steer > 0) state.steer = Math.max(0, state.steer - steerReturn);
+        if(state.steer < 0) state.steer = Math.min(0, state.steer + steerReturn);
+      }
+      // Clamp steering
+      state.steer = Math.max(-maxSteer, Math.min(maxSteer, state.steer));
+
+      // Apply steering to yaw based on speed
+      state.yaw -= state.steer * state.vel.length() * 2.5; // 2.5 is a turn sensitivity factor
+
+      state.pos.add(state.vel);
+      state.vel.multiplyScalar(0.99);
+
+      car.position.copy(state.pos);
+      car.rotation.y = state.yaw;
+
+      camera.position.lerp(new THREE.Vector3(state.pos.x, 5, state.pos.z+8), 0.05);
+      camera.lookAt(car.position);
+
+      speedEl.textContent = (state.vel.length()*50).toFixed(0);
+
+      renderer.render(scene,camera);
+    }
+    loop();
+
+    addEventListener('resize', ()=>{
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth,innerHeight);
+    });
+  </script>
+</body>
+</html>
