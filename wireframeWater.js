@@ -15,7 +15,7 @@ export function createWireframeWater({
   bloomRadius = 0.2,
   bloomThreshold = 0.1,
   cameraMove = 'static', // 'static' or 'orbit'
-  centerShape = 'sphere', // 'cube', 'sphere', 'cone', 'torus', 'torusKnot'
+  centerShape = 'cube', // 'cube', 'sphere', 'cone', 'torus', 'torusKnot'
   container = document.body
 } = {}) {
   let scene = new THREE.Scene();

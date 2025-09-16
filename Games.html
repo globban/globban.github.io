@@ -72,6 +72,20 @@ body {
   z-index: -1;
 }
 
+pre {
+  text-align: center;
+  color: #fff;
+  margin: 20px auto 0 auto;
+  padding: 6px 0;
+  width: 98vw;
+  max-width: 600px;
+  background: rgba(30, 30, 30, 0.35);
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+}
+
 @media (max-width: 900px) {
   .library-container {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -113,21 +127,17 @@ body {
     max-width: 340px;
     border-radius: 10px;
   }
-  h1 {
-    font-size: 1.3em !important;
-    padding: 6px 0 !important;
-    width: 98vw !important;
-    margin: 0 auto !important;
-    left: unset !important;
-    transform: unset !important;
-    position: static !important;
-  }
 }
     </style>
 </head>
 <body>
     <div id="background"></div>
-    <h1 style="color:#ffffff; background-color: #000000b2;  width: 10em; padding: 12px 0; border-radius: 20px; position: sticky; text-align: center; left: 50vw; transform: translateX(-50%); margin-top:32px; font-weight:400; letter-spacing:0.03em;font-family: 'dot'; font-size: 5em;">Games Library</h1>
+  <pre>  ________                              
+ /  _____/_____    _____   ____   ______
+/   \  ___\__  \  /     \_/ __ \ /  ___/
+\    \_\  \/ __ \|  Y Y  \  ___/ \___ \ 
+ \______  (____  |__|_|  /\___  /____  >
+        \/     \/      \/     \/     \/ </pre>
     <div class="library-container">
       <div class="game-card" data-url="https://canvas-cloc.onrender.com" data-menu="true">
             <img class="game-thumb" src="TN/draw.png" alt="Draw">
@@ -191,6 +201,28 @@ body {
 
       container: document.getElementById('background')
     });
+</script>
+<script>
+// Make white pixels transparent for the logo
+window.addEventListener('DOMContentLoaded', function() {
+  const canvas = document.getElementById('logo-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = '/Games.png';
+  img.onload = function() {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      // If pixel is close to white, make it transparent
+      if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
+        data[i+3] = 0;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  };
+});
 </script>
     <script>
 function createGameCard({ title, url, thumbnail, desc, showPurpleRect }) {

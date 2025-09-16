@@ -6,42 +6,91 @@
   <title>IP Address Viewer</title>
   <style>
     body {
-      background: #181c20;
-      color: #fff;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      min-height: 100vh;
       margin: 0;
+      padding: 2em 1em 4em 1em;
+      background: #000;
+      box-sizing: border-box;
+      touch-action: manipulation;
+      font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'monospace';
+      color: #0f0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      font-size: 1em;
     }
-    h1 {
+    .ascii-banner {
+      color: #0f0;
+      background: #000;
+      font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'monospace';
+      font-size: 1em;
+      text-align: left;
       margin-top: 2em;
-      font-size: 2.2em;
-      letter-spacing: 0.05em;
+      margin-bottom: 0.5em;
+      padding: 0.5em 1em 0.5em 1em;
+      border-radius: 0;
+      box-shadow: none;
+      white-space: pre;
+      letter-spacing: 0.02em;
+      user-select: text;
     }
-    .ip-box {
-      background: #23272e;
-      border-radius: 12px;
-      box-shadow: 0 0 16px #000a;
-      padding: 1.5em 2em;
-      margin: 2em 0 1em 0;
-      text-align: center;
-      min-width: 320px;
+    .terminal-box, #terminal-output {
+      background: #000;
+      color: #0f0;
+      font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'monospace';
+      font-size: 1em;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      min-width: 0;
+      max-width: none;
+      width: 100vw;
+      text-align: left;
+      border: none;
+      box-sizing: border-box;
+    }
+    .ip-label, .ip-value {
+      color: #0f0;
+      font-size: 1em;
+      font-weight: normal;
+      margin: 0;
+      padding: 0;
+      display: inline;
+      text-decoration: none;
+    }
+    a {
+      color: #0f0;
+      text-decoration: none;
     }
     .ip-label {
-      color: #0ff;
+      color: #0f0;
+      font-size: 1em;
+      margin: 0;
+      display: inline;
+    }
+    .ascii-banner {
+      color: #0f0;
+      background: #000;
+      font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'monospace';
       font-size: 1.1em;
-      margin-bottom: 0.3em;
-      display: block;
+      text-align: left;
+      margin: 0 0 0.5em 0;
+      padding: 0.5em 1em 0.5em 1em;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 0 16px #000a;
+      white-space: pre;
+      letter-spacing: 0.02em;
+      user-select: text;
+      width: 100vw;
+      max-width: 700px;
+      box-sizing: border-box;
     }
     .ip-value {
-      font-size: 1.5em;
-      font-weight: bold;
-      letter-spacing: 0.05em;
-      color: #fff;
-      margin-bottom: 0.5em;
+      font-size: 1em;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      color: #0f0;
+      margin: 0;
     }
     .note {
       color: #aaa;
@@ -49,10 +98,26 @@
       margin-top: 2em;
       max-width: 400px;
       text-align: center;
+    .terminal-box {
+      background: #000;
+      color: #0f0;
+      font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'monospace';
+      font-size: 1.08em;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 0 16px #000a;
+      padding: 1.5em 2em;
+      margin: 0 0 2em 0;
+      min-width: 340px;
+      max-width: 700px;
+      width: 100vw;
+      text-align: left;
+      border-top: 2px solid #0f0;
+      box-sizing: border-box;
+    }
     }
     .other-ips {
       margin-top: 2em;
-      background: #23272e;
+      background: #000000;
       border-radius: 12px;
       box-shadow: 0 0 16px #000a;
       padding: 1em 2em;
@@ -61,7 +126,7 @@
     .other-ips ul {
       padding-left: 1.2em;
       margin: 0.5em 0 0 0;
-      color: #fff;
+      color: #0f0;
     }
     .other-ips li {
       margin-bottom: 0.3em;
@@ -70,58 +135,131 @@
   </style>
 </head>
 <body>
-  <h1>IP Address Viewer</h1>
+  <pre class="ascii-banner">
+ _______ ______ __          __    
+|_     _|   __ \  |--.----.|  |--.
+ _|   |_|    __/     |  __||    < 
+|_______|___|  |__|__|____||__|__|
+
+  algot.fun Info Terminal           
+  </pre>
+  <div class="ip-box terminal-box">
   <div class="ip-box">
-    <span class="ip-label">Your Public IP Address:</span>
-    <span class="ip-value" id="public-ip">Loading...</span>
-    <span class="ip-label">Your Local IP Address:</span>
-    <span class="ip-value" id="local-ip">Loading...</span>
-  </div>
-  <div class="other-ips">
-    <span class="ip-label">Other Devices on Your Network:</span>
-    <ul id="other-ips-list">
-      <li>Not available in browser for privacy reasons.</li>
-    </ul>
-  </div>
-  <div class="note">
-    <strong>Note:</strong> For privacy and security, browsers do not allow web pages to scan your local network for other devices' IP addresses.<br>
-    You can see your public IP (as seen by the internet) and your local IP (as seen by your router).<br>
-    To see all devices on your network, use your router's admin page or a network scanner app.
+    <div><span class="ip-label">Public IP:</span> <span class="ip-value" id="public-ip">Loading...</span></div>
+    <div><span class="ip-label">Local IP:</span> <span class="ip-value" id="local-ip">Loading...</span></div>
+    <div><span class="ip-label">Location:</span> <span class="ip-value" id="location">Loading...</span></div>
+    <div><span class="ip-label">Region:</span> <span class="ip-value" id="region">Loading...</span></div>
+    <div><span class="ip-label">Country:</span> <span class="ip-value" id="country">Loading...</span></div>
+    <div><span class="ip-label">Timezone:</span> <span class="ip-value" id="timezone">Loading...</span></div>
+    <div><span class="ip-label">Local Time:</span> <span class="ip-value" id="localtime">Loading...</span></div>
+    <div><span class="ip-label">Latitude / Longitude:</span> <span class="ip-value" id="latlon">Loading...</span></div>
+    <div><span class="ip-label">Currency:</span> <span class="ip-value" id="currency">Loading...</span></div>
+    <div><span class="ip-label">Country Calling Code:</span> <span class="ip-value" id="callingcode">Loading...</span></div>
+    <div><span class="ip-label">ISP:</span> <span class="ip-value" id="isp">Loading...</span></div>
+    <div><span class="ip-label">User Agent:</span> <span class="ip-value" id="ua"></span></div>
+    <div><span class="ip-label">Browser Language:</span> <span class="ip-value" id="lang"></span></div>
+    <div><span class="ip-label">Platform:</span> <span class="ip-value" id="platform"></span></div>
+    <div><span class="ip-label">Screen Resolution:</span> <span class="ip-value" id="screen"></span></div>
+    <div><span class="ip-label">Color Depth:</span> <span class="ip-value" id="colordepth"></span></div>
+    <div><span class="ip-label">Device Type:</span> <span class="ip-value" id="device"></span></div>
   </div>
   <script>
-    // Get public IP using a public API
-    fetch('https://api.ipify.org?format=json')
+    // Get public IP and geo info
+
+    fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .then(data => {
-        document.getElementById('public-ip').textContent = data.ip;
+        document.getElementById('public-ip').textContent = data.ip || 'Unavailable';
+        document.getElementById('location').textContent = (data.city ? data.city + ', ' : '') + (data.region ? data.region + ', ' : '') + (data.country_name || '');
+        document.getElementById('region').textContent = data.region || 'Unavailable';
+        document.getElementById('country').textContent = data.country_name || 'Unavailable';
+        document.getElementById('timezone').textContent = data.timezone || 'Unavailable';
+        // Local time from timezone
+        if (data.timezone) {
+          try {
+            const now = new Date().toLocaleString('en-US', { timeZone: data.timezone, hour12: false });
+            document.getElementById('localtime').textContent = now;
+          } catch (e) {
+            document.getElementById('localtime').textContent = 'Unavailable';
+          }
+        } else {
+          document.getElementById('localtime').textContent = 'Unavailable';
+        }
+        // Lat/lon with Google Maps link
+        if (data.latitude && data.longitude) {
+          document.getElementById('latlon').innerHTML =
+            `<a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank" style="color:#0f0;text-decoration:underline;">${data.latitude}, ${data.longitude}</a>`;
+        } else {
+          document.getElementById('latlon').textContent = 'Unavailable';
+        }
+        document.getElementById('currency').textContent = data.currency || 'Unavailable';
+        document.getElementById('callingcode').textContent = data.country_calling_code || 'Unavailable';
+        document.getElementById('isp').textContent = data.org || 'Unavailable';
       })
       .catch(() => {
         document.getElementById('public-ip').textContent = "Unavailable";
+        document.getElementById('location').textContent = "Unavailable";
+        document.getElementById('region').textContent = "Unavailable";
+        document.getElementById('country').textContent = "Unavailable";
+        document.getElementById('timezone').textContent = "Unavailable";
+        document.getElementById('localtime').textContent = "Unavailable";
+        document.getElementById('latlon').textContent = "Unavailable";
+        document.getElementById('currency').textContent = "Unavailable";
+        document.getElementById('callingcode').textContent = "Unavailable";
+        document.getElementById('isp').textContent = "Unavailable";
       });
 
+    // Browser info
+    document.getElementById('ua').textContent = navigator.userAgent;
+    document.getElementById('lang').textContent = navigator.language || 'Unavailable';
+    document.getElementById('platform').textContent = navigator.platform || 'Unavailable';
+    document.getElementById('screen').textContent = `${window.screen.width} x ${window.screen.height}`;
+    document.getElementById('colordepth').textContent = window.screen.colorDepth + ' bit';
+    // Device type
+    function isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    document.getElementById('device').textContent = isMobile() ? 'Mobile' : 'Desktop';
+
     // Get local IP using WebRTC (works in most modern browsers)
+    // Persistently display the first detected local IP
     function getLocalIP(callback) {
       let RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
       if (!RTCPeerConnection) {
         callback('Unavailable');
         return;
       }
+      let found = false;
       let pc = new RTCPeerConnection({iceServers:[]});
       pc.createDataChannel('');
       pc.createOffer().then(offer => pc.setLocalDescription(offer));
       pc.onicecandidate = function(event) {
         if (!event || !event.candidate) return;
         let ipMatch = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(event.candidate.candidate);
-        if (ipMatch) {
+        if (ipMatch && !found) {
+          found = true;
           callback(ipMatch[1]);
           pc.onicecandidate = null;
         }
       };
-      setTimeout(() => callback('Unavailable'), 2000);
+      setTimeout(() => {
+        if (!found) callback('Unavailable');
+      }, 2000);
     }
+    let savedLocalIP = null;
     getLocalIP(function(ip) {
-      document.getElementById('local-ip').textContent = ip;
+      if (ip && ip !== 'Unavailable') {
+        savedLocalIP = ip;
+        document.getElementById('local-ip').textContent = ip;
+      } else if (savedLocalIP) {
+        document.getElementById('local-ip').textContent = savedLocalIP;
+      } else {
+        document.getElementById('local-ip').textContent = 'Unavailable';
+      }
     });
+
+    // Show user agent
+    document.getElementById('ua').textContent = navigator.userAgent;
   </script>
 </body>
 </html>

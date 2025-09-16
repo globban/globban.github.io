@@ -1,0 +1,62 @@
+<html>
+  <head>
+  <title>algot.fun Cast Receiver</title>
+
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin+Condensed:700">
+    <link rel="stylesheet" href="loading.css">
+  </head>
+  <body>
+    <div class="glass-bg"></div>
+    <iframe id="dashboard" scrolling="no"></iframe>
+    <div id="loading" class="loading wave">Loading</div>
+    <style>
+      body {
+        background: linear-gradient(135deg, #23243a 0%, #6a82fb 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .glass-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: 0;
+        background: rgba(255,255,255,0.10);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-radius: 0;
+        border: 1px solid rgba(255,255,255,0.12);
+      }
+      #dashboard {
+        position: relative;
+        z-index: 1;
+        margin: 0 auto;
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        background: transparent;
+      }
+      #loading {
+        z-index: 2;
+        position: absolute;
+        top: 10vh;
+        left: 0;
+        width: 100vw;
+        text-align: center;
+        color: #fff;
+        text-shadow: 0 2px 8px #0008;
+        font-size: 3vw;
+        font-family: 'Cabin Condensed', Arial, sans-serif;
+        pointer-events: none;
+      }
+    </style>
+  </body>
+
+  <!-- Post load all the goods used to interact with sender. -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+  <script src="main.js"></script>
+</html>
