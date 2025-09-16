@@ -1,0 +1,13 @@
+{
+  "name": "algot.fun Cast Sender",
+  "short_name": "CastSender",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#23243a",
+  "theme_color": "#23243a",
+  "description": "Send websites to your Chromecast or Cast-enabled device.",
+  "icons": [
+    { "src": "favicon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "favicon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

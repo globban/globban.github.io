@@ -2,7 +2,8 @@
   <head>
   <title>algot.fun Cast Sender</title>
 
-    <link rel="stylesheet" href="main.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin+Condensed:700">
     <link rel="icon" type="image/png" href="favicon.png">
     <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
@@ -107,6 +108,14 @@
         If the page does not load, make sure the HTTP header <b>X-Frame-Options</b> allows embedding in a frame.
       </p>
     </div>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('service-worker.js');
+        });
+      }
+    </script>
   </body>
 
   <!-- Post load all the goods used to interact with Chromecast/receiver. -->

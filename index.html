@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Algot.fun</title>
   <link rel="icon" href="/favicon.png"/>
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <style>
     @font-face {
@@ -161,5 +162,12 @@ fetch('https://api.pexels.com/v1/search?query=4k wallpaper&per_page=85', {
     }
     window.addEventListener('resize', handleMobileNav);
     window.addEventListener('DOMContentLoaded', handleMobileNav);
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
   </script>
 </html>
