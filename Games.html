@@ -17,10 +17,12 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center center;
+  overflow-x: hidden;
 }
 .library-container {
   margin: 40px auto;
   padding: 0 24px;
+  padding-top: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 32px;
@@ -75,15 +77,19 @@ body {
 pre {
   text-align: center;
   color: #fff;
-  margin: 20px auto 0 auto;
-  padding: 6px 0;
-  width: 98vw;
-  max-width: 600px;
-  background: rgba(30, 30, 30, 0.35);
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  padding: 10px 0px;
+  padding-bottom: 40px;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  margin: 0px;
+  width: 100vw;
+  background: rgba(109, 109, 109, 0);
   backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+  font-size: 3em;
+  height: 50vh;
+  top: 0px;
+  position: relative;
+  height: fit-content;
 }
 
 @media (max-width: 900px) {
@@ -194,35 +200,47 @@ pre {
              <button id="fullscreen-btn" style="padding: 10px 20px; font-size: 1em;">Toggle Fullscreen</button>
         </div>
     </div>
-     <script type="module">
-    import { createWireframeWater } from './wireframeWater.js';
+   <script type="module">
+import { createWireframeWater } from './wireframeWater.js';
 
-    createWireframeWater({
+// 1️⃣ Define waterController in outer scope
+let waterController = null;
 
-      container: document.getElementById('background')
-    });
-</script>
-<script>
-// Make white pixels transparent for the logo
-window.addEventListener('DOMContentLoaded', function() {
-  const canvas = document.getElementById('logo-canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.src = '/Games.png';
-  img.onload = function() {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      // If pixel is close to white, make it transparent
-      if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
-        data[i+3] = 0;
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
-  };
+// 2️⃣ Initialize background water
+window.addEventListener('DOMContentLoaded', () => {
+  const bg = document.getElementById('background');
+  waterController = createWireframeWater({ container: bg });
+
+  // 3️⃣ Setup game cards click handlers
+  document.querySelectorAll('.library-container .game-card').forEach(card => {
+    const url = card.dataset.url;
+    if (!url) return;
+    card.addEventListener('click', () => openGame(url));
+  });
+
+  // 4️⃣ Close popup
+  document.getElementById('close-btn').addEventListener('click', closePopup);
+  document.getElementById('iframe-popup').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closePopup();
+  });
 });
+
+// 5️⃣ Functions now can access waterController
+function openGame(url) {
+  if (waterController) waterController.pause(); // stop/hide background
+  const popup = document.getElementById('iframe-popup');
+  const iframe = document.getElementById('game-frame');
+  iframe.src = url;
+  popup.style.display = 'flex';
+}
+
+function closePopup() {
+  const popup = document.getElementById('iframe-popup');
+  const iframe = document.getElementById('game-frame');
+  iframe.src = '';
+  popup.style.display = 'none';
+  if (waterController) waterController.resume(); // show background again
+}
 </script>
     <script>
 function createGameCard({ title, url, thumbnail, desc, showPurpleRect }) {
@@ -301,6 +319,8 @@ function openGame(url, showPurpleRect) {
     wrapper.appendChild(control);
   }
 }
+
+
 
 function closePopup() {
   document.getElementById('iframe-popup').style.display = 'none';
