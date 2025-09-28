@@ -21,6 +21,20 @@
         "thumbnail": "https://imgs.crazygames.com/surf-cover"
       },
       {
+        "gameid": "frontwars-io",
+        "thumbnail": "https://imgs.crazygames.com/frontwars-io_16x9/20250926081637/frontwars-io_16x9-cover",
+        "customurl": "https://frontwars.io"
+      },
+      {
+        "gameid": "hypper-sandbox",
+        "thumbnail": "https://imgs.crazygames.com/hypper-sandbox_16x9/20250701043804/hypper-sandbox_16x9-cover"
+      },
+      {
+        "gameid": "mr-racer---car-racing",
+        "thumbnail": "https://imgs.crazygames.com/mr-racer---car-racing_16x9/20250829075007/mr-racer---car-racing_16x9-cover",
+        "customurl": "/racer.html"
+      },
+      {
         "gameid": "paper-io-2",
         "thumbnail": "https://imgs.crazygames.com/paper-io-2_16x9/20250214024143/paper-io-2_16x9-cover"
       },

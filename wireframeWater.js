@@ -8,12 +8,12 @@ import { UnrealBloomPass } from "https://esm.sh/three@0.160.0/examples/jsm/postp
 export function createWireframeWater({
   width = window.innerWidth,
   height = window.innerHeight,
-  color = 0x007700,
+  color = 0x0005050,
   waveAmplitude = 0.5,
   waveSpeed = 1,
-  bloomStrength = 1,
-  bloomRadius = 0.2,
-  bloomThreshold = 0.1,
+  bloomStrength = 0,
+  bloomRadius = 0,
+  bloomThreshold = 0,
   cameraMove = 'static', // 'static' or 'orbit'
   centerShape = 'cube', // 'cube', 'sphere', 'cone', 'torus', 'torusKnot'
   container = document.body
@@ -38,12 +38,16 @@ export function createWireframeWater({
     bloomThreshold
   );
   composer.addPass(bloomPass);
-
-  const geometry = new THREE.PlaneGeometry(100, 100, 100, 100);
-  const material = new THREE.MeshBasicMaterial({ color, wireframe: true });
+  //ALL DOCUMENTS HAVE COPYRIGHT ALGOT.FUN 2025
+  const geometry = new THREE.PlaneGeometry(50, 50, 50, 50);
+  const material = new THREE.MeshPhongMaterial({ color, wireframe: false, roughness: 1, metalness: 0 });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI / 1.3;
   scene.add(mesh);
+  scene.add (new THREE.AmbientLight(0xffffff, 0));
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(0, 10, 0);
+  scene.add(directionalLight);
 
   // Central shape selection
   let centerMesh = null;
@@ -103,6 +107,8 @@ export function createWireframeWater({
       positions.setZ(i, z);
     }
     positions.needsUpdate = true;
+    geometry.computeVertexNormals(); // <- recalc normals for proper shading
+
 
     if (cameraMove === 'orbit') {
       camera.position.x = Math.sin(time * 0.1) * 10;
