@@ -248,27 +248,61 @@ function openGame(url, showPurpleRect = false) {
     const menu = document.createElement('div');
     menu.id = 'iframe-menu';
     menu.style.position = 'absolute';
-    menu.style.bottom = '0';
-    menu.style.right = '0';
-    menu.style.backgroundColor = '#212233';
-    menu.style.padding = '10px 20px';
-    menu.style.zIndex = '10';
+    menu.style.bottom = '2px';
+    menu.style.right = '2px';
+    menu.style.backgroundColor = '#21223300';
+    menu.style.padding = '0px';
+    menu.style.zIndex = '11';
     menu.style.borderTopLeftRadius = '8px';
 
     const fullscreenBtn = document.createElement('button');
     fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
     fullscreenBtn.style.background = 'none';
+    fullscreenBtn.style.fontSize = '2em';
     fullscreenBtn.style.color = 'white';
     fullscreenBtn.style.border = 'none';
     fullscreenBtn.style.cursor = 'pointer';
-    fullscreenBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
+  fullscreenBtn.addEventListener('click', e => {
+  e.stopPropagation();
+
+  const controlBox = document.getElementById('control-box');
+
+  if (document.fullscreenElement) {
+    // If already fullscreen, exit it
+    document.exitFullscreen();
+  } else {
+    // Enter fullscreen
+    wrapper.requestFullscreen().then(() => {
+      iframe.style.width = '100%';
+
+      // Only elongate if control box exists
+      if (controlBox) {
+        iframe.style.height = 'calc(100vh + 45px)';
+        controlBox.style.display = 'none';
       } else {
-        wrapper.requestFullscreen();
+        iframe.style.height = '100vh';
       }
+
+      wrapper.style.borderRadius = '0';
+      menu.style.display = 'none';
+      fullscreenBtn.style.display = 'none';
     });
+  }
+});
+
+// 🔥 Handle ESC or system exit
+document.addEventListener('fullscreenchange', () => {
+  const controlBox = document.getElementById('control-box');
+  if (!document.fullscreenElement) {
+    // Restore popup styles
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    wrapper.style.borderRadius = '12px';
+    menu.style.display = 'block';
+    fullscreenBtn.style.display = 'block';
+    if (controlBox) controlBox.style.display = 'block';
+  }
+});
 
     menu.appendChild(fullscreenBtn);
     wrapper.appendChild(menu);
@@ -280,7 +314,7 @@ function openGame(url, showPurpleRect = false) {
       control.style.position = 'absolute';
       control.style.bottom = '0';
       control.style.left = '0';
-      control.style.width = '400px';
+      control.style.width = '100%';
       control.style.height = '45px';
       control.style.backgroundColor = '#212233';
       control.style.zIndex = '10';

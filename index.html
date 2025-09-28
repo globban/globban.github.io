@@ -122,24 +122,8 @@
   </header>
 
   <!-- Mobile nav will be injected here if needed -->
-  <div id="background" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;background-size:cover;background-position:center;"></div>
+  <iframe id="background" src="https://demo.marpi.pl/biomes/" style="position:fixed;top:-10vh;left:-3px;width:calc(100vw + 300px);height:110vh;z-index:0;background-size:cover;background-position:center;"></iframe>
 </body>
-<script>
-// Set a random wallpaper from Pexels API as the background
-const bgDiv = document.getElementById('background');
-fetch('https://api.pexels.com/v1/search?query=4k wallpaper&per_page=85', {
-  headers: {
-    Authorization: 'AJCLYKNilyyQ11ajGWehSngFYIkRf0bnioxae2lNBX9lYYShoUzlRg0O' // Replace with your key
-  }
-})
-.then(res => res.json())
-.then(data => {
-  const photos = data.photos;
-  const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
-  // Use large2x or original for best quality
-  bgDiv.style.backgroundImage = `url('${randomPhoto.src.original}')`;
-});
-</script>
   <script>
     // Mobile support: pop out nav links to main if width is too small
     function handleMobileNav() {
