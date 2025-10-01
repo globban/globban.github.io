@@ -8,13 +8,13 @@ import { UnrealBloomPass } from "https://esm.sh/three@0.160.0/examples/jsm/postp
 export function createWireframeWater({
   width = window.innerWidth,
   height = window.innerHeight,
-  color = 0x0005050,
+  color = 0x00ee00,
   waveAmplitude = 0.5,
   waveSpeed = 1,
-  bloomStrength = 0,
-  bloomRadius = 0,
-  bloomThreshold = 0,
-  cameraMove = 'static', // 'static' or 'orbit'
+  bloomStrength = 3,
+  bloomRadius = 3,
+  bloomThreshold = 0.1,
+  cameraMove = 'orbit', // 'static' or 'orbit'
   centerShape = 'cube', // 'cube', 'sphere', 'cone', 'torus', 'torusKnot'
   container = document.body
 } = {}) {
@@ -40,7 +40,7 @@ export function createWireframeWater({
   composer.addPass(bloomPass);
   //ALL DOCUMENTS HAVE COPYRIGHT ALGOT.FUN 2025
   const geometry = new THREE.PlaneGeometry(50, 50, 50, 50);
-  const material = new THREE.MeshPhongMaterial({ color, wireframe: false, roughness: 1, metalness: 0 });
+  const material = new THREE.MeshPhongMaterial({ color, wireframe: true, roughness: 0, metalness: 1 });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI / 1.3;
   scene.add(mesh);
@@ -54,7 +54,7 @@ export function createWireframeWater({
   if (centerShape === 'cube') {
     centerMesh = new THREE.Mesh(
       new THREE.BoxGeometry(1.2, 1.2, 1.2),
-      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.5, metalness: 0.5 })
+      new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xffffff, emissiveIntensity: 0.1, roughness: 0.5, metalness: 0.5 })
     );
   } else if (centerShape === 'sphere') {
     centerMesh = new THREE.Mesh(
@@ -111,8 +111,8 @@ export function createWireframeWater({
 
 
     if (cameraMove === 'orbit') {
-      camera.position.x = Math.sin(time * 0.1) * 10;
-      camera.position.z = Math.cos(time * 0.1) * 10;
+      camera.position.x = Math.sin(time * 0.1) * 10 - 5;
+      camera.position.z = Math.cos(time * 0.1) * 10 - 5;
       camera.lookAt(new THREE.Vector3(0, 0, 0));
     } else {
       camera.position.set(0, 10, 0);

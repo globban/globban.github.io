@@ -10,25 +10,29 @@
   font-family: 'dot';
   src: url('/dot.ttf');
 }
+
 body {
   margin: 0;
   color: #eee;
-  background: url('/wallpaper.webp');
+  background: url(/dark_mountains.webp);
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center center;
   overflow-x: hidden;
+  font-family: 'dot', sans-serif;
 }
+
 .library-container {
-  margin: 40px auto;
-  padding: 0 24px;
-  padding-top: 20px;
+  margin: 0 auto;
+  padding: 20px 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
   justify-items: center;
+  max-width: calc(360px * 3);
 }
+
 .library-container .game-card {
   position: relative;
   display: flex;
@@ -44,6 +48,7 @@ body {
   border-radius: 20px;
   position: relative;
 }
+
 .game-card::before {
   content: '';
   position: absolute;
@@ -58,14 +63,17 @@ body {
   pointer-events: none;
   transition: opacity 0.3s;
 }
+
 .game-card:hover::before {
   opacity: 1;
   background: inherit;
   filter: blur(18px) brightness(1.2);
 }
+
 .game-thumb:hover {
   transform: scale(1.05);
 }
+
 #background {
   position: fixed;
   top: 0;
@@ -78,21 +86,41 @@ body {
 pre {
   text-align: center;
   color: #fff;
-  padding: 10px 0px;
-  padding-bottom: 40px;
+  padding: 10px 0 40px;
   border-bottom: 3px solid rgba(255, 255, 255, 0.1);
-  margin: 0px;
-  width: 100vw;
+  margin: 0;
+  width: 100%;
   background: rgba(109, 109, 109, 0);
-  backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-  font-size: 3em;
-  height: 50vh;
-  top: 0px;
-  position: relative;
-  height: fit-content;
 }
 
+.search-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 10px;
+}
+
+#game-search {
+  width: 320px;
+  max-width: 90%;
+  padding: 15px 15px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  font-family: 'dot', sans-serif;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background 0.3s ease;
+}
+
+#game-search::placeholder {
+  color: #ccc;
+}
+
+#game-search:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 
 </style>
 </head>
@@ -103,10 +131,15 @@ pre {
 /   \  ___\__  \  /     \_/ __ \ /  ___/
 \    \_\  \/ __ \|  Y Y  \  ___/ \___ \ 
  \______  (____  |__|_|  /\___  /____  >
-        \/     \/      \/     \/     \/ </pre>
+        \/     \/      \/     \/     \/ 
+        
+        <div class="search-container" >
+
+  <input type="text" id="game-search" placeholder="Search games...">
+</div></pre>
     <div class="library-container">
-      <div class="game-card" data-url="https://canvas-cloc.onrender.com" data-menu="true">
-            <img class="game-thumb" src="TN/draw.png" alt="Draw">
+      <div class="game-card" data-url="https://webmc.xyz/" data-menu="true">
+            <img class="game-thumb" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.baagames.com%2Fwp-content%2Fuploads%2F2014%2F09%2FMinecraft-Logo.jpg" alt="Draw">
         </div>
         <div class="game-card" data-url="drift.html" data-menu="true">
             <img class="game-thumb" src="TN/Drift.png" alt="Drift">
@@ -126,20 +159,20 @@ pre {
         <div class="game-card" data-url="tetris.html">
             <img class="game-thumb" src="TN/tetris.png" alt="Tetris">
         </div>
-        <div class="game-card" data-url="https://slowroads.io/">
-            <img class="game-thumb" src="TN/slowroads.png" alt="Slow Roads">
+        <div class="game-card" data-url="https://slowroads.io/" data-direct="true">
+            <img class="game-thumb" src="TN/slowroads.png" alt="Slow Roads" >
         </div>
         <div class="game-card" data-url="5050.html">
             <img class="game-thumb" src="TN/5050.png" alt="5050">
-        </div>
-        <div class="game-card" data-url="bloxd.html">
-            <img class="game-thumb" src="TN/bloxd.png" alt="Bloxd">
         </div>
         <div class="game-card" data-url="cball.html">
             <img class="game-thumb" src="TN/cball.png" alt="Cball">
         </div>
         <div class="game-card" data-url="roulette.html">
             <img class="game-thumb" src="TN/roulette.png" alt="Roulette">
+        </div>
+         <div class="game-card" data-url="https://azgames.io/game/escape-road/">
+            <img class="game-thumb" src="https://imgs.crazygames.com/escape-road-asm_16x9/20250724105031/escape-road-asm_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Roulette">
         </div>
         <div class="game-card" data-url="dvd.html">
             <img class="game-thumb" src="TN/dvd.png" alt="DVD screensaver">
@@ -150,8 +183,6 @@ pre {
 
     </div>
     <div id="iframe-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column;">
-        <button id="close-btn" style="background: none; border: none; color: white; font-size: 2em; cursor: pointer; margin-bottom: 10px;">
-            <i class="fa fa-times"></i>
         </button>
         <div id="iframe-wrapper" style="position: relative; width: 80vw; height: 80vh; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(255,255,255,0.2);">
             <iframe id="game-frame" allow="fullscreen" style="width: 100%; height: 100%; border: none;"></iframe>
@@ -166,12 +197,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Attach click handlers to static cards
   document.querySelectorAll('.library-container .game-card').forEach(card => {
-    const url = card.dataset.url;
-    if (!url) return;
-    card.addEventListener('click', () => openGame(url, card.dataset.menu === "true"));
-  });
+  const url = card.dataset.url;
+  const direct = card.dataset.direct;
+  if (!url) return;
 
-  document.getElementById('close-btn').addEventListener('click', closePopup);
+  card.addEventListener('click', () => {
+    if (card.dataset.direct === "true") {
+      // Open directly in this tab
+      window.location.href = url;
+    } else {
+      // Open in popup
+      openGame(url, card.dataset.menu === "true");
+    }
+  });
+});
+
+const searchInput = document.getElementById('game-search');
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.library-container .game-card').forEach(card => {
+    const altText = card.querySelector('.game-thumb').alt.toLowerCase();
+    card.style.display = altText.includes(query) ? 'flex' : 'none';
+  });
+});
+
   document.getElementById('iframe-popup').addEventListener('click', e => {
     if (e.target === e.currentTarget) closePopup();
   });
@@ -183,7 +232,7 @@ window.addEventListener('DOMContentLoaded', () => {
       games.forEach(game => {
         const url = game.customurl 
           ? game.customurl 
-          : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true&v=1.337`;
+          : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
         const title = game.gameid
           .split('-')
           .map(w => w.charAt(0).toUpperCase() + w.slice(1))
@@ -198,6 +247,16 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     })
     .catch(err => console.error('Failed to load games.json:', err));
+});
+
+window.addEventListener("message", (event) => {
+  const trustedOrigins = ["https://your-safe-domain.com"];
+  if (!trustedOrigins.includes(event.origin)) {
+    return; // Ignore untrusted iframe messages
+  }
+
+  // Handle safe messages
+  console.log("Got safe message:", event.data);
 });
 
 function createGameCard({ title, url, thumbnail, desc, showPurpleRect }) {
@@ -226,34 +285,41 @@ function openGame(url, showPurpleRect = false) {
   document.getElementById('iframe-menu')?.remove();
 
   iframe.src = url;
-
-  // Push history state so "back" can be detected
-  history.pushState({ iframeOpen: true }, '');
-
   popup.style.display = 'flex';
-  wrapper.style.width = window.mobileCheck() ? '100vw' : '80vw';
-  wrapper.style.height = window.mobileCheck() ? '100vh' : '80vh';
-  wrapper.style.borderRadius = window.mobileCheck() ? '0' : '12px';
-  wrapper.style.boxShadow = window.mobileCheck() ? 'none' : '0 0 20px rgba(255,255,255,0.2)';
+  document.body.style.overflowY = 'hidden';
 
-  if (!window.mobileCheck()) {
-    // 💻 Desktop → popup with menu & optional purple rect
-    popup.style.display = 'flex';
-    popup.style.background = 'rgba(0,0,0,0.8)';
-    wrapper.style.width = '80vw';
-    wrapper.style.height = '80vh';
-    wrapper.style.borderRadius = '12px';
+  const isMobile = window.mobileCheck();
 
-    // Menu (fullscreen button)
+  // Set wrapper styles
+  wrapper.style.width = isMobile ? '100vw' : '80vw';
+  wrapper.style.height = isMobile ? '100vh' : '80vh';
+  wrapper.style.borderRadius = isMobile ? '0' : '12px';
+  wrapper.style.boxShadow = isMobile ? 'none' : '0 0 20px rgba(255,255,255,0.2)';
+
+  // Purple control box for desktop
+  if (!isMobile && showPurpleRect) {
+    const control = document.createElement('div');
+    control.id = 'control-box';
+    control.style.position = 'absolute';
+    control.style.bottom = '0';
+    control.style.left = '0';
+    control.style.width = '100%';
+    control.style.height = '45px';
+    control.style.backgroundColor = '#212233';
+    control.style.zIndex = '10';
+    wrapper.appendChild(control);
+  }
+
+  if (!isMobile) {
+    // Desktop → add fullscreen menu button
+    scrollTo(0, 0);
+
     const menu = document.createElement('div');
     menu.id = 'iframe-menu';
     menu.style.position = 'absolute';
     menu.style.bottom = '2px';
     menu.style.right = '2px';
-    menu.style.backgroundColor = '#21223300';
-    menu.style.padding = '0px';
     menu.style.zIndex = '11';
-    menu.style.borderTopLeftRadius = '8px';
 
     const fullscreenBtn = document.createElement('button');
     fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
@@ -262,74 +328,52 @@ function openGame(url, showPurpleRect = false) {
     fullscreenBtn.style.color = 'white';
     fullscreenBtn.style.border = 'none';
     fullscreenBtn.style.cursor = 'pointer';
-  fullscreenBtn.addEventListener('click', e => {
-  e.stopPropagation();
 
-  const controlBox = document.getElementById('control-box');
-
-  if (document.fullscreenElement) {
-    // If already fullscreen, exit it
-    document.exitFullscreen();
-  } else {
-    // Enter fullscreen
-    wrapper.requestFullscreen().then(() => {
-      iframe.style.width = '100%';
-
-      // Only elongate if control box exists
-      if (controlBox) {
-        iframe.style.height = 'calc(100vh + 45px)';
-        controlBox.style.display = 'none';
+    fullscreenBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+        iframe.style.height = '100%';
       } else {
-        iframe.style.height = '100vh';
+        wrapper.requestFullscreen().then(() => {
+          wrapper.style.borderRadius = '0';
+          document.getElementById('iframe-menu').style.display = 'none';
+          const controlBox = document.getElementById('control-box');
+          if (controlBox) iframe.style.height = 'calc(100vh + 45px)';
+          if (controlBox) controlBox.style.display = 'none';
+        });
       }
-
-      wrapper.style.borderRadius = '0';
-      menu.style.display = 'none';
-      fullscreenBtn.style.display = 'none';
     });
-  }
-});
 
-// 🔥 Handle ESC or system exit
-document.addEventListener('fullscreenchange', () => {
-  const controlBox = document.getElementById('control-box');
-  if (!document.fullscreenElement) {
-    // Restore popup styles
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    wrapper.style.borderRadius = '12px';
-    menu.style.display = 'block';
-    fullscreenBtn.style.display = 'block';
-    if (controlBox) controlBox.style.display = 'block';
-  }
-});
+
 
     menu.appendChild(fullscreenBtn);
     wrapper.appendChild(menu);
-
-    // Purple control box (desktop only if needed)
-    if (showPurpleRect) {
-      const control = document.createElement('div');
-      control.id = 'control-box';
-      control.style.position = 'absolute';
-      control.style.bottom = '0';
-      control.style.left = '0';
-      control.style.width = '100%';
-      control.style.height = '45px';
-      control.style.backgroundColor = '#212233';
-      control.style.zIndex = '10';
-      wrapper.appendChild(control);
-    }
   } else {
-    wrapper.requestFullscreen();
-    addEventListener('fullscreenchange', () => {
+    // Mobile → auto fullscreen with setTimeout
+    setTimeout(() => {
+      wrapper.requestFullscreen().catch(() => {});
+    }, 1000);
+  }
+
+  // Single fullscreenchange listener
+  if (!window._fullscreenListenerAdded) {
+    document.addEventListener('fullscreenchange', () => {
+      const controlBox = document.getElementById('control-box');
+      const menu = document.getElementById('iframe-menu');
       if (!document.fullscreenElement) {
-        closePopup();
+        // Restore styles
+        wrapper.style.borderRadius = window.mobileCheck() ? '0' : '12px';
+        if (menu) menu.style.display = 'block';
+        if (controlBox) controlBox.style.display = 'block';
+        iframe.style.height = '100%';
+        // If mobile and fullscreen exited, close popup
+        if (window.mobileCheck()) closePopup();
       }
     });
+    window._fullscreenListenerAdded = true;
   }
 }
-
 
 function closePopup() {
   const popup = document.getElementById('iframe-popup');
@@ -338,6 +382,7 @@ function closePopup() {
   popup.style.display = 'none';
   document.getElementById('control-box')?.remove();
   document.getElementById('iframe-menu')?.remove();
+  document.body.style.overflowY = 'scroll';
 }
 </script>
 

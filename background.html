@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liquid Gravity Sphere — Debugged</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    html,body{height:100%;margin:0;background:#000}
+    canvas{display:block}
+  </style>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.160.0';
+import { EffectComposer } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+// =====================
+// === Configurable ===
+// =====================
+const CONFIG = {
+  ballColor: 0x00ff00,
+  particleColor: 0xffffff,
+  sphereRadius: 2.0,
+  particleCount: 500,
+  gravityStrength: 0.2,
+  flowSpeed: 0.2,
+  softening: 1, // avoids singularities when particles are very near center
+  respawnMinRadiusMultiplier: 1.6, // spawn radius = sphereRadius * (this + rand*...)
+  respawnExtra: 5.0, // extra multiplier range for spawn
+  particleSize: 0.05,
+  wobbleAmp: 0.3
+};
+
+// =====================
+// === Basic setup ====
+// =====================
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(0, 0, 10);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Composer for bloom (glow)
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.01, 0.8);
+composer.addPass(bloom);
+
+// Lights
+const pLight = new THREE.PointLight(0xffffff, 1.4);
+pLight.position.set(10, 10, 10);
+scene.add(pLight);
+scene.add(new THREE.AmbientLight(0x202020));
+
+// =====================
+// === Water sphere ====
+// =====================
+const sphereGeo = new THREE.IcosahedronGeometry(CONFIG.sphereRadius, 6);
+const sphereMat = new THREE.MeshStandardMaterial({
+  color: CONFIG.ballColor,
+  metalness: 0.2,
+  roughness: 0.15,
+  transparent: false,
+  emissive: 0x00ff00,
+  emissiveIntensity: 1.5,
+  bloom: true
+});
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+scene.add(sphere);
+
+// Store base positions to avoid cumulative vertex drift
+const baseVertexCount = sphereGeo.attributes.position.count;
+const basePositions = new Float32Array(baseVertexCount * 3);
+for (let i = 0; i < baseVertexCount; i++) {
+  basePositions[i * 3 + 0] = sphereGeo.attributes.position.getX(i);
+  basePositions[i * 3 + 1] = sphereGeo.attributes.position.getY(i);
+  basePositions[i * 3 + 2] = sphereGeo.attributes.position.getZ(i);
+}
+
+// Tiny temp vectors for vertex update
+const tmpVecA = new THREE.Vector3();
+const tmpVecB = new THREE.Vector3();
+
+// =====================
+// === Particles =======
+// =====================
+const particlesGeo = new THREE.BufferGeometry();
+let positions = new Float32Array(CONFIG.particleCount * 3);
+let velocities = new Float32Array(CONFIG.particleCount * 3);
+
+function spawnParticle(i, minRMultiplier = CONFIG.respawnMinRadiusMultiplier) {
+  const ix = i * 3;
+  // spawn in a spherical shell well outside the sphere to avoid immediate re-collision
+  const theta = Math.acos(1 - 2 * Math.random());
+  const phi = 2 * Math.PI * Math.random();
+  const r = CONFIG.sphereRadius * (minRMultiplier + Math.random() * CONFIG.respawnExtra);
+  const x = Math.sin(theta) * Math.cos(phi) * r;
+  const y = Math.sin(theta) * Math.sin(phi) * r;
+  const z = Math.cos(theta) * r;
+  positions[ix] = x;
+  positions[ix + 1] = y;
+  positions[ix + 2] = z;
+  velocities[ix] = (Math.random() - 0.5) * 0.01;
+  velocities[ix + 1] = (Math.random() - 0.5) * 0.01;
+  velocities[ix + 2] = (Math.random() - 0.5) * 0.01;
+}
+
+for (let i = 0; i < CONFIG.particleCount; i++) {
+  spawnParticle(i);
+}
+
+particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+
+// round particle sprite
+const sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/circle.png');
+const particlesMat = new THREE.PointsMaterial({
+  color: CONFIG.particleColor,
+  size: CONFIG.particleSize,
+  map: sprite,
+  transparent: true,
+  alphaTest: 0,
+  depthWrite: false
+});
+
+const particles = new THREE.Points(particlesGeo, particlesMat);
+scene.add(particles);
+
+// =====================
+// === Mouse parallax ==
+// =====================
+let mouseX = 0, mouseY = 0;
+let isHovering = false;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+  isHovering = true;
+});
+
+window.addEventListener('mouseleave', () => { isHovering = false; });
+
+// =====================
+// === Sanity checks (test cases) ===
+// =====================
+(function runInitTests(){
+  // test: no NaNs in positions/velocities
+  for (let i = 0; i < positions.length; i++) {
+    console.assert(Number.isFinite(positions[i]), 'position #' + i + ' should be finite');
+    console.assert(Number.isFinite(velocities[i]), 'velocity #' + i + ' should be finite');
+  }
+  console.assert(particlesGeo.attributes.position.count === CONFIG.particleCount, 'particle count attribute should match');
+  console.log('init tests passed');
+})();
+
+// sanitize function: fixes any NaN / Infinite values in the positions/velocities arrays
+function sanitizeParticle(i) {
+  const ix = i * 3;
+  for (let k = 0; k < 3; k++) {
+    const v = positions[ix + k];
+    if (!Number.isFinite(v) || Math.abs(v) > 1e6) {
+      // respawn this particle safely
+      spawnParticle(i, CONFIG.respawnMinRadiusMultiplier);
+      return;
+    }
+  }
+  for (let k = 0; k < 3; k++) {
+    const v = velocities[ix + k];
+    if (!Number.isFinite(v) || Math.abs(v) > 1e6) velocities[ix + k] = 0;
+  }
+}
+
+// =====================
+// === Animation =======
+// =====================
+let lastTime = performance.now();
+function animate(time) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((time - lastTime) / 1000, 0.033);
+  lastTime = time;
+
+  // --- sphere wobble (use base positions so it doesn't accumulate) ---
+  const posAttr = sphere.geometry.attributes.position;
+  for (let i = 0; i < baseVertexCount; i++) {
+    const bx = basePositions[i * 3 + 0];
+    const by = basePositions[i * 3 + 1];
+    const bz = basePositions[i * 3 + 2];
+
+    // radial wobble using base normal direction
+    tmpVecA.set(bx, by, bz);
+    const len = tmpVecA.length();
+    if (len === 0) continue;
+    tmpVecA.normalize();
+
+    const offset = Math.sin(time * 0.001 + (bx + by * 1.3 + bz * 0.7) * 2.0) * CONFIG.wobbleAmp;
+
+    posAttr.setXYZ(i,
+      bx + tmpVecA.x * offset,
+      by + tmpVecA.y * offset,
+      bz + tmpVecA.z * offset
+    );
+  }
+  posAttr.needsUpdate = true;
+  sphere.geometry.computeVertexNormals();
+
+  // --- particle physics ---
+  const posArray = particlesGeo.attributes.position.array;
+  for (let i = 0; i < CONFIG.particleCount; i++) {
+    const ix = i * 3;
+    let x = posArray[ix];
+    let y = posArray[ix + 1];
+    let z = posArray[ix + 2];
+
+    // basic sanity: if any coord is not finite, respawn safely
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+      spawnParticle(i);
+      continue;
+    }
+
+    const dx = -x;
+    const dy = -y;
+    const dz = -z;
+    let distSq = dx * dx + dy * dy + dz * dz;
+
+    // guard against exact zero or extremely small distances
+    if (distSq <= 1e-8) {
+      // particle at center or extremely close — respawn it to avoid divide-by-zero
+      spawnParticle(i);
+      continue;
+    }
+
+    const dist = Math.sqrt(distSq);
+
+    // if inside collision distance -> despawn/respawn
+    if (dist <= CONFIG.sphereRadius + 0.02) {
+      spawnParticle(i);
+      continue;
+    }
+
+    // gravitational acceleration (softened)
+    const a = CONFIG.gravityStrength / (distSq + CONFIG.softening);
+
+    // update velocities (use dt so it's stable across framerates)
+    velocities[ix] += (dx / dist) * a * dt;
+    velocities[ix + 1] += (dy / dist) * a * dt;
+    velocities[ix + 2] += (dz / dist) * a * dt;
+
+    // integrate
+    posArray[ix] += velocities[ix] * CONFIG.flowSpeed * dt * 60; // scale with dt
+    posArray[ix + 1] += velocities[ix + 1] * CONFIG.flowSpeed * dt * 60;
+    posArray[ix + 2] += velocities[ix + 2] * CONFIG.flowSpeed * dt * 60;
+
+    // damping
+    velocities[ix] *= 0.995;
+    velocities[ix + 1] *= 0.995;
+    velocities[ix + 2] *= 0.995;
+
+    // sanitize if values blow up
+    if (!Number.isFinite(posArray[ix]) || Math.abs(posArray[ix]) > 1e6) sanitizeParticle(i);
+    if (!Number.isFinite(posArray[ix + 1]) || Math.abs(posArray[ix + 1]) > 1e6) sanitizeParticle(i);
+    if (!Number.isFinite(posArray[ix + 2]) || Math.abs(posArray[ix + 2]) > 1e6) sanitizeParticle(i);
+  }
+
+  particlesGeo.attributes.position.needsUpdate = true;
+
+  // camera parallax (only when hover/mousemove recently)
+  const targetX = isHovering ? mouseX * 2 : 0;
+  const targetY = isHovering ? -mouseY * 2 : 0;
+  camera.position.x += (targetX - camera.position.x) * 0.06;
+  camera.position.y += (targetY - camera.position.y) * 0.06;
+  camera.lookAt(0, 0, 0);
+
+  if (!isHovering) {
+	const targetX = camera.position.x * 1
+	camera.position.x += (targetX - camera.position.x) * 0.06;
+  	camera.position.y += (targetY - camera.position.y) * 0.06;
+	camera.lookAt(0, 0, 0);
+  }
+  // render with composer (bloom)
+  composer.render();
+}
+
+requestAnimationFrame(animate);
+
+// =====================
+// === Resize handler ==
+// =====================
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+});
+
+</script>
+</body>
+</html>
