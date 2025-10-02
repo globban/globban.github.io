@@ -2,7 +2,7 @@
     {
     "gameid": "bodycamera-shooter",
     "thumbnail": "https://imgs.crazygames.com/bodycamera-shooter_16x9/20250929082056/bodycamera-shooter_16x9-cover",
-    "category": "io",
+    "category": "casual",
     "blocked": false
     },
     {
@@ -165,6 +165,7 @@
         "gameid": "agario",
         "thumbnail": "https://imgs.crazygames.com/agario/20230719092731/agario-cover?metadata=none&quality=85&width=273&fit=crop",
         "category": "io",
+        "customurl": "https://tricksplit.io/?r=118273880312972004117",
         "blocked": false
     },
     {
@@ -2490,6 +2491,12 @@
         "blocked": false
     },
     {
+        "gameid": "geometry-dash-online",
+        "thumbnail": "https://imgs.crazygames.com/games/geometry-dash-online/cover_16x9-1732744370399.png?metadata=none&quality=85&width=273&fit=crop",
+        "category": "casual",
+        "customurl": "https://geometrylitegame.org/game/geometry-dash-lite/"
+    },
+    {
         "gameid": "worldguessr",
         "thumbnail": "https://imgs.crazygames.com/worldguessr_16x9/20241018082520/worldguessr_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
         "category": "casual"
@@ -2532,11 +2539,6 @@
     {
         "gameid": "empire-city",
         "thumbnail": "https://imgs.crazygames.com/empire-city_16x9/20250922024338/empire-city_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "casual"
-    },
-    {
-        "gameid": "geometry-dash-online",
-        "thumbnail": "https://imgs.crazygames.com/games/geometry-dash-online/cover_16x9-1732744370399.png?metadata=none&quality=85&width=273&fit=crop",
         "category": "casual"
     },
     {
@@ -5921,7 +5923,7 @@
     },
     {
         "gameid": "return-man-2",
-        "thumbnail": "https://imgs.crazygames.com/returnman2.png?metadata=none&quality=85&width=273&fit=crop&dpr=1 1x,https://imgs.crazygames.com/returnman2.png?metadata=none&quality=75&width=273&fit=crop",
+        "thumbnail": "https://imgs.crazygames.com/returnman2.png?metadata=none&quality=85&width=273&fit=crop&dpr=1",
         "category": "sports"
     },
     {

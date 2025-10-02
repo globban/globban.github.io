@@ -14,7 +14,7 @@
 body {
   margin: 0;
   color: #eee;
-  background: url(/dark_mountains.webp);
+  background: #000;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -86,7 +86,7 @@ body {
 pre {
   text-align: center;
   color: #fff;
-  padding: 10px 0 40px;
+  padding: 10px 0 0px;
   border-bottom: 3px solid rgba(255, 255, 255, 0.1);
   margin: 0;
   width: 100%;
@@ -122,7 +122,46 @@ pre {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0px 0px -20px 0px;
+  flex-wrap: wrap;
+}
+
+.tabs-container button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-family: 'dot', sans-serif;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.tabs-container button.active {
+  background: rgba(255,255,255,0.3);
+}
+
+.tabs-container button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2; /* behind #background */
+}
+
 </style>
+<script src="/particles.js"></script>
+
+
 </head>
 <body>
     <div id="background"></div>
@@ -133,10 +172,13 @@ pre {
  \______  (____  |__|_|  /\___  /____  >
         \/     \/      \/     \/     \/ 
         
-        <div class="search-container" >
-
+        <div class="search-container" >  
   <input type="text" id="game-search" placeholder="Search games...">
-</div></pre>
+</div>
+<div id="category-tabs" class="tabs-container"></div>
+
+</pre>
+
     <div class="library-container">
       <div class="game-card" data-url="https://webmc.xyz/" data-menu="true">
             <img class="game-thumb" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.baagames.com%2Fwp-content%2Fuploads%2F2014%2F09%2FMinecraft-Logo.jpg" alt="Draw">
@@ -192,6 +234,58 @@ pre {
              <button id="fullscreen-btn" style="padding: 10px 20px; font-size: 1em;">Toggle Fullscreen</button>
         </div>
     </div>
+    <div id="particles-js"></div>
+
+<script>
+particlesJS("particles-js", {
+  particles: {
+    number: {
+      value: 30,
+      density: { enable: true, value_area: 800 }
+    },
+    color: { value: "#ffffff" },
+    shape: { type: "circle" },
+    opacity: {
+      value: 0.5,
+      random: false
+    },
+    size: {
+      value: 3,
+      random: true
+    },
+    line_linked: {
+      enable: true,
+      distance: 150,
+      color: "#ffffff",
+      opacity: 0.4,
+      width: 1
+    },
+    move: {
+      enable: true,
+      speed: 2,
+      direction: "none",
+      random: false,
+      straight: false,
+      out_mode: "out",
+      attract: { enable: false }
+    }
+  },
+  interactivity: {
+    detect_on: "window",
+    events: {
+      onhover: { enable: true, mode: "repulse" },
+      onclick: { enable: true, mode: "none" },
+      resize: true
+    },
+    modes: {
+      repulse: { distance: 200, duration: 2 },
+      push: { particles_nb: 3 },
+      bubble: { distance: 210}
+    }
+  },
+  retina_detect: true
+});
+</script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -227,26 +321,37 @@ searchInput.addEventListener('input', () => {
 
   // Load dynamic games
   fetch('games.json')
-    .then(res => res.json())
-    .then(games => {
-      games.forEach(game => {
-        const url = game.customurl 
-          ? game.customurl 
-          : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
-        const title = game.gameid
-          .split('-')
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ');
-        createGameCard({
-          title,
-          url,
-          thumbnail: game.thumbnail,
-          desc: game.desc,
-          showPurpleRect: !game.customurl
-        });
+  .then(res => res.json())
+  .then(games => {
+    const categories = new Set();
+    const container = document.querySelector('.library-container');
+
+    // Create cards & collect categories
+    games.forEach(game => {
+      const url = game.customurl 
+        ? game.customurl 
+        : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
+      const title = game.gameid
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      createGameCard({
+        title,
+        url,
+        thumbnail: game.thumbnail,
+        desc: game.desc,
+        category: game.category,   // pass category
+        showPurpleRect: !game.customurl
       });
-    })
-    .catch(err => console.error('Failed to load games.json:', err));
+
+      if (game.category) categories.add(game.category);
+    });
+
+    // Build category tabs
+    buildCategoryTabs([...categories]);
+  })
+  .catch(err => console.error('Failed to load games.json:', err));
 });
 
 window.addEventListener("message", (event) => {
@@ -259,14 +364,51 @@ window.addEventListener("message", (event) => {
   console.log("Got safe message:", event.data);
 });
 
-function createGameCard({ title, url, thumbnail, desc, showPurpleRect }) {
+function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect }) {
   const container = document.querySelector('.library-container');
   const card = document.createElement('div');
   card.classList.add('game-card');
+  card.dataset.category = category || "Other";
   card.innerHTML = `<img class="game-thumb" src="${thumbnail}" alt="${title}">`;
   card.addEventListener('click', () => openGame(url, showPurpleRect));
   container.appendChild(card);
 }
+
+function buildCategoryTabs(categories) {
+  const tabsContainer = document.getElementById('category-tabs');
+
+  // Add "All" tab first
+  const allBtn = document.createElement('button');
+  allBtn.textContent = "All";
+  allBtn.classList.add("active");
+  allBtn.addEventListener('click', () => filterByCategory("All"));
+  tabsContainer.appendChild(allBtn);
+
+  // Add one button per category
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.textContent = cat;
+    btn.addEventListener('click', () => filterByCategory(cat));
+
+    tabsContainer.appendChild(btn);
+  });
+}
+
+function filterByCategory(category) {
+  // Set active state
+  document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove("active"));
+  [...document.querySelectorAll('#category-tabs button')].find(b => b.textContent === category)?.classList.add("active");
+
+  // Show/hide cards
+  document.querySelectorAll('.library-container .game-card').forEach(card => {
+    if (category === "All" || card.dataset.category === category) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
 
 window.mobileCheck = function() {
   let check = false;
@@ -279,7 +421,6 @@ function openGame(url, showPurpleRect = false) {
   const popup = document.getElementById('iframe-popup');
   const wrapper = document.getElementById('iframe-wrapper');
   const iframe = document.getElementById('game-frame');
-
   // Clean old UI
   document.getElementById('control-box')?.remove();
   document.getElementById('iframe-menu')?.remove();
@@ -289,12 +430,19 @@ function openGame(url, showPurpleRect = false) {
   document.body.style.overflowY = 'hidden';
 
   const isMobile = window.mobileCheck();
+  if (isMobile) {
+    let currentUrl = new URL(url); 
+    currentUrl.searchParams.set('v', '1.337'); // Add or update the parameter
+    location.replace(currentUrl.toString()); // Navigate to the new URL
+  }
 
   // Set wrapper styles
   wrapper.style.width = isMobile ? '100vw' : '80vw';
   wrapper.style.height = isMobile ? '100vh' : '80vh';
   wrapper.style.borderRadius = isMobile ? '0' : '12px';
-  wrapper.style.boxShadow = isMobile ? 'none' : '0 0 20px rgba(255,255,255,0.2)';
+  wrapper.style.boxShadow = isMobile ? 'none' : '0 0 20px rgba(255,255,255,0.2)'; 
+
+
 
   // Purple control box for desktop
   if (!isMobile && showPurpleRect) {
