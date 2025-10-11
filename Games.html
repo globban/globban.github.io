@@ -13,7 +13,7 @@
 <body>
     <div id="background"></div>
   <!-- Back button (reloads page) -->
-  <button id="back-btn" title="Back"><fa class="fas fa-arrow-left"></fa></button>
+  <!-- back button removed; navigation handled in-page -->
   <!-- Start area: centered search and categories -->
   <div id="start-area">
     <pre class="start-logo">  ________                              
@@ -26,7 +26,7 @@
     <div class="search-container">
       <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on">
     </div><div id="category-tabs" class="tabs-container"></div>
-    <div id="favorites" class="favorites-container" aria-live="polite"></div>
+  <!-- recently-played now renders in the main library when Recents tab is used -->
     
   </div>
 
@@ -118,20 +118,14 @@ window.addEventListener('DOMContentLoaded', () => {
 const searchInput = document.getElementById('game-search');
 // Only perform search when Enter is pressed
 searchInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
+    if (e.key === 'Enter') {
     e.preventDefault();
     const q = searchInput.value.trim();
     if (q) showSearchResults(q);
-    document.getElementById('back-btn').style.display = 'block';
   }
 });
 
-// Back button reload behavior
-const backBtn = document.getElementById('back-btn');
-backBtn.addEventListener('click', () => {
-  // Simple reload to return to start state
-  location.reload();
-});
+// Back button removed — in-page UI keeps start area visible and shows results below.
 
   document.getElementById('iframe-popup').addEventListener('click', e => {
     if (e.target === e.currentTarget) closePopup();
@@ -145,8 +139,9 @@ backBtn.addEventListener('click', () => {
       window.__gamesData = games || [];
       const categories = new Set();
       window.__gamesData.forEach(g => { if (g.category) categories.add(g.category); });
-      buildCategoryTabs([...categories]);
-      renderFavorites();
+  buildCategoryTabs([...categories]);
+  // Render recently-played items (if any) into the main library by default
+  showRecents();
       // Ensure lazy loader is initialized to observe favorite thumbnails
       initLazyLoader();
     })
@@ -265,47 +260,23 @@ function initLazyLoader() {
   window._lazyLoaderInited = true;
 }
 
-// Favorites helpers
-function loadFavorites() { try { return JSON.parse(localStorage.getItem('gf_favs') || '[]'); } catch(e) { return []; } }
-function saveFavorites(arr) { localStorage.setItem('gf_favs', JSON.stringify(arr)); }
-function isFavorited(url) { return loadFavorites().some(f => f.url === url); }
-function toggleFavoriteForCurrent() {
+// Recently played helpers (max 20). We store recent plays under 'gf_recent'.
+function loadRecents() { try { return JSON.parse(localStorage.getItem('gf_recent') || '[]'); } catch(e) { return []; } }
+function saveRecents(arr) { localStorage.setItem('gf_recent', JSON.stringify(arr)); }
+function addRecentForCurrent() {
   const g = window.__currentGame;
   if (!g) return;
-  const favs = loadFavorites();
-  const idx = favs.findIndex(f => f.url === g.url);
-  if (idx >= 0) favs.splice(idx, 1);
-  else favs.unshift({ url: g.url, title: g.title, thumbnail: g.thumbnail, category: g.category, showPurpleRect: !!g.showPurpleRect });
-  saveFavorites(favs);
-  renderFavorites();
+  const recs = loadRecents();
+  const idx = recs.findIndex(r => r.url === g.url);
+  if (idx >= 0) recs.splice(idx, 1); // move to front
+  recs.unshift({ url: g.url, title: g.title, thumbnail: g.thumbnail, category: g.category, showPurpleRect: !!g.showPurpleRect, playedAt: Date.now() });
+  // cap to 20 most recent
+  if (recs.length > 20) recs.length = 20;
+  saveRecents(recs);
+  // render into the main library so recents look like normal game cards
+  try { showRecents(); } catch (e) {}
 }
-function renderFavorites() {
-  const container = document.getElementById('favorites');
-  if (!container) return;
-  const favs = loadFavorites();
-  container.innerHTML = '';
-  favs.forEach(f => {
-    const el = document.createElement('div');
-    el.className = 'favorite-item';
-    el.title = f.title;
-    const img = document.createElement('img');
-    img.setAttribute('data-src', f.thumbnail);
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-    img.alt = f.title;
-    el.appendChild(img);
-    el.addEventListener('click', () => {
-      // determine showPurpleRect: prefer stored value, otherwise infer from games.json
-      const stored = typeof f.showPurpleRect !== 'undefined' ? !!f.showPurpleRect : undefined;
-      const inferred = getShowPurpleForUrl(f.url);
-      const showPurple = (typeof stored !== 'undefined') ? stored : inferred;
-      window.__currentGame = { url: f.url, title: f.title, thumbnail: f.thumbnail, category: f.category, showPurpleRect: showPurple };
-      openGame(f.url, !!showPurple);
-    });
-    container.appendChild(el);
-  });
-  // Ensure lazy loader is observing newly added favorite images
-  initLazyLoader();
-}
+// Note: recents are rendered into the main library via showRecents(); legacy helpers removed.
 
 // Try to infer showPurpleRect setting for a URL by looking up games.json data
 function getShowPurpleForUrl(url) {
@@ -320,10 +291,10 @@ function getShowPurpleForUrl(url) {
 function buildCategoryTabs(categories) {
   const tabsContainer = document.getElementById('category-tabs');
   const allBtn = document.createElement('button');
-  allBtn.innerHTML = '<i class="fa-solid fa-dice-five"></i>';
-  allBtn.dataset.category = 'All';
+  allBtn.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
+  allBtn.dataset.category = 'Recents';
   allBtn.classList.add('active');
-  allBtn.addEventListener('click', () => showCategory('All'));
+  allBtn.addEventListener('click', () => showRecents());
   tabsContainer.appendChild(allBtn);
 
   // icon map (uppercased keys)
@@ -358,6 +329,8 @@ function buildCategoryTabs(categories) {
 
 // Render functions: showCategory and showSearchResults
 function showCategory(category) {
+  // If recents tab selected, render recents instead
+  if (category === 'Recents') return showRecents();
   // Set active state on tabs (compare data-category first)
   document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('active'));
   [...document.querySelectorAll('#category-tabs button')].find(b => (b.dataset.category && b.dataset.category === category) || b.textContent === category)?.classList.add('active');
@@ -372,43 +345,16 @@ function showCategory(category) {
     window.__renderTimer = null;
   }
 
-  if (category === 'All') {
-    // shuffle and progressively render to avoid loading all at once
-    const shuffled = games.slice();
-    // Fisher-Yates shuffle
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    const batchSize = 6; // how many cards per interval
-    let index = 0;
-    window.__renderTimer = setInterval(() => {
-      const end = Math.min(index + batchSize, shuffled.length);
-      for (; index < end; index++) {
-        const g = shuffled[index];
-        const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
-        const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
-        createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
-      }
-      if (index >= shuffled.length) {
-        clearInterval(window.__renderTimer);
-        window.__renderTimer = null;
-      }
-    }, 120); // every 120ms render next batch
-  } else {
-    const toShow = games.filter(g => g.category === category);
-    toShow.forEach(g => {
-      const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
-      const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
-      createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
-    });
-  }
-  // Reveal library and hide start area
+  // Render games for the selected category (no 'All' option anymore)
+  const toShow = games.filter(g => g.category === category);
+  toShow.forEach(g => {
+    const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
+    const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
+    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+  });
+  // Reveal library below the start area and compact the start area to top
   document.querySelector('.library-container').classList.add('visible');
-  document.getElementById('start-area').style.display = 'none';
-  // show back button
-  document.getElementById('back-btn').style.display = 'block';
+  updateRecentsVisibility();
 }
 
 function showSearchResults(query) {
@@ -427,9 +373,31 @@ function showSearchResults(query) {
     createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
   });
   document.querySelector('.library-container').classList.add('visible');
-  document.getElementById('start-area').style.display = 'none';
-  // show back button
-  document.getElementById('back-btn').style.display = 'block';
+  // keep start area visible; library displays below
+  updateRecentsVisibility();
+  // compact the start area when search results are shown
+}
+
+function showRecents() {
+  const container = document.querySelector('.library-container');
+  container.innerHTML = '';
+  const recs = loadRecents();
+  if (!recs || recs.length === 0) {
+    // No recents — keep library hidden
+    document.querySelector('.library-container').classList.remove('visible');
+    updateRecentsVisibility();
+    return;
+  }
+  // Render recents in same style as normal cards
+  recs.forEach(r => {
+    // Try to infer showPurpleRect if missing
+    const stored = typeof r.showPurpleRect !== 'undefined' ? !!r.showPurpleRect : undefined;
+    const inferred = getShowPurpleForUrl(r.url);
+    const showPurple = (typeof stored !== 'undefined') ? stored : inferred;
+    createGameCard({ title: r.title, url: r.url, thumbnail: r.thumbnail, desc: '', category: r.category, showPurpleRect: showPurple });
+  });
+  document.querySelector('.library-container').classList.add('visible');
+  updateRecentsVisibility();
 }
 
 function filterByCategory(category) {
@@ -466,6 +434,9 @@ function openGame(url, showPurpleRect = false) {
   iframe.src = url;
   popup.style.display = 'flex';
   document.body.style.overflowY = 'hidden';
+
+  // Track recently played (move to front)
+  try { addRecentForCurrent(); } catch (e) {}
 
   const isMobile = window.mobileCheck();
   if (isMobile) {
@@ -543,36 +514,7 @@ function openGame(url, showPurpleRect = false) {
       }
     });
 
-    const favBtn = document.createElement('button');
-    favBtn.id = 'fav-btn';
-    favBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
-    favBtn.style.background = 'none';
-    favBtn.style.fontSize = '1.5em';
-    favBtn.style.color = 'white';
-    favBtn.style.border = 'none';
-    favBtn.style.cursor = 'pointer';
-    favBtn.style.marginLeft = '8px';
-    favBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      toggleFavoriteForCurrent();
-      // update icon
-      const heart = favBtn.querySelector('i');
-      if (window.__currentGame && isFavorited(window.__currentGame.url)) {
-        heart.className = 'fa-solid fa-heart';
-      } else {
-        heart.className = 'fa-regular fa-heart';
-      }
-    });
-
-
-
-    // set initial favorite icon state based on current game
-    try {
-      const heart = favBtn.querySelector('i');
-      if (window.__currentGame && isFavorited(window.__currentGame.url)) heart.className = 'fa-solid fa-heart';
-      else heart.className = 'fa-regular fa-heart';
-    } catch (e) {}
-    menu.appendChild(favBtn);
+    // (removed favorite button — replaced by recently-played list on start)
     menu.appendChild(fullscreenBtn);
   wrapper.appendChild(menu);
   // left-side tag/menu

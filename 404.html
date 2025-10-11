@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 — Page not found</title>
+  <meta name="description" content="404 — Page not found" />
+  <style>
+    :root{
+      --bg:#000;
+      --accent:#7c5cff;
+      --muted:#9aa4b2;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: #e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;padding:32px;
+    }
+    .card{
+      width:100%;max-width:980px;background:rgba(255,255,255,0.02);
+      border-radius:20px;padding:36px;box-shadow:0 10px 30px rgba(0,0,0,0.6);backdrop-filter: blur(6px);
+      display:grid;grid-template-columns: 1fr 420px;gap:28px;align-items:center;
+    }
+    @media (max-width:880px){.card{grid-template-columns:1fr;max-width:720px;padding:28px}.illustration{order:-1}}
+
+    .left h1{font-size:44px;margin:0 0 10px 0;letter-spacing:-0.02em}
+    .left p{margin:0 0 22px 0;color:var(--muted);line-height:1.5}
+
+    .cta{display:flex;gap:12px}
+    .btn{
+      appearance:none;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
+      background:rgba(255,255,255,0.06);color:inherit;backdrop-filter: blur(4px);
+    }
+    .btn.primary{background:linear-gradient(90deg,var(--accent), #5bd1ff);color:#000}
+    .small{font-size:13px;color:var(--muted);display:block;margin-top:12px}
+
+    .illustration{display:flex;align-items:center;justify-content:center}
+    video.scene{width:360px;max-width:100%;border-radius:16px}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <section class="left">
+      <span class="badge">404</span>
+      <h1 id="title">Where are you going dude?</h1>
+      <p>Either the link is broken or you are REALLY lost in the sauce.</p>
+
+      <div class="cta" role="group" aria-label="actions">
+        <button class="btn primary" id="homeBtn" title="Go to site home">Take me home</button>
+      </div>
+
+      <footer>
+        <div id="pathInfo"></div>
+      </footer>
+    </section>
+
+    <aside class="illustration" aria-hidden="true">
+      <video class="scene" autoplay muted loop playsinline>
+        <source src="/logo.mp4" type="video/mp4" />
+      </video>
+    </aside>
+  </main>
+
+  <script>
+    const repoUrl = null; // e.g. 'https://github.com/Globban/globban.github.io'
+    const homeBtn = document.getElementById('homeBtn');
+    const repoBtn = document.getElementById('repoBtn');
+    const pathInfo = document.getElementById('pathInfo');
+
+    pathInfo.textContent = 'What did you even think you\'d find at ' + location.pathname + location.search + location.hash + '?';
+
+    homeBtn.addEventListener('click', ()=>{
+        location.href = location.origin + '/';
+    });
+
+    if(repoUrl){
+      repoBtn.addEventListener('click', ()=> location.href = repoUrl);
+    } else {
+      repoBtn.textContent = 'Open site root';
+      repoBtn.addEventListener('click', ()=> location.href = location.origin + '/');
+    }
+  </script>
+</body>
+</html>

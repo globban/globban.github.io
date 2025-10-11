@@ -37,7 +37,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Start area shown on page load: centered search + categories */
 #start-area {
-  min-height: 70vh;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -195,7 +195,8 @@ pre {
     #ff7f00,
     #ff0000
   );
-  filter: blur(10px) saturate(1.1);
+  filter: blur(5px) saturate(1.1);
+  animation: forwards rotation 10s linear infinite;
 }
 
 #game-search::placeholder {
@@ -235,6 +236,7 @@ pre {
 
 .tabs-container {
   display: flex;
+    position: sticky;
   justify-content: center;
   gap: 10px;
   margin: 0px 0px -20px 0px;
@@ -250,6 +252,7 @@ pre {
   font-family: 'dot', sans-serif;
   cursor: pointer;
   transition: background 0.3s;
+  position: sticky;
 }
 
 .tabs-container button.icon {
@@ -269,7 +272,7 @@ pre {
 }
 
 .tabs-container button:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 #particles-js {
@@ -280,29 +283,12 @@ pre {
   height: 100%;
   z-index: -2; /* behind #background */
 }
-
-/* Back button (top-left) */
-#back-btn {
-    display: none;
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 9999;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 2em;
-}
-#back-btn:hover, #back-btn:focus {
-  background: rgba(255,255,255,0.08);
-  outline: 2px solid rgba(255,255,255,0.08);
-  font-size: 2em;
+/* library appears below the start-area */
+.library-container {
+  width: min(96%, 1200px);
+  margin-top: 8px;
+  margin-bottom: 40px;
 }
 
-/* favorite button in iframe menu */
-#fav-btn { background: none; border: none; color: white; cursor: pointer; padding: 6px; }
-#fav-btn i { font-size: 1.4rem; }
+/* (fav button removed — recently-played uses the favorites container) */
 

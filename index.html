@@ -12,6 +12,10 @@
       font-family: 'Dot';
       src: url('/dot.ttf');
     }
+    @font-face {
+      font-family: 'IMPACT';
+      src: url('/IMPACT.ttf');
+    }
 
     body {
       margin: 0;
@@ -111,18 +115,42 @@
       }
     }
 
+    main {
+      position: absolute;
+      top: 50vh;
+      left: 50vw;
+      transform: translate(-50%, -50%);
+      padding: 2em;
+      text-align: center;
+      z-index: 1;
+      color: #ffffff;
+      font-size: fill-available;
+      width: 100vw;
+    }
+
+    h1 {
+      font-family: Impact;
+      font-size: 4em;
+    }
+
+    h2 {
+      font-family: 'Dot', Arial, sans-serif;
+    }
+
   </style>
 </head>
 
   <header>
-    <h1>Algot.fun</h1>
+    <h2>Algot.fun</h2>
     <div class="links" id="navLinks">
       <a href="https://chat-4r5m.onrender.com/">Chat</a>
       <a href="/Games.html">Games</a>
       <a href="/Tools.html">Tools</a>
     </div>
   </header>
-
+  <main>
+    <h1>WELCOME TO ALGOT.FUN</h1>
+  </main>
   <!-- Mobile nav will be injected here if needed -->
   <iframe id="background" src="/background.html" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;border:none;"></iframe>
   "></iframe>

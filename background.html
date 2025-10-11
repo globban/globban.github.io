@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Liquid Gravity Sphere — Debugged</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    html,body{height:100%;margin:0;background:#000}
-    canvas{display:block}
-  </style>
+  <title>Logo Preview</title>
+  <style>html,body{overflow:hidden;height:100vh;width:100vw;margin:0;background:transparent}canvas{height:100vh;width:100vw;display:block;position:absolute;top:0;left:0;pointer-events:none}</style>
 </head>
 <body>
 <script type="module">
@@ -15,287 +12,147 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
 import { EffectComposer } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { STLLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/STLLoader.js';
+import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-// =====================
-// === Configurable ===
-// =====================
-const CONFIG = {
-  ballColor: new THREE.Color(Math.random(), Math.random(), Math.random()), // fixed random color
-  particleColor: 0xffffff,
-  sphereRadius: 2.0,
-  particleCount: 500,
-  gravityStrength: 0.2,
-  flowSpeed: 0.2,
-  softening: 1, // avoids singularities when particles are very near center
-  respawnMinRadiusMultiplier: 1.6, // spawn radius = sphereRadius * (this + rand*...)
-  respawnExtra: 5.0, // extra multiplier range for spawn
-  particleSize: 0.05,
-  wobbleAmp: 0.3
-};
-
-// =====================
-// === Basic setup ====
-// =====================
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 200);
-camera.position.set(0, 0, 10);
+// keep the canvas transparent so the page background (CSS grid) shows through
+scene.background = null;
+// lights
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 0.7);
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
+const light = new THREE.DirectionalLight(0xffffff, 0.8);
+light.position.set(0, 0, 1);
+scene.add(light);  
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.setSize(innerWidth, innerHeight);
+// make background transparent
+renderer.setClearColor(0x000000, 0);
 document.body.appendChild(renderer.domElement);
 
-// Composer for bloom (glow)
+// composer + bloom
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.01, 0.8);
+// tuned bloom for a subtle glow
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.08, 0.7);
 composer.addPass(bloom);
 
-// Lights
-const pLight = new THREE.PointLight(0xffffff, 1.4);
-pLight.position.set(10, 10, 10);
-scene.add(pLight);
-scene.add(new THREE.AmbientLight(0x202020));
 
-// =====================
-// === Water sphere ====
-// =====================
-const sphereGeo = new THREE.IcosahedronGeometry(CONFIG.sphereRadius, 6);
-const sphereMat = new THREE.MeshStandardMaterial({
-  color: CONFIG.ballColor,
-  metalness: 0.2,
-  roughness: 0.15,
-  transparent: false,
-  emissive: CONFIG.ballColor,
-  emissiveIntensity: 2,
-  bloom: true
-});
-const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-scene.add(sphere);
+// load STL
+let logoMesh = null;
+const loader = new STLLoader();
+loader.load('logo.stl', (geometry) => {
+  geometry.computeVertexNormals();
+  // bounding box for Y-based gradient
+  geometry.computeBoundingBox();
+  const bbox = geometry.boundingBox;
+  const minY = bbox.min.y;
+  const maxY = bbox.max.y;
+  const height = Math.max(maxY - minY, 1e-6);
 
-// Store base positions to avoid cumulative vertex drift
-const baseVertexCount = sphereGeo.attributes.position.count;
-const basePositions = new Float32Array(baseVertexCount * 3);
-for (let i = 0; i < baseVertexCount; i++) {
-  basePositions[i * 3 + 0] = sphereGeo.attributes.position.getX(i);
-  basePositions[i * 3 + 1] = sphereGeo.attributes.position.getY(i);
-  basePositions[i * 3 + 2] = sphereGeo.attributes.position.getZ(i);
-}
+  // colors for the gradient (bottom -> top)
+  const bottomColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // blue
+  const topColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // pink
 
-// Tiny temp vectors for vertex update
-const tmpVecA = new THREE.Vector3();
-const tmpVecB = new THREE.Vector3();
-
-// =====================
-// === Particles =======
-// =====================
-const particlesGeo = new THREE.BufferGeometry();
-let positions = new Float32Array(CONFIG.particleCount * 3);
-let velocities = new Float32Array(CONFIG.particleCount * 3);
-
-function spawnParticle(i, minRMultiplier = CONFIG.respawnMinRadiusMultiplier) {
-  const ix = i * 3;
-  // spawn in a spherical shell well outside the sphere to avoid immediate re-collision
-  const theta = Math.acos(1 - 2 * Math.random());
-  const phi = 2 * Math.PI * Math.random();
-  const r = CONFIG.sphereRadius * (minRMultiplier + Math.random() * CONFIG.respawnExtra);
-  const x = Math.sin(theta) * Math.cos(phi) * r;
-  const y = Math.sin(theta) * Math.sin(phi) * r;
-  const z = Math.cos(theta) * r;
-  positions[ix] = x;
-  positions[ix + 1] = y;
-  positions[ix + 2] = z;
-  velocities[ix] = (Math.random() - 0.5) * 0.01;
-  velocities[ix + 1] = (Math.random() - 0.5) * 0.01;
-  velocities[ix + 2] = (Math.random() - 0.5) * 0.01;
-}
-
-for (let i = 0; i < CONFIG.particleCount; i++) {
-  spawnParticle(i);
-}
-
-particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
-
-// round particle sprite
-const sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/circle.png');
-const particlesMat = new THREE.PointsMaterial({
-  color: CONFIG.particleColor,
-  size: CONFIG.particleSize,
-  map: sprite,
-  transparent: true,
-  alphaTest: 0,
-  depthWrite: false
-});
-
-const particles = new THREE.Points(particlesGeo, particlesMat);
-scene.add(particles);
-
-// =====================
-// === Mouse parallax ==
-// =====================
-let mouseX = 0, mouseY = 0;
-let isHovering = false;
-
-window.addEventListener('mousemove', (e) => {
-  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseY = (e.clientY / window.innerHeight) * 2 - 1;
-  isHovering = true;
-});
-
-window.addEventListener('mouseleave', () => { isHovering = false; });
-
-// =====================
-// === Sanity checks (test cases) ===
-// =====================
-(function runInitTests(){
-  // test: no NaNs in positions/velocities
-  for (let i = 0; i < positions.length; i++) {
-    console.assert(Number.isFinite(positions[i]), 'position #' + i + ' should be finite');
-    console.assert(Number.isFinite(velocities[i]), 'velocity #' + i + ' should be finite');
+  // per-vertex colors for the filled mesh
+  const pos = geometry.attributes.position;
+  const count = pos.count;
+  const colors = new Float32Array(count * 3);
+  const tmp = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const y = pos.getY(i);
+    // normalized t along Y
+    let t = (y - minY) / height;
+    // small pseudo-random jitter to get a fizzy look (deterministic-ish using vertex index)
+    const jitter = (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.03; // cheap hash-like jitter
+    t = THREE.MathUtils.clamp(t + jitter, 0, 1);
+    tmp.copy(bottomColor).lerp(topColor, t);
+    colors[i * 3 + 0] = tmp.r;
+    colors[i * 3 + 1] = tmp.g;
+    colors[i * 3 + 2] = tmp.b;
   }
-  console.assert(particlesGeo.attributes.position.count === CONFIG.particleCount, 'particle count attribute should match');
-  console.log('init tests passed');
-})();
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-// sanitize function: fixes any NaN / Infinite values in the positions/velocities arrays
-function sanitizeParticle(i) {
-  const ix = i * 3;
-  for (let k = 0; k < 3; k++) {
-    const v = positions[ix + k];
-    if (!Number.isFinite(v) || Math.abs(v) > 1e6) {
-      // respawn this particle safely
-      spawnParticle(i, CONFIG.respawnMinRadiusMultiplier);
-      return;
-    }
-  }
-  for (let k = 0; k < 3; k++) {
-    const v = velocities[ix + k];
-    if (!Number.isFinite(v) || Math.abs(v) > 1e6) velocities[ix + k] = 0;
-  }
-}
+  // solid mesh material uses vertex colors
+  const material = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    metalness: 0,
+    roughness: 1,
+    emissiveIntensity: 0.8,
+    emissive: 0x000000,
+    side: THREE.DoubleSide
+  });
 
-// =====================
-// === Animation =======
-// =====================
-let lastTime = performance.now();
-function animate(time) {
+  logoMesh = new THREE.Mesh(geometry, material);
+
+  // create a colored wireframe overlay that uses the same gradient
+  const wireGeo = new THREE.WireframeGeometry(geometry);
+  const wpos = wireGeo.attributes.position;
+  const wcount = wpos.count;
+  const wcolors = new Float32Array(wcount * 3);
+  for (let i = 0; i < wcount; i++) {
+    const y = wpos.getY(i);
+    let t = (y - minY) / height;
+    // slightly less jitter for lines so they read as structure
+    const jitter = (Math.sin(i * 7.1234) * 43758.5453 % 1) * 0.015;
+    t = THREE.MathUtils.clamp(t + jitter, 0, 1);
+    tmp.copy(bottomColor).lerp(topColor, t);
+    wcolors[i * 3 + 0] = tmp.r;
+    wcolors[i * 3 + 1] = tmp.g;
+    wcolors[i * 3 + 2] = tmp.b;
+  }
+  wireGeo.setAttribute('color', new THREE.BufferAttribute(wcolors, 3));
+
+  const lineMaterial = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    bloom: false
+  });
+  const wireframe = new THREE.LineSegments(wireGeo, lineMaterial);
+
+  // normalize scale & center like before
+  const size = new THREE.Vector3(); bbox.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const target = 2.2; // desired size radius
+  const scale = target / maxDim;
+  logoMesh.scale.setScalar(scale);
+  wireframe.scale.setScalar(scale);
+  const center = new THREE.Vector3(); bbox.getCenter(center);
+  logoMesh.position.copy(center).multiplyScalar(-scale);
+  wireframe.position.copy(center).multiplyScalar(-scale);
+
+  // add both to the scene; wireframe on top
+  scene.add(logoMesh);
+  scene.add(wireframe);
+}, undefined, (err) => { console.error('Failed to load logo.stl', err); });
+
+// controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.9;
+
+function animate() {
   requestAnimationFrame(animate);
-  const dt = Math.min((time - lastTime) / 1000, 0.033);
-  lastTime = time;
-
-  // --- sphere wobble (use base positions so it doesn't accumulate) ---
-  const posAttr = sphere.geometry.attributes.position;
-  for (let i = 0; i < baseVertexCount; i++) {
-    const bx = basePositions[i * 3 + 0];
-    const by = basePositions[i * 3 + 1];
-    const bz = basePositions[i * 3 + 2];
-
-    // radial wobble using base normal direction
-    tmpVecA.set(bx, by, bz);
-    const len = tmpVecA.length();
-    if (len === 0) continue;
-    tmpVecA.normalize();
-
-    const offset = Math.sin(time * 0.001 + (bx + by * 1.3 + bz * 0.7) * 2.0) * CONFIG.wobbleAmp;
-
-    posAttr.setXYZ(i,
-      bx + tmpVecA.x * offset,
-      by + tmpVecA.y * offset,
-      bz + tmpVecA.z * offset
-    );
-  }
-  posAttr.needsUpdate = true;
-  sphere.geometry.computeVertexNormals();
-
-  // --- particle physics ---
-  const posArray = particlesGeo.attributes.position.array;
-  for (let i = 0; i < CONFIG.particleCount; i++) {
-    const ix = i * 3;
-    let x = posArray[ix];
-    let y = posArray[ix + 1];
-    let z = posArray[ix + 2];
-
-    // basic sanity: if any coord is not finite, respawn safely
-    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
-      spawnParticle(i);
-      continue;
-    }
-
-    const dx = -x;
-    const dy = -y;
-    const dz = -z;
-    let distSq = dx * dx + dy * dy + dz * dz;
-
-    // guard against exact zero or extremely small distances
-    if (distSq <= 1e-8) {
-      // particle at center or extremely close — respawn it to avoid divide-by-zero
-      spawnParticle(i);
-      continue;
-    }
-
-    const dist = Math.sqrt(distSq);
-
-    // if inside collision distance -> despawn/respawn
-    if (dist <= CONFIG.sphereRadius + 0.02) {
-      spawnParticle(i);
-      continue;
-    }
-
-    // gravitational acceleration (softened)
-    const a = CONFIG.gravityStrength / (distSq + CONFIG.softening);
-
-    // update velocities (use dt so it's stable across framerates)
-    velocities[ix] += (dx / dist) * a * dt;
-    velocities[ix + 1] += (dy / dist) * a * dt;
-    velocities[ix + 2] += (dz / dist) * a * dt;
-
-    // integrate
-    posArray[ix] += velocities[ix] * CONFIG.flowSpeed * dt * 60; // scale with dt
-    posArray[ix + 1] += velocities[ix + 1] * CONFIG.flowSpeed * dt * 60;
-    posArray[ix + 2] += velocities[ix + 2] * CONFIG.flowSpeed * dt * 60;
-
-    // damping
-    velocities[ix] *= 0.995;
-    velocities[ix + 1] *= 0.995;
-    velocities[ix + 2] *= 0.995;
-
-    // sanitize if values blow up
-    if (!Number.isFinite(posArray[ix]) || Math.abs(posArray[ix]) > 1e6) sanitizeParticle(i);
-    if (!Number.isFinite(posArray[ix + 1]) || Math.abs(posArray[ix + 1]) > 1e6) sanitizeParticle(i);
-    if (!Number.isFinite(posArray[ix + 2]) || Math.abs(posArray[ix + 2]) > 1e6) sanitizeParticle(i);
-  }
-
-  particlesGeo.attributes.position.needsUpdate = true;
-
-  // camera parallax (only when hover/mousemove recently)
-  const targetX = isHovering ? mouseX * 2 : 0;
-  const targetY = isHovering ? -mouseY * 2 : 0;
-  camera.position.x += (targetX - camera.position.x) * 0.06;
-  camera.position.y += (targetY - camera.position.y) * 0.06;
-  camera.lookAt(0, 0, 0);
-
-  if (!isHovering) {
-	const targetX = camera.position.x * 1
-	camera.position.x += (targetX - camera.position.x) * 0.06;
-  	camera.position.y += (targetY - camera.position.y) * 0.06;
-	camera.lookAt(0, 0, 0);
-  }
-  // render with composer (bloom)
+  controls.update();
   composer.render();
 }
+animate();
 
-requestAnimationFrame(animate);
-
-// =====================
-// === Resize handler ==
-// =====================
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+window.addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
 });
-
 </script>
 </body>
 </html>
