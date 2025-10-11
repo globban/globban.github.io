@@ -8,6 +8,20 @@
     "blocked": false
   },
   {
+    "gameid": "idleon",
+    "customurl": "https://www.legendsofidleon.com/ytGl5oc/",
+    "thumbnail": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.b9113X5UwsPjG4yh-Gp7AQHaEP%3Fcb%3D12%26pid%3DApi&f=1&ipt=f3db75e9d02b01de49a242de57a25c7f9e201287722001567828296dcb04f221&ipo=images",
+    "category": "idle",
+    "blocked": false
+  },
+  {
+    "gameid": "snowrider",
+    "customurl": "snowrider.html",
+    "thumbnail": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.0n7cu3v9F-uzO3oumuMLYgHaEK%3Fcb%3D12%26pid%3DApi&f=1&ipt=332acd943b6411818af0f64ffff175491ecc5bc5f0c46f4fa6959615c1b9f0c0&ipo=images",
+    "category": "casual",
+    "blocked": false
+  },
+  {
     "gameid": "drift",
     "customurl": "drift.html",
     "thumbnail": "TN/Drift.png",
