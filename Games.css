@@ -1,0 +1,308 @@
+@font-face {
+  font-family: 'dot';
+  src: url('/dot.ttf');
+}
+
+body {
+  margin: 0;
+  color: #eee;
+  background: #000;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center center;
+  overflow-x: hidden;
+  font-family: 'dot', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'dot', sans-serif;
+  margin: 0;
+}
+
+.library-container {
+  margin: 0 auto;
+  padding: 20px 0;
+  /* hidden until user searches or selects a category */
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  max-width: calc(360px * 3);
+}
+
+.library-container.visible {
+  display: grid;
+}
+
+/* Start area shown on page load: centered search + categories */
+#start-area {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+/* Start logo (ASCII) */
+#start-area .start-logo {
+  white-space: pre;
+  font-family: monospace, 'dot', sans-serif;
+  color: #fff;
+  opacity: 0.95;
+  margin: 0;
+  line-height: 0.95;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.library-container .game-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  padding: 1px;
+}
+
+.game-thumb {
+  position: relative;
+  width: 320px;
+  max-width: 320px; /* card content width */
+  aspect-ratio: 16 / 9;
+  object-fit: cover; /* crop where necessary */
+  border-radius: var(--card-inner-radius, 12px);
+  z-index: 2;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.game-card::before,
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: 1;
+  background: conic-gradient(
+    from var(--gradient-angle, 0deg),
+   #e81cff, /* Purple */
+    #c34aff, /* Violet */
+    #c84eff, /* Indigo */
+    #40c9ff, /* Blue */
+    #00eaff, /* Cyan */
+    #00ff7f, /* Spring Green */
+    #ffea00, /* Yellow */
+    #ff7f00, /* Orange */
+    #ff0000  /* Red */
+  );
+  border-radius: 16px;
+  animation: rotation 5s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+
+
+.game-card::after {
+  filter: blur(15px);
+}
+
+.game-card:hover::before,
+.game-card:hover::after {
+  opacity: 1;
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotation {
+  0% { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+pre {
+  text-align: center;
+  color: #fff;
+  padding: 10px 0 0px;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+  margin: 0;
+  width: 100%;
+  background: rgba(109, 109, 109, 0);
+}
+
+.search-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 10px;
+}
+#game-search {
+  position: relative;
+  z-index: 3;
+  width: min(90%, 760px);
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  border: none;
+  outline: none;
+  font-size: 1.15rem;
+  font-family: 'dot', sans-serif;
+  background-color: rgb(10, 10, 10);
+  color: #fff;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Gradient ring behind the input */
+.search-container {
+  position: relative;
+}
+.search-container::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  padding: 0 28px;
+  transform: translateX(-50%);
+  width: min(90%, 760px);
+  height: 56px;
+  border-radius: 999px;
+  z-index: 1;
+  background: conic-gradient(
+    from var(--gradient-angle, 0deg),
+    #e81cff,
+    #c34aff,
+    #c84eff,
+    #40c9ff,
+    #00eaff,
+    #00ff7f,
+    #ffea00,
+    #ff7f00,
+    #ff0000
+  );
+  filter: blur(10px) saturate(1.1);
+}
+
+#game-search::placeholder {
+  color: #ccc;
+}
+
+#game-search:focus {
+  background-color: #111;
+}
+
+/* Favorites area on start page */
+.favorites-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 10px 6px;
+  max-width: 920px;
+}
+.favorite-item {
+  width: 320px;
+  aspect-ratio: 16 / 9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 0px;
+  cursor: pointer;
+}
+.favorite-item img { width: 320px; height: 180px; object-fit: cover; border-radius: 6px; }
+.favorite-item .fav-title { font-size: 0.7rem; color: #fff; display: none; }
+.favorite-item .fav-remove { margin-left: 6px; color: #fff; opacity: 0.8; }
+
+
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0px 0px -20px 0px;
+  flex-wrap: wrap;
+}
+
+.tabs-container button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-family: 'dot', sans-serif;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.tabs-container button.icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+}
+.tabs-container button.icon i { pointer-events: none; }
+
+.tabs-container button.active {
+  background: rgba(255,255,255,0.3);
+}
+
+.tabs-container button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2; /* behind #background */
+}
+
+/* Back button (top-left) */
+#back-btn {
+    display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 9999;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 2em;
+}
+#back-btn:hover, #back-btn:focus {
+  background: rgba(255,255,255,0.08);
+  outline: 2px solid rgba(255,255,255,0.08);
+  font-size: 2em;
+}
+
+/* favorite button in iframe menu */
+#fav-btn { background: none; border: none; color: white; cursor: pointer; padding: 6px; }
+#fav-btn i { font-size: 1.4rem; }
+

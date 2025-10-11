@@ -1,4 +1,103 @@
 [   
+
+  {
+    "gameid": "webmc",
+    "customurl": "https://webmc.xyz/",
+    "thumbnail": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.baagames.com%2Fwp-content%2Fuploads%2F2014%2F09%2FMinecraft-Logo.jpg",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "drift",
+    "customurl": "drift.html",
+    "thumbnail": "TN/Drift.png",
+    "category": "driving",
+    "blocked": false
+  },
+  {
+    "gameid": "life",
+    "customurl": "life.html",
+    "thumbnail": "TN/life.png",
+    "category": "puzzle",
+    "blocked": false
+  },
+  {
+    "gameid": "slot",
+    "customurl": "slot.html",
+    "thumbnail": "TN/slot.png",
+    "category": "sports",
+    "blocked": false
+  },
+  {
+    "gameid": "snake",
+    "customurl": "snake/index.html",
+    "thumbnail": "TN/Snake.png",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "stickman-hook",
+    "customurl": "https://stickmanhook2.io/game/stickman-hook/",
+    "thumbnail": "TN/Hook.png",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "tetris",
+    "customurl": "tetris.html",
+    "thumbnail": "TN/tetris.png",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "slowroads",
+    "customurl": "https://slowroads.io/",
+    "thumbnail": "TN/slowroads.png",
+    "category": "driving",
+    "blocked": false
+  },
+  {
+    "gameid": "5050",
+    "customurl": "5050.html",
+    "thumbnail": "TN/5050.png",
+    "category": "sports",
+    "blocked": false
+  },
+  {
+    "gameid": "cball",
+    "customurl": "cball.html",
+    "thumbnail": "TN/cball.png",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "roulette",
+    "customurl": "roulette.html",
+    "thumbnail": "TN/roulette.png",
+    "category": "sports",
+    "blocked": false
+  },
+  {
+    "gameid": "escape-road",
+    "customurl": "https://azgames.io/game/escape-road/",
+    "thumbnail": "https://imgs.crazygames.com/escape-road-asm_16x9/20250724105031/escape-road-asm_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
+    "category": "driving",
+    "blocked": false
+  },
+  {
+    "gameid": "dvd",
+    "customurl": "dvd.html",
+    "thumbnail": "TN/dvd.png",
+    "category": "casual",
+    "blocked": false
+  },
+  {
+    "gameid": "ski",
+    "customurl": "ski.html",
+    "thumbnail": "TN/ski.png",
+    "category": "sports",
+    "blocked": false
+  },
     {
     "gameid": "bodycamera-shooter",
     "thumbnail": "https://imgs.crazygames.com/bodycamera-shooter_16x9/20250929082056/bodycamera-shooter_16x9-cover",

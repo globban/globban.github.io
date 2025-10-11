@@ -4,226 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="/Games.css">
     <title>Games Library</title>
-    <style>
-@font-face {
-  font-family: 'dot';
-  src: url('/dot.ttf');
-}
-
-body {
-  margin: 0;
-  color: #eee;
-  background: #000;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center center;
-  overflow-x: hidden;
-  font-family: 'dot', sans-serif;
-}
-
-.library-container {
-  margin: 0 auto;
-  padding: 20px 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
-  justify-items: center;
-  max-width: calc(360px * 3);
-}
-
-.library-container .game-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.game-thumb {
-  z-index: 2;
-  width: 340px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  border-radius: 20px;
-  position: relative;
-}
-
-.game-card::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 340px;
-  height: 100%;
-  border-radius: 20px;
-  transform: translate(-50%, -50%) scale(1.15);
-  z-index: 1;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.game-card:hover::before {
-  opacity: 1;
-  background: inherit;
-  filter: blur(18px) brightness(1.2);
-}
-
-.game-thumb:hover {
-  transform: scale(1.05);
-}
-
-#background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-pre {
-  text-align: center;
-  color: #fff;
-  padding: 10px 0 0px;
-  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
-  margin: 0;
-  width: 100%;
-  background: rgba(109, 109, 109, 0);
-}
-
-.search-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin: 20px 0 10px;
-}
-
-#game-search {
-  width: 320px;
-  max-width: 90%;
-  padding: 15px 15px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  font-family: 'dot', sans-serif;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  transition: background 0.3s ease;
-}
-
-#game-search::placeholder {
-  color: #ccc;
-}
-
-#game-search:focus {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.tabs-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 0px 0px -20px 0px;
-  flex-wrap: wrap;
-}
-
-.tabs-container button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  font-family: 'dot', sans-serif;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.tabs-container button.active {
-  background: rgba(255,255,255,0.3);
-}
-
-.tabs-container button:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-#particles-js {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -2; /* behind #background */
-}
-
-</style>
+   
 <script src="/particles.js"></script>
-
-
 </head>
+
 <body>
     <div id="background"></div>
-  <pre>  ________                              
+  <!-- Back button (reloads page) -->
+  <button id="back-btn" title="Back"><fa class="fas fa-arrow-left"></fa></button>
+  <!-- Start area: centered search and categories -->
+  <div id="start-area">
+    <pre class="start-logo">  ________                              
  /  _____/_____    _____   ____   ______
 /   \  ___\__  \  /     \_/ __ \ /  ___/
 \    \_\  \/ __ \|  Y Y  \  ___/ \___ \ 
  \______  (____  |__|_|  /\___  /____  >
         \/     \/      \/     \/     \/ 
-        
-        <div class="search-container" >  
-  <input type="text" id="game-search" placeholder="Search games...">
-</div>
-<div id="category-tabs" class="tabs-container"></div>
-
 </pre>
+    <div class="search-container">
+      <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on">
+    </div><div id="category-tabs" class="tabs-container"></div>
+    <div id="favorites" class="favorites-container" aria-live="polite"></div>
+    
+  </div>
 
-    <div class="library-container">
-      <div class="game-card" data-url="https://webmc.xyz/" data-menu="true">
-            <img class="game-thumb" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.baagames.com%2Fwp-content%2Fuploads%2F2014%2F09%2FMinecraft-Logo.jpg" alt="Draw">
-        </div>
-        <div class="game-card" data-url="drift.html" data-menu="true">
-            <img class="game-thumb" src="TN/Drift.png" alt="Drift">
-        </div>
-        <div class="game-card" data-url="life.html" data-menu="false">
-            <img class="game-thumb" src="TN/life.png" alt="Life">
-        </div>
-        <div class="game-card" data-url="slot.html">
-            <img class="game-thumb" src="TN/slot.png" alt="Slot">
-        </div>
-        <div class="game-card" data-url="snake/index.html">
-            <img class="game-thumb" src="TN/Snake.png" alt="Snake">
-        </div>
-        <div class="game-card" data-url="https://stickmanhook2.io/game/stickman-hook/">
-            <img class="game-thumb" src="TN/Hook.png" alt="Stickman">
-        </div>
-        <div class="game-card" data-url="tetris.html">
-            <img class="game-thumb" src="TN/tetris.png" alt="Tetris">
-        </div>
-        <div class="game-card" data-url="https://slowroads.io/" data-direct="true">
-            <img class="game-thumb" src="TN/slowroads.png" alt="Slow Roads" >
-        </div>
-        <div class="game-card" data-url="5050.html">
-            <img class="game-thumb" src="TN/5050.png" alt="5050">
-        </div>
-        <div class="game-card" data-url="cball.html">
-            <img class="game-thumb" src="TN/cball.png" alt="Cball">
-        </div>
-        <div class="game-card" data-url="roulette.html">
-            <img class="game-thumb" src="TN/roulette.png" alt="Roulette">
-        </div>
-         <div class="game-card" data-url="https://azgames.io/game/escape-road/">
-            <img class="game-thumb" src="https://imgs.crazygames.com/escape-road-asm_16x9/20250724105031/escape-road-asm_16x9-cover?metadata=none&quality=85&width=273&fit=crop" alt="Roulette">
-        </div>
-        <div class="game-card" data-url="dvd.html">
-            <img class="game-thumb" src="TN/dvd.png" alt="DVD screensaver">
-        </div>
-        <div class="game-card" data-url="ski.html">
-            <img class="game-thumb" src="TN/ski.png" alt="Ski Game">
-        </div>
-
-    </div>
+  <!-- Library container (hidden until user interacts) -->
+  <div class="library-container"></div>
     <div id="iframe-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column;">
         </button>
         <div id="iframe-wrapper" style="position: relative; width: 80vw; height: 80vh; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(255,255,255,0.2);">
@@ -231,6 +39,7 @@ pre {
         </div>
         <!-- Menu for games with a custom URL or original games -->
         <div id="iframe-menu" style="display: none; width: 80vw; text-align: center; margin-top: 10px;">
+          <h1>ALGOT.FUN</h1>
              <button id="fullscreen-btn" style="padding: 10px 20px; font-size: 1em;">Toggle Fullscreen</button>
         </div>
     </div>
@@ -307,52 +116,45 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const searchInput = document.getElementById('game-search');
-searchInput.addEventListener('input', () => {
-  const query = searchInput.value.toLowerCase();
-  document.querySelectorAll('.library-container .game-card').forEach(card => {
-    const altText = card.querySelector('.game-thumb').alt.toLowerCase();
-    card.style.display = altText.includes(query) ? 'flex' : 'none';
-  });
+// Only perform search when Enter is pressed
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const q = searchInput.value.trim();
+    if (q) showSearchResults(q);
+    document.getElementById('back-btn').style.display = 'block';
+  }
+});
+
+// Back button reload behavior
+const backBtn = document.getElementById('back-btn');
+backBtn.addEventListener('click', () => {
+  // Simple reload to return to start state
+  location.reload();
 });
 
   document.getElementById('iframe-popup').addEventListener('click', e => {
     if (e.target === e.currentTarget) closePopup();
   });
 
-  // Load dynamic games
+  // Load dynamic games (fetch once, but render only on user action)
+  window.__gamesData = [];
   fetch('games.json')
-  .then(res => res.json())
-  .then(games => {
-    const categories = new Set();
-    const container = document.querySelector('.library-container');
-
-    // Create cards & collect categories
-    games.forEach(game => {
-      const url = game.customurl 
-        ? game.customurl 
-        : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
-      const title = game.gameid
-        .split('-')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-
-      createGameCard({
-        title,
-        url,
-        thumbnail: game.thumbnail,
-        desc: game.desc,
-        category: game.category,   // pass category
-        showPurpleRect: !game.customurl
-      });
-
-      if (game.category) categories.add(game.category);
-    });
-
-    // Build category tabs
-    buildCategoryTabs([...categories]);
-  })
-  .catch(err => console.error('Failed to load games.json:', err));
+    .then(res => res.json())
+    .then(games => {
+      window.__gamesData = games || [];
+      const categories = new Set();
+      window.__gamesData.forEach(g => { if (g.category) categories.add(g.category); });
+      buildCategoryTabs([...categories]);
+      renderFavorites();
+      // Ensure lazy loader is initialized to observe favorite thumbnails
+      initLazyLoader();
+    })
+    .catch(err => console.error('Failed to load games.json:', err));
 });
+
+// Initialize lazy loader on DOMContentLoaded as well
+document.addEventListener('DOMContentLoaded', () => initLazyLoader());
 
 window.addEventListener("message", (event) => {
   const trustedOrigins = ["https://your-safe-domain.com"];
@@ -369,29 +171,265 @@ function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect 
   const card = document.createElement('div');
   card.classList.add('game-card');
   card.dataset.category = category || "Other";
-  card.innerHTML = `<img class="game-thumb" src="${thumbnail}" alt="${title}">`;
-  card.addEventListener('click', () => openGame(url, showPurpleRect));
+  card.dataset.url = url;
+  card.dataset.title = title;
+  card.dataset.thumbnail = thumbnail;
+
+  const img = document.createElement('img');
+  img.className = 'game-thumb';
+  img.alt = title;
+  // Use data-src for lazy loading and a tiny transparent placeholder as initial src
+  img.setAttribute('data-src', thumbnail);
+  img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  img.loading = 'lazy';
+
+  img.addEventListener('load', () => {
+    try {
+      const rect = img.getBoundingClientRect();
+      const w = rect.width || img.naturalWidth || 340;
+      const thickness = Math.max(4, Math.min(18, Math.round(w * 0.03)));
+      const blur = Math.max(6, Math.min(36, Math.round(thickness * 1.8)));
+      const outerRadius = Math.max(10, Math.round(w * 0.065));
+      const innerRadius = Math.max(8, Math.round(outerRadius - thickness));
+
+      card.style.setProperty('--border-thickness', thickness + 'px');
+      card.style.setProperty('--glow-blur', blur + 'px');
+      card.style.setProperty('--card-radius', outerRadius + 'px');
+      card.style.setProperty('--card-inner-radius', innerRadius + 'px');
+      img.classList.add('loaded');
+      setTimeout(() => card.classList.add('visible'), 20);
+    } catch (e) {
+      card.style.setProperty('--border-thickness', '6px');
+      card.style.setProperty('--glow-blur', '15px');
+      card.style.setProperty('--card-radius', '22px');
+      card.style.setProperty('--card-inner-radius', '16px');
+      img.classList.add('loaded');
+      setTimeout(() => card.classList.add('visible'), 20);
+    }
+  });
+
+  card.appendChild(img);
+  card.addEventListener('click', () => {
+    window.__currentGame = { url, title, thumbnail, desc, category, showPurpleRect };
+    openGame(url, showPurpleRect);
+  });
   container.appendChild(card);
+  setTimeout(() => { if (!img.classList.contains('loaded')) { img.classList.add('loaded'); card.classList.add('visible'); } }, 800);
+  return card;
+}
+
+// Lazy loader: IntersectionObserver to swap data-src -> src when image is near viewport.
+function initLazyLoader() {
+  if (window._lazyLoaderInited) return;
+  const loadImage = (img) => {
+    if (!img) return;
+    const src = img.getAttribute('data-src');
+    if (!src) return;
+    img.src = src;
+    img.removeAttribute('data-src');
+  };
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          observer.unobserve(img);
+          loadImage(img);
+        }
+      });
+    }, { root: null, rootMargin: '200px', threshold: 0.01 });
+
+    // Observe existing and future images with data-src
+    const observeAll = () => document.querySelectorAll('img[data-src]').forEach(img => io.observe(img));
+    // Observe current ones now
+    observeAll();
+    // Also observe newly added images periodically (e.g., during progressive render)
+    const mo = new MutationObserver((mutations) => { observeAll(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+  } else {
+    // Fallback: on scroll/resize load images in viewport
+    const checkAndLoad = () => {
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        const rect = img.getBoundingClientRect();
+        if (rect.top < window.innerHeight + 200 && rect.bottom > -200) {
+          const src = img.getAttribute('data-src');
+          if (src) { img.src = src; img.removeAttribute('data-src'); }
+        }
+      });
+    };
+    ['scroll','resize','orientationchange'].forEach(ev => window.addEventListener(ev, checkAndLoad, { passive: true }));
+    // Run once to catch images already in view
+    setTimeout(checkAndLoad, 100);
+  }
+  window._lazyLoaderInited = true;
+}
+
+// Favorites helpers
+function loadFavorites() { try { return JSON.parse(localStorage.getItem('gf_favs') || '[]'); } catch(e) { return []; } }
+function saveFavorites(arr) { localStorage.setItem('gf_favs', JSON.stringify(arr)); }
+function isFavorited(url) { return loadFavorites().some(f => f.url === url); }
+function toggleFavoriteForCurrent() {
+  const g = window.__currentGame;
+  if (!g) return;
+  const favs = loadFavorites();
+  const idx = favs.findIndex(f => f.url === g.url);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.unshift({ url: g.url, title: g.title, thumbnail: g.thumbnail, category: g.category, showPurpleRect: !!g.showPurpleRect });
+  saveFavorites(favs);
+  renderFavorites();
+}
+function renderFavorites() {
+  const container = document.getElementById('favorites');
+  if (!container) return;
+  const favs = loadFavorites();
+  container.innerHTML = '';
+  favs.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'favorite-item';
+    el.title = f.title;
+    const img = document.createElement('img');
+    img.setAttribute('data-src', f.thumbnail);
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+    img.alt = f.title;
+    el.appendChild(img);
+    el.addEventListener('click', () => {
+      // determine showPurpleRect: prefer stored value, otherwise infer from games.json
+      const stored = typeof f.showPurpleRect !== 'undefined' ? !!f.showPurpleRect : undefined;
+      const inferred = getShowPurpleForUrl(f.url);
+      const showPurple = (typeof stored !== 'undefined') ? stored : inferred;
+      window.__currentGame = { url: f.url, title: f.title, thumbnail: f.thumbnail, category: f.category, showPurpleRect: showPurple };
+      openGame(f.url, !!showPurple);
+    });
+    container.appendChild(el);
+  });
+  // Ensure lazy loader is observing newly added favorite images
+  initLazyLoader();
+}
+
+// Try to infer showPurpleRect setting for a URL by looking up games.json data
+function getShowPurpleForUrl(url) {
+  const games = window.__gamesData || [];
+  for (let g of games) {
+    const candidate = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
+    if (candidate === url) return !!(!g.customurl); // showPurpleRect = !customurl
+  }
+  return false;
 }
 
 function buildCategoryTabs(categories) {
   const tabsContainer = document.getElementById('category-tabs');
-
-  // Add "All" tab first
   const allBtn = document.createElement('button');
-  allBtn.textContent = "All";
-  allBtn.classList.add("active");
-  allBtn.addEventListener('click', () => filterByCategory("All"));
+  allBtn.innerHTML = '<i class="fa-solid fa-dice-five"></i>';
+  allBtn.dataset.category = 'All';
+  allBtn.classList.add('active');
+  allBtn.addEventListener('click', () => showCategory('All'));
   tabsContainer.appendChild(allBtn);
+
+  // icon map (uppercased keys)
+  const iconMap = {
+    'CASUAL': 'fa-solid fa-gamepad',
+    'DRIVING': 'fa-solid fa-car',
+    'PUZZLE': 'fa-solid fa-puzzle-piece',
+    'SPORTS': 'fa-solid fa-basketball-ball',
+    'IO': 'fa-solid fa-yin-yang',
+    'IDLE': 'fa-solid fa-coffee',
+    'STICKMAN': 'fa-solid fa-person-running'
+  };
 
   // Add one button per category
   categories.forEach(cat => {
+    const key = (cat || '').toString().toUpperCase();
+    const iconClass = iconMap[key];
     const btn = document.createElement('button');
-    btn.textContent = cat;
-    btn.addEventListener('click', () => filterByCategory(cat));
-
+    btn.dataset.category = cat;
+    if (iconClass) {
+      btn.classList.add('icon');
+      btn.innerHTML = `<i class="${iconClass}" aria-hidden="true"></i>`;
+      btn.title = cat;
+      btn.setAttribute('aria-label', cat);
+    } else {
+      btn.textContent = cat;
+    }
+    btn.addEventListener('click', () => showCategory(cat));
     tabsContainer.appendChild(btn);
   });
+}
+
+// Render functions: showCategory and showSearchResults
+function showCategory(category) {
+  // Set active state on tabs (compare data-category first)
+  document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('active'));
+  [...document.querySelectorAll('#category-tabs button')].find(b => (b.dataset.category && b.dataset.category === category) || b.textContent === category)?.classList.add('active');
+
+  // Populate library with matching games
+  const container = document.querySelector('.library-container');
+  container.innerHTML = '';
+  const games = window.__gamesData || [];
+  // Cancel any previous progressive rendering
+  if (window.__renderTimer) {
+    clearInterval(window.__renderTimer);
+    window.__renderTimer = null;
+  }
+
+  if (category === 'All') {
+    // shuffle and progressively render to avoid loading all at once
+    const shuffled = games.slice();
+    // Fisher-Yates shuffle
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    const batchSize = 6; // how many cards per interval
+    let index = 0;
+    window.__renderTimer = setInterval(() => {
+      const end = Math.min(index + batchSize, shuffled.length);
+      for (; index < end; index++) {
+        const g = shuffled[index];
+        const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
+        const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
+        createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+      }
+      if (index >= shuffled.length) {
+        clearInterval(window.__renderTimer);
+        window.__renderTimer = null;
+      }
+    }, 120); // every 120ms render next batch
+  } else {
+    const toShow = games.filter(g => g.category === category);
+    toShow.forEach(g => {
+      const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
+      const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
+      createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+    });
+  }
+  // Reveal library and hide start area
+  document.querySelector('.library-container').classList.add('visible');
+  document.getElementById('start-area').style.display = 'none';
+  // show back button
+  document.getElementById('back-btn').style.display = 'block';
+}
+
+function showSearchResults(query) {
+  const q = (query || '').toLowerCase().trim();
+  const container = document.querySelector('.library-container');
+  container.innerHTML = '';
+  const games = window.__gamesData || [];
+  const results = games.filter(g => {
+    const title = (g.gameid || g.title || '').toLowerCase();
+    const desc = (g.desc || '').toLowerCase();
+    return title.includes(q) || desc.includes(q);
+  });
+  results.forEach(g => {
+    const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
+    const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
+    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+  });
+  document.querySelector('.library-container').classList.add('visible');
+  document.getElementById('start-area').style.display = 'none';
+  // show back button
+  document.getElementById('back-btn').style.display = 'block';
 }
 
 function filterByCategory(category) {
@@ -453,7 +491,7 @@ function openGame(url, showPurpleRect = false) {
     control.style.left = '0';
     control.style.width = '100%';
     control.style.height = '45px';
-    control.style.backgroundColor = '#212233';
+    control.style.backgroundColor = '#000000';
     control.style.zIndex = '10';
     wrapper.appendChild(control);
   }
@@ -468,6 +506,13 @@ function openGame(url, showPurpleRect = false) {
     menu.style.bottom = '2px';
     menu.style.right = '2px';
     menu.style.zIndex = '11';
+    const menu2 = document.createElement('div');
+    menu2.id = 'iframe-menu2';
+    menu2.style.position = 'absolute';
+    menu2.style.bottom = '2px';
+    menu2.style.left = '2px';
+    menu2.style.zIndex = '11';
+    
 
     const fullscreenBtn = document.createElement('button');
     fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
@@ -476,7 +521,12 @@ function openGame(url, showPurpleRect = false) {
     fullscreenBtn.style.color = 'white';
     fullscreenBtn.style.border = 'none';
     fullscreenBtn.style.cursor = 'pointer';
-
+    const Tag = document.createElement('h1');
+    Tag.innerText = 'ALGOT.FUN';
+    Tag.style.color = 'white';
+    Tag.style.fontSize = '2em';
+    Tag.style.margin = '0';
+    menu2.appendChild(Tag);
     fullscreenBtn.addEventListener('click', e => {
       e.stopPropagation();
       if (document.fullscreenElement) {
@@ -493,10 +543,44 @@ function openGame(url, showPurpleRect = false) {
       }
     });
 
+    const favBtn = document.createElement('button');
+    favBtn.id = 'fav-btn';
+    favBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+    favBtn.style.background = 'none';
+    favBtn.style.fontSize = '1.5em';
+    favBtn.style.color = 'white';
+    favBtn.style.border = 'none';
+    favBtn.style.cursor = 'pointer';
+    favBtn.style.marginLeft = '8px';
+    favBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavoriteForCurrent();
+      // update icon
+      const heart = favBtn.querySelector('i');
+      if (window.__currentGame && isFavorited(window.__currentGame.url)) {
+        heart.className = 'fa-solid fa-heart';
+      } else {
+        heart.className = 'fa-regular fa-heart';
+      }
+    });
 
 
+
+    // set initial favorite icon state based on current game
+    try {
+      const heart = favBtn.querySelector('i');
+      if (window.__currentGame && isFavorited(window.__currentGame.url)) heart.className = 'fa-solid fa-heart';
+      else heart.className = 'fa-regular fa-heart';
+    } catch (e) {}
+    menu.appendChild(favBtn);
     menu.appendChild(fullscreenBtn);
-    wrapper.appendChild(menu);
+  wrapper.appendChild(menu);
+  // left-side tag/menu
+  menu2.style.padding = '6px 10px';
+  menu2.style.display = 'flex';
+  menu2.style.alignItems = 'center';
+  menu2.style.justifyContent = 'center';
+  wrapper.appendChild(menu2);
   } else {
     // Mobile → auto fullscreen with setTimeout
     setTimeout(() => {

@@ -20,7 +20,7 @@ import { UnrealBloomPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postp
 // === Configurable ===
 // =====================
 const CONFIG = {
-  ballColor: 0x00ff00,
+  ballColor: new THREE.Color(Math.random(), Math.random(), Math.random()), // fixed random color
   particleColor: 0xffffff,
   sphereRadius: 2.0,
   particleCount: 500,
@@ -66,8 +66,8 @@ const sphereMat = new THREE.MeshStandardMaterial({
   metalness: 0.2,
   roughness: 0.15,
   transparent: false,
-  emissive: 0x00ff00,
-  emissiveIntensity: 1.5,
+  emissive: CONFIG.ballColor,
+  emissiveIntensity: 2,
   bloom: true
 });
 const sphere = new THREE.Mesh(sphereGeo, sphereMat);

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <style>
     body { background: #000000; color: #eee; font-family: Arial, sans-serif; margin: 0; min-height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    #eq-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.7; }
+    #eq-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
     .player { z-index: 2; background: #000000ee; border-radius: 18px; padding: 24px 18px; box-shadow: 0 4px 32px #000a; display: flex; flex-direction: column; align-items: center; }
     .controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
     .play-btn { position: absolute;background: #000000; color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 2em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px #23243a66; }
@@ -24,23 +24,52 @@
       <span id="status"></span>
     </div>
   </div>
-  <script>
+  <script type="module">
+    import * as THREE from 'https://esm.sh/three@0.160.0';
+
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const status = document.getElementById('status');
-    const eqBg = document.getElementById('eq-bg');
-    const ctx = eqBg.getContext('2d');
+    const canvas = document.getElementById('eq-bg');
     let audioCtx, analyser, source;
     let isPlaying = false;
-    let eqColor = '#fff';
     let fftSize = 128;
 
+    // Three.js setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Create blob mesh
+    const geometry = new THREE.IcosahedronGeometry(1, 4);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x00ff00,
+      shininess: 100,
+      wireframe: true,
+      emissive: 0x00ff00,
+      emissiveIntensity: 0.5
+    });
+    const blob = new THREE.Mesh(geometry, material);
+    scene.add(blob);
+
+    // Add lights
+    const light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(2, 2, 2);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x222222));
+
+    // Store original vertices
+    const originalVertices = geometry.attributes.position.array.slice();
+    camera.position.z = 2.5;
+
     function resizeCanvas() {
-      eqBg.width = window.innerWidth;
-      eqBg.height = window.innerHeight;
+      const { innerWidth: w, innerHeight: h } = window;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     }
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
 
     playBtn.onclick = async () => {
       if (!isPlaying) {
@@ -68,20 +97,34 @@
     function drawEq() {
       if (!isPlaying) return;
       requestAnimationFrame(drawEq);
+
       const data = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(data);
-      ctx.clearRect(0, 0, eqBg.width, eqBg.height);
-      const barWidth = eqBg.width / data.length;
-      // Only dots visualizer
-      for (let i = 0; i < data.length; i++) {
-        const val = data[i];
-        const x = i * barWidth + barWidth / 2;
-        const y = eqBg.height - val * 3;
-        ctx.beginPath();
-        ctx.arc(x, y, Math.max(4, barWidth / 2.5), 0, 2 * Math.PI);
-        ctx.fillStyle = eqColor;
-        ctx.fill();
+
+      // Update vertices based on audio data
+      const positions = geometry.attributes.position.array;
+      for (let i = 0; i < positions.length; i += 3) {
+        const dataIndex = (i / 3) % data.length;
+        const amp = data[dataIndex] / 255; // Normalize to 0-1
+        const vertex = new THREE.Vector3(
+          originalVertices[i],
+          originalVertices[i + 1],
+          originalVertices[i + 2]
+        );
+        vertex.normalize();
+        const scale = 1 + amp * 0.3; // Scale factor
+        positions[i] = vertex.x * scale;
+        positions[i + 1] = vertex.y * scale;
+        positions[i + 2] = vertex.z * scale;
       }
+      geometry.attributes.position.needsUpdate = true;
+      geometry.computeVertexNormals();
+
+      // Rotate blob
+      blob.rotation.y += 0.002;
+      blob.rotation.x += 0.001;
+
+      renderer.render(scene, camera);
     }
   </script>
 </body>
