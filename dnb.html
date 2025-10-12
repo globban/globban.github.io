@@ -8,29 +8,22 @@
   <style>
     body { background: #000000; color: #eee; font-family: Arial, sans-serif; margin: 0; min-height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     #eq-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-    .player { z-index: 2; background: #000000ee; border-radius: 18px; padding: 24px 18px; box-shadow: 0 4px 32px #000a; display: flex; flex-direction: column; align-items: center; }
-    .controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
-    .play-btn { position: absolute;background: #000000; color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 2em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px #23243a66; }
-    .play-btn:hover { background: #f00; color: #fff; }
-    #status { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); font-size: 1.1em; color: #b6b6d6; margin-left: 12px; }
+    .player { z-index: 2; background: #00000000; border-radius: 18px; padding: 24px 18px; box-shadow: 0 4px 32px #000a; display: flex; flex-direction: column; align-items: center; }
+    /* removed play button and status styles - interactions are via keyboard and screen (pointer) */
   </style>
 </head>
 <body>
   <canvas id="eq-bg"></canvas>
-  <div class="player">
+  <div class="player" id="playerContainer" aria-hidden="true">
     <audio id="audio" src="https://azura.drmnbss.org/listen/dnbradio/radio.mp3" crossorigin="anonymous"></audio>
-    <div class="controls">
-      <button class="play-btn" id="playBtn"><i class="fa fa-play"></i></button>
-      <span id="status"></span>
-    </div>
   </div>
   <script type="module">
     import * as THREE from 'https://esm.sh/three@0.160.0';
 
     const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('playBtn');
-    const status = document.getElementById('status');
     const canvas = document.getElementById('eq-bg');
+    const playerContainer = document.getElementById('playerContainer');
+
     let audioCtx, analyser, source;
     let isPlaying = false;
     let fftSize = 128;
@@ -71,28 +64,52 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
-    playBtn.onclick = async () => {
+    async function ensureAudioGraph() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!analyser || !source) {
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = fftSize;
+        source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      }
+      // resume audio context on user gesture if needed
+      if (audioCtx.state === 'suspended') {
+        try { await audioCtx.resume(); } catch (e) { /* ignore */ }
+      }
+    }
+
+    async function togglePlayback() {
       if (!isPlaying) {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (!analyser || !source) {
-          analyser = audioCtx.createAnalyser();
-          analyser.fftSize = fftSize;
-          source = audioCtx.createMediaElementSource(audio);
-          source.connect(analyser);
-          analyser.connect(audioCtx.destination);
+        await ensureAudioGraph();
+        try {
+          await audio.play();
+        } catch (e) {
+          // play() may fail if the user gesture didn't occur; gesture should be from key or pointer
+          console.error('Playback failed:', e);
+          return;
         }
-        if (audio.paused) await audio.play();
-        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
-        status.textContent = 'Streaming...';
         isPlaying = true;
         drawEq();
       } else {
         audio.pause();
-        playBtn.innerHTML = '<i class="fa fa-play"></i>';
-        status.textContent = 'Paused';
         isPlaying = false;
       }
-    };
+    }
+
+    // Toggle on any key press
+    window.addEventListener('keydown', async (e) => {
+      // optional: ignore modifier-only keys if desired
+      await togglePlayback();
+    });
+
+    // Toggle on screen pointer (mouse/touch) press anywhere
+    // Use pointerdown to cover mouse, touch and pen.
+    window.addEventListener('pointerdown', async (e) => {
+      // ignore non-primary mouse buttons
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      await togglePlayback();
+    });
 
     function drawEq() {
       if (!isPlaying) return;
@@ -106,12 +123,10 @@
       for (let i = 0; i < positions.length; i += 3) {
         const dataIndex = (i / 3) % data.length;
         const amp = data[dataIndex] / 255; // Normalize to 0-1
-        const vertex = new THREE.Vector3(
-          originalVertices[i],
-          originalVertices[i + 1],
-          originalVertices[i + 2]
-        );
-        vertex.normalize();
+        const vx = originalVertices[i];
+        const vy = originalVertices[i + 1];
+        const vz = originalVertices[i + 2];
+        const vertex = new THREE.Vector3(vx, vy, vz).normalize();
         const scale = 1 + amp * 0.3; // Scale factor
         positions[i] = vertex.x * scale;
         positions[i + 1] = vertex.y * scale;
@@ -126,6 +141,26 @@
 
       renderer.render(scene, camera);
     }
+
+    // Optional: visual hint on first load (removable)
+    // show a temporary hint to press any key / tap to play
+    const hint = document.createElement('div');
+    hint.textContent = 'Press any key or tap the screen to play/pause';
+    Object.assign(hint.style, {
+      position: 'fixed',
+      bottom: '24px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      color: '#b6b6d6',
+      fontSize: '14px',
+      zIndex: 3,
+      background: '#00000088',
+      padding: '8px 12px',
+      borderRadius: '12px',
+      pointerEvents: 'none'
+    });
+    document.body.appendChild(hint);
+    setTimeout(() => hint.remove(), 8000);
   </script>
 </body>
 </html>
