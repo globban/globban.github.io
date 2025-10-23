@@ -12,6 +12,14 @@
 
 <body>
     <div id="background"></div>
+    <!-- New Tab mode toggle (top-left) -->
+    <div id="newtab-control" style="position:fixed;left:8px;top:8px;z-index:3;">
+      <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
+        <input type="checkbox" id="newtab-toggle"> Hide tab
+      </label>
+    </div>
+
+    <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
   <!-- Back button (reloads page) -->
   <!-- back button removed; navigation handled in-page -->
   <!-- Start area: centered search and categories -->
@@ -21,8 +29,11 @@
 /   \  ___\__  \  /     \_/ __ \ /  ___/
 \    \_\  \/ __ \|  Y Y  \  ___/ \___ \ 
  \______  (____  |__|_|  /\___  /____  >
-        \/     \/      \/     \/     \/ 
+        \/     \/      \/     \/     \/
 </pre>
+<!-- Compact floating panel for hide-tab settings (injected/controlled by JS) -->
+
+
     <div class="search-container">
       <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on">
     </div><div id="category-tabs" class="tabs-container"></div>
@@ -95,6 +106,8 @@ particlesJS("particles-js", {
   retina_detect: true
 });
 </script>
+</body>
+</html>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -110,7 +123,7 @@ window.addEventListener('DOMContentLoaded', () => {
       window.location.href = url;
     } else {
       // Open in popup
-      openGame(url, card.dataset.menu === "true");
+      openGame(url, card.dataset.menu === "false");
     }
   });
 });
@@ -560,8 +573,99 @@ function closePopup() {
 }
 </script>
 
+<script>
+// New Tab behavior script
+(function() {
+  const STORAGE_KEY = 'gf_newtab_on';
 
+  const toggle = () => document.getElementById('newtab-toggle');
+  const overlay = () => document.getElementById('newtab-overlay');
 
+  function enable() {
+    localStorage.setItem(STORAGE_KEY, '1');
+  }
 
+  function disable() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  function showOverlay() {
+    const o = overlay();
+    if (o) o.style.display = 'flex';
+  }
+
+  function hideOverlay() {
+    const o = overlay();
+    if (o) o.style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const chk = toggle();
+    if (!chk) return;
+
+    const on = !!localStorage.getItem(STORAGE_KEY);
+    chk.checked = on;
+    if (on) enable();
+
+    chk.addEventListener('change', () => {
+      if (chk.checked) enable();
+      else disable();
+    });
+
+    // --- Redirect after 2 seconds away ---
+    let awayTimer = null;
+
+    function startAwayTimer() {
+      if (awayTimer) return;
+      awayTimer = setTimeout(() => {
+        awayTimer = null;
+        if (!document.hasFocus() && document.visibilityState === 'hidden' && localStorage.getItem(STORAGE_KEY)) {
+          console.log('User away for 2s → redirecting to Google');
+          window.location.href = 'https://google.com';
+        }
+      }, 1000);
+    }
+
+    function cancelAwayTimer() {
+      if (awayTimer) {
+        clearTimeout(awayTimer);
+        awayTimer = null;
+      }
+    }
+
+    // Detect tab hidden or focus lost
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        startAwayTimer();
+      } else {
+        cancelAwayTimer();
+      }
+    });
+
+    window.addEventListener('blur', startAwayTimer);
+    window.addEventListener('focus', cancelAwayTimer);
+
+    // Optional: Alt key = instant redirect
+    window.addEventListener('keydown', e => {
+      if (e.altKey) window.location.href = 'https://google.com';
+    });
+
+    // Keep overlay hide logic if you use it
+    document.addEventListener('click', () => {
+      if (localStorage.getItem(STORAGE_KEY)) hideOverlay();
+    });
+
+    document.addEventListener('keydown', ev => {
+      if (!localStorage.getItem(STORAGE_KEY)) return;
+      if (ev.key === 'Escape') {
+        hideOverlay();
+        return;
+      }
+      hideOverlay();
+    });
+  });
+})();
+
+</script>
 </body>
 </html>
