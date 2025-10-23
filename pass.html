@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    /* --- Base --- */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: radial-gradient(circle at 100% 100%, #4e00c2, #0a0017);
+      color: #fff;
+      font-family: "Poppins", Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* --- Glass container --- */
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 40px 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 520px;
+      text-align: center;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h1 {
+      margin-top: 0;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    p {
+      color: #ddd;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    label {
+      margin-top: 8px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      margin-top: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      transition: 0.3s;
+    }
+    input[type="number"]:focus {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    input[type="checkbox"] {
+      margin-right: 6px;
+      accent-color: #a060ff;
+      transform: scale(1.2);
+    }
+
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a060ff, #5015ff);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 14px rgba(80, 21, 255, 0.3);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(80, 21, 255, 0.45);
+    }
+
+    textarea {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-family: "Poppins", monospace;
+      font-size: 14px;
+      text-align: center;
+      resize: none;
+      outline: none;
+      transition: 0.3s;
+    }
+    textarea:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* --- Status message --- */
+    #status {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 600;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+      opacity: 0;
+      animation: fadeOut 3s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: translateX(-50%) scale(1); }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fa-solid fa-lock"></i> Password Generator</h1>
+    <p>Create strong and secure passwords easily.</p>
+
+    <form id="passwordForm">
+      <label for="length">Password Length:</label>
+      <input type="number" id="length" name="length" value="12" required />
+
+      <label style="margin-top: 12px;">Include Characters:</label>
+      <div style="margin-top: 6px;">
+        <input type="checkbox" id="uppercase" checked />
+        <label for="uppercase">Uppercase (A–Z)</label><br />
+        <input type="checkbox" id="lowercase" checked />
+        <label for="lowercase">Lowercase (a–z)</label><br />
+        <input type="checkbox" id="numbers" checked />
+        <label for="numbers">Numbers (0–9)</label><br />
+        <input type="checkbox" id="symbols" />
+        <label for="symbols">Symbols (!@#$%^&*)</label>
+      </div>
+
+      <button type="submit"><i class="fa-solid fa-key"></i> Generate</button>
+    </form>
+
+    <h2 style="margin-top: 18px; font-weight: 500;">Generated Password:</h2>
+    <textarea id="generatedPassword" rows="auto" readonly></textarea>
+  </div>
+
+  <label id="status"></label>
+
+  <script>
+    function generatePassword(length, useUppercase, useLowercase, useNumbers, useSymbols) {
+      const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+      const numbers = '0123456789';
+      const symbols = '!@#$%^&*()_+[]{}|;:,.<>?';
+      let pool = '';
+      if (useUppercase) pool += uppercase;
+      if (useLowercase) pool += lowercase;
+      if (useNumbers) pool += numbers;
+      if (useSymbols) pool += symbols;
+
+      if (!pool) {
+        alert('Select at least one character type!');
+        return '';
+      }
+
+      let password = '';
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        password += pool[randomIndex];
+      }
+      return password;
+    }
+
+    function showStatus(msg) {
+      const status = document.getElementById('status');
+      status.textContent = msg;
+      status.style.animation = 'none';
+      status.offsetHeight; // restart animation
+      status.style.animation = 'fadeOut 3s ease forwards';
+    }
+
+    document.getElementById('passwordForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const length = parseInt(document.getElementById('length').value);
+      const useUpper = document.getElementById('uppercase').checked;
+      const useLower = document.getElementById('lowercase').checked;
+      const useNums = document.getElementById('numbers').checked;
+      const useSyms = document.getElementById('symbols').checked;
+
+      const pwd = generatePassword(length, useUpper, useLower, useNums, useSyms);
+      const area = document.getElementById('generatedPassword');
+      area.value = pwd;
+      if (pwd) showStatus('Password Generated!');
+    });
+
+    document.getElementById('generatedPassword').addEventListener('click', function () {
+      this.select();
+      document.execCommand('copy');
+      showStatus('Copied to Clipboard!');
+    });
+  </script>
+</body>
+</html>

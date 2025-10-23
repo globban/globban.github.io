@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>QR Generator</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Inter", system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    min-height: 100vh;
+    background: url('https://images.unsplash.com/photo-1757600797704-300d69978b8c?auto=format&fit=crop&q=80&w=2664');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    color: #f1f5f9;
+  }
+  .wrap { width:100%;max-width:960px;margin:60px auto;padding:20px;box-sizing:border-box; }
+  .card {
+    backdrop-filter: blur(18px) saturate(180%);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  h1 { margin:0;font-size:22px;font-weight:600;color:#fff; }
+  label { font-size:13px;opacity:0.85;display:block;margin-bottom:6px; }
+  textarea, select, input[type="range"], input[type="color"], input[type="file"] {
+    width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.1);color:#f8fafc;outline:none;font-size:14px;
+  }
+  textarea { min-height:84px;resize:vertical;padding:10px; }
+  textarea:focus, select:focus, input:focus { border-color:#38bdf8;background:rgba(255,255,255,0.15); }
+  ::file-selector-button {
+    background:rgba(255,255,255,0.2);border:none;border-radius:6px;color:#fff;padding:5px 10px;cursor:pointer;margin-right:8px;
+  }
+  .row { display:flex;gap:12px;margin-top:12px;flex-wrap:wrap; }
+  .col { flex:1; }
+  .controls { display:flex;gap:8px;flex-wrap:wrap;margin-top:16px; }
+  button {
+    background:linear-gradient(90deg,#38bdf8,#06b6d4);border:none;padding:10px 16px;
+    color:#fff;border-radius:10px;cursor:pointer;font-weight:500;transition:0.2s;
+  }
+  button:hover { transform:translateY(-2px);box-shadow:0 4px 14px rgba(6,182,212,0.4); }
+  button.secondary { background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3); }
+  .preview { display:flex;gap:18px;align-items:center;margin-top:24px;flex-wrap:wrap;justify-content:center; }
+  .preview-box {
+    background:rgba(255,255,255,0.1);padding:16px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  footer { margin-top:14px;font-size:13px;opacity:0.7;text-align:center; }
+  code { background:rgba(255,255,255,0.15);padding:2px 5px;border-radius:4px;color:#38bdf8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <header style="display:flex;justify-content:space-between;align-items:center">
+      <h1>QR Generator</h1>
+      <div style="opacity:.7;font-size:13px">No build step · with styles</div>
+    </header>
+
+    <div style="margin-top:12px">
+      <label>Text or URL</label>
+      <textarea id="text">https://algot.fun</textarea>
+
+      <div class="row">
+        <div class="col">
+          <label>Size: <span id="sizeVal">300</span>px</label>
+          <input id="size" type="range" min="128" max="1024" value="300">
+        </div>
+
+        <div style="width:160px">
+          <label>Error correction</label>
+          <select id="level">
+            <option value="L">L</option><option value="M" selected>M</option>
+            <option value="Q">Q</option><option value="H">H</option>
+          </select>
+        </div>
+
+        <div style="width:200px">
+          <label>Style</label>
+          <!-- note: fluid renamed to extra-rounded/classy etc. -->
+          <select id="style">
+            <option value="square">Square</option>
+            <option value="dots">Dots</option>
+            <option value="rounded">Rounded</option>
+            <option value="classy">Classy</option>
+            <option value="classy-rounded">Classy Rounded</option>
+            <option value="extra-rounded">Extra Rounded (fluid)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="width:120px">
+          <label>Foreground</label><input id="fg" type="color" value="#111827">
+        </div>
+        <div style="width:120px">
+          <label>Background</label><input id="bg" type="color" value="#ffffff">
+        </div>
+        <div style="flex:1">
+          <label>Logo (optional)</label>
+          <input id="logo" type="file" accept="image/*">
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="generate">Generate</button>
+        <button id="downloadPng" class="secondary">Download PNG</button>
+        <button id="downloadSvg" class="secondary">Download SVG</button>
+      </div>
+
+      <div class="preview"><div class="preview-box" id="qrBox"></div></div>
+      <footer>Powered by <code>qr-code-styling</code></footer>
+    </div>
+  </div>
+</div>
+
+<!-- QR library -->
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+<script>
+const qrBox = document.getElementById("qrBox");
+const textEl = document.getElementById("text");
+const sizeEl = document.getElementById("size");
+const sizeVal = document.getElementById("sizeVal");
+const levelEl = document.getElementById("level");
+const fgEl = document.getElementById("fg");
+const bgEl = document.getElementById("bg");
+const styleEl = document.getElementById("style");
+const logoEl = document.getElementById("logo");
+const downloadPngBtn = document.getElementById("downloadPng");
+const downloadSvgBtn = document.getElementById("downloadSvg");
+
+let lastLogoObjectUrl = null;
+
+let qr = new QRCodeStyling({
+  width: 300,
+  height: 300,
+  type: "canvas",        // canvas for PNG; we'll also support SVG download
+  data: textEl.value,
+  image: "",
+  dotsOptions: { color: fgEl.value, type: "square" },
+  backgroundOptions: { color: bgEl.value },
+  qrOptions: { errorCorrectionLevel: levelEl.value }
+});
+qr.append(qrBox);
+
+function getDotType(style) {
+  // map select value to supported qr-code-styling types
+  // valid types: 'square','dots','rounded','classy','classy-rounded','extra-rounded'
+  const valid = ['square','dots','rounded','classy','classy-rounded','extra-rounded'];
+  return valid.includes(style) ? style : 'square';
+}
+
+async function generate() {
+  const dotType = getDotType(styleEl.value);
+  const size = Number(sizeEl.value) || 300;
+  const data = textEl.value || ' ';
+  const fg = fgEl.value || '#111827';
+  const bg = bgEl.value || '#ffffff';
+  const level = levelEl.value || 'M';
+
+  // If a new logo file was chosen, create an object URL and update
+  if (lastLogoObjectUrl) {
+    // revoke previous to avoid leaking memory
+    URL.revokeObjectURL(lastLogoObjectUrl);
+    lastLogoObjectUrl = null;
+  }
+
+  let imageUrl = "";
+  if (logoEl.files && logoEl.files[0]) {
+    imageUrl = URL.createObjectURL(logoEl.files[0]);
+    lastLogoObjectUrl = imageUrl;
+  }
+
+  qr.update({
+    width: size,
+    height: size,
+    data,
+    image: imageUrl,
+    dotsOptions: { color: fg, type: dotType },
+    backgroundOptions: { color: bg },
+    qrOptions: { errorCorrectionLevel: level }
+  });
+}
+
+// download helpers
+downloadPngBtn.addEventListener('click', () => {
+  // png download (canvas)
+  qr.download({ name: "qr", extension: "png" });
+});
+
+downloadSvgBtn.addEventListener('click', () => {
+  // svg download (works even if initial type was canvas)
+  qr.download({ name: "qr", extension: "svg" });
+});
+
+sizeEl.oninput = () => sizeVal.textContent = sizeEl.value;
+document.getElementById("generate").onclick = generate;
+
+// regenerate when inputs change for convenience
+[textEl, sizeEl, levelEl, fgEl, bgEl, styleEl, logoEl].forEach(el => {
+  el.addEventListener('change', generate);
+});
+window.addEventListener('load', generate);
+</script>
+</body>
+</html>
