@@ -10,9 +10,14 @@
       box-sizing: border-box;
     }
 
+    @font-face {
+      font-family: 'Dot';
+      src: url('/dot.ttf');
+    }
+
     body {
       margin: 0;
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'Dot';
       color: #eee;
       background: #000;
       overflow: hidden;
@@ -35,25 +40,24 @@
     /* Intro title */
     h1 {
       z-index: 2;
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      position: relative;
       font-size: 3em;
-      text-align: center;
       text-shadow: 0 0 10px #fff;
-      animation: fade-out 2s forwards 1s;
     }
 
     /* Options container */
     #options {
-      position: relative;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
       opacity: 0;
-      animation: fade-in 2s forwards 2s;
+      animation: fade-in 2s forwards;
     }
 
     /* Links */
@@ -61,8 +65,8 @@
         backdrop-filter: blur(8px);
       padding: 18px 40px;
       border-radius: 12px;
-      background: rgba(0, 0, 0, 0.781);
-      color: #fff;
+      background: rgb(0, 0, 0);
+      color: #ffffff;
       font-size: 2.5em;
       text-decoration: none;
       display: flex;
@@ -70,6 +74,7 @@
       justify-content: center;
       gap: 10px;
       transition: all 0.3s ease;
+      width: 100%;
     }
 
     a:hover {
@@ -77,26 +82,21 @@
       transform: scale(1.05);
     }
 
-    @keyframes fade-out {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
     @keyframes fade-in {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+      0% {filter: blur(15px); opacity: 0; display: none;}
+      100% { filter: blur(0); opacity: 1; display: flex;}
     }
   </style>
 </head>
 
 <body>
-  <h1>Algot.fun</h1>
+  
 
   <div id="options">
+    <h1>Algot.fun</h1>
     <a href="/Games.html"><i class="fa-solid fa-gamepad"></i>Games</a>
     <a href="https://chat-4r5m.onrender.com/"><i class="fa-solid fa-comment"></i>Chat</a>
     <a href="/Tools.html"><i class="fa-solid fa-tools"></i>Tools</a>
-    
   </div>
 
   <div id="your-element-selector"></div>
