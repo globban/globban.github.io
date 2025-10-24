@@ -15,13 +15,13 @@
     .viewer{flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
 
     .game-screen {
-  width: 100%;
-  height: 50%; /* 2 games visible at once */
-  scroll-snap-align: start;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
+      width: 100%;
+      height: 50%; /* 2 games visible at once */
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
 
     .thumb{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center;background-color:#111}
 
@@ -49,16 +49,23 @@
       cursor:pointer;
     }
     .cat-item.active{opacity:1;color:#3fa9ff}
+    
+    #searchBar input::placeholder { color: #9aa4b2; }
   </style>
 </head>
 
 <body>
+  <div id="gameFrameContainer" style="display:none; position:fixed; inset:0; background:black; z-index:9999;">
+  <iframe id="gameFrame" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>
+  <button id="closeGame" style="position:absolute; top:10px; right:10px; background:#222; color:white; border:none; padding:10px; font-size:18px; cursor:pointer;">✕</button>
+</div>
+
   <div class="app">
     <div id="searchBar" style="padding:8px; background:#111; display:flex; align-items:center;">
-  <input id="searchInput" type="text" placeholder="Search games..." 
-         style="flex:1; padding:6px 10px; font-size:14px; border:none; border-radius:4px; outline:none; background:#222; color:#fff;" />
-  <i class="fa-solid fa-magnifying-glass" style="margin-left:8px; color:#9aa4b2;"></i>
-</div>
+      <input id="searchInput" type="text" placeholder="Search games..." 
+             style="flex:1; padding:6px 10px; font-size:14px; border:none; border-radius:4px; outline:none; background:#222; color:#fff;" />
+      <i class="fa-solid fa-magnifying-glass" style="margin-left:8px; color:#9aa4b2;"></i>
+    </div>
     <div id="viewer" class="viewer"></div>
     <div id="catBar" class="cat-bar"></div>
   </div>
@@ -73,18 +80,48 @@ let filtered = [];
 let batchSize = 10;
 let currentIndex = 0;
 
+const gameFrameContainer = document.getElementById('gameFrameContainer');
+const gameFrame = document.getElementById('gameFrame');
+const closeGame = document.getElementById('closeGame');
+
+function openFullscreenGame(url) {
+  gameFrame.src = url;
+  gameFrameContainer.style.display = 'block';
+
+  const elem = gameFrameContainer;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  }
+}
+
+closeGame.addEventListener('click', () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+  gameFrame.src = '';
+  gameFrameContainer.style.display = 'none';
+});
+
+
+// Safely get a URL for a game
 function gameUrl(g){
-  return g.customurl?.trim() !== '' ? g.customurl : CRAZYGAMES_TEMPLATE(g.gameid);
+  if(g.customurl?.trim()) return g.customurl;
+  if(g.gameid?.trim()) return CRAZYGAMES_TEMPLATE(g.gameid);
+  return 'https://crazygames.com/';
 }
 
+// Load and filter out bad entries
 function loadGames(){
-  fetch(GAMES_JSON).then(r=>r.json()).then(list=>{
-    games = list;
-    initCategories();
-    applyFilter(null);
-  });
+  fetch(GAMES_JSON)
+    .then(r => r.json())
+    .then(list => {
+      games = list.filter(g => g.customurl?.trim() || g.gameid?.trim());
+      initCategories();
+      applyFilter(null);
+    });
 }
 
+// Setup category bar
 function initCategories(){
   const catBar = document.getElementById('catBar');
   catBar.innerHTML = '';
@@ -92,36 +129,34 @@ function initCategories(){
   const cats = [...new Set(games.map(g => g.category).filter(Boolean))];
 
   createCatItem('All', null, catBar);
-
   cats.forEach(cat => createCatItem(cat, cat, catBar));
 }
 
+// Create individual category item
 function createCatItem(text, category, bar){
   const item = document.createElement('div');
   item.className = 'cat-item';
   item.innerHTML = `<i class="fa-solid fa-gamepad"></i><span>${text}</span>`;
-
-  // Pass the event object to applyFilter
-  item.addEventListener('click', (e) => applyFilter(category, e));
-
+  item.addEventListener('click', (e) => applyFilter(category, e.currentTarget));
   bar.appendChild(item);
 }
 
-// Fix applyFilter to receive the event
-function applyFilter(category, e){
-  // Remove active from all
+// Filter games by category
+function applyFilter(category, clickedItem){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('viewer').scrollTop = 0;
+
   document.querySelectorAll('.cat-item').forEach(el=>el.classList.remove('active'));
+  if(clickedItem) clickedItem.classList.add('active');
 
-  // Add active to the clicked element
-  if(e) e.currentTarget.classList.add('active');
-
-  filtered = category ? games.filter(g=>g.category === category) : games;
+  filtered = category ? games.filter(g => g.category === category) : [...games];
 
   currentIndex = 0;
   document.getElementById('viewer').innerHTML = '';
   loadMore();
 }
 
+// Load next batch of games
 function loadMore(){
   const viewer = document.getElementById('viewer');
   const chunk = filtered.slice(currentIndex, currentIndex + batchSize);
@@ -134,14 +169,17 @@ function loadMore(){
     thumb.className = 'thumb';
     thumb.style.backgroundImage = `url(${g.thumbnail})`;
 
-   const meta = document.createElement('div');
-meta.className = 'meta';
-meta.innerHTML = `<div class="title">${g.gameid.replace(/-/g,' ')}</div>
-                  <div class="cat">${g.category || ''}</div>`;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = `<div class="title">${g.gameid.replace(/-/g,' ')}</div>
+                      <div class="cat">${g.category || ''}</div>`;
 
     card.appendChild(thumb);
     card.appendChild(meta);
-    card.addEventListener('click', ()=>window.open(gameUrl(g),'_blank'));
+
+    card.addEventListener('click', () => {
+       openFullscreenGame(gameUrl(g));
+    });
 
     viewer.appendChild(card);
   });
@@ -150,13 +188,14 @@ meta.innerHTML = `<div class="title">${g.gameid.replace(/-/g,' ')}</div>
 }
 
 // Infinite scroll
-document.getElementById('viewer').addEventListener('scroll', e=>{
+document.getElementById('viewer').addEventListener('scroll', e => {
   const v = e.target;
   if(v.scrollTop + v.clientHeight >= v.scrollHeight - 200){
     loadMore();
   }
 });
 
+// Search bar filter
 const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.toLowerCase();
