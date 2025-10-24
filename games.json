@@ -1033,6 +1033,7 @@
     },
     {
         "gameid": "mr-racer---car-racing",
+        "customurl": "https://html5.gamedistribution.com/rvvASMiM/a42cb23aca9647b3840f8a7dca61fde5/index.html?gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy5nYW1lZmxhcmUuY29tLyIsInBhcmVudERvbWFpbiI6ImdhbWVmbGFyZS5jb20iLCJ0b3BEb21haW4iOiJnYW1lZmxhcmUuY29tIiwiaGFzSW1wcmVzc2lvbiI6dHJ1ZSwibG9hZGVyRW5hYmxlZCI6dHJ1ZSwiaG9zdCI6Imh0bWw1LmdhbWVkaXN0cmlidXRpb24uY29tIiwidmVyc2lvbiI6IjEuNS4xOCJ9",
         "thumbnail": "https://imgs.crazygames.com/mr-racer---car-racing_16x9/20250829075007/mr-racer---car-racing_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
         "category": "driving",
         "blocked": false
