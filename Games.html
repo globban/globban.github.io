@@ -647,7 +647,7 @@ function closePopup() {
 
     // Optional: Alt key = instant redirect
     window.addEventListener('keydown', e => {
-      if (e.altKey) window.location.href = 'https://google.com';
+      if (e.altKey && chk.checked) window.location.href = 'https://google.com';
     });
 
     // Keep overlay hide logic if you use it

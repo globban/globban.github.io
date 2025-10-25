@@ -8,6 +8,13 @@
     "blocked": false
   },
   {
+    "gameid": "crossy-roads",
+    "customurl": "https://azgames.io/game/crossy-road/",
+    "thumbnail": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.bodysrungame.com%2Fgames%2Fimages%2F20230628%2Fcrossy_road_1687920278723.jpg",
+    "category": "casual",
+    "blocked": false
+  },
+  {
     "gameid": "idleon",
     "customurl": "https://www.legendsofidleon.com/ytGl5oc/",
     "thumbnail": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.b9113X5UwsPjG4yh-Gp7AQHaEP%3Fcb%3D12%26pid%3DApi&f=1&ipt=f3db75e9d02b01de49a242de57a25c7f9e201287722001567828296dcb04f221&ipo=images",
