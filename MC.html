@@ -1,32 +1,199 @@
-<html>
-	<head>
-		<title>Algot's MC server</title>
-		<link rel="icon" href="https://www.algot.fun/favicon.png">
-        <link rel="stylesheet" href="index.css">
-	</head>
-	<body>
-		<div class="topnav">
-			<a class="active" href="/index.html">Home</a>
-			<a href="/Links.html">Links</a>
-			<a href="/clicker.html">clicker</a>
-			<a href="/Webbutton.html">Webbutton</a>
-			<a href="/MC.html">MC server</a>
-			<a href="/clock.html">clock</a>
-		  </div>
-		  <div class="toprgb"></div>
-		  <div class="blur toprgb"></div>
-		  <div class="blur toprgb"></div>
-		<h1>Algot's MCserver</h1>
-	   <h1>Address: mc.algot.fun</h1>
-	   <h1>(this a java server)</h1>
-	   <h1>rules:
-		<p></p>1. note this is a pvp server
-		<p></p>2. no hacking/cheating
-		<p></p>3. you can team up
-		<p></p>4. you can betray your team
-		<p></p>5. don't make spawn too chaotic
-		<p></p>6. have fun
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algotfun Minecraft Server</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="/mc.png" type="image/x-icon">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://wallpapercave.com/wp/wp5810523.jpg') center center / cover no-repeat fixed;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #1d1d1d38;
+      backdrop-filter: blur(10px);
+      padding: 30px 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    h1 {
+      color: #ffffff;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    p.subtitle {
+      color: #aaa;
+      margin-bottom: 0;
+    }
+    .server-info {
+      margin: 40px auto;
+      background: #1d1d1d38;
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    .server-info h2 {
+      color: #00ff88;
+      margin-bottom: 15px;
+    }
+    .server-info .data {
+      text-align: left;
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    .join-btn {
+      cursor: pointer;
+      display: inline-block;
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      background: #008040;
+      color: #ffffff;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: background 0.2s ease;
+    }
+    .join-btn:hover {
+      background: #00a04d;
+    }
+    .tutorial {
+      margin: 40px auto;
+      padding: 25px;
+      width: 90%;
+      max-width: 700px;
+      background: #1d1d1d38;
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      text-align: left;
+    }
+    .tutorial h2 {
+      color: #00ff88;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    ol {
+      line-height: 1.8;
+      margin-left: 20px;
+    }
+    code {
+      background: #333;
+      color: #0f0;
+      padding: 3px 6px;
+      border-radius: 5px;
+    }
+    footer {
+      color: #000000;
+      font-size: 0.9rem;
+      padding: 20px 10px;
+      margin-top: 40px;
+    }
+    a {
+      color: #00ff88;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
 
-	   </h1>
-	</body>
-</html>	
+    /* Copy notification */
+    #copiedNotice {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00a04d;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: none;
+      animation: fade 2s ease forwards;
+      font-weight: 600;
+    }
+    @keyframes fade {
+      0% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, 30px); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><img style="width:32px;" src="/mc.png" alt="Minecraft Icon"> Algot.fun Minecraft Server</h1>
+    <p class="subtitle">Join our Minecraft world — play on PC, mobile, or console!</p>
+  </header>
+
+  <section class="server-info">
+    <h2>🧩 Server Info</h2>
+    <div class="data">
+      <p><strong>Server Address:</strong> <code>mc.algot.fun</code></p>
+      <p><strong>Bedrock Port:</strong> <code>19132</code></p>
+      <p><strong>Java Port:</strong> <code>25565</code></p>
+
+      <p><strong>Version:</strong> 1.21.120.4 (Bedrock), 1.21.10 (Java)</p>
+      <p><div id="joinBtn" class="join-btn"><i class="fa-solid fa-play"></i> Join Server</div></p>
+    </div>
+  </section>
+
+  <section class="tutorial">
+    <h2>🎮 How to Join on Xbox or PlayStation</h2>
+    <ol>
+      <li>On your console’s home screen, go to <strong>Settings → Network → DNS Settings</strong>.</li>
+      <li>Switch to <strong>Manual</strong> and enter these values:
+        <br>Primary DNS: <code>104.238.130.180</code><br>
+        Secondary DNS: <code>8.8.8.8</code>
+      </li>
+      <li>Open <strong>Minecraft</strong> and go to the <strong>Servers</strong> tab.</li>
+      <li>Join any server except for CubeCraft. preferably <strong>Lifeboat</strong>.</li>
+      <li>Inside BedrockConnect, choose “Add Server” and enter:
+        <br>Address: <code>mc.algot.fun</code>
+        <br>Port: <code>19132</code>
+      </li>
+      <li>Save it, connect, and enjoy 🎉</li>
+    </ol>
+    <p>📘 <a href="https://github.com/Pugmatt/BedrockConnect" target="_blank">Learn more about BedrockConnect</a></p>
+  </section>
+
+  <footer>
+    © 2025 mc.algot.fun • Not affiliated with Mojang or Microsoft
+  </footer>
+
+  <div id="copiedNotice">Server address copied!</div>
+
+  <script>
+    const SERVER = { host: 'mc.algot.fun', port: 19132, label: 'mc.algot.fun:19132' };
+    const joinBtn = document.getElementById('joinBtn');
+    const copiedNotice = document.getElementById('copiedNotice');
+
+    function openMinecraft() {
+      const uri = `minecraft://?addExternalServer=Algotfun|${SERVER.host}:${SERVER.port}`;
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = uri;
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 1200);
+      // fallback: show copy popup
+      setTimeout(() => {
+        if (!document.hidden) copyAddress();
+      }, 1500);
+    }
+
+    function copyAddress() {
+        navigator.clipboard.writeText(SERVER.label);
+        copiedNotice.style.display = 'block';
+        setTimeout(() => copiedNotice.style.display = 'none', 2000);
+    }
+    joinBtn.addEventListener('click', openMinecraft);
+  </script>
+</body>
+</html>
