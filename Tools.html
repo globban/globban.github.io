@@ -20,7 +20,7 @@
       background-repeat: no-repeat;
       background-attachment: fixed;
       background-position: center center;
-      min-height: 100vh;
+      height: 100vh;
     }
     h1 {
       text-align: center;
@@ -86,7 +86,6 @@
   </style>
 </head>
 <body>
-  <div id="background" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
   <pre> _______               __        
 |_     _|.-----.-----.|  |.-----.
   |   |  |  _  |  _  ||  ||__ --|
@@ -132,14 +131,15 @@
       <i class="fas fa-qrcode"></i>
       <span>QR code</span>
     </a>
+    <a class="tool-link" href="/wheelspin.html" title="Wheel Spin" target="_blank">
+      <i class="fas fa-dharmachakra"></i>
+      <span>Wheel Spin</span>
+    </a>
+    <a class="tool-link" href="https://app.haikei.app" title="Haikei" target="_blank">
+      <i class="fas fa-image"></i>
+      <span>Haikei</span>
+    </a>
   </div>
-    <script type="module">
-    import { createWireframeWater } from './wireframeWater.js';
-
-    createWireframeWater({
-
-      container: document.getElementById('background')
-    });
-  </script>
+    <iframe src="/shift.html" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: -2;" allow="autoplay"></iframe>
 </body>
 </html>

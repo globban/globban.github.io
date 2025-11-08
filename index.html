@@ -1,127 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Algot.fun</title>
-  <link rel="icon" href="/favicon.png"/>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <style>
-    @font-face {
-      font-family: 'Dot';
-      src: url('/dot.ttf');
-    }
-    @font-face {
-      font-family: 'IMPACT';
-      src: url('/IMPACT.ttf');
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      overflow-y: hidden;
-      overflow: hidden;
-      background: #000;
-      box-sizing: border-box;
-      touch-action: manipulation;
-      font-family: 'Dot', Arial, sans-serif;
-      color: #eee;
-      min-height: 100vh;
-      background-color: #000000;
-    }
-
-    header {
-      font-family: 'Dot', Arial, sans-serif;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 75px;
-      background: rgba(20, 20, 20, 0.35);
-      color: #fff;
-      padding-left: 2em;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
-      box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      z-index: 1000;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2em;
-      letter-spacing: 0.05em;
-    }
-
-    .links {
-      display: flex;
-      align-items: center;
-      gap: 1.5em;
-      margin-right: 5em;
-      transition: all 0.3s;
-    }
-
-    header a {
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.1em;
-      padding: 0.3em 1em;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.05);
-      transition: background 0.2s;
-    }
-    header a:hover {
-      background: rgba(255,255,255,0.18);
-    }
-
-    .mobile-nav {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.2em;
-      margin: 2em auto 0 auto;
-      padding: 1.2em 0.5em 1.2em 0.5em;
-      max-width: 90vw;
-      background: rgba(30, 30, 40, 0); /* more transparent */
-      border-radius: 18px;
-      position: relative;
-      top: 85px;
-      z-index: 1002; /* above #background and header */
-     
-
-    }
-
-    main {
-      position: absolute;
-      top: 50vh;
-      left: 50vw;
-      transform: translate(-50%, -50%);
-      padding: 2em;
-      text-align: center;
-      z-index: 1;
-      color: #ffffff;
-      font-size: fill-available;
-      width: 100vw;
-    }
-
-    h1 {
-      font-family: Impact;
-      font-size: 4em;
-    }
-
-    h2 {
-      font-family: 'Dot', Arial, sans-serif;
-    }
-
-  </style>
-
-</head>
-<script>
+    <script>
   // Simple mobile redirect
 (function() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -133,36 +13,47 @@
 })();
 
 </script>
-  <header>
-    <h2>Algot.fun</h2>
-    <div class="links" id="navLinks">
-      <a href="https://chat-4r5m.onrender.com/">Chat</a>
-      <a href="/Games.html">Games</a>
-      <a href="/Tools.html">Tools</a>
-      <a href="/MC.html"><img style="width:32px;" src="/mc.png" alt="Minecraft Icon"></a>
-    </div>
-  </header>
-  <main>
-    <h1>WELCOME TO ALGOT.FUN</h1>
-  </main>
-  <!-- Mobile nav will be injected here if needed -->
-  <iframe id="background" src="/background.html" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;border:none;"></iframe>
-  "></iframe>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home</title>
+  <link rel="stylesheet" href="/home.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+ 
+</head>
+<body>
+<main>
+<a href="/Games.html">
+  <div class="card">
+    <pixel-canvas></pixel-canvas>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentcolor" viewBox="0 0 640 640">
+      <path d="M448 128C554 128 640 214 640 320C640 426 554 512 448 512L192 512C86 512 0 426 0 320C0 214 86 128 192 128L448 128zM192 240C178.7 240 168 250.7 168 264L168 296L136 296C122.7 296 112 306.7 112 320C112 333.3 122.7 344 136 344L168 344L168 376C168 389.3 178.7 400 192 400C205.3 400 216 389.3 216 376L216 344L248 344C261.3 344 272 333.3 272 320C272 306.7 261.3 296 248 296L216 296L216 264C216 250.7 205.3 240 192 240zM432 336C414.3 336 400 350.3 400 368C400 385.7 414.3 400 432 400C449.7 400 464 385.7 464 368C464 350.3 449.7 336 432 336zM496 240C478.3 240 464 254.3 464 272C464 289.7 478.3 304 496 304C513.7 304 528 289.7 528 272C528 254.3 513.7 240 496 240z"></path>
+    </svg>
+    <button>Layout</button>
+</div>
+</a>
+<a href="/Tools.html">
+  <div class="card" style="--active-color: #e0f2fe">
+    <pixel-canvas data-gap="10" data-speed="25" data-colors="#e0f2fe, #7dd3fc, #0ea5e9"></pixel-canvas>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentcolor" viewBox="0 0 640 640">
+      <path d="M541.4 162.6C549 155 561.7 156.9 565.5 166.9C572.3 184.6 576 203.9 576 224C576 312.4 504.4 384 416 384C398.5 384 381.6 381.2 365.8 376L178.9 562.9C150.8 591 105.2 591 77.1 562.9C49 534.8 49 489.2 77.1 461.1L264 274.2C258.8 258.4 256 241.6 256 224C256 135.6 327.6 64 416 64C436.1 64 455.4 67.7 473.1 74.5C483.1 78.3 484.9 91 477.4 98.6L388.7 187.3C385.7 190.3 384 194.4 384 198.6L384 240C384 248.8 391.2 256 400 256L441.4 256C445.6 256 449.7 254.3 452.7 251.3L541.4 162.6z"/>
+    </svg>
+  <button>Code</button>
+  </div></a>
+<a href="https://chat-4r5m.onrender.com">
+  <div class="card" style="--active-color: #00f08a">
+    <pixel-canvas data-gap="3" data-speed="20" data-colors="#00f08a, #00e047, #0fb308"></pixel-canvas>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentcolor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M576 304C576 436.5 461.4 544 320 544C282.9 544 247.7 536.6 215.9 523.3L97.5 574.1C88.1 578.1 77.3 575.8 70.4 568.3C63.5 560.8 62 549.8 66.8 540.8L115.6 448.6C83.2 408.3 64 358.3 64 304C64 171.5 178.6 64 320 64C461.4 64 576 171.5 576 304z"/></svg>
+    <button>Command</button>
+  </div>
+</a>
+<a href="/MC.html">
+  <div class="card" style="--active-color: #fecdd3">
+    <pixel-canvas data-gap="6" data-speed="80" data-colors="#fecdd3, #fda4af, #e11d48" data-no-focus></pixel-canvas>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentcolor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M348 62.7C330.7 52.7 309.3 52.7 292 62.7L207.8 111.3C190.5 121.3 179.8 139.8 179.8 159.8L179.8 261.7L91.5 312.7C74.2 322.7 63.5 341.2 63.5 361.2L63.5 458.5C63.5 478.5 74.2 497 91.5 507L175.8 555.6C193.1 565.6 214.5 565.6 231.8 555.6L320.1 504.6L408.4 555.6C425.7 565.6 447.1 565.6 464.4 555.6L548.5 507C565.8 497 576.5 478.5 576.5 458.5L576.5 361.2C576.5 341.2 565.8 322.7 548.5 312.7L460.2 261.7L460.2 159.8C460.2 139.8 449.5 121.3 432.2 111.3L348 62.7zM296 356.6L296 463.1L207.7 514.1C206.5 514.8 205.1 515.2 203.7 515.2L203.7 409.9L296 356.6zM527.4 357.2C528.1 358.4 528.5 359.8 528.5 361.2L528.5 458.5C528.5 461.4 527 464 524.5 465.4L440.2 514C439 514.7 437.6 515.1 436.2 515.1L436.2 409.8L527.4 357.2zM412.3 159.8L412.3 261.7L320 315L320 208.5L411.2 155.9C411.9 157.1 412.3 158.5 412.3 159.9z"/></svg>
+    <button>Dropper</button>
+  </div>
+</a>
+</main>
+<script type="module" src="/home.js"></script>
 </body>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js');
-      });
-    }
-  </script>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E9LNEMG4G5"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-E9LNEMG4G5');
-</script>
 </html>

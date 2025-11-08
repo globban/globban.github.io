@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Algot.fun</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="manifest" href="/manifest.json">
+
   <style>
     * {
       box-sizing: border-box;
@@ -19,7 +21,7 @@
       margin: 0;
       font-family: 'Dot';
       color: #eee;
-      background: #000;
+      background: url('/blob-scene-haikei.png');
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -87,6 +89,7 @@
       100% { filter: blur(0); opacity: 1; display: flex;}
     }
 
+
   </style>
 </head>
 
@@ -101,24 +104,41 @@
     <a href="/Tools.html"><i class="fa-solid fa-tools"></i>Tools</a>
     <a href="/MC.html"><i class="fa-solid fa-cube"></i>MC</a>
   </div>
-  <div id="your-element-selector"></div>
+  <button id="installBtn" style="display: block; position: absolute; top: 16px; right: 16px; z-index: 999; font-size: 16px; padding: 10px 18px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border: none; border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px; cursor: pointer; width: 200px;">
+  Install<i class="fa-solid fa-download"></i>
+</button>
+ <script>
+  const installBtn = document.getElementById("installBtn");
+  let deferredPrompt;
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
-  <script>
-    VANTA.DOTS({
-      el: "#your-element-selector",
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00,
-      color: 0x00ff00,
-      color2: 0x00ff00,
-      backgroundColor: 0x000000
-    })
-  </script>
+  document.body.style.backdropFilter = 'hue-rotate(' + (Math.random() * 360) + 'deg)';
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = "block";
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    installBtn.style.display = "none";
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    deferredPrompt = null;
+  });
+
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    installBtn.style.display = "block";
+  } else {
+    installBtn.style.display = "none";
+  }
+
+  // Register Service Worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+  }
+</script>
+
 </body>
 </html>

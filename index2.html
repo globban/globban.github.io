@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algot.fun</title>
+  <link rel="icon" href="/favicon.png"/>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: 'Dot';
+      src: url('/dot.ttf');
+    }
+    @font-face {
+      font-family: 'IMPACT';
+      src: url('/IMPACT.ttf');
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      overflow: hidden;
+      background: #000;
+      box-sizing: border-box;
+      touch-action: manipulation;
+      font-family: 'Dot', Arial, sans-serif;
+      color: #eee;
+      min-height: 100vh;
+      background-color: #000000;
+    }
+
+    header {
+      font-family: 'Dot', Arial, sans-serif;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 75px;
+      background: rgba(20, 20, 20, 0.35);
+      color: #fff;
+      padding-left: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      letter-spacing: 0.05em;
+    }
+
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 1.5em;
+      margin-right: 5em;
+      transition: all 0.3s;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.1em;
+      padding: 0.3em 1em;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      transition: background 0.2s;
+    }
+    header a:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    .mobile-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2em;
+      margin: 2em auto 0 auto;
+      padding: 1.2em 0.5em 1.2em 0.5em;
+      max-width: 90vw;
+      background: rgba(30, 30, 40, 0); /* more transparent */
+      border-radius: 18px;
+      position: relative;
+      top: 85px;
+      z-index: 1002; /* above #background and header */
+     
+
+    }
+
+    main {
+      position: absolute;
+      top: 50vh;
+      left: 50vw;
+      transform: translate(-50%, -50%);
+      padding: 2em;
+      text-align: center;
+      z-index: 1;
+      color: #ffffff;
+      font-size: fill-available;
+      width: 100vw;
+    }
+
+    h1 {
+      font-family: Impact;
+      font-size: 4em;
+    }
+
+    h2 {
+      font-family: 'Dot', Arial, sans-serif;
+    }
+
+  </style>
+
+</head>
+<script>
+  // Simple mobile redirect
+(function() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isMobile = /android|iphone|ipad|ipod|windows phone|blackberry|mobile/i.test(ua);
+
+  if (isMobile) {
+    window.location.replace("/mobile.html");
+  }
+})();
+
+</script>
+  <header>
+    <h2>Algot.fun</h2>
+    <div class="links" id="navLinks">
+      <a href="https://chat-4r5m.onrender.com/">Chat</a>
+      <a href="/Games.html">Games</a>
+      <a href="/Tools.html">Tools</a>
+    </div>
+  </header>
+  <main>
+    <h1>WELCOME TO ALGOT.FUN</h1>
+  </main>
+  <a href="/MC.html"><img style="width:64px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; position: absolute; bottom: 20px; right: 20px; backdrop-filter: blur(8px); background-color: #00000000; z-index: 1000;" src="/mc.png" alt="Minecraft Icon"></a>
+  <!-- Mobile nav will be injected here if needed -->
+  <iframe id="background" src="/background.html" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;border:none;"></iframe>
+  "></iframe>
+</body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js');
+      });
+    }
+  </script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E9LNEMG4G5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-E9LNEMG4G5');
+</script>
+</html>

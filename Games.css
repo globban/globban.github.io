@@ -37,13 +37,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Start area shown on page load: centered search + categories */
 #start-area {
-  max-height: 70vh;
+  padding: 0px;
+  margin: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 18px;
-  padding: 48px 20px;
   text-align: center;
 }
 
@@ -85,21 +85,16 @@ h1, h2, h3, h4, h5, h6 {
 .game-card::after {
   content: '';
   position: absolute;
-  inset: -2px;
+  inset: 0px;
   z-index: 1;
   background: conic-gradient(
     from var(--gradient-angle, 0deg),
-   #e81cff, /* Purple */
-    #c34aff, /* Violet */
-    #c84eff, /* Indigo */
-    #40c9ff, /* Blue */
-    #00eaff, /* Cyan */
-    #00ff7f, /* Spring Green */
-    #ffea00, /* Yellow */
-    #ff7f00, /* Orange */
-    #ff0000  /* Red */
+    #ffffff,
+    #000000, 
+    #000000,
+    #ffffff
   );
-  border-radius: 16px;
+  border-radius: 12px;
   animation: rotation 5s linear infinite;
   opacity: 0;
   transition: opacity 0.3s;
@@ -108,7 +103,7 @@ h1, h2, h3, h4, h5, h6 {
 
 
 .game-card::after {
-  filter: blur(15px);
+  filter: blur(20px);
 }
 
 .game-card:hover::before,
@@ -185,15 +180,10 @@ pre {
   z-index: 1;
   background: conic-gradient(
     from var(--gradient-angle, 0deg),
-    #e81cff,
-    #c34aff,
-    #c84eff,
-    #40c9ff,
-    #00eaff,
-    #00ff7f,
-    #ffea00,
-    #ff7f00,
-    #ff0000
+    #ffffff,
+    #000000, 
+    #000000,
+    #ffffff
   );
   filter: blur(5px) saturate(1.1);
   animation: forwards rotation 10s linear infinite;

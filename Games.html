@@ -7,36 +7,32 @@
     <link rel="stylesheet" type="text/css" href="/Games.css">
     <title>Games Library</title>
    
-<script src="/particles.js"></script>
 </head>
 
 <body>
     <div id="background"></div>
     <!-- New Tab mode toggle (top-left) -->
-    <div id="newtab-control" style="position:fixed;left:8px;top:8px;z-index:3;">
+     <div onclick="togglesettings()" id="settings-btn" style="position:fixed;left:8px;top:8px;z-index:3;">
+       <i class="fas fa-ellipsis-vertical" style="font-size:32px"></i>
+     </div >
+    <div id="settings-menu" style="position:fixed;left:8px;top:50px;z-index:3; display:none;">
+    <div id="newtab-control">
       <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
         <input type="checkbox" id="newtab-toggle"> Hide tab
       </label>
     </div>
-
+    </div>
     <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
   <!-- Back button (reloads page) -->
   <!-- back button removed; navigation handled in-page -->
   <!-- Start area: centered search and categories -->
   <div id="start-area">
-    <pre class="start-logo">  ________                              
- /  _____/_____    _____   ____   ______
-/   \  ___\__  \  /     \_/ __ \ /  ___/
-\    \_\  \/ __ \|  Y Y  \  ___/ \___ \ 
- \______  (____  |__|_|  /\___  /____  >
-        \/     \/      \/     \/     \/
-</pre>
 <!-- Compact floating panel for hide-tab settings (injected/controlled by JS) -->
 
 
     <div class="search-container">
       <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on">
-    </div><div id="category-tabs" class="tabs-container"></div>
+    </div><div id="category-tabs" class="tabs-container" style="padding-bottom: 30px;"></div>
   <!-- recently-played now renders in the main library when Recents tab is used -->
     
   </div>
@@ -54,61 +50,18 @@
              <button id="fullscreen-btn" style="padding: 10px 20px; font-size: 1em;">Toggle Fullscreen</button>
         </div>
     </div>
-    <div id="particles-js"></div>
-
-<script>
-particlesJS("particles-js", {
-  particles: {
-    number: {
-      value: 30,
-      density: { enable: true, value_area: 800 }
-    },
-    color: { value: "#ffffff" },
-    shape: { type: "circle" },
-    opacity: {
-      value: 0.5,
-      random: false
-    },
-    size: {
-      value: 3,
-      random: true
-    },
-    line_linked: {
-      enable: true,
-      distance: 150,
-      color: "#ffffff",
-      opacity: 0.4,
-      width: 1
-    },
-    move: {
-      enable: true,
-      speed: 2,
-      direction: "none",
-      random: false,
-      straight: false,
-      out_mode: "out",
-      attract: { enable: false }
-    }
-  },
-  interactivity: {
-    detect_on: "window",
-    events: {
-      onhover: { enable: true, mode: "repulse" },
-      onclick: { enable: true, mode: "none" },
-      resize: true
-    },
-    modes: {
-      repulse: { distance: 200, duration: 2 },
-      push: { particles_nb: 3 },
-      bubble: { distance: 210}
-    }
-  },
-  retina_detect: true
-});
-</script>
 </body>
 </html>
 <script>
+
+  function togglesettings() {
+    const menu = document.getElementById('settings-menu');
+    if (menu.style.display === 'none' || menu.style.display === '') {
+      menu.style.display = 'block';
+    } else {
+      menu.style.display = 'none';
+    }
+  }
 window.addEventListener('DOMContentLoaded', () => {
 
   // Attach click handlers to static cards

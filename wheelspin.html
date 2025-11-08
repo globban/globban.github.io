@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wheel of Names</title>
+  <style>
+    body {
+      background: #202020;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    canvas {
+      margin-top: 20px;
+      background: #111;
+      border-radius: 50%;
+    }
+    textarea {
+      width: 300px;
+      height: 100px;
+      border-radius: 5px;
+      border: none;
+      padding: 10px;
+      resize: none;
+      background: #333;
+      color: #fff;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wheel of Names</h1>
+  <textarea id="namesInput" placeholder="Enter names, one per line">algot fun wheel</textarea><br>
+  <button id="spin">Spin</button>
+  <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  <h2 id="result"></h2>
+
+  <script>
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    let names = [];
+    let arc = 0;
+    let startAngle = 0;
+    let spinAngle = 0;
+    let spinTime = 0;
+    let spinTimeTotal = 0;
+    let spinning = false;
+
+    function drawWheel() {
+      const outsideRadius = 180;
+      const textRadius = 150;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < names.length; i++) {
+        const angle = startAngle + i * arc;
+        ctx.fillStyle = `hsl(${(i * 360) / names.length}, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, canvas.height / 2);
+        ctx.arc(canvas.width / 2, canvas.height / 2, outsideRadius, angle, angle + arc, false);
+        ctx.lineTo(canvas.width / 2, canvas.height / 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 20px Arial'; // Set the font size and style
+        ctx.translate(canvas.width / 2 + Math.cos(angle + arc / 2) * textRadius,
+                      canvas.height / 2 + Math.sin(angle + arc / 2) * textRadius);
+        ctx.rotate(angle + arc / 2 + Math.PI / 2);
+        ctx.fillText(names[i], -ctx.measureText(names[i]).width / 2, 0);
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, canvas.height / 2 - outsideRadius);
+      ctx.lineTo(canvas.width / 2 + 10, canvas.height / 2 - outsideRadius - 20);
+      ctx.lineTo(canvas.width / 2 - 10, canvas.height / 2 - outsideRadius - 20);
+      ctx.closePath();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+
+    function rotateWheel() {
+      spinTime += 9;
+    if (spinTime >= spinTimeTotal) {
+      rotateWheel._lastSpinAngle = 0;
+      stopRotateWheel();
+      return;
+    }
+
+    // Use the eased total angle but apply only the delta since last frame
+    const eased = easeOut(spinTime, 0, spinAngle, spinTimeTotal); // degrees
+    const last = rotateWheel._lastSpinAngle || 0;
+    const deltaDeg = eased - last;
+    rotateWheel._lastSpinAngle = eased;
+
+    // convert degrees to radians and apply the incremental change (negative to match original direction)
+    startAngle += (deltaDeg * Math.PI / 180) * -10;
+
+    drawWheel();
+    requestAnimationFrame(rotateWheel);
+    return;
+      const spinAngleChange = easeOut(spinTime, 0, spinAngle, spinTimeTotal);
+      startAngle += (spinAngleChange * Math.PI);
+      drawWheel();
+      requestAnimationFrame(rotateWheel);
+    }
+
+    function stopRotateWheel() {
+      const degrees = (startAngle * 180) / Math.PI + 90;
+      const arcd = (arc * 180) / Math.PI;
+      const index = Math.floor((360 - (degrees % 360)) / arcd) % names.length;
+      document.getElementById('result').textContent = `Result: ${names[index]}`;
+      spinning = false;
+    }
+
+    function easeOut(t, b, c, d) {
+      const ts = (t /= d) * t;
+      const tc = ts * t;
+      return b + c * (tc + -3 * ts + 3 * t);
+    }
+
+    function loadNames() {
+      const input = document.getElementById('namesInput').value.trim();
+      if (!input) return;
+    names = input.split(/[,\s]+/).map(n => n.trim()).filter(Boolean);
+      arc = (2 * Math.PI) / names.length;
+      drawWheel();
+    }
+
+    document.getElementById('namesInput').addEventListener('input', loadNames);
+
+    // add "remove chosen" checkbox next to the Spin button
+    (function(){
+      const spinBtn = document.getElementById('spin');
+      const label = document.createElement('label');
+      label.style.marginLeft = '10px';
+      label.style.color = 'white';
+      label.style.fontSize = '20px';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'removeChosen';
+      checkbox.style.marginRight = '6px';
+
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode('Knockout'));
+      spinBtn.insertAdjacentElement('afterend', label);
+    })();
+
+    // start a spin
+    document.getElementById('spin').onclick = () => {
+      if (spinning || names.length === 0) return;
+      spinning = true;
+      rotateWheel._lastSpinAngle = 0;
+      spinAngle = Math.random() * 720 + 360;
+      spinTime = 0;
+      spinTimeTotal = Math.random() * 6000 + 7000;
+      rotateWheel();
+    };
+
+    // override stopRotateWheel to remove chosen option and optionally auto-spin
+    function stopRotateWheel() {
+      const degrees = (startAngle * 180) / Math.PI + 90;
+      const arcd = (arc * 180) / Math.PI;
+      const index = Math.floor((360 - (degrees % 360)) / arcd) % names.length;
+      const resultEl = document.getElementById('result');
+
+      resultEl.textContent = `Result: ${names[index]}`;
+      spinning = false;
+
+      const removeChecked = document.getElementById('removeChosen') && document.getElementById('removeChosen').checked;
+      if (!removeChecked) return;
+
+      // remove the chosen name
+      names.splice(index, 1);
+
+      // keep the textarea in sync (one name per line)
+      document.getElementById('namesInput').value = names.join('\n');
+
+      // update arc and redraw wheel
+      if (names.length > 0) {
+        arc = (2 * Math.PI) / names.length;
+      } else {
+        arc = 0;
+      }
+      drawWheel();
+
+      // if more than one left, auto-spin again after a short delay
+      if (names.length > 1) {
+        setTimeout(() => {
+          if (names.length <= 1) {
+            if (names.length === 1) resultEl.textContent = `Final winner: ${names[0]}`;
+            else resultEl.textContent = `No names left`;
+            return;
+          }
+          // start another spin
+          spinning = true;
+          rotateWheel._lastSpinAngle = 0;
+          spinAngle = Math.random() * 720 + 360;
+          spinTime = 0;
+          spinTimeTotal = Math.random() * 6000 + 7000;
+          rotateWheel();
+        }, 700);
+      } else if (names.length === 1) {
+        resultEl.textContent = `Final winner: ${names[0]}`;
+      } else {
+        resultEl.textContent = `No names left`;
+      }
+    }
+
+    window.onload = loadNames;
+  </script>
+</body>
+</html>
