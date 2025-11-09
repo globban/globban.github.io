@@ -104,7 +104,7 @@
     <a href="/Tools.html"><i class="fa-solid fa-tools"></i>Tools</a>
     <a href="/MC.html"><i class="fa-solid fa-cube"></i>MC</a>
   </div>
-  <button id="installBtn" style="display: block; position: absolute; top: 16px; right: 16px; z-index: 999; font-size: 16px; padding: 10px 18px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border: none; border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px; cursor: pointer; width: 200px;">
+  <button id="installBtn" style="display: none; position: absolute; top: 16px; right: 16px; z-index: 999; font-size: 16px; padding: 10px 18px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border: none; border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px; cursor: pointer; width: 200px;">
   Install<i class="fa-solid fa-download"></i>
 </button>
  <script>
@@ -113,30 +113,60 @@
 
   document.body.style.backdropFilter = 'hue-rotate(' + (Math.random() * 360) + 'deg)';
 
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = "block";
-  });
+  // Ensure the button exists before attaching listeners and hide it by default
+  if (installBtn) {
+    installBtn.style.display = 'none';
 
-  installBtn.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-    installBtn.style.display = "none";
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-    deferredPrompt = null;
-  });
+    window.addEventListener("beforeinstallprompt", (e) => {
+      // Prevent the automatic prompt and save the event for later
+      e.preventDefault();
+      deferredPrompt = e;
+      // Show the install button when install is possible
+      installBtn.style.display = "block";
+      console.log('beforeinstallprompt fired, install button shown');
+    });
 
-  if (!window.matchMedia('(display-mode: standalone)').matches) {
-    installBtn.style.display = "block";
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        console.log('No deferredPrompt available');
+        return;
+      }
+
+      // Hide button while prompt is active
+      installBtn.style.display = "none";
+
+      // Show the browser install prompt
+      deferredPrompt.prompt();
+
+      try {
+        const choiceResult = await deferredPrompt.userChoice;
+        console.log('User response to the install prompt:', choiceResult);
+      } catch (err) {
+        console.warn('Error waiting for userChoice:', err);
+      } finally {
+        deferredPrompt = null;
+      }
+    });
+
+    // If already in standalone mode, keep hidden
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      installBtn.style.display = "none";
+    }
   } else {
-    installBtn.style.display = "none";
+    console.warn('Install button element not found');
   }
 
-  // Register Service Worker
+  // Optional: handle appinstalled to hide the button after install
+  window.addEventListener('appinstalled', (evt) => {
+    console.log('PWA was installed.', evt);
+    if (installBtn) installBtn.style.display = 'none';
+  });
+
+  // Register Service Worker with error handling
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js");
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
   }
 </script>
 
