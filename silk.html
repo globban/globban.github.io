@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silk Road</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+  }
+  canvas {
+    width: 360px;
+    height: 780px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 0 50px rgba(255,255,255,0.1);
+    filter: hue-rotate(var(--hue,0deg)) brightness(var(--brightness,1)) contrast(var(--contrast,1)) blur(var(--blur,0px)) saturate(var(--saturate,1));
+  }
+  button, input[type="range"], input[type="color"] {
+    margin: 10px;
+  }
+
+    #settings {
+        margin-top: 15px;
+        display: inline-block;
+        text-align: left;
+        border: 1px solid #555;
+        padding: 10px;
+        border-radius: 8px;
+        background: #111;
+        display: none;
+        flex-direction: row;
+
+    }
+
+    button {
+        background: #222;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+</style>
+</head>
+<body>
+  <h1>Silk wallpaper generator</h1>
+  <div>
+    <button onclick="generate()">Generate</button>
+    <button onclick="download()">Download</button>
+  </div>
+  <div>
+    <label>Top color <input type="color" id="color1" value="#ff0000"></label>
+    <label>Bottom color <input type="color" id="color2" value="#0000ff"></label>
+    <label>Gradient strength <input type="range" id="gradientStrength" min="0" max="1" step="0.01" value="0.7"></label>
+    <label>Size <input type="range" id="height" min="100" max="4000" value="2532">X<input type="range" id="width" min="100" max="4000" value="1170"></label>
+
+    <script>
+    // Override the download function after the page scripts run.
+    // This reads pixels from the WebGL framebuffer (avoids needing preserveDrawingBuffer).
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('wallpaper');
+      // get the same GL context (returns existing one)
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+      window.download = function() {
+        // Ensure a frame is drawn (use same drawFrame declared in main script)
+        try { drawFrame(Math.random() * 100.0); } catch (e) { /* ignore if not available */ }
+
+        const w = canvas.width;
+        const h = canvas.height;
+        const pixels = new Uint8Array(w * h * 4);
+
+        // Ensure rendering finished, then read pixels
+        if (gl && gl.finish) gl.finish();
+        gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+        // Create a 2D canvas and copy flipped pixels (WebGL has bottom-left origin)
+        const tmp = document.createElement('canvas');
+        tmp.width = w;
+        tmp.height = h;
+        const ctx = tmp.getContext('2d');
+        const imageData = ctx.createImageData(w, h);
+
+        for (let y = 0; y < h; y++) {
+          const srcRow = y * w * 4;
+          const dstRow = (h - y - 1) * w * 4;
+          for (let i = 0; i < w * 4; i++) {
+            imageData.data[dstRow + i] = pixels[srcRow + i];
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        const a = document.createElement('a');
+        a.href = tmp.toDataURL('image/png');
+        a.download = 'oled_shader_wallpaper.png';
+        a.click();
+      };
+    });
+    </script>
+  </div>
+  <canvas id="wallpaper" width="1170" height="2532"></canvas>
+
+<script>
+
+
+
+    function settings(){
+        const settingsDiv = document.getElementById('settings');
+        if(settingsDiv.style.display === 'inline-block'){
+            settingsDiv.style.display = 'none';
+        } else {
+            settingsDiv.style.display = 'inline-block';
+        }
+    }
+const canvas = document.getElementById('wallpaper');
+const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+if (!gl) {
+  alert('WebGL not supported in this browser.');
+  throw new Error('WebGL not supported');
+}
+
+// Inputs for dynamic output size
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function resizeCanvasToInputs() {
+  // parse inputs and clamp to allowed range
+  const w = clamp(parseInt(widthInput.value, 10) || canvas.width || 1170, 100, 16000);
+  const h = clamp(parseInt(heightInput.value, 10) || canvas.height || 2532, 100, 16000);
+  canvas.width = w;
+  canvas.height = h;
+
+  // Scale for on-page preview while keeping real output resolution for download
+const previewMaxWidth = 1000;
+const previewMaxHeight = 1000;
+canvas.style.cursor = 'crosshair'; // Change cursor to crosshair for better UX
+const scaleX = previewMaxWidth / w;
+const scaleY = previewMaxHeight / h;
+const scale = Math.min(scaleX, scaleY, 1);
+canvas.style.width = Math.round(w * scale) + 'px';
+canvas.style.height = Math.round(h * scale) + 'px';
+
+  // update WebGL viewport to new pixel size
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+// initialize from inputs and keep canvas in sync when user changes values
+resizeCanvasToInputs();
+widthInput.addEventListener('input', resizeCanvasToInputs);
+heightInput.addEventListener('input', resizeCanvasToInputs);
+
+const vertShaderSrc = `
+attribute vec2 a_position;
+void main(){
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+const fragShaderSrc = `
+precision highp float;
+uniform vec2 iResolution;
+uniform float iTime;
+uniform vec3 color1; // top color
+uniform vec3 color2; // bottom color
+uniform float gradientStrength; // 0..1 blend between procedural and gradient
+
+void mainImage(out vec4 fragColor, vec2 fragCoord) {
+  float mr = min(iResolution.x, iResolution.y);
+  vec2 uv = (fragCoord * 2.0 - iResolution.xy) / mr;
+
+  float d = -iTime * 0.5;
+  float a = 0.0;
+  for (float i = 0.0; i < 8.0; ++i) {
+    a += cos(i - d - a * uv.x);
+    d += sin(uv.y * i + a);
+  }
+  d += iTime * 0.5;
+    
+  // Procedural base color
+  float r = cos(uv.x * d) * 0.6 + 0.4;
+  float g = cos(uv.y * a) * 0.5 + 0.5;
+  float b = cos(a + d) * 0.5 + 0.5;
+  vec3 base = vec3(r, g, b);
+
+  base = cos(base * cos(vec3(d, a, 2.5)) * 0.5 + 0.5);
+  vec3 procCol = mix(color1, color2, base.r);
+
+  // Vertical gradient: bottom (y=0) -> color2, top (y=iResolution.y) -> color1
+  float t = fragCoord.y / iResolution.y;
+  vec3 gradient = mix(color2, color1, t);
+
+  // Blend procedural color with gradient according to gradientStrength
+  vec3 col = mix(procCol, gradient, clamp(gradientStrength, 0.0, 1.0));
+  fragColor = vec4(col, 1.0);
+}
+
+void main(){
+  mainImage(gl_FragColor, gl_FragCoord.xy);
+}`;
+
+function compileShader(gl, src, type){
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, src);
+  gl.compileShader(shader);
+  if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+    console.error(gl.getShaderInfoLog(shader));
+  }
+  return shader;
+}
+
+const vertShader = compileShader(gl, vertShaderSrc, gl.VERTEX_SHADER);
+const fragShader = compileShader(gl, fragShaderSrc, gl.FRAGMENT_SHADER);
+const program = gl.createProgram();
+gl.attachShader(program, vertShader);
+gl.attachShader(program, fragShader);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+const posLoc = gl.getAttribLocation(program, 'a_position');
+const buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1, -1, 1, -1, -1, 1,
+  -1, 1, 1, -1, 1, 1
+]), gl.STATIC_DRAW);
+gl.enableVertexAttribArray(posLoc);
+gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+const iResolution = gl.getUniformLocation(program, 'iResolution');
+const iTime = gl.getUniformLocation(program, 'iTime');
+const color1Loc = gl.getUniformLocation(program, 'color1');
+const color2Loc = gl.getUniformLocation(program, 'color2');
+const gradientStrengthLoc = gl.getUniformLocation(program, 'gradientStrength');
+
+function hexToRgb(hex){
+  const bigint = parseInt(hex.slice(1), 16);
+  return [((bigint >> 16) & 255) / 255, ((bigint >> 8) & 255) / 255, (bigint & 255) / 255];
+}
+
+function drawFrame(time){
+  const c1 = hexToRgb(document.getElementById('color1').value);
+  const c2 = hexToRgb(document.getElementById('color2').value);
+  const gstr = parseFloat(document.getElementById('gradientStrength')?.value || 0.7);
+  gl.uniform2f(iResolution, canvas.width, canvas.height);
+  gl.uniform1f(iTime, time);
+  gl.uniform3fv(color1Loc, c1);
+  gl.uniform3fv(color2Loc, c2);
+  if (gradientStrengthLoc) gl.uniform1f(gradientStrengthLoc, gstr);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+function generate(){
+  const time = Math.random()*100.0; // random frame for variety
+  drawFrame(time);
+}
+
+document.querySelectorAll('input[type="range"]').forEach(input => {
+  input.addEventListener('input', () => {
+    document.body.style.setProperty('--hue', document.getElementById('hue').value + 'deg');
+    document.body.style.setProperty('--brightness', document.getElementById('brightness').value);
+    document.body.style.setProperty('--contrast', document.getElementById('contrast').value);
+    document.body.style.setProperty('--blur', document.getElementById('blur').value + 'px');
+    document.body.style.setProperty('--saturate', document.getElementById('saturate').value);
+  });
+});
+
+function download(){
+  const dataURL = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataURL;
+  a.download = 'oled_shader_wallpaper.png';
+  a.click();
+}
+</script>
+</body>
+</html>

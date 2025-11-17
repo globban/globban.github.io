@@ -21,7 +21,8 @@
       margin: 0;
       font-family: 'Dot';
       color: #eee;
-      background: url('/blob-scene-haikei.png');
+      background: url('/wp.png') no-repeat center center fixed;
+      background-size: cover; 
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -30,14 +31,6 @@
     }
 
     /* Vanta background container */
-    #your-element-selector {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-    }
 
     /* Intro title */
     h1 {
@@ -50,8 +43,8 @@
     /* Options container */
     #options {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50vh;
+      left: 50vw;
       transform: translate(-50%, -50%);
       z-index: 2;
       display: flex;
@@ -67,7 +60,7 @@
         backdrop-filter: blur(8px);
       padding: 18px 40px;
       border-radius: 12px;
-      background: rgb(0, 0, 0);
+      background: rgba(0, 0, 0, 0.5);
       color: #ffffff;
       font-size: 2.5em;
       text-decoration: none;
@@ -108,10 +101,11 @@
   Install<i class="fa-solid fa-download"></i>
 </button>
  <script>
+  
+  document.body.style.backdropFilter = `hue-rotate(${Math.random() * 360}deg)`;
+
   const installBtn = document.getElementById("installBtn");
   let deferredPrompt;
-
-  document.body.style.backdropFilter = 'hue-rotate(' + (Math.random() * 360) + 'deg)';
 
   // Ensure the button exists before attaching listeners and hide it by default
   if (installBtn) {
