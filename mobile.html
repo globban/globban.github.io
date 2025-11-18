@@ -3,106 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Algot.fun</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <link rel="manifest" href="/manifest.json">
-
+  <title>Home</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    @font-face {
-      font-family: 'Dot';
-      src: url('/dot.ttf');
-    }
-
     body {
       margin: 0;
-      font-family: 'Dot';
-      color: #eee;
-      background: url('/wp.png') no-repeat center center fixed;
-      background-size: cover; 
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0a0f24, #1b2a4a);
+      color: white;
       height: 100vh;
-    }
-
-    /* Vanta background container */
-
-    /* Intro title */
-    h1 {
-      z-index: 2;
-      position: relative;
-      font-size: 3em;
-      text-shadow: 0 0 10px #fff;
-    }
-
-    /* Options container */
-    #options {
-      position: absolute;
-      top: 50vh;
-      left: 50vw;
-      transform: translate(-50%, -50%);
-      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      opacity: 0;
-      animation: fade-in 2s forwards;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    /* Links */
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+      text-align: center;
+      animation: fadeIn 1.2s ease;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 80%;
+      max-width: 300px;
+    }
+
     a {
-        backdrop-filter: blur(8px);
-      padding: 18px 40px;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.5);
-      color: #ffffff;
-      font-size: 2.5em;
       text-decoration: none;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 16px;
+      border-radius: 14px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      backdrop-filter: blur(6px);
+      transition: 0.22s;
+      border: 1px solid rgba(255,255,255,0.15);
+      animation: slideUp 0.9s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      transition: all 0.3s ease;
-      width: 100%;
+      gap: 12px;
+    }
+
+    a i {
+      font-size: 1.4rem;
+      display: inline-block;
     }
 
     a:hover {
-      background: rgba(255, 255, 255, 0.3);
       transform: scale(1.05);
+      background: rgba(255,255,255,0.18);
     }
 
-    @keyframes fade-in {
-      0% {filter: blur(15px); opacity: 0; display: none;}
-      100% { filter: blur(0); opacity: 1; display: flex;}
+    /* Floating particles */
+    .particle {
+      position: absolute;
+      background: white;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      opacity: 0.25;
+      animation: floatUp 8s linear infinite;
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(50vh); }
+      to { transform: translateY(-50vh); }
+    }
   </style>
 </head>
-
 <body>
-  
-
-
-  <div id="options">
-    <h1>Algot.fun</h1>
-    <a href="/gameswipe.html"><i class="fa-solid fa-gamepad"></i>Games</a>
-    <a href="https://chat-4r5m.onrender.com/"><i class="fa-solid fa-comment"></i>Chat</a>
-    <a href="/Tools.html"><i class="fa-solid fa-tools"></i>Tools</a>
-    <a href="/MC.html"><i class="fa-solid fa-cube"></i>MC</a>
-  </div>
-  <button id="installBtn" style="display: none; position: absolute; top: 16px; right: 16px; z-index: 999; font-size: 16px; padding: 10px 18px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border: none; border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px; cursor: pointer; width: 200px;">
+   <button id="installBtn" style="display: none; position: absolute; bottom: 16px; right: 50%; transform: translateX(50%); z-index: 999; font-size: 16px; padding: 10px 18px; background: rgb(40, 167, 69); color: rgb(255, 255, 255); border: none; border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px; cursor: pointer; width: 200px;">
   Install<i class="fa-solid fa-download"></i>
 </button>
- <script>
-  
-  document.body.style.backdropFilter = `hue-rotate(${Math.random() * 360}deg)`;
+  <img src="logo.svg" alt="Logo" style="width:320px;height:auto;margin-bottom:20px; filter: drop-shadow(0px 0px 6px #fff);" />
+
+  <h1>Welcome</h1>
+
+  <div class="menu">
+    <a href="gameswipe.html"><i class="fa-solid fa-gamepad"></i>Games</a>
+    <a href="Tools.html"><i class="fa-solid fa-wrench"></i>Tools</a>
+    <a href="https://chat-4r5m.onrender.com"><i class="fa-solid fa-comments"></i>Chat</a>
+    <a href="/MC.html"><i class="fa-solid fa-cube"></i>Minecraft</a>
+  </div>
+
+  <script>
+    // Generate floating particles
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = 6 + Math.random() * 10 + 's';
+      p.style.opacity = 0.15 + Math.random() * 0.3;
+      document.body.appendChild(p);
+    }
+  </script>
+   <script>
 
   const installBtn = document.getElementById("installBtn");
   let deferredPrompt;
@@ -163,6 +178,5 @@
     });
   }
 </script>
-
 </body>
 </html>

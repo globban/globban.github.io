@@ -10,16 +10,18 @@
 </head>
 
 <body>
-    <div id="background"></div>
     <!-- New Tab mode toggle (top-left) -->
-     <div onclick="togglesettings()" id="settings-btn" style="position:fixed;left:8px;top:8px;z-index:3;">
+     <div onclick="togglesettings()" id="settings-btn" style="position:fixed;left:8px;top:8px;z-index:3; cursor:pointer;color:#fff;padding:6px 8px;background:rgba(0,0,0,0.5);border-radius:8px;font-size:0.95rem;">
        <i class="fas fa-ellipsis-vertical" style="font-size:32px"></i>
+       
      </div >
     <div id="settings-menu" style="position:fixed;left:8px;top:50px;z-index:3; display:none;">
     <div id="newtab-control">
       <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
-        <input type="checkbox" id="newtab-toggle"> Hide tab
-      </label>
+        <input type="checkbox" id="newtab-toggle"> Hide tab</label>
+        <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
+        <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url </label>
+
     </div>
     </div>
     <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
@@ -31,7 +33,8 @@
 
 
     <div class="search-container">
-      <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on">
+      <button id="random" onclick="random()"><i class="fas fa-dice-five"></i></button>
+      <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div><div id="category-tabs" class="tabs-container" style="padding-bottom: 30px;"></div>
   <!-- recently-played now renders in the main library when Recents tab is used -->
     
@@ -61,6 +64,26 @@
     } else {
       menu.style.display = 'none';
     }
+  }
+
+  document.getElementById('background').addEventListener('change', (e) => {
+    const url = e.target.value.trim();
+    if (url) {
+      changeBackground(url);
+    }
+  });
+
+  const savedBgUrl = localStorage.getItem('games_bg_url');
+  if (savedBgUrl) {
+    changeBackground(savedBgUrl);
+  }
+
+  function changeBackground(url) {
+    document.body.style.backgroundImage = `url(${url})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    localStorage.setItem('games_bg_url', url);
   }
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -113,6 +136,16 @@ searchInput.addEventListener('keydown', (e) => {
     })
     .catch(err => console.error('Failed to load games.json:', err));
 });
+
+function random() {
+  const games = window.__gamesData || [];
+  if (games.length === 0) return;
+  const randomIndex = Math.floor(Math.random() * games.length);
+  const game = games[randomIndex];
+  const url = game.customurl ? game.customurl : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
+  const showPurpleRect = !game.customurl; // showPurpleRect = true for original games
+  openGame(url, showPurpleRect);
+}
 
 // Initialize lazy loader on DOMContentLoaded as well
 document.addEventListener('DOMContentLoaded', () => initLazyLoader());
