@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "bit888"
+    "default": "algotrip",
+    "second": "bit888",
+    "third": "algo67"
   }
 }
