@@ -20,8 +20,8 @@
       <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
         <input type="checkbox" id="newtab-toggle"> Hide tab</label>
         <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
-        <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url </label>
-
+        <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url 
+        <button id="reset-btn" onclick="localStorage.clear()" style="display:flex;align-items:center;gap:8px;background:rgba(255, 0, 0, 0.253);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">Reset all</button></label>
     </div>
     </div>
     <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
@@ -33,12 +33,16 @@
 
 
     <div class="search-container">
-      <button id="random" onclick="random()"><i class="fas fa-dice-five"></i></button>
+      <button id="roll-btn"><i class="fas fa-dice-five"></i></button>
       <input type="text" id="game-search" placeholder="Search games..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div><div id="category-tabs" class="tabs-container" style="padding-bottom: 30px;"></div>
   <!-- recently-played now renders in the main library when Recents tab is used -->
     
   </div>
+<div id="roll-wrapper">
+  <div id="roll-strip"></div>
+  <div id="pointer" aria-hidden="true"></div>
+</div>
 
   <!-- Library container (hidden until user interacts) -->
   <div class="library-container"></div>
@@ -74,9 +78,11 @@
   });
 
   const savedBgUrl = localStorage.getItem('games_bg_url');
-  if (savedBgUrl) {
-    changeBackground(savedBgUrl);
-  }
+
+  if (savedBgUrl && savedBgUrl !== "#000000") {
+  changeBackground(savedBgUrl);
+}
+
 
   function changeBackground(url) {
     document.body.style.backgroundImage = `url(${url})`;
@@ -136,17 +142,6 @@ searchInput.addEventListener('keydown', (e) => {
     })
     .catch(err => console.error('Failed to load games.json:', err));
 });
-
-function random() {
-  const games = window.__gamesData || [];
-  if (games.length === 0) return;
-  const randomIndex = Math.floor(Math.random() * games.length);
-  const game = games[randomIndex];
-  const url = game.customurl ? game.customurl : `https://games.crazygames.com/en_US/${game.gameid}/index.html?skipPrerollFirstSession=true`;
-  const showPurpleRect = !game.customurl; // showPurpleRect = true for original games
-  openGame(url, showPurpleRect);
-}
-
 // Initialize lazy loader on DOMContentLoaded as well
 document.addEventListener('DOMContentLoaded', () => initLazyLoader());
 
@@ -174,7 +169,7 @@ function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect 
   img.alt = title;
   // Use data-src for lazy loading and a tiny transparent placeholder as initial src
   img.setAttribute('data-src', thumbnail);
-  img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  img.src = 'data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAAAAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==';
   img.loading = 'lazy';
 
   img.addEventListener('load', () => {
@@ -292,6 +287,7 @@ function buildCategoryTabs(categories) {
   const allBtn = document.createElement('button');
   allBtn.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
   allBtn.dataset.category = 'Recents';
+  allBtn.addEventListener('click', () =>  showCategory('Recents'));
   allBtn.classList.add('active');
   allBtn.addEventListener('click', () => showRecents());
   tabsContainer.appendChild(allBtn);
@@ -328,8 +324,7 @@ function buildCategoryTabs(categories) {
 
 // Render functions: showCategory and showSearchResults
 function showCategory(category) {
-  // If recents tab selected, render recents instead
-  if (category === 'Recents') return showRecents();
+  
   // Set active state on tabs (compare data-category first)
   document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('active'));
   [...document.querySelectorAll('#category-tabs button')].find(b => (b.dataset.category && b.dataset.category === category) || b.textContent === category)?.classList.add('active');
@@ -353,7 +348,7 @@ function showCategory(category) {
   });
   // Reveal library below the start area and compact the start area to top
   document.querySelector('.library-container').classList.add('visible');
-  updateRecentsVisibility();
+  
 }
 
 function showSearchResults(query) {
@@ -373,7 +368,7 @@ function showSearchResults(query) {
   });
   document.querySelector('.library-container').classList.add('visible');
   // keep start area visible; library displays below
-  updateRecentsVisibility();
+  
   // compact the start area when search results are shown
 }
 
@@ -384,7 +379,14 @@ function showRecents() {
   if (!recs || recs.length === 0) {
     // No recents — keep library hidden
     document.querySelector('.library-container').classList.remove('visible');
-    updateRecentsVisibility();
+    const noRecentsMessage = document.createElement('p');
+    noRecentsMessage.style.color = '#888';
+    noRecentsMessage.style.fontSize = '40px';
+    noRecentsMessage.style.marginTop = '20px';
+
+    noRecentsMessage.textContent = 'No recently played games.';
+    container.appendChild(noRecentsMessage);
+    container.classList.add('visible');
     return;
   }
   // Render recents in same style as normal cards
@@ -396,7 +398,7 @@ function showRecents() {
     createGameCard({ title: r.title, url: r.url, thumbnail: r.thumbnail, desc: '', category: r.category, showPurpleRect: showPurple });
   });
   document.querySelector('.library-container').classList.add('visible');
-  updateRecentsVisibility();
+  
 }
 
 function filterByCategory(category) {
@@ -652,6 +654,88 @@ function closePopup() {
   });
 })();
 
+</script>
+<script>
+/*
+  Usage notes:
+  - window.__gamesData should be an array of game objects.
+    Each game may have: gameid, customurl, img, thumbnail, title.
+  - The script will pick N items to display (rollCount) and center one randomly.
+  - On finish it calls openGame(url, showPurpleRect). Ensure openGame exists.
+*/
+
+(function() {
+  const wrapper = document.getElementById("roll-wrapper");
+  const strip = document.getElementById("roll-strip");
+  const btn = document.getElementById("roll-btn");
+  
+
+  function thumb(game) {
+    return game.img || game.thumbnail || game.thumb || "https://via.placeholder.com/300x169?text=No+Image";
+  }
+
+  function rollGames() {
+    wrapper.style.display = "block";
+    const games = window.__gamesData || [];
+    if (!games.length) return alert("No game data found");
+
+    strip.innerHTML = "";
+
+    const rollCount = 100;           // 🔥 Longer roll (more items)
+    const finalIndex = Math.floor(Math.random() * rollCount);
+
+    let selectedList = [];
+
+    for (let i = 0; i < rollCount; i++) {
+      const g = games[Math.floor(Math.random() * games.length)];
+      selectedList.push(g);
+
+      const item = document.createElement("div");
+      item.className = "roll-item";
+
+      item.innerHTML = `<img src="${thumb(g)}">`;
+      strip.appendChild(item);
+    }
+
+    const finalGame = selectedList[finalIndex];
+
+    strip.style.transition = "none";
+    strip.style.transform = "translateX(0)";
+    void strip.offsetWidth; // reflow
+
+    requestAnimationFrame(() => {
+      const items = strip.querySelectorAll(".roll-item");
+      const chosen = items[finalIndex];
+
+      const chosenRect = chosen.getBoundingClientRect();
+      const stripRect = strip.getBoundingClientRect();
+
+      const chosenCenter = (chosenRect.left - stripRect.left) + chosenRect.width / 2;
+      const screenCenter = window.innerWidth / 2;
+
+      const translate = chosenCenter - screenCenter;
+
+      strip.style.transition = "transform 6s cubic-bezier(0.12, 0.78, 0.25, 1)";
+      strip.style.transform = `translateX(-${translate}px)`;
+
+      strip.addEventListener("transitionend", () => {
+        const url = finalGame.customurl
+          ? finalGame.customurl
+          : `https://games.crazygames.com/en_US/${finalGame.gameid}/index.html?skipPrerollFirstSession=true`;
+
+        if (typeof openGame === "function") {
+          openGame(url, !finalGame.customurl);
+          wrapper.style.display = "none";
+          addRecentForCurrent(url, finalGame);
+        } else {
+          window.open(url, "_blank");
+        }
+      }, { once: true });
+    });
+  }
+
+  btn.addEventListener("click", rollGames);
+})();
 </script>
 </body>
 </html>

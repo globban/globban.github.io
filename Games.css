@@ -6,13 +6,15 @@
 body {
   margin: 0;
   color: #eee;
-  background: #000;
+  background: url('https://wallpapercave.com/wp/wp14889185.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center center;
   overflow-x: hidden;
   font-family: 'dot', sans-serif;
+  overflow: auto;
+  overflow-y: auto;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -29,6 +31,10 @@ h1, h2, h3, h4, h5, h6 {
   gap: 20px;
   justify-items: center;
   max-width: calc(360px * 3);
+  background-color: #0002;
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding-inline: 10px;
 }
 
 .library-container.visible {
@@ -81,7 +87,7 @@ h1, h2, h3, h4, h5, h6 {
   transform-origin: center;
 }
 
-#random {
+#roll-btn {
   z-index: 4;
   width: 56px;
   height: 56px;
@@ -97,9 +103,10 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 8px #0002;
   transition: background 0.3s;
   margin-right: 8px;
+  backdrop-filter: blur(10px)
 }
 
-#random:hover {
+#roll-btn:hover {
   background: rgba(26, 26, 26, 0.459);
 }
 
@@ -230,12 +237,13 @@ pre {
   padding: 8px 16px;
   border: none;
   border-radius: 50%;
-  background: rgba(255,255,255,0.1);
+  background: #0002;
   color: #fff;
   font-family: 'dot', sans-serif;
   cursor: pointer;
   transition: background 0.3s;
   position: sticky;
+  backdrop-filter: blur(10px);
 }
 
 .tabs-container button.icon {
@@ -273,5 +281,64 @@ pre {
   margin-bottom: 40px;
 }
 
-/* (fav button removed — recently-played uses the favorites container) */
+  #roll-wrapper {
+    display: none;
+    z-index: 999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #000;
+  }
 
+  #roll-strip {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 20px;
+    transform: translateX(0);
+    transition: transform 6s cubic-bezier(0.1, 0.9, 0.1, 1);
+    will-change: transform;
+  }
+
+  .roll-item {
+    width: 300px;
+    height: 168.75px; /* 16:9 */
+    margin: 0 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex: 0 0 auto;
+    background: #111;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  }
+
+  .roll-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Center pointer */
+  #pointer {
+    position: fixed;
+    top: 50%;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: 10;
+  }
+
+  #pointer::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-top: 35px solid #ffde59;
+    filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.8));
+  }
