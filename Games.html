@@ -21,7 +21,7 @@
         <input type="checkbox" id="newtab-toggle"> Hide tab</label>
         <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
         <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url 
-        <button id="reset-btn" onclick="localStorage.clear()" style="display:flex;align-items:center;gap:8px;background:rgba(255, 0, 0, 0.253);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">Reset all</button></label>
+        <button id="reset-btn" onclick="localStorage.clear(), location.reload()" style="display:flex;align-items:center;gap:8px;background:rgba(255, 0, 0, 0.253);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">Reset all</button></label>
     </div>
     </div>
     <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
@@ -76,13 +76,26 @@
       changeBackground(url);
     }
   });
-
+function addBackgroundIframe() {
+    const iframe = document.createElement('iframe');
+    iframe.id = 'bg-iframe';
+    iframe.src = 'topo.html';
+    iframe.style.position = 'fixed';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100vw';
+    iframe.style.height = '100vh';
+    iframe.style.zIndex = '-1';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+}
   const savedBgUrl = localStorage.getItem('games_bg_url');
 
   if (savedBgUrl && savedBgUrl !== "#000000") {
   changeBackground(savedBgUrl);
+}  else {
+  addBackgroundIframe();
 }
-
 
   function changeBackground(url) {
     document.body.style.backgroundImage = `url(${url})`;
@@ -90,6 +103,11 @@
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundRepeat = 'no-repeat';
     localStorage.setItem('games_bg_url', url);
+    // Remove existing iframe if any
+    const existingIframe = document.getElementById('bg-iframe');
+    if (existingIframe) {
+      existingIframe.remove();
+    }
   }
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -123,7 +141,8 @@ searchInput.addEventListener('keydown', (e) => {
 // Back button removed — in-page UI keeps start area visible and shows results below.
 
   document.getElementById('iframe-popup').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closePopup();
+    if (e.target === e.currentTarget) closePopup();;
+   
   });
 
   // Load dynamic games (fetch once, but render only on user action)
@@ -432,6 +451,8 @@ function openGame(url, showPurpleRect = false) {
   document.getElementById('control-box')?.remove();
   document.getElementById('iframe-menu')?.remove();
 
+  document.getElementById('bg-iframe')?.remove();
+
   iframe.src = url;
   popup.style.display = 'flex';
   document.body.style.overflowY = 'hidden';
@@ -558,6 +579,8 @@ function closePopup() {
   document.getElementById('control-box')?.remove();
   document.getElementById('iframe-menu')?.remove();
   document.body.style.overflowY = 'scroll';
+  if (localStorage.getItem('games_bg_url') === null || localStorage.getItem('games_bg_url') === "#000000") {
+  addBackgroundIframe();}
 }
 </script>
 
