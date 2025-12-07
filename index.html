@@ -22,6 +22,15 @@
 </head>
 <body>
   <iframe src="topo.html" style="z-index: -1; width: 100vw; height: 100vh; border: none; position: absolute; top: 0px; left: 0px;"></iframe>
+
+  <div id="splash" onclick="hide()">
+  <div class="logo-mask" style="--logo: url('logo.svg')">
+    <img src="logo.svg" class="logo">
+  </div>
+</div>
+
+
+
 <main>
 <a href="/Games.html">
   <div class="card">
@@ -55,6 +64,49 @@
   </div>
 </a>
 </main>
+  <img src="logo.svg" id="sigil"/>
 <script type="module" src="/home.js"></script>
 </body>
+<script>
+  const sigil = document.getElementById("sigil");
+
+  window.addEventListener("load", () => {
+    if (localStorage.getItem("sigilActive") !== "false") {
+    setTimeout(() => {
+      const splash = document.getElementById("splash");
+      splash.style.opacity = "0";
+      
+      // Remove it from DOM after fade-out
+      setTimeout(() => splash.remove(), 600);
+    }, 1000); // matches shimmer duration
+  } else {
+    hide()
+  }
+  
+  });
+
+
+
+
+// Restore state from localStorage on page load
+if (localStorage.getItem("sigilActive") !== "false") {
+  sigil.classList.add("active");
+}
+
+sigil.addEventListener("click", () => {
+  sigil.classList.toggle("active");
+
+  if (sigil.classList.contains("active")) {
+    localStorage.setItem("sigilActive", "true");
+  } else {
+    localStorage.setItem("sigilActive", "false");
+  }
+});
+
+
+  function hide() {
+    document.getElementById("splash").style.display = "none"
+  }
+</script>
+
 </html>
