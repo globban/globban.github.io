@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Team Wheelspin</title>
+	<style>
+		body {
+			background: #181a20;
+			color: #fff;
+			font-family: 'Segoe UI', Arial, sans-serif;
+			margin: 0;
+			min-height: 100vh;
+		}
+		.container {
+			background: #23263a;
+			padding: 30px 24px 24px 24px;
+			border-radius: 16px;
+			max-width: 540px;
+			margin: 40px auto;
+			box-shadow: 0 4px 32px #0006;
+		}
+		h2, h3 {
+			text-align: center;
+			margin-top: 0;
+		}
+		label, input, button, select, textarea {
+			width: 100%;
+			margin-bottom: 14px;
+			font-size: 1.1em;
+		}
+		textarea, input, select {
+			background: #23263a;
+			color: #fff;
+			border: 1px solid #444;
+			border-radius: 6px;
+			padding: 8px;
+			box-sizing: border-box;
+		}
+		button {
+			background: linear-gradient(90deg, #4caf50, #2196f3);
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			padding: 12px;
+			font-weight: bold;
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+		button:hover {
+			background: linear-gradient(90deg, #2196f3, #4caf50);
+		}
+		.assignments label {
+			margin-bottom: 6px;
+			font-size: 1em;
+			color: #b3b3ff;
+		}
+		.hidden { display: none; }
+		.teams {
+			margin-top: 30px;
+			display: flex;
+			flex-direction: column;
+			gap: 18px;
+		}
+		.team {
+			background: #23263a;
+			border-left: 8px solid #4caf50;
+			border-radius: 8px;
+			padding: 14px 18px;
+			font-size: 1.1em;
+			box-shadow: 0 2px 8px #0002;
+		}
+		.canvas-wrap {
+			display: flex;
+			justify-content: center;
+			margin: 18px 0 10px 0;
+		}
+		canvas {
+			background: #181a20;
+			border-radius: 50%;
+			box-shadow: 0 2px 12px #0008;
+		}
+		.team-label {
+			text-align: center;
+			font-size: 1.2em;
+			margin-bottom: 8px;
+			color: #4cafef;
+			font-weight: bold;
+		}
+		.result-label {
+			text-align: center;
+			font-size: 1.2em;
+			margin-top: 10px;
+			color: #fff;
+			font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<h2>Team Wheelspin</h2>
+	<label>Enter names (comma or newline separated):</label>
+	<textarea id="names" rows="4" placeholder="Alice, Bob, Charlie, ..."></textarea>
+	<label>Number of teams:</label>
+	<input type="number" id="teamCount" min="2" max="10" value="2">
+	<button onclick="showAssignments()">Next: Assign Members</button>
+
+	<div id="assignmentSection" class="hidden" style="display:none;">
+		<h3>Secret Team Assignment</h3>
+		<div id="assignments" class="assignments"></div>
+		<button onclick="startWheelspin()">Spin to Assign Teams</button>
+	</div>
+
+
+	<div id="wheelSection" class="hidden" style="position:relative;">
+		<div id="finalizedTeamOverlay" style="display:none; position:absolute; left:0; top:0; width:100%; height:400px; z-index:10; pointer-events:none; display:flex; align-items:center; justify-content:center;"></div>
+		<div class="team-label" id="currentTeamLabel"></div>
+		<div class="canvas-wrap"><canvas id="wheelCanvas" width="400" height="400"></canvas></div>
+		<button id="spinBtn" onclick="spinWheel()">Spin</button>
+		<div class="result-label" id="spinResult"></div>
+	</div>
+
+	<div id="result" class="teams"></div>
+</div>
+<script>
+let memberList = [];
+let teamCount = 2;
+let assignments = {};
+let riggedAssignments = [];
+let teams = [];
+let currentTeam = 0;
+let currentMemberIdx = 0;
+let wheelNames = [];
+let wheelRiggedPick = null;
+let spinning = false;
+let arc = 0;
+let startAngle = 0;
+let spinAngle = 0;
+let spinTime = 0;
+let spinTimeTotal = 0;
+
+function showAssignments() {
+	const namesRaw = document.getElementById('names').value;
+	memberList = namesRaw.split(/[\n,]+/).map(n => n.trim()).filter(n => n);
+	teamCount = parseInt(document.getElementById('teamCount').value);
+	if (memberList.length < teamCount) {
+		alert('Not enough members for the number of teams!');
+		return;
+	}
+	// Save names and teamCount to localStorage
+	localStorage.setItem('rigged_names', JSON.stringify(memberList));
+	localStorage.setItem('rigged_teamCount', teamCount);
+	// Build assignment UI
+	const assignDiv = document.getElementById('assignments');
+	assignDiv.innerHTML = '';
+	assignments = {};
+	// Try to load previous assignments
+	let prevAssignments = JSON.parse(localStorage.getItem('rigged_assignments') || 'null');
+	for (let i = 0; i < memberList.length; i++) {
+		const name = memberList[i];
+		const sel = document.createElement('select');
+		sel.id = 'assign_' + i;
+		for (let t = 1; t <= teamCount; t++) {
+			const opt = document.createElement('option');
+			opt.value = t;
+			opt.text = 'Team ' + t;
+			sel.appendChild(opt);
+		}
+		// Restore previous assignment if available
+		if (prevAssignments && prevAssignments[name]) {
+			sel.value = prevAssignments[name];
+		}
+		const label = document.createElement('label');
+		label.textContent = name + ': ';
+		label.appendChild(sel);
+		assignDiv.appendChild(label);
+	}
+	const assignSection = document.getElementById('assignmentSection');
+	assignSection.classList.remove('hidden');
+	assignSection.style.display = '';
+	document.getElementById('wheelSection').classList.add('hidden');
+	document.getElementById('result').innerHTML = '';
+}
+
+function startWheelspin() {
+	// Read rigged assignments
+	riggedAssignments = Array.from({length: teamCount}, () => []);
+	assignments = {};
+	for (let i = 0; i < memberList.length; i++) {
+		const teamNum = parseInt(document.getElementById('assign_' + i).value) - 1;
+		riggedAssignments[teamNum].push(memberList[i]);
+		assignments[memberList[i]] = teamNum + 1;
+	}
+	// Save assignments to localStorage
+	localStorage.setItem('rigged_assignments', JSON.stringify(assignments));
+	// Prepare for wheelspin
+	teams = Array.from({length: teamCount}, () => []);
+	currentTeam = 0;
+	currentMemberIdx = 0;
+	document.getElementById('assignmentSection').classList.add('hidden');
+	document.getElementById('wheelSection').classList.remove('hidden');
+	document.getElementById('result').innerHTML = '';
+	nextTeamWheel();
+}
+
+function nextTeamWheel() {
+	// If all teams assigned, show result
+	if (currentTeam >= teamCount) {
+		showFinalTeams();
+		document.getElementById('wheelSection').classList.add('hidden');
+		return;
+	}
+	// If all members for this team assigned, show this team and move to next team
+	if (currentMemberIdx >= riggedAssignments[currentTeam].length) {
+		showTeamPartial(currentTeam);
+		currentTeam++;
+		currentMemberIdx = 0;
+		nextTeamWheel();
+		return;
+	}
+
+	// Show a single team as a big overlay in the center of the wheel for a short time, then hide
+	function showTeamPartial(teamIdx) {
+		const overlay = document.getElementById('finalizedTeamOverlay');
+		overlay.innerHTML = `<div style="font-size:2.2em;font-weight:bold;color:#111;text-align:center;text-shadow: 2px 2px 0 #fff, -2px 2px 0 #fff, 2px -2px 0 #fff, -2px -2px 0 #fff, 0 2px 0 #fff, 2px 0 0 #fff, 0 -2px 0 #fff, -2px 0 0 #fff; padding: 0 20px; border-radius: 16px;">Team ${teamIdx+1}: ${teams[teamIdx].join(', ')}</div>`;
+		overlay.style.display = 'flex';
+		// Save teams to localStorage (partial progress)
+		localStorage.setItem('rigged_teams', JSON.stringify(teams));
+		setTimeout(() => {
+			overlay.style.display = 'none';
+		}, 1500);
+	}
+	// Show all unassigned members on the wheel for this pick
+	let assigned = teams.flat();
+	wheelNames = memberList.filter(n => !assigned.includes(n));
+	let rigged = riggedAssignments[currentTeam][currentMemberIdx];
+	wheelRiggedPick = wheelNames.includes(rigged) ? rigged : wheelNames[0];
+	startAngle = 0;
+	arc = (2 * Math.PI) / wheelNames.length;
+	drawWheel();
+	document.getElementById('currentTeamLabel').textContent = `Team ${currentTeam+1}`;
+	document.getElementById('spinResult').textContent = '';
+	document.getElementById('spinBtn').disabled = false;
+}
+
+function drawWheel() {
+	const canvas = document.getElementById('wheelCanvas');
+	const ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	const outsideRadius = 180;
+	const textRadius = 140;
+	for (let i = 0; i < wheelNames.length; i++) {
+		const angle = startAngle + i * arc;
+		ctx.fillStyle = `hsl(${(i * 360) / wheelNames.length}, 80%, 55%)`;
+		ctx.beginPath();
+		ctx.moveTo(canvas.width / 2, canvas.height / 2);
+		ctx.arc(canvas.width / 2, canvas.height / 2, outsideRadius, angle, angle + arc, false);
+		ctx.lineTo(canvas.width / 2, canvas.height / 2);
+		ctx.fill();
+
+		ctx.save();
+		ctx.fillStyle = '#181a20';
+		ctx.font = 'bold 20px Arial';
+		ctx.translate(
+			canvas.width / 2 + Math.cos(angle + arc / 2) * textRadius,
+			canvas.height / 2 + Math.sin(angle + arc / 2) * textRadius
+		);
+		ctx.rotate(angle + arc / 2 + Math.PI / 2);
+		ctx.fillText(wheelNames[i], -ctx.measureText(wheelNames[i]).width / 2, 0);
+		ctx.restore();
+	}
+	// Draw pointer
+	ctx.beginPath();
+	ctx.moveTo(canvas.width / 2, canvas.height / 2 - outsideRadius - 10);
+	ctx.lineTo(canvas.width / 2 + 16, canvas.height / 2 - outsideRadius - 32);
+	ctx.lineTo(canvas.width / 2 - 16, canvas.height / 2 - outsideRadius - 32);
+	ctx.closePath();
+	ctx.fillStyle = '#fff';
+	ctx.fill();
+}
+
+function spinWheel() {
+	if (spinning) return;
+	spinning = true;
+	// Calculate the angle to land the pointer at the center of the rigged member's segment (top of the wheel, -90deg)
+	let idx = wheelNames.indexOf(wheelRiggedPick);
+	// The pointer is at -90deg, so the center of the rigged segment should be at -Math.PI/2
+	let targetAngle = (arc * idx) + arc / 2;
+	// How much to spin so that (startAngle + delta) % 2PI = -Math.PI/2 - targetAngle
+	let normalizedStart = ((startAngle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+	let finalAngle = -Math.PI / 2 - targetAngle;
+	// Add multiple full spins for effect
+	let spins = 3 + Math.floor(Math.random() * 2); // 3 or 4 full spins
+	let stopAngle = (2 * Math.PI) * spins + finalAngle - normalizedStart;
+	// Normalize stopAngle to be positive
+	while (stopAngle < 0) stopAngle += 2 * Math.PI;
+	stopAngle = startAngle + stopAngle;
+	let duration = 1800 + Math.random() * 600;
+	let start = null;
+	let initialAngle = startAngle;
+
+	function animateWheel(ts) {
+		if (!start) start = ts;
+		let elapsed = ts - start;
+		let progress = Math.min(elapsed / duration, 1);
+		// Ease out cubic
+		let eased = 1 - Math.pow(1 - progress, 3);
+		startAngle = initialAngle + (stopAngle - initialAngle) * eased;
+		drawWheel();
+		if (progress < 1) {
+			requestAnimationFrame(animateWheel);
+		} else {
+			spinning = false;
+			// Assign the rigged pick to the team
+			teams[currentTeam].push(wheelRiggedPick);
+			document.getElementById('spinResult').textContent = `${wheelRiggedPick} assigned to Team ${currentTeam+1}!`;
+			document.getElementById('spinBtn').disabled = true;
+			setTimeout(() => {
+				currentMemberIdx++;
+				nextTeamWheel();
+			}, 800);
+		}
+	}
+	requestAnimationFrame(animateWheel);
+}
+
+function showFinalTeams() {
+	let html = '';
+	for (let t = 0; t < teams.length; t++) {
+		html += `<div class=\"team\"><strong>Team ${t+1}:</strong> ${teams[t].join(', ')}</div>`;
+	}
+	document.getElementById('result').innerHTML = html;
+	// Hide the temporary finalized team overlay
+	document.getElementById('finalizedTeamOverlay').style.display = 'none';
+	// Save teams to localStorage
+	localStorage.setItem('rigged_teams', JSON.stringify(teams));
+}
+
+// On page load, restore names, teamCount, and assignments if available
+window.addEventListener('DOMContentLoaded', () => {
+	let savedNames = JSON.parse(localStorage.getItem('rigged_names') || 'null');
+	let savedTeamCount = localStorage.getItem('rigged_teamCount');
+	let savedAssignments = JSON.parse(localStorage.getItem('rigged_assignments') || 'null');
+	if (savedNames && Array.isArray(savedNames)) {
+		document.getElementById('names').value = savedNames.join(', ');
+	}
+	if (savedTeamCount) {
+		document.getElementById('teamCount').value = savedTeamCount;
+	}
+	// If assignments exist, prefill after showAssignments
+	if (savedAssignments) {
+		setTimeout(() => {
+			showAssignments();
+		}, 100);
+	}
+	// Optionally, show last teams result
+	let savedTeams = JSON.parse(localStorage.getItem('rigged_teams') || 'null');
+	if (savedTeams && Array.isArray(savedTeams) && savedTeams.length > 0) {
+		let html = '';
+		for (let t = 0; t < savedTeams.length; t++) {
+			html += `<div class=\"team\"><strong>Team ${t+1}:</strong> ${savedTeams[t].join(', ')}</div>`;
+		}
+		document.getElementById('result').innerHTML = html;
+	}
+});
+</script>
+</body>
+</html>
