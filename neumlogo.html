@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Neumorphic Logo</title>
+    <style>
+        :root {
+            --bg-color: #eef0f3;
+            --dark-shadow: rgba(203, 209, 217, 0.9);
+            --light-shadow: rgba(255, 255, 255, 0.9);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #surface {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        .logo-svg {
+            width: 400px; /* Adjust size as needed */
+            height: auto;
+            transition: transform 0.1s ease-out, filter 0.1s ease-out;
+            /* Initial Neumorphic State using drop-shadow */
+            filter: 
+                drop-shadow(15px 15px 20px var(--dark-shadow)) 
+                drop-shadow(-15px -15px 20px var(--light-shadow));
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="surface">
+        <img src="logo.svg" alt="Logo" class="logo-svg" id="interactive-logo">
+    </div>
+
+    <script>
+        const logo = document.getElementById('interactive-logo');
+        const surface = document.getElementById('surface');
+
+        surface.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            // Calculate movement vectors
+            const moveX = (x - centerX) / 20;
+            const moveY = (y - centerY) / 20;
+
+            // 1. Dynamic Drop Shadows
+            // drop-shadows create the "extruded" look on transparent SVGs
+            const shadowX = moveX * 0.8;
+            const shadowY = moveY * 0.8;
+            
+            logo.style.filter = `
+                drop-shadow(${shadowX}px ${shadowY}px 25px var(--dark-shadow)) 
+                drop-shadow(${-shadowX}px ${-shadowY}px 25px var(--light-shadow))
+            `;
+
+            // 2. 3D Rotation
+            const rotateX = (centerY - y) / 25;
+            const rotateY = (x - centerX) / 25;
+
+            logo.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        // Reset on leave
+        surface.addEventListener('mouseleave', () => {
+            logo.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            logo.style.filter = `
+                drop-shadow(15px 15px 20px var(--dark-shadow)) 
+                drop-shadow(-15px -15px 20px var(--light-shadow))
+            `;
+        });
+    </script>
+</body>
+</html>

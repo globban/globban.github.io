@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS2 ESP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Orbitron';
+      src: url(/orbitron.ttf);
+      font-display: swap;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Orbitron', Arial, sans-serif;
+      background: #0a0a0f;
+    }
+    body {
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background:
+        linear-gradient(120deg, rgba(30,30,40,0.7) 0%, rgba(10,10,20,0.7) 100%),
+        url('/resources/bg.png') center center/cover no-repeat;
+      opacity: 0.6;
+      z-index: 1;
+      pointer-events: none;
+      mix-blend-mode: lighten;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .main-card {
+      position: relative;
+      z-index: 2;
+      margin: 0 auto;
+      margin-top: 4vh;
+      background: rgba(255,255,255,0.08);
+      border-radius: 32px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      padding: 3rem 2.5rem 2.5rem 2.5rem;
+      max-width: 520px;
+      text-align: center;
+      color: #fff;
+      animation: fadein 1.2s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 3.2em;
+      margin: 0 0 0.5em 0;
+      font-family: 'Orbitron', Arial, sans-serif;
+      letter-spacing: 0.04em;
+      color: #fff;
+      text-shadow: 0 2px 24px #000, 0 1px 0 #222;
+    }
+    .desc {
+      font-size: 1.2em;
+      color: #e0e0e0;
+      margin-bottom: 2em;
+      line-height: 1.5;
+      text-shadow: 0 1px 0 #111;
+    }
+    .download-btn {
+      font-family: 'Orbitron', Arial, sans-serif;
+      font-size: 1.2em;
+      padding: 0.9em 2.2em;
+      border-radius: 2em;
+      border: none;
+      background: linear-gradient(90deg, #3a8fff 0%, #6f40ff 100%);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 2px 16px 0 rgba(58,143,255,0.18);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 1.5em;
+    }
+    .download-btn:hover {
+      background: linear-gradient(90deg, #6f40ff 0%, #3a8fff 100%);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 32px 0 rgba(58,143,255,0.28);
+    }
+    .img-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.5em;
+      margin-top: 2em;
+      flex-wrap: wrap;
+    }
+    .img-row img {
+      border-radius: 18px;
+      box-shadow: 0 2px 16px 0 rgba(0,0,0,0.18);
+      max-width: 520px;
+      max-height: 500px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      background: #00000000;
+      filter: contrast(120%) brightness(1.1);
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .main-card {
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+        max-width: 98vw;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      .img-row img {
+        max-width: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <canvas id="bg"></canvas>
+    <div class="main-card">
+      <h1>CS2 Fully External ESP</h1>
+      <div class="desc">
+        The most advanced, fully external ESP for CS2. <br>
+        Lightning-fast, undetected, and <b>extremely</b> easy to use.<br>
+        <b>Download now and get the bleeding edge of Cs2 ESPs!</b>
+      </div>
+      <button class="download-btn" onclick="download()">DOWNLOAD</button>
+      <div class="img-row">
+        <img src="/resources/keybinds.png" alt="Keybinds">
+        
+      </div>
+    </div><img style="position: absolute; width: 100px; bottom: 480px; left: 700px; filter:brightness(50%);" src="/resources/skeleton.png"  alt="ESP Skeleton">
+  <script>
+    function download() {
+      window.location.href = '/CS2Cheat.zip';
+    }
+    // Animated background dots
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    const dotSpacing = 48;
+    const dotRadius = 3;
+    const dotColor = '#222';
+    const repelRadius = 200;
+    const repelStrength = 60;
+    const dots = [];
+    function createDots() {
+      dots.length = 0;
+      for (let y = dotSpacing/2; y < height; y += dotSpacing) {
+        for (let x = dotSpacing/2; x < width; x += dotSpacing) {
+          dots.push({
+            ox: x,
+            oy: y,
+            x: x,
+            y: y,
+            vx: 0,
+            vy: 0
+          });
+        }
+      }
+    }
+    let mouse = { x: -1000, y: -1000 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+    window.addEventListener('mouseleave', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+    window.addEventListener('resize', () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createDots();
+    });
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const dot of dots) {
+        // Repel from mouse
+        let dx = dot.x - mouse.x;
+        let dy = dot.y - mouse.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < repelRadius) {
+          let angle = Math.atan2(dy, dx);
+          let force = (repelRadius - dist) / repelRadius;
+          dot.vx += Math.cos(angle) * force * repelStrength * 0.02;
+          dot.vy += Math.sin(angle) * force * repelStrength * 0.02;
+        }
+        // Spring back to original
+        let ox = dot.ox - dot.x;
+        let oy = dot.oy - dot.y;
+        dot.vx += ox * 0.08;
+        dot.vy += oy * 0.08;
+        // Damping
+        dot.vx *= 0.80;
+        dot.vy *= 0.80;
+        dot.x += dot.vx;
+        dot.y += dot.vy;
+        // Draw
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, dotRadius, 0, Math.PI * 2);
+        ctx.fillStyle = dotColor;
+        ctx.globalAlpha = 0.85;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+      requestAnimationFrame(animate);
+    }
+    createDots();
+    animate();
+  </script>
+</body>
+</html>
