@@ -9,7 +9,7 @@
     margin: 0;
     font-family: "Inter", system-ui, Segoe UI, Roboto, Arial, sans-serif;
     min-height: 100vh;
-    background: url('https://images.unsplash.com/photo-1757600797704-300d69978b8c?auto=format&fit=crop&q=80&w=2664');
+    background: #000000;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -54,9 +54,11 @@
   }
   footer { margin-top:14px;font-size:13px;opacity:0.7;text-align:center; }
   code { background:rgba(255,255,255,0.15);padding:2px 5px;border-radius:4px;color:#38bdf8; }
+  #background { position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1; }
 </style>
 </head>
 <body>
+  <iframe id="background" src="/topo.html" frameborder="0"></iframe>
 <div class="wrap">
   <div class="card">
     <header style="display:flex;justify-content:space-between;align-items:center">
@@ -65,8 +67,65 @@
     </header>
 
     <div style="margin-top:12px">
-      <label>Text or URL</label>
-      <textarea id="text">https://algot.fun</textarea>
+      <label>Type</label>
+      <select id="type">
+        <option value="text">Text / URL</option>
+        <option value="url">URL</option>
+        <option value="wifi">Wi‑Fi</option>
+        <option value="mailto">Email (mailto)</option>
+        <option value="gmail">Gmail (compose)</option>
+        <option value="tel">Phone (tel)</option>
+        <option value="sms">SMS</option>
+      </select>
+
+      <div id="textBlock">
+        <label style="margin-top:8px">Content / URL / Text</label>
+        <textarea id="text">https://algot.fun</textarea>
+      </div>
+
+      <div id="extras" style="margin-top:8px">
+        <div id="wifiFields" style="display:none">
+          <label>SSID</label>
+          <input id="wifiSsid" placeholder="MyNetwork" />
+          <label>Password</label>
+          <input id="wifiPass" placeholder="password" />
+          <label>Encryption</label>
+          <select id="wifiEnc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">None</option></select>
+          <label><input type="checkbox" id="wifiHidden" /> Hidden network</label>
+        </div>
+
+        <div id="mailFields" style="display:none">
+          <label>To</label>
+          <input id="mailTo" placeholder="name@example.com" />
+          <label>Subject</label>
+          <input id="mailSub" placeholder="Subject" />
+          <label>Body</label>
+          <textarea id="mailBody" placeholder="Message body"></textarea>
+        </div>
+
+        <div id="gmailFields" style="display:none">
+          <label>To</label>
+          <input id="gmailTo" placeholder="name@example.com" />
+          <label>Subject</label>
+          <input id="gmailSub" placeholder="Subject" />
+          <label>Body</label>
+          <textarea id="gmailBody" placeholder="Message body"></textarea>
+        </div>
+
+        <div id="telFields" style="display:none">
+          <label>Phone</label>
+          <input id="telNum" placeholder="+1234567890" />
+        </div>
+
+        <div id="smsFields" style="display:none">
+          <label>Phone</label>
+          <input id="smsNum" placeholder="+1234567890" />
+          <label>Message</label>
+          <input id="smsBody" placeholder="SMS message" />
+        </div>
+
+        
+      </div>
 
       <div class="row">
         <div class="col">
@@ -126,6 +185,23 @@
 <script>
 const qrBox = document.getElementById("qrBox");
 const textEl = document.getElementById("text");
+const typeEl = document.getElementById("type");
+// wifi fields
+const wifiSsid = document.getElementById('wifiSsid');
+const wifiPass = document.getElementById('wifiPass');
+const wifiEnc = document.getElementById('wifiEnc');
+const wifiHidden = document.getElementById('wifiHidden');
+// mail/gmail
+const mailTo = document.getElementById('mailTo');
+const mailSub = document.getElementById('mailSub');
+const mailBody = document.getElementById('mailBody');
+const gmailTo = document.getElementById('gmailTo');
+const gmailSub = document.getElementById('gmailSub');
+const gmailBody = document.getElementById('gmailBody');
+// tel/sms
+const telNum = document.getElementById('telNum');
+const smsNum = document.getElementById('smsNum');
+const smsBody = document.getElementById('smsBody');
 const sizeEl = document.getElementById("size");
 const sizeVal = document.getElementById("sizeVal");
 const levelEl = document.getElementById("level");
@@ -150,6 +226,22 @@ let qr = new QRCodeStyling({
 });
 qr.append(qrBox);
 
+function show(id, v){ document.getElementById(id).style.display = v ? '' : 'none'; }
+
+function updateFieldsVisibility(){
+  const t = typeEl.value;
+  // show main text box only for text and url types
+  show('textBlock', t === 'text' || t === 'url');
+  show('wifiFields', t === 'wifi');
+  show('mailFields', t === 'mailto');
+  show('gmailFields', t === 'gmail');
+  show('telFields', t === 'tel');
+  show('smsFields', t === 'sms');
+}
+
+function escWi(s){ return (s||'').replace(/([\\;,:])/g,'\\$1'); }
+
+
 function getDotType(style) {
   // map select value to supported qr-code-styling types
   // valid types: 'square','dots','rounded','classy','classy-rounded','extra-rounded'
@@ -160,10 +252,51 @@ function getDotType(style) {
 async function generate() {
   const dotType = getDotType(styleEl.value);
   const size = Number(sizeEl.value) || 300;
-  const data = textEl.value || ' ';
   const fg = fgEl.value || '#111827';
   const bg = bgEl.value || '#ffffff';
   const level = levelEl.value || 'M';
+
+  // Build payload depending on selected type
+  let data = '';
+  const t = typeEl.value;
+  const raw = (textEl.value || '').trim();
+
+  if (t === 'wifi'){
+    const ssid = escWi(wifiSsid.value || raw || '');
+    const enc = (wifiEnc.value || 'WPA');
+    const pass = escWi(wifiPass.value || '');
+    const hidden = wifiHidden.checked ? 'true' : 'false';
+    if (enc === 'nopass'){
+      data = `WIFI:T:nopass;S:${ssid};H:${hidden};;`;
+    } else {
+      data = `WIFI:T:${enc};S:${ssid};P:${pass};H:${hidden};;`;
+    }
+  } else if (t === 'mailto'){
+    const to = mailTo.value || raw || '';
+    const sub = encodeURIComponent(mailSub.value || '');
+    const body = encodeURIComponent(mailBody.value || '');
+    data = `mailto:${to}` + ((sub||body) ? `?subject=${sub}&body=${body}` : '');
+  } else if (t === 'gmail'){
+    const to = gmailTo.value || raw || '';
+    const sub = encodeURIComponent(gmailSub.value || '');
+    const body = encodeURIComponent(gmailBody.value || '');
+    data = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}${sub?`&su=${sub}`:''}${body?`&body=${body}`:''}`;
+  } else if (t === 'tel'){
+    const num = telNum.value || raw || '';
+    data = `tel:${num}`;
+  } else if (t === 'sms'){
+    const num = smsNum.value || raw || '';
+    const msg = smsBody.value || '';
+    // SMSTO:number:message is widely supported
+    data = `SMSTO:${num}:${msg}`;
+  } else if (t === 'url'){
+    let url = raw;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    data = url;
+  } else {
+    // text (default)
+    data = raw;
+  }
 
   // If a new logo file was chosen, create an object URL and update
   if (lastLogoObjectUrl) {
@@ -203,10 +336,16 @@ downloadSvgBtn.addEventListener('click', () => {
 sizeEl.oninput = () => sizeVal.textContent = sizeEl.value;
 document.getElementById("generate").onclick = generate;
 
+// show/hide extra fields when type changes
+typeEl.addEventListener('change', updateFieldsVisibility);
+updateFieldsVisibility();
+
 // regenerate when inputs change for convenience
-[textEl, sizeEl, levelEl, fgEl, bgEl, styleEl, logoEl].forEach(el => {
-  el.addEventListener('change', generate);
-});
+[textEl, typeEl, sizeEl, levelEl, fgEl, bgEl, styleEl, logoEl,
+ wifiSsid, wifiPass, wifiEnc, wifiHidden,
+ mailTo, mailSub, mailBody, gmailTo, gmailSub, gmailBody,
+ telNum, smsNum, smsBody].forEach(el => { if (el) el.addEventListener('change', generate); });
+
 window.addEventListener('load', generate);
 </script>
 </body>
