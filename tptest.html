@@ -1,302 +1,446 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Tptest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Test</title>
     <style>
-      body {
+      * {
         margin: 0;
-        height: 100vh;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #0a0a15, #1a1a2e, #16213e);
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background: #3f3f3f;
-        transform-origin: center top;
-        transition: transform 0.3s ease;
+        padding: 20px;
+        color: #fff;
       }
-  
-      .zoom-controls {
-        position: fixed;
-        top: 20px;
-        right: 20px;
+
+      .container {
+        background: rgba(10, 10, 20, 0.346);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 40px;
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .test-state {
+        text-align: center;
+        font-size: 14px;
+        color: #999;
+        margin-bottom: 20px;
+        height: 20px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .metric-card {
+        background: rgba(10, 10, 20, 0.346);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .metric-card:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+        background: rgba(102, 126, 234, 0.1);
+      }
+
+      .metric-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #999;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .gauge-container {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto 20px;
+      }
+
+      .speedometer {
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+      }
+
+      #speedArc {
+        filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.8));
+        transition: d 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+         background: rgba(10, 10, 20, 0.346);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.2s linear;
+      }
+
+      .button-group {
         display: flex;
         gap: 10px;
+        margin-bottom: 20px;
       }
-  
-      .zoom-button {
-        padding: 10px 15px;
-        font-size: 20px;
-        border: none;
-        border-radius: 12px;
-        background: #505050;
-        color: #fff;
-        cursor: pointer;
-        box-shadow:
-          6px 6px 10px #3b3b3b,
-          -6px -6px 10px #656565;
-        transition: all 0.2s ease;
-      }
-  
-      .zoom-button:hover {
-        box-shadow:
-          inset 4px 4px 8px #3b3b3b,
-          inset -4px -4px 8px #656565;
-        color: #4CAF50;
-      }
-  
-      .test-container {
-        text-align: center;
-        padding: 40px;
-        background: #505050;
-        border-radius: 20px;
-        max-width: 360px;
-        width: 100%;
-        box-shadow:
-          inset 4px 4px 8px #3b3b3b,
-          inset -4px -4px 8px #656565;
-        
-      }
-  
-      h1 {
-        margin: 0 0 24px;
-        font-size: 20px;
-        font-weight: 500;
-        color: #ffffff;
-      }
-  
-      .gauge {
-        position: relative;
-        width: 280px;
-        height: 280px;
-        margin: 0 auto 20px;
-        background: conic-gradient(#4CAF50 0deg, #e0e0e0 0deg);
-        border-radius: 50%;
-        transition: background 0.2s ease-out;
-      }
-  
-      .gauge-inner {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 220px;
-        height: 220px;
-        margin: -110px 0 0 -110px;
-        background: #505050;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          inset 6px 6px 12px #3a3a3a,
-          inset -6px -6px 12px #606060;
-      }
-  
-      #speedValue {
-        font-size: 64px;
+
+      button {
+        flex: 1;
+        padding: 14px 24px;
+        font-size: 16px;
         font-weight: 600;
-        color: #4CAF50;
-        line-height: 1;
-      }
-  
-      #speedUnit {
-        font-size: 18px;
-        color: #ffffff;
-        margin-top: -8px;
-      }
-  
-      .info {
-        font-size: 16px;
-        color: #ffffff;
-        margin: 8px 0;
-      }
-  
-      #startButton {
-        margin-top: 20px;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: 500;
-        color: #ffffff;
-        background: #505050;
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         cursor: pointer;
-        box-shadow:
-          6px 6px 10px #3b3b3b,
-          -6px -6px 10px #656565;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
-  
-      #startButton:hover:not(:disabled) {
-        box-shadow:
-          inset 4px 4px 8px #3b3b3b,
-          inset -4px -4px 8px #656565;
-        color: #4CAF50;
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        flex: 2;
       }
-  
-      #startButton:disabled {
-        opacity: 0.5;
-        cursor: default;
+
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
       }
-  
-      #particles-js {
+
+      .btn-secondary {
+        background: rgba(102, 126, 234, 0.2);
+        color: #667eea;
+        border: 1px solid #667eea;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: rgba(102, 126, 234, 0.3);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .info-text {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .stats-detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 13px;
+      }
+
+      .stat-label {
+        color: #999;
+      }
+
+      .stat-value {
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 24px;
+        }
+
+        h1 {
+          font-size: 22px;
+          margin-bottom: 20px;
+        }
+
+        .metrics-grid {
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .metric-card {
+          padding: 12px;
+        }
+
+        .metric-value {
+          font-size: 20px;
+        }
+
+        .large-metric .metric-value {
+          font-size: 32px;
+        }
+      }
+
+      #bg {
         position: fixed;
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
         z-index: -1;
-        background-color: #000000;
+        border: none;
       }
     </style>
   </head>
   <body>
-  
-    <div class="test-container">
-      <h1>Tptest</h1>
-      <div class="gauge" id="gauge">
-        <div class="gauge-inner">
-          <div id="speedValue">–</div>
-          <div id="speedUnit">Mbps</div>
-        </div>
+    <iframe id="bg" src="/topo.html"></iframe>
+
+    <div class="container">
+      <h1>Speed Test</h1>
+
+      <div class="test-state" id="testState">Ready to test</div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
-      <div class="info" id="ping">Ping: – ms</div>
-      <div class="info" id="downloadSize">Downloaded: – MB</div>
-      <div class="info" id="gigabyte">1GB in –</div>
-      <button id="startButton">Start test</button>
+
+      <div class="gauge-container">
+        <svg class="speedometer" viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet">
+          <!-- Background arc -->
+          <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <!-- Speed arc -->
+          <path id="speedArc" d="M 20 100 A 80 80 0 0 1 20 100" stroke="#667eea" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <!-- Speed value -->
+          <text id="speedText" x="100" y="95" text-anchor="middle" font-size="32" font-weight="600" fill="#667eea">—</text>
+          <text x="100" y="110" text-anchor="middle" font-size="14" fill="#999">Mbps</text>
+        </svg>
+      </div>
+      <div class="metric-label" style="text-align: center; margin-top: 12px;">
+        <span id="downloadData">0</span> MB
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" id="startBtn" onclick="startTest()">Start Test</button>
+        <button class="btn-secondary" id="resetBtn" onclick="resetTest()">Reset</button>
+      </div>
     </div>
   
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script src="particles.js"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
   <script>
+    // ============ Configuration ============
+    const CONFIG = {
+      WARMUP_TIME: 1000,
+      INTERVAL_MS: 200,
+      DOWNLOAD_URL: 'https://speed.cloudflare.com/__down?bytes=100000000',
+      THREADS: 8,
+    };
 
-  (function(){
-    // ---- Config ----
-    const DURATION     = 5_000;
-    const WARMUP       = 2_000;
-    const INTERVAL_MS  = 250;
-    const TEST_URL     = 'https://speed.cloudflare.com/__down?bytes=75000000';
-    const THREADS      = 6;
-    const MAX_EXPECTED = 500; // Mbps for full gauge
+    // ============ State ============
+    let state = {
+      isRunning: false,
+      downloadSamples: [],
+      totalDownload: 0,
+      lastDownload: 0,
+      currentSpeed: 0,
+      smoothedSpeed: 0,
+    };
 
-    // ---- Elements ----
-    const gaugeEl        = document.getElementById('gauge');
-    const speedValueEl   = document.getElementById('speedValue');
-    const pingEl         = document.getElementById('ping');
-    const downloadSizeEl = document.getElementById('downloadSize');
-    const gigabyteEl     = document.getElementById('gigabyte');
-    const startBtn       = document.getElementById('startButton');
+    // ============ UI Elements ============
+    const UI = {
+      startBtn: document.getElementById('startBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      testState: document.getElementById('testState'),
+      progressFill: document.getElementById('progressFill'),
+      downloadData: document.getElementById('downloadData'),
+    };
 
-    // ---- State ----
-    let running = false;
-    let controllers = [];
-    let totalBytes = 0;
-    let lastBytes = 0;
-    let samples = [];
-    let startTime = 0;
-    let intervalId = null;
+    // ============ Download Test ============
+    async function testDownload(duration) {
+      state.totalDownload = 0;
+      state.lastDownload = 0;
+      state.downloadSamples = [];
 
-    startBtn.addEventListener('click', runTest);
+      const controllers = Array.from({ length: CONFIG.THREADS }, () => new AbortController());
+      const startTime = performance.now();
 
-    async function runTest(){
-      if (running) return;
-      running = true;
-      startBtn.disabled = true;
+      const downloadPromises = controllers.map(async (ctrl) => {
+        try {
+          const url = CONFIG.DOWNLOAD_URL + '&_=' + Math.random();
+          const response = await fetch(url, { signal: ctrl.signal });
+          const reader = response.body.getReader();
 
-      // reset UI & state
-      speedValueEl.textContent   = '–';
-      pingEl.textContent         = 'Ping: …';
-      downloadSizeEl.textContent = 'Downloaded: 0.00 MB';
-      gigabyteEl.textContent = '1GB in –';
-      totalBytes = lastBytes = 0;
-      samples = [];
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            state.totalDownload += value.length;
+          }
+        } catch (e) {
+          if (e.name !== 'AbortError') console.error('Download error:', e);
+        }
+      });
 
-      // 1) Ping
-      const t0 = performance.now();
-      try {
-        await fetch('https://speed.cloudflare.com/__down?bytes=10000', { method:'HEAD', cache:'no-store' });
-      } catch (err) {
-        console.warn('Ping failed:', err);
-      }
-      pingEl.textContent = `Ping: ${(performance.now() - t0).toFixed(1)} ms`;
+      const updateInterval = setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const delta = state.totalDownload - state.lastDownload;
+        state.lastDownload = state.totalDownload;
 
-      // 2) Throughput
-      startTime   = performance.now();
-      controllers = Array.from({length: THREADS}, () => new AbortController());
-
-      // spawn each stream
-      const runners = controllers.map(ctrl => fetchStream(ctrl));
-
-      // update loop
-      intervalId = setInterval(() => {
-        const now     = performance.now();
-        const elapsed = now - startTime;
-        const deltaB  = totalBytes - lastBytes;
-        lastBytes    = totalBytes;
-
-        if (elapsed > WARMUP) {
-          const instMbps = (deltaB * 8) / (INTERVAL_MS/1000) / 1_048_576;
-          samples.push(instMbps);
-          if (samples.length > 10) samples.shift();
-          const avg = samples.reduce((a,b) => a+b, 0) / samples.length;
-          speedValueEl.textContent = avg.toFixed(2);
-          updateGauge(avg / MAX_EXPECTED * 100);
-        } else {
-          speedValueEl.textContent = '…';
-          updateGauge(0);
+        if (elapsed > CONFIG.WARMUP_TIME) {
+          const mbps = (delta * 8) / (CONFIG.INTERVAL_MS / 1000) / 1_000_000;
+          state.downloadSamples.push(mbps);
+          if (state.downloadSamples.length > 15) state.downloadSamples.shift();
+          
+          // Smooth the speed transition with exponential moving average
+          state.currentSpeed = mbps;
+          state.smoothedSpeed += (state.currentSpeed - state.smoothedSpeed) * 0.15;
         }
 
-        downloadSizeEl.textContent =
-          `Downloaded: ${(totalBytes / 1_048_576).toFixed(2)} MB`;
-      }, INTERVAL_MS);
+        // Animate progress with smooth transition
+        const pct = Math.min(100, (elapsed / duration) * 100);
+        UI.progressFill.style.width = pct + '%';
 
-      // stop after duration
-      setTimeout(async () => {
-        controllers.forEach(c => c.abort());
-        clearInterval(intervalId);
-        await Promise.allSettled(runners);
+        updateUI();
+      }, CONFIG.INTERVAL_MS);
 
-        const finalAvg = samples.length
-          ? samples.reduce((a,b) => a+b, 0) / samples.length
-          : 0;
-        speedValueEl.textContent = finalAvg.toFixed(2);
-        updateGauge(finalAvg / MAX_EXPECTED * 100);
+      await Promise.race([
+        Promise.all(downloadPromises),
+        sleep(duration)
+      ]);
 
-        // Calculate the time to download 1GB
-        const timeToDownloadGB = (8000 / finalAvg);  // Multiply by 1000 to convert Mbps to MB/s, then divide 1024MB by the speed
-        gigabyteEl.textContent = `1GB in ${timeToDownloadGB.toFixed(2)} seconds`;
-
-        running = false;
-        startBtn.disabled = false;
-      }, DURATION + 50);
+      controllers.forEach(c => c.abort());
+      clearInterval(updateInterval);
     }
 
-    async function fetchStream(ctrl) {
+    // ============ Main Test Flow ============
+    async function startTest() {
+      if (state.isRunning) return;
+
+      state.isRunning = true;
+      state.downloadSamples = [];
+      state.totalDownload = 0;
+      state.lastDownload = 0;
+      state.currentSpeed = 0;
+      state.smoothedSpeed = 0;
+
+      UI.startBtn.disabled = true;
+      UI.resetBtn.disabled = true;
+      UI.progressFill.style.width = '0%';
+
+      const testDuration = 10000; // 10 seconds
+
       try {
-        // append with & to the existing ?bytes=…
-        const url = TEST_URL + '&_=' + Math.random();
-        const res = await fetch(url, { signal: ctrl.signal });
-        if (!res.body) throw new Error('No readable stream');
-        const reader = res.body.getReader();
-        while (true) {
-          const {done, value} = await reader.read();
-          if (done) break;
-          totalBytes += value.byteLength;
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError') console.error('Stream error:', err);
+        UI.testState.textContent = 'Testing speed...';
+        await testDownload(testDuration);
+      } catch (e) {
+        console.error('Test error:', e);
+        UI.testState.textContent = 'Test error: ' + e.message;
+      } finally {
+        finalizeTest();
       }
     }
 
-    function updateGauge(percent) {
-      const p = Math.max(0, Math.min(100, percent));
-      const deg = p * 3.6;
-      gaugeEl.style.background =
-        `conic-gradient(#4CAF50 0deg, #4CAF50 ${deg}deg, #e0e0e0 ${deg}deg 360deg)`;
+    function updateUI() {
+      const displaySpeed = state.smoothedSpeed.toFixed(2);
+      document.getElementById('speedText').textContent = displaySpeed;
+      UI.downloadData.textContent = (state.totalDownload / 1_000_000).toFixed(1);
+      
+      // Update speedometer arc (0-500 Mbps scale)
+      const maxSpeed = 500;
+      const percent = Math.min(100, (state.smoothedSpeed / maxSpeed) * 100);
+      const angle = (percent / 100) * 180; // 0-180 degrees for semicircle
+      const rad = (angle * Math.PI) / 180;
+      const x = 100 + 80 * Math.cos(Math.PI - rad);
+      const y = 100 - 80 * Math.sin(Math.PI - rad);
+      const largeArc = angle > 90 ? 1 : 0;
+      
+      const pathData = `M 20 100 A 80 80 0 ${largeArc} 1 ${x} ${y}`;
+      document.getElementById('speedArc').setAttribute('d', pathData);
     }
-  })();
+
+    function finalizeTest() {
+      state.isRunning = false;
+      UI.startBtn.disabled = false;
+      UI.resetBtn.disabled = false;
+      UI.testState.textContent = 'Test complete';
+      UI.progressFill.style.width = '100%';
+    }
+
+    function resetTest() {
+      if (state.isRunning) return;
+
+      state = {
+        isRunning: false,
+        downloadSamples: [],
+        totalDownload: 0,
+        lastDownload: 0,
+        currentSpeed: 0,
+        smoothedSpeed: 0,
+      };
+
+      document.getElementById('speedText').textContent = '—';
+      UI.downloadData.textContent = '0';
+      UI.testState.textContent = 'Ready to test';
+      UI.progressFill.style.width = '0%';
+      UI.startBtn.disabled = false;
+      
+      // Reset arc to start
+      document.getElementById('speedArc').setAttribute('d', 'M 20 100 A 80 80 0 0 1 20 100');
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Initialize particles
+    if (window.particlesJS) {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: '#667eea' },
+          opacity: { value: 0.5 },
+          size: { value: 3 },
+          move: { enable: true, speed: 2 }
+        }
+      });
+    }
   </script>
 
 </body>

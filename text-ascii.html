@@ -254,11 +254,19 @@
                 <button onclick="generateASCII()">Generate ASCII</button>
                 <button onclick="copyToClipboard()">Copy to Clipboard</button>
                 <button onclick="downloadASCII()">Download</button>
+                <button onclick="downloadPNG()">Download PNG</button>
             </div>
 
             <div class="output-section">
                 <label for="output">ASCII Output:</label>
                 <pre id="output"></pre>
+            </div>
+            
+            <div class="input-section">
+                <label for="textColor">Text color:</label>
+                <input type="color" id="textColor" value="#ffffff">
+                <label for="bgColor">Background color:</label>
+                <input type="color" id="bgColor" value="#000000">
             </div>
         </div>
     </div>
@@ -490,6 +498,62 @@
             document.body.removeChild(element);
         }
 
+        // Update preview colors from the color pickers
+        function updateColors() {
+            const outputEl = document.getElementById('output');
+            const textColorEl = document.getElementById('textColor');
+            const bgColorEl = document.getElementById('bgColor');
+            if (!outputEl) return;
+            if (textColorEl) outputEl.style.color = textColorEl.value;
+            if (bgColorEl) outputEl.style.background = bgColorEl.value;
+        }
+
+        // Download ASCII output as a PNG image
+        function downloadPNG() {
+            const outputEl = document.getElementById('output');
+            const text = outputEl.textContent;
+            if (!text || text.includes('Error') || text.includes('Please')) return;
+
+            const lines = text.split('\n');
+            const fontSize = 14; // px
+            const lineHeight = 1.15;
+            const fontFamily = 'Courier New, monospace';
+
+            const tmpCanvas = document.createElement('canvas');
+            const tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.font = `${fontSize}px ${fontFamily}`;
+
+            let maxWidth = 0;
+            for (const line of lines) {
+                const w = tmpCtx.measureText(line).width;
+                if (w > maxWidth) maxWidth = w;
+            }
+
+            const padding = 20;
+            tmpCanvas.width = Math.ceil(maxWidth + padding * 2);
+            tmpCanvas.height = Math.ceil(lines.length * fontSize * lineHeight + padding * 2);
+
+            const bgColor = (document.getElementById('bgColor') || { value: '#000000' }).value;
+            tmpCtx.fillStyle = bgColor;
+            tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+
+            const textColor = (document.getElementById('textColor') || { value: '#ffffff' }).value;
+            tmpCtx.fillStyle = textColor;
+            tmpCtx.font = `${fontSize}px ${fontFamily}`;
+            tmpCtx.textBaseline = 'top';
+
+            for (let i = 0; i < lines.length; i++) {
+                tmpCtx.fillText(lines[i], padding, padding + i * fontSize * lineHeight);
+            }
+
+            const link = document.createElement('a');
+            link.href = tmpCanvas.toDataURL('image/png');
+            link.download = 'ascii-art.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // Enter key to generate
         document.getElementById('textInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -566,15 +630,29 @@
             animate();
         }
 
+        // Attach color picker listeners and initialize preview colors
+        function setupColorControls() {
+            const textColorEl = document.getElementById('textColor');
+            const bgColorEl = document.getElementById('bgColor');
+
+            if (textColorEl) textColorEl.addEventListener('input', updateColors);
+            if (bgColorEl) bgColorEl.addEventListener('input', updateColors);
+
+            // Ensure preview matches initial picker values
+            updateColors();
+        }
+
         // Initialize
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 initializeBackground();
                 initializeFonts();
+                setupColorControls();
             });
         } else {
             initializeBackground();
             initializeFonts();
+            setupColorControls();
         }
     </script>
 </body>
