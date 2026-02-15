@@ -56,6 +56,8 @@
 					<option value="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "  >High detail</option>
 					<option value="@#S%?*+;:,.   ">Simple</option>
 					<option value="   .:-=+*#%@">Reversed</option>
+					<option value="█▓▒░ ">Boxes</option>
+					<option value="█">pixels (use color)</option>
 				</select>
 			</div>
 
@@ -97,6 +99,9 @@
 				<div class="actions">
 					<button id="copy">Copy Text</button>
 					<button id="downloadTxt">Download .txt</button>
+					<button id="downloadHtml">Download .html</button>
+					<button id="downloadPng">Download PNG</button>
+					<button id="downloadImage">Download Image</button>
 				</div>
 			</div>
 
@@ -134,6 +139,7 @@
 		const downloadTxt = document.getElementById('downloadTxt');
 		const downloadHtml = document.getElementById('downloadHtml');
 		const downloadPng = document.getElementById('downloadPng');
+		const downloadImage = document.getElementById('downloadImage');
 
 		widthRange.addEventListener('input', ()=> widthVal.textContent = widthRange.value);
 		scaleRange.addEventListener('input', ()=> scaleVal.textContent = scaleRange.value);
@@ -199,10 +205,15 @@
 			const brightness = parseInt(brightnessRange.value,10);
 			const contrast = parseInt(contrastRange.value,10);
 
-			// Build ascii lines
-			const lines = [];
+			// Build ascii lines (store HTML lines, plain text lines, and char matrix)
+			const linesHtml = [];
+			const linesText = [];
+			const chars = [];
+
 			for(let y=0;y<preview.height;y++){
-				let line='';
+				let lineHtml='';
+				let lineText='';
+				let rowChars = [];
 				for(let x=0;x<preview.width;x++){
 					const i = (y*preview.width + x) * 4;
 					let r = data[i], g = data[i+1], b = data[i+2];
@@ -214,28 +225,31 @@
 					const t = invert ? 255 - lum : lum;
 					const idx = Math.floor((t/255) * (charset.length - 1));
 					const ch = charset[idx] || ' ';
+					rowChars.push(ch);
 					if (useColor){
-						const span = `<span style="color:rgb(${r},${g},${b})">${escapeHtml(ch)}</span>`;
-						line += span;
+						lineHtml += `<span style="color:rgb(${r},${g},${b})">${escapeHtml(ch)}</span>`;
 					} else {
-						line += ch;
+						lineHtml += escapeHtml(ch);
 					}
+					lineText += ch;
 				}
-				lines.push(line);
+				linesHtml.push(`<div class=\"line\">${lineHtml}</div>`);
+				linesText.push(lineText);
+				chars.push(rowChars);
 			}
 
 			// Render output
 			if (useColor){
-				outputEl.innerHTML = lines.map(l=>`<div class=\"line\">${l}</div>`).join('\n');
+				outputEl.innerHTML = linesHtml.join('\n');
 				outputEl.style.fontSize = '8px';
 				outputEl.style.lineHeight = '7px';
 			} else {
-				outputEl.textContent = lines.map(l=>stripHtml(l)).join('\n');
+				outputEl.textContent = linesText.join('\n');
 				outputEl.style.fontSize = '8px';
 				outputEl.style.lineHeight = '7px';
 			}
 			// store last result
-			window._lastAscii = {lines, useColor};
+			window._lastAscii = {linesHtml, linesText, chars, useColor, cols: preview.width, rows: preview.height};
 		}
 
 		function applyBC(v, brightness, contrast){
@@ -263,33 +277,74 @@
 
 		downloadTxt.addEventListener('click', ()=>{
 			if (!window._lastAscii) return alert('Generate first');
-			const text = window._lastAscii.useColor ? outputEl.innerText : outputEl.textContent;
+			const text = window._lastAscii.linesText ? window._lastAscii.linesText.join('\n') : (outputEl.textContent || '');
 			const blob = new Blob([text],{type:'text/plain;charset=utf-8'});
 			const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='ascii.txt'; a.click();
 		});
 
 		downloadHtml.addEventListener('click', ()=>{
 			if (!window._lastAscii) return alert('Generate first');
-			const html = `<!doctype html><meta charset=\"utf-8\"><style>body{background:#000;color:#fff;font-family:monospace;white-space:pre}</style><pre>${outputEl.innerHTML}</pre>`;
+			const htmlBody = window._lastAscii.linesHtml ? window._lastAscii.linesHtml.join('\n') : outputEl.innerHTML;
+			const html = `<!doctype html><meta charset="utf-8"><style>body{background:#000;color:#fff;font-family:monospace;white-space:pre}</style>${htmlBody}`;
 			const blob = new Blob([html],{type:'text/html;charset=utf-8'});
 			const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='ascii.html'; a.click();
 		});
 
 		downloadPng.addEventListener('click', ()=>{
 			if (!window._lastAscii) return alert('Generate first');
-			// Render text to a canvas and export PNG
-			const lines = window._lastAscii.lines.map(l=> stripHtml(l));
-			const fontSize = 8; const lineHeight = 7;
-			const cols = lines[0] ? lines[0].length : 0;
+			const ascii = window._lastAscii;
+			const fontSize = 8; const lineHeight = 9; // slightly larger for legibility
+			const cols = ascii.cols || (ascii.linesText && ascii.linesText[0] ? ascii.linesText[0].length : 0);
+			const rows = ascii.rows || (ascii.linesText ? ascii.linesText.length : 0);
+			if (!cols || !rows) return alert('Nothing to export');
+
+			// Build canvas sized to characters
 			const canvas = document.createElement('canvas');
-			canvas.width = cols * (fontSize*0.6);
-			canvas.height = lines.length * lineHeight;
+			// measure width of a monospace char roughly
+			const tmp = document.createElement('canvas').getContext('2d');
+			tmp.font = `${fontSize}px monospace`;
+			const charW = Math.ceil(tmp.measureText('M').width);
+			canvas.width = cols * charW;
+			canvas.height = rows * lineHeight;
 			const ctx = canvas.getContext('2d');
 			ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
 			ctx.font = `${fontSize}px monospace`;
-			ctx.fillStyle = '#fff';
-			for(let i=0;i<lines.length;i++) ctx.fillText(lines[i], 0, (i+1)*lineHeight);
+			ctx.textBaseline = 'top';
+
+			// read image pixels from preview canvas for color info
+			const pctx = preview.getContext('2d');
+			const imgData = pctx.getImageData(0,0,preview.width,preview.height).data;
+
+			for(let y=0;y<rows;y++){
+				for(let x=0;x<cols;x++){
+					const ch = (ascii.chars && ascii.chars[y] && ascii.chars[y][x]) ? ascii.chars[y][x] : ' ';
+					if (ascii.useColor){
+						const i = (y*preview.width + x) * 4;
+						const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
+						ctx.fillStyle = `rgb(${r},${g},${b})`;
+					} else {
+						ctx.fillStyle = '#fff';
+					}
+					ctx.fillText(ch, x * charW, y * lineHeight);
+				}
+			}
+
 			canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='ascii.png'; a.click(); });
+		});
+
+		downloadImage.addEventListener('click', ()=>{
+			if (!window._loadedImage) return alert('Load an image first');
+			try{
+				const src = window._loadedImage.src;
+				const a = document.createElement('a');
+				a.href = src;
+				// try to infer filename
+				const parts = (src || '').split('/');
+				let name = parts[parts.length-1] || 'image';
+				if (!name.includes('.')) name += '.png';
+				a.download = name;
+				a.click();
+			}catch(e){ alert('Could not download original image.'); }
 		});
 
 		// small helper: if user pastes an image from clipboard

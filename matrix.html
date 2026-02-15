@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pi-clock</title>
+  <link rel="icon" type="image" href="https://www.algot.fun/favicon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: "Press Start 2P", monospace;
+      background: rgb(32, 32, 32);
+      color: rgb(0, 0, 0);
+      overflow: hidden;
+    }
+
+    #c {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      filter: hue-rotate(0deg);
+      transition: filter 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c" ></canvas>
+
+  <script>
+    var root = {
+      wavecolor: {
+        r: 255,
+        g: 0,
+        b: 0
+      },
+      matrixspeed: 25
+    };
+
+    var c = document.getElementById("c");
+    var ctx = c.getContext("2d");
+
+    // Canvas auto-sizing
+    function resizeCanvas() {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    
+    // Matrix effect configuration
+    var konkani = "゠アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレワヰヱヲンヺ・ーヽヿ0123456789";
+    var characters = konkani.split("");
+    var font_size = 20;
+    var columns = c.width / font_size;
+    var drops = [];
+    for (var x = 0; x < columns; x++) drops[x] = 1;
+
+    var lastTime = 0; // For controlling animation frequency
+    var animationFrameId = null;
+    var currentHue = 0;
+
+    function draw(timestamp) {
+      if (timestamp - lastTime < (1000 / root.matrixspeed)) {
+        animationFrameId = requestAnimationFrame(draw); // Keep the animation going
+        return;
+      }
+      lastTime = timestamp;
+
+      ctx.fillStyle = "rgba(0,0,0, 0.05)";
+      ctx.fillRect(0, 0, c.width, c.height);
+
+      ctx.font = font_size + "px arial";
+
+      for (var i = 0; i < drops.length; i++) {
+        var text = characters[Math.floor(Math.random() * characters.length)];
+        ctx.fillStyle = `rgb(${root.wavecolor.r},${root.wavecolor.g},${root.wavecolor.b})`;
+        ctx.fillText(text, i * font_size, drops[i] * font_size);
+
+        drops[i]++;
+        if (drops[i] * font_size > c.height && Math.random() > 0.975) drops[i] = 0;
+      }
+
+      animationFrameId = requestAnimationFrame(draw); // Request next animation frame
+    }
+
+    // Start animation
+    requestAnimationFrame(draw);
+
+    // Space key to change hue filter
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        currentHue = (currentHue + 30) % 360;
+        c.style.filter = `hue-rotate(${currentHue}deg)`;
+      }
+    });
+    
+  </script>
+</body>
+</html>
