@@ -10,10 +10,19 @@
     #eq-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
     .player { z-index: 2; background: #00000000; border-radius: 18px; padding: 24px 18px; box-shadow: 0 4px 32px #000a; display: flex; flex-direction: column; align-items: center; }
     /* removed play button and status styles - interactions are via keyboard and screen (pointer) */
+    /* Live indicator (bottom center) */
+    #live-indicator { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 20px; color: #fff; font-weight: 700; font-size: 12px; pointer-events: none; opacity: 0.98; }
+    #live-indicator .dot { width: 10px; height: 10px; border-radius: 50%; background: #7a7a7a; box-shadow: 0 0 6px rgba(0,0,0,0.6); transition: background .2s, transform .15s, box-shadow .2s; }
+    #live-indicator.live .dot { background: #ff3b30; box-shadow: 0 0 10px #ff3b30; animation: live-pulse 1000ms infinite; transform: scale(1.05); }
+    @keyframes live-pulse { 0% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.4); opacity: 0.75 } 100% { transform: scale(1); opacity: 1 } }
   </style>
 </head>
 <body>
   <canvas id="eq-bg"></canvas>
+  <div id="live-indicator" aria-hidden="true">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="label">LIVE</span>
+  </div>
   <div class="player" id="playerContainer" aria-hidden="true">
     <audio id="audio" src="https://azura.drmnbss.org/listen/dnbradio/radio.mp3" crossorigin="anonymous"></audio>
   </div>
@@ -27,6 +36,18 @@
     let audioCtx, analyser, source;
     let isPlaying = false;
     let fftSize = 128;
+
+    const liveIndicator = document.getElementById('live-indicator');
+    function updateLiveIndicator() {
+      if (!liveIndicator) return;
+      if (isPlaying) {
+        liveIndicator.classList.add('live');
+        liveIndicator.setAttribute('aria-hidden', 'false');
+      } else {
+        liveIndicator.classList.remove('live');
+        liveIndicator.setAttribute('aria-hidden', 'true');
+      }
+    }
 
     // Three.js setup
     const scene = new THREE.Scene();
@@ -90,12 +111,25 @@
           return;
         }
         isPlaying = true;
+        updateLiveIndicator();
         drawEq();
       } else {
         audio.pause();
         isPlaying = false;
+        updateLiveIndicator();
       }
     }
+
+    // Keep indicator in sync with media events (covers external changes)
+    audio.addEventListener('play', () => {
+      isPlaying = true;
+      updateLiveIndicator();
+      drawEq();
+    });
+    audio.addEventListener('pause', () => {
+      isPlaying = false;
+      updateLiveIndicator();
+    });
 
     // Toggle on space key press
     window.addEventListener('keydown', async (e) => {
@@ -146,10 +180,10 @@
     // Optional: visual hint on first load (removable)
     // show a temporary hint to press any key / tap to play
     const hint = document.createElement('div');
-    hint.textContent = 'Press any key or tap the screen to play/pause';
+    hint.textContent = 'Press space or tap the screen to play/pause';
     Object.assign(hint.style, {
       position: 'fixed',
-      bottom: '24px',
+      top: '24px',
       left: '50%',
       transform: 'translateX(-50%)',
       color: '#b6b6d6',
