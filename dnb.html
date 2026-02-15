@@ -97,10 +97,11 @@
       }
     }
 
-    // Toggle on any key press
+    // Toggle on space key press
     window.addEventListener('keydown', async (e) => {
-      // optional: ignore modifier-only keys if desired
-      await togglePlayback();
+      if (e.code === 'Space') {
+        await togglePlayback();
+      }
     });
 
     // Toggle on screen pointer (mouse/touch) press anywhere
