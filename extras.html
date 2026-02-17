@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-items: center;
+            align-items: start;
+            width: 100%;
+        }
+        @media (max-width: 1000px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 90%;
+            max-width: 900px;
+            margin: 0;
+            padding: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid #ffffff20;
+        }
+        
+        .item-description {
+            flex: 1;
+            margin: 0 20px;
+        }
+        .item-button {
+            text-align: center;
+        }
+        .item-button a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #01480057;
+            border: rgb(0, 163, 0) solid 1px;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .item-button a:hover {
+            background-color: #002805;
+        }
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            z-index: -1;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="/topo.html"></iframe>
+    <h1>Extras</h1>
+    <div class="content">
+        <div class="item">
+            <div class="item-description">
+                <h2>Minecraft Server</h2>
+                <p>Join our custom Minecraft server and explore a world of endless possibilities!</p>
+            </div>
+            <div class="item-button">
+                <a href="/MC.html">Visit</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="item-description">
+                <h2>CS2 ESP Cheats</h2>
+                <p>fully external CS2 ESP cheat. Simple controls, advanced cheat</p>
+            </div>
+            <div class="item-button">
+                <a href="/cs2.html">Visit</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="item-description">
+                <h2>Algot.fun Miniplayer</h2>
+                <p>Download the Algot.fun miniplayer for a compact web gaming experience.</p>
+            </div>
+            <div class="item-button">
+                <a href="/miniplayer.zip">Download</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="item-description">
+                <h2>Myinstants Hotbar</h2>
+                <p>Get the Myinstants hotbar for quick access to your favorite sounds.</p>
+            </div>
+            <div class="item-button">
+                <a href="/MyHotbar.zip">Download</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="item-description">
+                <h2>Algot.newtab 3.0</h2>
+                <p>Upgrade your browser experience with the Algot.newtab 3.0 extension.</p>
+            </div>
+            <div class="item-button">
+                <a href="/Algot.newtab3.0.zip">Download</a>
+            </div>
+        </div>
+    </div>
+</body> 
+</html>
