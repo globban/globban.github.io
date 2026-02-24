@@ -209,20 +209,62 @@
         function toggleTracking() { isTracking ? stopTracking() : startTracking(); }
 
         async function startTracking() {
-            if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
-            isTracking = true; dataPoints = []; maxSpeed = 0;
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "End Run"; btn.style.background = "#ff3b3b"; btn.style.color = "#fff";
-            document.getElementById('lock-btn').classList.remove('hidden');
-            watchId = navigator.geolocation.watchPosition(pos => {
-                const kmh = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                if (kmh > maxSpeed) maxSpeed = kmh;
-                dataPoints.push({ lat: pos.coords.latitude, lng: pos.coords.longitude, alt: pos.coords.altitude });
-                document.getElementById('curr-speed').innerText = kmh.toFixed(1);
-                document.getElementById('live-top-speed').innerText = maxSpeed.toFixed(1);
-                document.getElementById('curr-alt').innerText = pos.coords.altitude ? Math.round(pos.coords.altitude) : "--";
-            }, null, { enableHighAccuracy: true });
-        }
+    // 1. Request Wake Lock to keep CPU alive
+    if ('wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+    }
+
+    // 2. Audio Hack (Keeps process alive on iOS/Android in pocket)
+    const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+    silentAudio.loop = true;
+    silentAudio.play().catch(() => console.log("Audio needs user interaction first"));
+
+    isTracking = true;
+    dataPoints = [];
+    maxSpeed = 0;
+    
+    const btn = document.getElementById('main-btn');
+    btn.innerText = "End Run";
+    btn.style.background = "#ff3b3b";
+    
+    // 3. High-Reliability Watch Configuration
+    const geoOptions = {
+        enableHighAccuracy: true, // Forces GPS hardware
+        maximumAge: 0,            // Don't use cached location
+        timeout: 5000             // Timeout if no lock in 5s
+    };
+
+    let speedBuffer = []; // For smoothing
+
+    watchId = navigator.geolocation.watchPosition(pos => {
+        // Filter out low accuracy (over 20m error is usually trash data)
+        if (pos.coords.accuracy > 20) return;
+
+        let rawKmh = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
+        
+        // 4. Speed Smoothing (Last 3 samples)
+        speedBuffer.push(rawKmh);
+        if (speedBuffer.length > 3) speedBuffer.shift();
+        const smoothedKmh = speedBuffer.reduce((a, b) => a + b) / speedBuffer.length;
+
+        if (smoothedKmh > maxSpeed) maxSpeed = smoothedKmh;
+
+        dataPoints.push({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            alt: pos.coords.altitude,
+            speed: smoothedKmh
+        });
+
+        // UI Updates
+        document.getElementById('curr-speed').innerText = smoothedKmh.toFixed(1);
+        document.getElementById('live-top-speed').innerText = maxSpeed.toFixed(1);
+        document.getElementById('curr-alt').innerText = pos.coords.altitude ? Math.round(pos.coords.altitude) : "--";
+        
+    }, (err) => {
+        console.warn(`GPS Error: ${err.message}`);
+    }, geoOptions);
+}
 
         function stopTracking() {
             isTracking = false; if (wakeLock) wakeLock.release();
