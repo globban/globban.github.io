@@ -1,0 +1,17 @@
+{
+  "name": "SHRED Ski Tracker",
+  "short_name": "SHRED",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#39FF14",
+  "description": "High-performance dark mode ski tracker.",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

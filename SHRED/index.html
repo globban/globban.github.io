@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHRED | Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; touch-action: manipulation; }
+        .stat-card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 1.25rem; padding: 1rem; }
+        .btn-shred { background: #39FF14; color: #000; box-shadow: 0 0 25px rgba(57, 255, 20, 0.2); }
+        #map { height: 250px; width: 100%; border-radius: 1.5rem; background: #000; border: 1px solid #333; }
+        
+        /* PURE BLACK POCKET LOCK */
+        #pocket-shield {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; /* Pure Black for OLED power saving */
+            z-index: 9999;
+            cursor: pointer;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .unlock-hint { color: #111; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        
+        input[type=range] { -webkit-appearance: none; background: #222; height: 8px; border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #39FF14; cursor: pointer; border: 4px solid #000; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div id="pocket-shield" onclick="handlePocketTap()">
+        <p class="unlock-hint">Triple tap to unlock</p>
+    </div>
+
+    <div id="tracking-screen" class="flex flex-col min-h-[92vh] justify-between transition-all">
+        <div class="flex justify-between items-center opacity-40">
+            <span class="text-[10px] font-black tracking-widest uppercase italic text-[#39FF14]">Pro Session</span>
+            <button id="lock-btn" onclick="activateLock()" class="hidden text-[10px] border border-[#39FF14] text-[#39FF14] px-4 py-1.5 rounded-full flex items-center gap-2 font-bold">
+                <i data-lucide="lock" class="w-3"></i> POCKET LOCK
+            </button>
+        </div>
+
+        <div class="text-center">
+            <p class="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Top Speed</p>
+            <h1 id="live-top-speed" class="text-9xl font-black italic tracking-tighter text-[#39FF14]">0.0</h1>
+            <p class="text-gray-400 text-sm">km/h</p>
+        </div>
+
+        <div class="stat-card space-y-3">
+            <div class="flex justify-between items-center">
+                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Gps Hz</p>
+                <p id="interval-display" class="text-[#39FF14] text-xs font-bold font-mono">1.0s</p>
+            </div>
+            <input id="acc-slider" type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full" oninput="updateIntervalDisplay(this.value)">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stat-card">
+                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Current</p>
+                <p class="text-xl font-bold italic"><span id="curr-speed">0.0</span> <span class="text-[10px] text-gray-600 font-normal italic">kmh</span></p>
+            </div>
+            <div class="stat-card">
+                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Altitude</p>
+                <p class="text-xl font-bold"><span id="curr-alt">--</span> <span class="text-[10px] text-gray-600 font-normal">m</span></p>
+            </div>
+        </div>
+
+        <button id="main-btn" onclick="toggleTracking()" class="btn-shred w-full py-5 rounded-3xl font-black text-xl uppercase tracking-widest active:scale-95">
+            Start Shredding
+        </button>
+    </div>
+
+    <div id="summary-screen" class="hidden flex flex-col gap-3">
+        <h2 class="text-3xl font-black italic mt-2 tracking-tighter uppercase">Run Summary</h2>
+        <div id="map"></div>
+        <div class="stat-card flex justify-between items-center">
+            <div>
+                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Max Speed</p>
+                <p id="summary-top-speed" class="text-5xl font-black italic text-[#39FF14]">0.0</p>
+            </div>
+            <p class="text-gray-600 font-black italic text-xl mr-2">KM/H</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stat-card col-span-2 flex justify-between items-center"><p class="text-gray-500 text-[10px] uppercase font-bold">Total Distance</p><p id="total-dist" class="text-xl font-bold italic">0.00 km</p></div>
+            <div class="stat-card"><p class="text-gray-500 text-[10px] uppercase font-bold">Top Alt</p><p id="top-alt" class="text-xl font-bold">0m</p></div>
+            <div class="stat-card"><p class="text-gray-500 text-[10px] uppercase font-bold">Bottom Alt</p><p id="bottom-alt" class="text-xl font-bold">0m</p></div>
+        </div>
+        <button onclick="location.reload()" class="bg-zinc-900 text-white w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-widest">Reset Session</button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let isTracking = false, watchId = null, dataPoints = [], maxSpeed = 0, totalDistance = 0, lastLoggedTime = 0, sampleInterval = 1000;
+        let wakeLock = null;
+        let tapCount = 0, tapTimer = null;
+
+        function updateIntervalDisplay(val) {
+            sampleInterval = val * 1000;
+            document.getElementById('interval-display').innerText = parseFloat(val).toFixed(1) + "s";
+        }
+
+        // LOCK LOGIC
+        function activateLock() {
+            document.getElementById('pocket-shield').style.display = 'flex';
+        }
+
+        function handlePocketTap() {
+            tapCount++;
+            clearTimeout(tapTimer);
+            
+            if (tapCount === 3) {
+                document.getElementById('pocket-shield').style.display = 'none';
+                tapCount = 0;
+            } else {
+                // If they don't finish the 3 taps within 600ms, reset
+                tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+            }
+        }
+
+        function toggleTracking() {
+            if (!isTracking) startTracking();
+            else stopTracking();
+        }
+
+        async function startTracking() {
+            if ('wakeLock' in navigator) {
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
+            }
+
+            isTracking = true;
+            dataPoints = []; maxSpeed = 0; totalDistance = 0; lastLoggedTime = 0;
+
+            const btn = document.getElementById('main-btn');
+            btn.innerText = "Stop Session";
+            btn.style.background = "#ff3b3b"; btn.style.color = "#fff";
+            btn.style.boxShadow = "0 0 25px rgba(255, 59, 59, 0.2)";
+            
+            document.getElementById('acc-slider').disabled = true;
+            document.getElementById('lock-btn').classList.remove('hidden');
+
+            watchId = navigator.geolocation.watchPosition(
+                pos => {
+                    const now = Date.now();
+                    if (now - lastLoggedTime >= sampleInterval) {
+                        handleUpdate(pos.coords.speed, pos.coords.altitude, pos.coords.latitude, pos.coords.longitude);
+                        lastLoggedTime = now;
+                    }
+                },
+                err => console.log(err),
+                { enableHighAccuracy: true }
+            );
+        }
+
+        function handleUpdate(speed, alt, lat, lng) {
+            const kmh = speed ? speed * 3.6 : 0;
+            if (kmh > maxSpeed) maxSpeed = kmh;
+            if (dataPoints.length > 0) {
+                const prev = dataPoints[dataPoints.length - 1];
+                totalDistance += calculateDistance(prev.lat, prev.lng, lat, lng);
+            }
+            dataPoints.push({ lat, lng, alt, speed: kmh });
+            document.getElementById('curr-speed').innerText = kmh.toFixed(1);
+            document.getElementById('live-top-speed').innerText = maxSpeed.toFixed(1);
+            document.getElementById('curr-alt').innerText = alt ? Math.round(alt) : "--";
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function stopTracking() {
+            isTracking = false; 
+            if (wakeLock) wakeLock.release();
+            navigator.geolocation.clearWatch(watchId);
+            document.getElementById('tracking-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+            document.getElementById('pocket-shield').style.display = 'none';
+
+            const alts = dataPoints.map(p => p.alt).filter(a => a !== null);
+            document.getElementById('summary-top-speed').innerText = maxSpeed.toFixed(1);
+            document.getElementById('total-dist').innerText = totalDistance.toFixed(2) + " km";
+            document.getElementById('top-alt').innerText = (alts.length ? Math.round(Math.max(...alts)) : 0) + "m";
+            document.getElementById('bottom-alt').innerText = (alts.length ? Math.round(Math.min(...alts)) : 0) + "m";
+            
+            initMap();
+        }
+
+        function initMap() {
+            if (!dataPoints.length) return;
+            const map = L.map('map', { zoomControl: false }).setView([dataPoints[0].lat, dataPoints[0].lng], 14);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            const latLngs = dataPoints.map(p => [p.lat, p.lng]);
+            L.polyline(latLngs, { color: '#39FF14', weight: 6 }).addTo(map);
+            map.fitBounds(L.polyline(latLngs).getBounds(), { padding: [30, 30] });
+        }
+    </script>
+</body>
+</html>
