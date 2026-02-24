@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHRED | Pro</title>
+    <title>SHRED | Elite Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -11,218 +11,245 @@
     
     <style>
         body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; touch-action: manipulation; }
-        .stat-card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 1.25rem; padding: 1rem; }
-        .btn-shred { background: #39FF14; color: #000; box-shadow: 0 0 25px rgba(57, 255, 20, 0.2); }
-        #map { height: 250px; width: 100%; border-radius: 1.5rem; background: #000; border: 1px solid #333; }
-        
-        /* PURE BLACK POCKET LOCK */
-        #pocket-shield {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; /* Pure Black for OLED power saving */
-            z-index: 9999;
-            cursor: pointer;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .unlock-hint { color: #111; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-        
-        input[type=range] { -webkit-appearance: none; background: #222; height: 8px; border-radius: 5px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #39FF14; cursor: pointer; border: 4px solid #000; }
+        .stat-card { background: #0b0b0b; border: 1px solid #151515; border-radius: 1.5rem; padding: 1.25rem; }
+        .btn-shred { background: #39FF14; color: #000; box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); transition: all 0.2s ease; }
+        #map { height: 200px; width: 100%; border-radius: 1.5rem; background: #000; border: 1px solid #222; margin: 1rem 0; }
+        .page { display: none; height: 92vh; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
+        .page::-webkit-scrollbar { display: none; }
+        .active-page { display: flex; }
+        #pocket-shield { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .lock-indicator { color: #080808; font-size: 8px; font-weight: 900; letter-spacing: 0.5em; text-transform: uppercase; pointer-events: none; }
+        input[type="text"] { background: #111; border: 1px solid #222; color: #fff; border-radius: 1rem; padding: 1rem; outline: none; text-align: center; font-weight: 800; width: 100%; transition: border 0.2s; }
+        input[type="text"]:focus { border-color: #39FF14; }
+        input[type="range"] { accent-color: #39FF14; }
+        #pfp-input { font-size: 4rem; width: 120px; height: 120px; padding: 0; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4" onclick="handleInitialTap()">
 
     <div id="pocket-shield" onclick="handlePocketTap()">
-        <p class="unlock-hint">Triple tap to unlock</p>
+        <p class="lock-indicator">Triple Tap To Return</p>
     </div>
 
-    <div id="tracking-screen" class="flex flex-col min-h-[92vh] justify-between transition-all">
-        <div class="flex justify-between items-center opacity-40">
-            <span class="text-[10px] font-black tracking-widest uppercase italic text-[#39FF14]">Pro Session</span>
-            <button id="lock-btn" onclick="activateLock()" class="hidden text-[10px] border border-[#39FF14] text-[#39FF14] px-4 py-1.5 rounded-full flex items-center gap-2 font-bold">
-                <i data-lucide="lock" class="w-3"></i> POCKET LOCK
+    <div class="flex justify-between items-center mb-4 z-50">
+        <div class="flex gap-2">
+            <button onclick="showPage('leaderboard-page')" class="p-3 bg-zinc-900 rounded-2xl active:scale-90 transition-transform">
+                <i data-lucide="trophy" class="text-[#39FF14] w-5 h-5"></i>
+            </button>
+            <button onclick="showPage('profile-page')" class="p-3 bg-zinc-900 rounded-2xl flex items-center gap-2 active:scale-90 transition-transform">
+                <span id="nav-pfp">⛷️</span>
+                <span id="nav-user" class="text-[10px] font-black uppercase tracking-tighter hidden sm:inline">RIDER</span>
             </button>
         </div>
+        <div class="flex items-center gap-3">
+            <div id="connection-dot" class="w-2 h-2 rounded-full bg-red-600"></div>
+            <button id="lock-btn" onclick="activateLock()" class="hidden text-[10px] bg-zinc-900 border border-zinc-800 text-gray-400 px-4 py-2 rounded-full font-black uppercase tracking-widest">Lock</button>
+        </div>
+    </div>
 
-        <div class="text-center">
-            <p class="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Top Speed</p>
+    <div id="tracking-page" class="page active-page">
+        <div class="text-center py-6">
+            <p class="text-gray-600 text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-center w-full">Max Session Speed</p>
             <h1 id="live-top-speed" class="text-9xl font-black italic tracking-tighter text-[#39FF14]">0.0</h1>
-            <p class="text-gray-400 text-sm">km/h</p>
+            <p class="text-gray-500 text-sm font-bold uppercase tracking-widest text-center w-full">km/h</p>
         </div>
 
-        <div class="stat-card space-y-3">
+        <div class="stat-card space-y-4 mb-4">
             <div class="flex justify-between items-center">
-                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Gps Hz</p>
-                <p id="interval-display" class="text-[#39FF14] text-xs font-bold font-mono">1.0s</p>
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Gps Sync</span>
+                <span id="interval-display" class="text-[#39FF14] font-mono font-bold">1.0s</span>
             </div>
             <input id="acc-slider" type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full" oninput="updateIntervalDisplay(this.value)">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-            <div class="stat-card">
-                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Current</p>
-                <p class="text-xl font-bold italic"><span id="curr-speed">0.0</span> <span class="text-[10px] text-gray-600 font-normal italic">kmh</span></p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="stat-card flex flex-col items-center">
+                <span class="text-[9px] font-black text-gray-600 uppercase mb-1">Live</span>
+                <span class="text-2xl font-black italic"><span id="curr-speed">0.0</span></span>
             </div>
-            <div class="stat-card">
-                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Altitude</p>
-                <p class="text-xl font-bold"><span id="curr-alt">--</span> <span class="text-[10px] text-gray-600 font-normal">m</span></p>
+            <div class="stat-card flex flex-col items-center">
+                <span class="text-[9px] font-black text-gray-600 uppercase mb-1">Alt</span>
+                <span class="text-2xl font-black italic"><span id="curr-alt">--</span>m</span>
             </div>
         </div>
 
-        <button id="main-btn" onclick="toggleTracking()" class="btn-shred w-full py-5 rounded-3xl font-black text-xl uppercase tracking-widest active:scale-95">
-            Start Shredding
-        </button>
+        <button id="main-btn" onclick="toggleTracking()" class="btn-shred w-full py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest mt-auto">Start Shredding</button>
     </div>
 
-    <div id="summary-screen" class="hidden flex flex-col gap-3">
-        <h2 class="text-3xl font-black italic mt-2 tracking-tighter uppercase">Run Summary</h2>
-        <div id="map"></div>
-        <div class="stat-card flex justify-between items-center">
-            <div>
-                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">Max Speed</p>
-                <p id="summary-top-speed" class="text-5xl font-black italic text-[#39FF14]">0.0</p>
+    <div id="profile-page" class="page">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-black italic uppercase tracking-tighter">Identity</h2>
+            <button onclick="showPage('tracking-page')" class="p-2 bg-zinc-900 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+        </div>
+        <div class="flex flex-col items-center gap-6">
+            <input id="pfp-input" type="text" maxlength="2" placeholder="⛷️">
+            <div class="w-full space-y-2">
+                <p class="text-gray-600 text-[10px] font-black uppercase tracking-widest ml-2">Username</p>
+                <input id="username-input" type="text" maxlength="12" placeholder="RIDER NAME">
             </div>
-            <p class="text-gray-600 font-black italic text-xl mr-2">KM/H</p>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-            <div class="stat-card col-span-2 flex justify-between items-center"><p class="text-gray-500 text-[10px] uppercase font-bold">Total Distance</p><p id="total-dist" class="text-xl font-bold italic">0.00 km</p></div>
-            <div class="stat-card"><p class="text-gray-500 text-[10px] uppercase font-bold">Top Alt</p><p id="top-alt" class="text-xl font-bold">0m</p></div>
-            <div class="stat-card"><p class="text-gray-500 text-[10px] uppercase font-bold">Bottom Alt</p><p id="bottom-alt" class="text-xl font-bold">0m</p></div>
+        <button onclick="saveProfile()" class="bg-[#39FF14] text-black w-full py-5 rounded-3xl font-black uppercase tracking-widest mt-auto mb-4">Save Profile</button>
+    </div>
+
+    <div id="leaderboard-page" class="page">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-black italic uppercase tracking-tighter">Global Peaks</h2>
+            <button onclick="showPage('tracking-page')" class="p-2 bg-zinc-900 rounded-full"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
         </div>
-        <button onclick="location.reload()" class="bg-zinc-900 text-white w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-widest">Reset Session</button>
+        <div id="leaderboard-content" class="space-y-2 pb-20"></div>
+    </div>
+
+    <div id="summary-page" class="page">
+        <h2 class="text-3xl font-black italic uppercase tracking-tighter">Run Summary</h2>
+        <div id="map"></div>
+        <div class="stat-card flex justify-between items-center mb-4">
+            <div><p class="text-gray-600 text-[10px] font-black uppercase">Max Speed</p><p id="sum-max" class="text-5xl font-black italic text-[#39FF14]">0.0</p></div>
+            <span class="text-gray-500 font-black italic text-xl">KMH</span>
+        </div>
+        <button onclick="softReset()" class="bg-white text-black w-full py-5 rounded-3xl font-black uppercase tracking-widest mt-auto mb-4">New Session</button>
     </div>
 
     <script>
         lucide.createIcons();
-        let isTracking = false, watchId = null, dataPoints = [], maxSpeed = 0, totalDistance = 0, lastLoggedTime = 0, sampleInterval = 1000;
-        let wakeLock = null;
+        
+        // --- JSONBIN CONFIG ---
+        const BIN_ID = "699dfe98d0ea881f40d5dbc7";
+        const API_KEY = "$2a$10$/ixw5jkkHC.ZGSRfFRuDKui80wjbSFtxiGyA2mgw2L.58/CHwNsVK";
+        const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        let userProfile = JSON.parse(localStorage.getItem('shred_profile')) || { name: 'Rider', emoji: '⛷️' };
+        let isTracking = false, watchId = null, dataPoints = [], maxSpeed = 0, totalDistance = 0, wakeLock = null;
         let tapCount = 0, tapTimer = null;
 
-        function updateIntervalDisplay(val) {
-            sampleInterval = val * 1000;
-            document.getElementById('interval-display').innerText = parseFloat(val).toFixed(1) + "s";
+        function init() {
+            document.getElementById('nav-user').innerText = userProfile.name;
+            document.getElementById('nav-pfp').innerText = userProfile.emoji;
+            document.getElementById('pfp-input').value = userProfile.emoji;
+            document.getElementById('username-input').value = userProfile.name;
+            fetchLeaderboard();
         }
 
-        // LOCK LOGIC
-        function activateLock() {
-            document.getElementById('pocket-shield').style.display = 'flex';
+        async function postScore(speed) {
+            try {
+                // 1. Get current leaderboard
+                const res = await fetch(BASE_URL, { headers: { "X-Master-Key": API_KEY }});
+                const data = await res.json();
+                let list = data.record.scores || [];
+
+                // 2. Update or Add
+                const existingIdx = list.findIndex(r => r.name === userProfile.name);
+                if (existingIdx > -1) {
+                    if (speed > list[existingIdx].speed) list[existingIdx] = { ...userProfile, speed: speed };
+                } else {
+                    list.push({ ...userProfile, speed: speed });
+                }
+
+                // 3. Sort and Limit top 50
+                list.sort((a, b) => b.speed - a.speed);
+                list = list.slice(0, 50);
+
+                // 4. Save back
+                await fetch(BASE_URL, {
+                    method: 'PUT',
+                    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+                    body: JSON.stringify({ scores: list })
+                });
+                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-[#39FF14] shadow-[0_0_8px_#39FF14]";
+            } catch (e) { console.error(e); }
         }
 
+        async function fetchLeaderboard() {
+            const container = document.getElementById('leaderboard-content');
+            container.innerHTML = `<p class="text-center py-20 text-gray-500 animate-pulse">Syncing...</p>`;
+            try {
+                const res = await fetch(BASE_URL, { headers: { "X-Master-Key": API_KEY }});
+                const data = await res.json();
+                const list = data.record.scores || [];
+                
+                container.innerHTML = "";
+                list.forEach((entry, i) => {
+                    const div = document.createElement('div');
+                    div.className = "stat-card flex items-center gap-4 mb-2 border-l-4 " + (i<3 ? 'border-[#39FF14]' : 'border-transparent');
+                    div.innerHTML = `
+                        <span class="text-xs font-black text-gray-700 w-4">#${i+1}</span>
+                        <span class="text-2xl">${entry.emoji}</span>
+                        <div class="flex-1 overflow-hidden"><p class="text-sm font-black uppercase truncate">${entry.name}</p></div>
+                        <p class="text-xl font-black italic text-[#39FF14]">${entry.speed.toFixed(1)}<span class="text-[8px] text-gray-600 ml-1">KMH</span></p>
+                    `;
+                    container.appendChild(div);
+                });
+                document.getElementById('connection-dot').className = "w-2 h-2 rounded-full bg-[#39FF14] shadow-[0_0_8px_#39FF14]";
+            } catch (e) { container.innerHTML = "Offline."; }
+        }
+
+        function saveProfile() {
+            const emojiArr = Array.from(document.getElementById('pfp-input').value.trim());
+            userProfile.emoji = emojiArr.length ? emojiArr[0] : "⛷️";
+            userProfile.name = document.getElementById('username-input').value.trim() || "Rider";
+            localStorage.setItem('shred_profile', JSON.stringify(userProfile));
+            init(); showPage('tracking-page');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+            if(id === 'leaderboard-page') fetchLeaderboard();
+        }
+
+        function handleInitialTap() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); }
+        function activateLock() { document.getElementById('pocket-shield').style.display = 'flex'; }
         function handlePocketTap() {
-            tapCount++;
-            clearTimeout(tapTimer);
-            
-            if (tapCount === 3) {
-                document.getElementById('pocket-shield').style.display = 'none';
-                tapCount = 0;
-            } else {
-                // If they don't finish the 3 taps within 600ms, reset
-                tapTimer = setTimeout(() => { tapCount = 0; }, 600);
-            }
+            tapCount++; clearTimeout(tapTimer);
+            if (tapCount === 3) { document.getElementById('pocket-shield').style.display = 'none'; tapCount = 0; }
+            else { tapTimer = setTimeout(() => { tapCount = 0; }, 600); }
         }
 
-        function toggleTracking() {
-            if (!isTracking) startTracking();
-            else stopTracking();
-        }
+        function updateIntervalDisplay(val) { document.getElementById('interval-display').innerText = parseFloat(val).toFixed(1) + "s"; }
+
+        function toggleTracking() { isTracking ? stopTracking() : startTracking(); }
 
         async function startTracking() {
-            if ('wakeLock' in navigator) {
-                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
-            }
-
-            isTracking = true;
-            dataPoints = []; maxSpeed = 0; totalDistance = 0; lastLoggedTime = 0;
-
+            if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+            isTracking = true; dataPoints = []; maxSpeed = 0;
             const btn = document.getElementById('main-btn');
-            btn.innerText = "Stop Session";
-            btn.style.background = "#ff3b3b"; btn.style.color = "#fff";
-            btn.style.boxShadow = "0 0 25px rgba(255, 59, 59, 0.2)";
-            
-            document.getElementById('acc-slider').disabled = true;
+            btn.innerText = "End Run"; btn.style.background = "#ff3b3b"; btn.style.color = "#fff";
             document.getElementById('lock-btn').classList.remove('hidden');
-
-            watchId = navigator.geolocation.watchPosition(
-                pos => {
-                    const now = Date.now();
-                    if (now - lastLoggedTime >= sampleInterval) {
-                        handleUpdate(pos.coords.speed, pos.coords.altitude, pos.coords.latitude, pos.coords.longitude);
-                        lastLoggedTime = now;
-                    }
-                },
-                err => console.log(err),
-                { enableHighAccuracy: true }
-            );
-        }
-
-        function handleUpdate(speed, alt, lat, lng) {
-            const kmh = speed ? speed * 3.6 : 0;
-            if (kmh > maxSpeed) maxSpeed = kmh;
-            if (dataPoints.length > 0) {
-                const prev = dataPoints[dataPoints.length - 1];
-                totalDistance += calculateDistance(prev.lat, prev.lng, lat, lng);
-            }
-            dataPoints.push({ lat, lng, alt, speed: kmh });
-            document.getElementById('curr-speed').innerText = kmh.toFixed(1);
-            document.getElementById('live-top-speed').innerText = maxSpeed.toFixed(1);
-            document.getElementById('curr-alt').innerText = alt ? Math.round(alt) : "--";
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            watchId = navigator.geolocation.watchPosition(pos => {
+                const kmh = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
+                if (kmh > maxSpeed) maxSpeed = kmh;
+                dataPoints.push({ lat: pos.coords.latitude, lng: pos.coords.longitude, alt: pos.coords.altitude });
+                document.getElementById('curr-speed').innerText = kmh.toFixed(1);
+                document.getElementById('live-top-speed').innerText = maxSpeed.toFixed(1);
+                document.getElementById('curr-alt').innerText = pos.coords.altitude ? Math.round(pos.coords.altitude) : "--";
+            }, null, { enableHighAccuracy: true });
         }
 
         function stopTracking() {
-            isTracking = false; 
-            if (wakeLock) wakeLock.release();
+            isTracking = false; if (wakeLock) wakeLock.release();
             navigator.geolocation.clearWatch(watchId);
-            document.getElementById('tracking-screen').classList.add('hidden');
-            document.getElementById('summary-screen').classList.remove('hidden');
-            document.getElementById('pocket-shield').style.display = 'none';
+            postScore(maxSpeed);
+            document.getElementById('sum-max').innerText = maxSpeed.toFixed(1);
+            showPage('summary-page');
+            setTimeout(initMap, 200);
+        }
 
-            const alts = dataPoints.map(p => p.alt).filter(a => a !== null);
-            document.getElementById('summary-top-speed').innerText = maxSpeed.toFixed(1);
-            document.getElementById('total-dist').innerText = totalDistance.toFixed(2) + " km";
-            document.getElementById('top-alt').innerText = (alts.length ? Math.round(Math.max(...alts)) : 0) + "m";
-            document.getElementById('bottom-alt').innerText = (alts.length ? Math.round(Math.min(...alts)) : 0) + "m";
-            
-            initMap();
+        function softReset() {
+            document.getElementById('main-btn').style.background = "#39FF14"; document.getElementById('main-btn').style.color = "#000";
+            document.getElementById('main-btn').innerText = "Start Shredding";
+            showPage('tracking-page');
         }
 
         function initMap() {
             if (!dataPoints.length) return;
+            const mapContainer = L.DomUtil.get('map');
+            if (mapContainer != null) mapContainer._leaflet_id = null;
             const map = L.map('map', { zoomControl: false }).setView([dataPoints[0].lat, dataPoints[0].lng], 14);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-            const latLngs = dataPoints.map(p => [p.lat, p.lng]);
-            L.polyline(latLngs, { color: '#39FF14', weight: 6 }).addTo(map);
-            map.fitBounds(L.polyline(latLngs).getBounds(), { padding: [30, 30] });
+            L.polyline(dataPoints.map(p => [p.lat, p.lng]), { color: '#39FF14', weight: 6 }).addTo(map);
+            map.fitBounds(L.polyline(dataPoints.map(p => [p.lat, p.lng])).getBounds(), { padding: [20, 20] });
         }
 
-        // Add this at the very top of your <script> tag
-
-// One-time listener for the first click to trigger fullscreen
-document.addEventListener('click', function initFullscreen() {
-    if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('portrait').catch(err => console.log(err));
-}
-    const docElm = document.documentElement;
-    if (docElm.requestFullscreen) {
-        docElm.requestFullscreen();
-    } else if (docElm.mozRequestFullScreen) { // Firefox
-        docElm.mozRequestFullScreen();
-    } else if (docElm.webkitRequestFullScreen) { // Chrome, Safari, Opera
-        docElm.webkitRequestFullScreen();
-    } else if (docElm.msRequestFullscreen) { // IE/Edge
-        docElm.msRequestFullscreen();
-    }
-}, { once: false });
+        init();
     </script>
 </body>
 </html>
