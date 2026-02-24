@@ -204,6 +204,25 @@
             L.polyline(latLngs, { color: '#39FF14', weight: 6 }).addTo(map);
             map.fitBounds(L.polyline(latLngs).getBounds(), { padding: [30, 30] });
         }
+
+        // Add this at the very top of your <script> tag
+
+// One-time listener for the first click to trigger fullscreen
+document.addEventListener('click', function initFullscreen() {
+    const docElm = document.documentElement;
+    if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+    } else if (docElm.mozRequestFullScreen) { // Firefox
+        docElm.mozRequestFullScreen();
+    } else if (docElm.webkitRequestFullScreen) { // Chrome, Safari, Opera
+        docElm.webkitRequestFullScreen();
+    } else if (docElm.msRequestFullscreen) { // IE/Edge
+        docElm.msRequestFullscreen();
+    }
+    
+    // Remove the listener so it doesn't try to trigger on every single tap
+    document.removeEventListener('click', initFullscreen);
+}, { once: true });
     </script>
 </body>
 </html>
