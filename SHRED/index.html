@@ -515,7 +515,7 @@
 
             watchId = navigator.geolocation.watchPosition(pos => {
                 // Filter out low accuracy (over 20m error is usually trash data)
-                if (pos.coords.accuracy > 20) return;
+                //if (pos.coords.accuracy > 20) return;
 
                 let rawKmh = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
 
@@ -537,6 +537,9 @@
                     alt: pos.coords.altitude,
                     speed: smoothedKmh
                 });
+
+                // Update max speed
+                maxSpeed = Math.max(maxSpeed, smoothedKmh);
 
                 // UI Updates
                 document.getElementById('curr-speed').innerText = smoothedKmh.toFixed(1);
