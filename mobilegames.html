@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Game Swipe — Mobile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
+  <style>
+    :root{--bg:#0f1724;--muted:#9aa4b2}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:#000;color:#fff;overflow:hidden}
+
+    .app{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+    .viewer{flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
+
+    .game-screen {
+      width: 100%;
+      height: 50%; /* 2 games visible at once */
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .thumb{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center;background-color:#111}
+
+    .meta{padding:14px;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);font-size:14px}
+    .meta .title{font-size:20px;font-weight:600}
+    .meta .cat{font-size:13px;color:var(--muted)}
+
+    .cat-bar{
+      height:56px;
+      background:#111;
+      display:flex;
+      align-items:center;
+      justify-content:space-around;
+      border-top:1px solid #222;
+      position:sticky;
+      bottom:0;
+      font-size:12px;
+    }
+    .cat-item{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      opacity:.6;
+      cursor:pointer;
+    }
+    .cat-item.active{opacity:1;color:#3fa9ff}
+    
+    #searchBar input::placeholder { color: #9aa4b2; }
+    /* Landscape (horizontal) on phones: show two games side-by-side */
+    @media (orientation: landscape) {
+      .viewer{
+        display:flex;
+        flex-wrap:wrap;
+        overflow-y:auto;
+        scroll-snap-type: none;
+        -webkit-overflow-scrolling:touch;
+        gap:8px;
+        padding:8px;
+      }
+      .game-screen{
+        width:calc(50% - 8px);
+        height:auto; /* let thumbnail define height */
+        scroll-snap-align: none;
+      }
+      .thumb{width:100%; aspect-ratio:16/9}
+    }
+  </style>
+</head>
+
+<body>
+  <div id="gameFrameContainer" style="display:none; position:fixed; inset:0; background:black; z-index:9999;">
+  <iframe id="gameFrame" allowfullscreen style="width:100%; height:100%; top: -20px; border:none;"></iframe>
+  <button id="closeGame" style="position:absolute; top:8px; left:8px; background:#00000000; color:rgb(0, 0, 0, 0); border:none; border-radius: 8px; padding:10px; font-size:18px; cursor:pointer;">✕</button>
+</div>
+
+  <div class="app">
+    <div id="searchBar" style="padding:8px; background:#111; display:flex; align-items:center;">
+      <i class="fa-solid fa-dice-five" style="margin-right:8px; color:#9aa4b2;"></i>
+      <input id="searchInput" type="text" placeholder="Search games..." 
+             style="flex:1; padding:6px 10px; font-size:14px; border:none; border-radius:4px; outline:none; background:#222; color:#fff;" />
+      <i class="fa-solid fa-magnifying-glass" style="margin-left:8px; color:#9aa4b2;"></i>
+    </div>
+    <div id="viewer" class="viewer"></div>
+    <div id="catBar" class="cat-bar"></div>
+  </div>
+
+<script>
+const GAMES_JSON = './mobilegames.json';
+const CRAZYGAMES_TEMPLATE = id =>
+  `https://games.crazygames.com/en_US/${encodeURIComponent(id)}/index.html?skipPrerollFirstSession=true&v=1.337`;
+
+let games = [];
+let filtered = [];
+let batchSize = 10;
+let currentIndex = 0;
+
+const gameFrameContainer = document.getElementById('gameFrameContainer');
+const gameFrame = document.getElementById('gameFrame');
+const closeGame = document.getElementById('closeGame');
+
+function openFullscreenGame(url) {
+  gameFrame.src = url;
+  gameFrameContainer.style.display = 'block';
+
+  const elem = gameFrameContainer;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  }
+}
+
+closeGame.addEventListener('click', () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+  gameFrame.src = '';
+  gameFrameContainer.style.display = 'none';
+});
+
+
+// Safely get a URL for a game
+function gameUrl(g){
+  if(g.customurl?.trim()) return g.customurl;
+  if(g.gameid?.trim()) return CRAZYGAMES_TEMPLATE(g.gameid);
+  return 'https://crazygames.com/';
+}
+
+// Load and filter out bad entries
+function loadGames(){
+  fetch(GAMES_JSON)
+    .then(r => r.json())
+    .then(list => {
+      games = list.filter(g => g.customurl?.trim() || g.gameid?.trim());
+      initCategories();
+      applyFilter(null);
+    });
+}
+
+// Setup category bar
+function initCategories(){
+  const catBar = document.getElementById('catBar');
+  catBar.innerHTML = '';
+
+  const cats = [...new Set(games.map(g => g.category).filter(Boolean))];
+
+  createCatItem('powered by algot.fun', null, catBar);
+  cats.forEach(cat => createCatItem(cat, cat, catBar));
+}
+
+// Create individual category item
+function createCatItem(text, category, bar){
+  const item = document.createElement('div');
+  item.className = 'cat-item';
+  item.innerHTML = `</i><span>${text}</span>`;
+  item.addEventListener('click', (e) => applyFilter(category, e.currentTarget));
+  bar.appendChild(item);
+}
+
+// Filter games by category
+function applyFilter(category, clickedItem){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('viewer').scrollTop = 0;
+
+  document.querySelectorAll('.cat-item').forEach(el=>el.classList.remove('active'));
+  if(clickedItem) clickedItem.classList.add('active');
+
+  filtered = category ? games.filter(g => g.category === category) : [...games];
+
+  currentIndex = 0;
+  document.getElementById('viewer').innerHTML = '';
+  loadMore();
+}
+
+// Load next batch of games
+function loadMore(){
+  const viewer = document.getElementById('viewer');
+  const chunk = filtered.slice(currentIndex, currentIndex + batchSize);
+
+  chunk.forEach(g=>{
+    const card = document.createElement('div');
+    card.className = 'game-screen';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    thumb.style.backgroundImage = `url(${g.thumbnail})`;
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = `<div class="title">${g.gameid.replace(/-/g,' ')}</div>
+                      <div class="cat">${g.category || ''}</div>`;
+
+    card.appendChild(thumb);
+    card.appendChild(meta);
+
+    card.addEventListener('click', () => {
+       openFullscreenGame(gameUrl(g));
+    });
+
+    viewer.appendChild(card);
+  });
+
+  currentIndex += batchSize;
+}
+
+// Infinite scroll
+document.getElementById('viewer').addEventListener('scroll', e => {
+  const v = e.target;
+  if(v.scrollTop + v.clientHeight >= v.scrollHeight - 200){
+    loadMore();
+  }
+});
+
+// Search bar filter
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  filtered = games.filter(g => g.gameid.replace(/-/g,' ').toLowerCase().includes(query));
+  currentIndex = 0;
+  document.getElementById('viewer').innerHTML = '';
+  loadMore();
+});
+
+//random game on dice icon click
+document.querySelector('#searchBar .fa-dice-five').addEventListener('click', () => {
+  if (games.length === 0) return;
+  const randomIndex = Math.floor(Math.random() * games.length);
+  const randomGame = games[randomIndex];
+  openFullscreenGame(gameUrl(randomGame));
+});
+
+loadGames();
+</script>
+</body>
+</html>

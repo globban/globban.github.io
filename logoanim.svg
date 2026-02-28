@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40" width="80" height="40" preserveAspectRatio="xMidYMid meet" fill="none">
+    <defs>
+        <filter id="laser-glow">
+            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <style>
+            @keyframes laserCut1 {
+                0% {
+                    stroke-dashoffset: 1000;
+                    opacity: 1;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    stroke-dashoffset: -1000;
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes laserCut2 {
+                0% {
+                    stroke-dashoffset: 1000;
+                    opacity: 1;
+                }
+                10% {
+                    opacity: 1;
+                }
+                85% {
+                    opacity: 1;
+                }
+                100% {
+                    stroke-dashoffset: -1000;
+                    opacity: 1;
+                }
+            }
+            
+            .laser-path-1 {
+                animation: laserCut1 30s linear infinite;
+                filter: url(#laser-glow);
+            }
+            
+            .laser-path-2 {
+                animation: laserCut2 30s linear infinite;
+                filter: url(#laser-glow);
+            }
+        </style>
+    </defs>
+    <path class="laser-path-1" d="M10,20 L20,0 L30,20 L50,20 L60,0 L70,20" 
+          stroke="#ffffff" stroke-width="2" stroke-dasharray="100" stroke-linecap="round"/>
+    <path class="laser-path-2" d="M0,0 L20,40 L40,0 L60,40 L80,0" 
+          stroke="#ffffff" stroke-width="2" stroke-dasharray="150" stroke-linecap="round"/>
+</svg>
