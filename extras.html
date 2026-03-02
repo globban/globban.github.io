@@ -80,7 +80,8 @@
 <body>
     <iframe src="/topo.html"></iframe>
     <h1>Extras</h1>
-    <div class="item">
+    <div class="content">
+        <div class="item">
             <div class="item-description">
                 <h2>KASM workspace</h2>
                 <p>Get the power of my pc in your hands (login needed)</p>
@@ -89,7 +90,6 @@
                 <a id="kasm-link" href="#" target="_blank">Loading KASM Link...</a>
             </div>
         </div>
-    <div class="content">
         <div class="item">
             <div class="item-description">
                 <h2>Minecraft Server</h2>
@@ -149,7 +149,6 @@ async function getKasmLink() {
         if (data.url && data.url.includes('trycloudflare.com')) {
             btn.href = data.url;
             btn.innerText = "🚀 Launch Kasm Workspace";
-            btn.style.backgroundColor = "#2ecc71"; // Success Green
             btn.style.borderColor = "#27ae60";
             btn.style.boxShadow = "0 0 15px rgba(46, 204, 113, 0.4)";
         } else {
