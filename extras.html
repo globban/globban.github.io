@@ -83,6 +83,15 @@
     <div class="content">
         <div class="item">
             <div class="item-description">
+                <h2>KASM workspace</h2>
+                <p>Get the power of my pc in your hands (login needed)</p>
+            </div>
+            <div class="item-button">
+                <a id="kasm-link" href="#" target="_blank">Loading KASM Link...</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="item-description">
                 <h2>Minecraft Server</h2>
                 <p>Join our custom Minecraft server and explore a world of endless possibilities!</p>
             </div>
@@ -127,5 +136,35 @@
             </div>
         </div>
     </div>
+    <script>
+async function getKasmLink() {
+    const btn = document.getElementById('kasm-link');
+    const workerUrl = 'https://cloud.algot-fun.workers.dev';
+
+    try {
+        const response = await fetch(workerUrl);
+        const data = await response.json();
+
+        // Check if we got a valid tunnel URL back
+        if (data.url && data.url.includes('trycloudflare.com')) {
+            btn.href = data.url;
+            btn.innerText = "🚀 Launch Kasm Workspace";
+            btn.style.borderColor = "#27ae60";
+            btn.style.boxShadow = "0 0 15px rgba(46, 204, 113, 0.4)";
+        } else {
+            btn.innerText = "😴 Server is Offline";
+            btn.style.backgroundColor = "#e74c3c"; // Offline Red
+            btn.style.pointerEvents = "none";      // Disable click
+        }
+    } catch (error) {
+        console.error('Error fetching link:', error);
+        btn.innerText = "⚠️ Connection Error";
+        btn.style.backgroundColor = "#f39c12"; // Warning Orange
+    }
+}
+
+// Check for the link immediately when the page loads
+getKasmLink();
+</script>
 </body> 
 </html>
