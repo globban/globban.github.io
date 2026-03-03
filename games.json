@@ -1,10 +1,48 @@
 [   
     {
+        "gameid": "subway-surfers",
+        "customurl": "https://azgames.io/subway-surfers.embed",
+        "thumbnail": "https://static.wikia.nocookie.net/subwaysurf/images/3/35/Promote_Subway.png/revision/latest/scale-to-width-down/820?cb=20130114122353",
+        "category": "casual"
+    },
+    {
+    "gameid": "slope-3",
+    "customurl": "https://game.azgame.io/slope-3/",
+    "thumbnail": "https://azgames.io/upload/imgs/slope1.png",
+    "category": "casual",
+    "blocked": false
+},
+    {
     "gameid": "Quake",
     "customurl": "https://www.netquake.io/",
     "thumbnail": "https://gamingbolt.com/wp-content/uploads/2021/08/quake-cover-image.jpg",
     "category": "casual",
     "blocked": false
+  },
+    {
+     "gameid": "knife-master",
+     "customurl": "https://gamea.azgame.io/knife-master/",
+     "thumbnail": "https://geometry-games.io/cache/data/image/game/knife-master/knife-master-m320x190.webp",
+     "category": "casual",
+     "blocked": false
+      },
+  {
+    "gameid": "ice-baby-quest",
+    "customurl": "https://gamea.azgame.io/ice-baby-quest/",
+    "thumbnail": "https://geometry-games.io/data/image/game/ice-baby-quest/ice-baby-quest.png",
+    "category": "casual"
+  },
+  {
+    "gameid": "curve-rush",
+    "customurl": "https://game.azgame.io/curve-rush/", 
+    "thumbnail": "https://img.gg.deals/7b/e7/af92af7ddfe116ccaabcf543267c30ba43c3_307xr176.jpg",
+    "category": "casual"
+  },
+  {
+    "gameid": "glide-in",
+    "customurl": "https://gamea.azgame.io/glide-in/",
+    "thumbnail": "https://cowboysafari.io/data/image/HowtoPlayGlideIn.png",
+    "category": "casual"
   },
   {
     "gameid": "webmc",
