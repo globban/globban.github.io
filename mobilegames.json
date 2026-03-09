@@ -1,4 +1,24 @@
 [
+      {
+    "gameid": "curve-rush",
+    "customurl": "https://game.azgame.io/curve-rush/", 
+    "thumbnail": "https://img.gg.deals/7b/e7/af92af7ddfe116ccaabcf543267c30ba43c3_307xr176.jpg"
+  },
+    {
+        "gameid": "subway-surfers",
+        "customurl": "https://azgames.io/subway-surfers.embed",
+        "thumbnail": "https://static.wikia.nocookie.net/subwaysurf/images/3/35/Promote_Subway.png/revision/latest/scale-to-width-down/820?cb=20130114122353"
+    },
+  {
+    "gameid": "glide-in",
+    "customurl": "https://gamea.azgame.io/glide-in/",
+    "thumbnail": "https://cowboysafari.io/data/image/HowtoPlayGlideIn.png"
+  },
+        {
+     "gameid": "knife-master",
+     "customurl": "https://gamea.azgame.io/knife-master/",
+     "thumbnail": "https://geometry-games.io/cache/data/image/game/knife-master/knife-master-m320x190.webp"
+      },
 {
     "gameid": "crossy-roads",
     "customurl": "https://azgames.io/game/crossy-road/",
