@@ -286,8 +286,6 @@ function addRecentForCurrent() {
   // cap to 20 most recent
   if (recs.length > 20) recs.length = 20;
   saveRecents(recs);
-  // render into the main library so recents look like normal game cards
-  try { showRecents(); } catch (e) {}
 }
 // Note: recents are rendered into the main library via showRecents(); legacy helpers removed.
 
