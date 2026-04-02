@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Logo Preview</title>
+  <style>html,body{overflow:hidden;height:100vh;width:100vw;margin:0;background:transparent}canvas{height:100vh;width:100vw;display:block;position:absolute;top:0;left:0;pointer-events:none}</style>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.160.0';
+import { EffectComposer } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { STLLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/STLLoader.js';
+import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const scene = new THREE.Scene();
+// keep the canvas transparent so the page background (CSS grid) shows through
+scene.background = null;
+// lights
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 2);
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
+const light = new THREE.DirectionalLight(0xffffff, 0.8);
+light.position.set(0, 0, 1);
+scene.add(light);  
+
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.setSize(innerWidth, innerHeight);
+// make background transparent
+renderer.setClearColor(0x000000, 0);
+document.body.appendChild(renderer.domElement);
+
+// composer + bloom
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+// tuned bloom for a subtle glow
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.02, 0.7);
+composer.addPass(bloom);
+
+
+// load STL
+let logoMesh = null;
+const loader = new STLLoader();
+loader.load('shredsauce.stl', (geometry) => {
+  geometry.computeVertexNormals();
+  // bounding box for Y-based gradient
+  geometry.computeBoundingBox();
+  const bbox = geometry.boundingBox;
+  const minY = bbox.min.y;
+  const maxY = bbox.max.y;
+  const height = Math.max(maxY - minY, 1e-6);
+
+  // colors for the gradient (bottom -> top)
+  const bottomColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // blue
+  const topColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // pink
+
+  // per-vertex colors for the filled mesh
+  const pos = geometry.attributes.position;
+  const count = pos.count;
+  const colors = new Float32Array(count * 3);
+  const tmp = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const y = pos.getY(i);
+    // normalized t along Y
+    let t = (y - minY) / height;
+    // small pseudo-random jitter to get a fizzy look (deterministic-ish using vertex index)
+    const jitter = (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.03; // cheap hash-like jitter
+    t = THREE.MathUtils.clamp(t + jitter, 0, 1);
+    tmp.copy(bottomColor).lerp(topColor, t);
+    colors[i * 3 + 0] = tmp.r;
+    colors[i * 3 + 1] = tmp.g;
+    colors[i * 3 + 2] = tmp.b;
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  // solid mesh material uses vertex colors
+  const material = new THREE.MeshStandardMaterial({
+    vertexColors: false,
+    metalness: 0,
+    roughness: 1,
+    emissiveIntensity: 0.8,
+    emissive: 0x00000000,
+    side: THREE.DoubleSide
+  });
+
+  logoMesh = new THREE.Mesh(geometry, material);
+
+  // create a colored wireframe overlay that uses the same gradient
+  const wireGeo = new THREE.WireframeGeometry(geometry);
+  const wpos = wireGeo.attributes.position;
+  const wcount = wpos.count;
+  const wcolors = new Float32Array(wcount * 3);
+  for (let i = 0; i < wcount; i++) {
+    const y = wpos.getY(i);
+    let t = (y - minY) / height;
+    // slightly less jitter for lines so they read as structure
+    const jitter = (Math.sin(i * 7.1234) * 43758.5453 % 1) * 0.015;
+    t = THREE.MathUtils.clamp(t + jitter, 0, 1);
+    tmp.copy(bottomColor).lerp(topColor, t);
+    wcolors[i * 3 + 0] = tmp.r;
+    wcolors[i * 3 + 1] = tmp.g;
+    wcolors[i * 3 + 2] = tmp.b;
+  }
+  wireGeo.setAttribute('color', new THREE.BufferAttribute(wcolors, 3));
+
+  const lineMaterial = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    bloom: false
+  });
+  const wireframe = new THREE.LineSegments(wireGeo, lineMaterial);
+
+  // normalize scale & center like before
+  const size = new THREE.Vector3(); bbox.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const target = 2.2; // desired size radius
+  const scale = target / maxDim;
+  logoMesh.scale.setScalar(scale);
+  wireframe.scale.setScalar(scale);
+  const center = new THREE.Vector3(); bbox.getCenter(center);
+  logoMesh.position.copy(center).multiplyScalar(-scale);
+  wireframe.position.copy(center).multiplyScalar(-scale);
+
+  // add both to the scene; wireframe on top
+  scene.add(wireframe);
+}, undefined, (err) => { console.error('Failed to load logo.stl', err); });
+
+// controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 3;
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  composer.render();
+}
+animate();
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
