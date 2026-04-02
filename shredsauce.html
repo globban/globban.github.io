@@ -4,7 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Logo Preview</title>
-  <style>html,body{overflow:hidden;height:100vh;width:100vw;margin:0;background:transparent}canvas{height:100vh;width:100vw;display:block;position:absolute;top:0;left:0;pointer-events:none}</style>
+  <style>
+    html, body { overflow: hidden; height: 100vh; width: 100vw; margin: 0; background: #000; }
+    canvas { height: 100vh; width: 100vw; display: block; position: absolute; top: 0; left: 0; pointer-events: none; }
+  </style>
 </head>
 <body>
 <script type="module">
@@ -13,62 +16,60 @@ import { EffectComposer } from 'https://esm.sh/three@0.160.0/examples/jsm/postpr
 import { RenderPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'https://esm.sh/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { STLLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/STLLoader.js';
-import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
+// Scene Setup
 const scene = new THREE.Scene();
-// keep the canvas transparent so the page background (CSS grid) shows through
-scene.background = null;
-// lights
-const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
-camera.position.set(0, 0, 2);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 5);
+
+// Lights
 const ambient = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambient);
 const light = new THREE.DirectionalLight(0xffffff, 0.8);
 light.position.set(0, 0, 1);
-scene.add(light);  
+scene.add(light);
 
-const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-renderer.setSize(innerWidth, innerHeight);
-// make background transparent
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000, 0);
 document.body.appendChild(renderer.domElement);
 
-// composer + bloom
+// Post-processing
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-// tuned bloom for a subtle glow
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.2, 0.02, 0.7);
+const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.02, 0.7);
 composer.addPass(bloom);
 
+// Container for the logo
+const logoGroup = new THREE.Group();
+scene.add(logoGroup);
 
-// load STL
-let logoMesh = null;
+// Load STL
 const loader = new STLLoader();
 loader.load('shredsauce.stl', (geometry) => {
   geometry.computeVertexNormals();
-  // bounding box for Y-based gradient
+  geometry.center(); // Pivot from the center
+  
   geometry.computeBoundingBox();
   const bbox = geometry.boundingBox;
   const minY = bbox.min.y;
   const maxY = bbox.max.y;
   const height = Math.max(maxY - minY, 1e-6);
 
-  // colors for the gradient (bottom -> top)
-  const bottomColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // blue
-  const topColor = new THREE.Color(Math.random(), Math.random(), Math.random()); // pink
+  const bottomColor = new THREE.Color(0xff7105); 
+  const topColor = new THREE.Color(0xff913d);
 
-  // per-vertex colors for the filled mesh
+  // Mesh Colors
   const pos = geometry.attributes.position;
   const count = pos.count;
   const colors = new Float32Array(count * 3);
   const tmp = new THREE.Color();
+
   for (let i = 0; i < count; i++) {
     const y = pos.getY(i);
-    // normalized t along Y
     let t = (y - minY) / height;
-    // small pseudo-random jitter to get a fizzy look (deterministic-ish using vertex index)
-    const jitter = (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.03; // cheap hash-like jitter
+    const jitter = (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.03;
     t = THREE.MathUtils.clamp(t + jitter, 0, 1);
     tmp.copy(bottomColor).lerp(topColor, t);
     colors[i * 3 + 0] = tmp.r;
@@ -77,80 +78,70 @@ loader.load('shredsauce.stl', (geometry) => {
   }
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-  // solid mesh material uses vertex colors
   const material = new THREE.MeshStandardMaterial({
-    vertexColors: false,
-    metalness: 0,
-    roughness: 1,
-    emissiveIntensity: 0.6,
-    emissive: 0x00000000,
+    vertexColors: true,
+    metalness: 0.2,
+    roughness: 0.8,
     side: THREE.DoubleSide
   });
 
-  logoMesh = new THREE.Mesh(geometry, material);
+  const mesh = new THREE.Mesh(geometry, material);
+  logoGroup.add(mesh);
 
-  // create a colored wireframe overlay that uses the same gradient
+  // Wireframe
   const wireGeo = new THREE.WireframeGeometry(geometry);
-  const wpos = wireGeo.attributes.position;
-  const wcount = wpos.count;
-  const wcolors = new Float32Array(wcount * 3);
-  for (let i = 0; i < wcount; i++) {
-    const y = wpos.getY(i);
-    let t = (y - minY) / height;
-    // slightly less jitter for lines so they read as structure
-    const jitter = (Math.sin(i * 7.1234) * 43758.5453 % 1) * 0.015;
-    t = THREE.MathUtils.clamp(t + jitter, 0, 1);
-    tmp.copy(bottomColor).lerp(topColor, t);
-    wcolors[i * 3 + 0] = tmp.r;
-    wcolors[i * 3 + 1] = tmp.g;
-    wcolors[i * 3 + 2] = tmp.b;
-  }
-  wireGeo.setAttribute('color', new THREE.BufferAttribute(wcolors, 3));
-
   const lineMaterial = new THREE.LineBasicMaterial({
     vertexColors: true,
     transparent: true,
-    opacity: 0.95,
+    opacity: 0.8,
     blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    bloom: false
+    depthWrite: false
   });
   const wireframe = new THREE.LineSegments(wireGeo, lineMaterial);
+  logoGroup.add(wireframe);
 
-  // normalize scale & center like before
-  const size = new THREE.Vector3(); bbox.getSize(size);
+  // Scaling
+  const size = new THREE.Vector3();
+  bbox.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z) || 1;
-  const target = 2.2; // desired size radius
-  const scale = target / maxDim;
-  logoMesh.scale.setScalar(scale);
-  wireframe.scale.setScalar(scale);
-  const center = new THREE.Vector3(); bbox.getCenter(center);
-  logoMesh.position.copy(center).multiplyScalar(-scale);
-  wireframe.position.copy(center).multiplyScalar(-scale);
+  logoGroup.scale.setScalar(2.5 / maxDim);
 
-  // add both to the scene; wireframe on top
-  scene.add(wireframe);
-}, undefined, (err) => { console.error('Failed to load logo.stl', err); });
+}, undefined, (err) => { console.error('Error loading STL:', err); });
 
-// controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0;
+// Mouse Tracking
+const mouse = new THREE.Vector2();
+const targetRotation = new THREE.Vector2();
+
+window.addEventListener('mousemove', (event) => {
+  // Normalize mouse coordinates (-1 to +1)
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
 
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
+
+  if (logoGroup) {
+    // Subtle Lerp for smooth rotation
+    targetRotation.x += (-mouse.y * 0.5 - targetRotation.x) * 0.05;
+    targetRotation.y += (mouse.x * 0.5 - targetRotation.y) * 0.05;
+
+    logoGroup.rotation.x = targetRotation.x;
+    logoGroup.rotation.y = targetRotation.y;
+    
+    // Idle floating effect
+    logoGroup.position.y = Math.sin(Date.now() * 0.002) * 0.1;
+  }
+
   composer.render();
 }
 animate();
 
-window.addEventListener('resize', ()=>{
-  camera.aspect = innerWidth/innerHeight;
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  composer.setSize(innerWidth, innerHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 </body>
