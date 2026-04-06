@@ -73,9 +73,9 @@
 </head>
 
 <body>
-  <div id="gameFrameContainer" style="display:none; position:fixed; inset:0; background:black; z-index:9999;">
-  <iframe id="gameFrame" allowfullscreen style="width:100%; height:100%; top: -20px; border:none;"></iframe>
-  <button id="closeGame" style="position:absolute; top:8px; left:8px; background:#00000000; color:rgb(0, 0, 0, 0); border:none; border-radius: 8px; padding:10px; font-size:18px; cursor:pointer;">✕</button>
+  <div id="gameFrameContainer" style="display:none; position:fixed; inset:0; background:black; z-index:9999; overflow:hidden;">
+  <iframe id="gameFrame" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"></iframe>
+  <div id="edgeSwipeZone" style="position:absolute; top:0; left:0; width:32px; height:100%; z-index:10000; touch-action: pan-y; background:rgba(0,0,0,0);"></div>
 </div>
 
   <div class="app">
@@ -98,28 +98,87 @@ let games = [];
 let filtered = [];
 let batchSize = 10;
 let currentIndex = 0;
+let currentCrop = false;
 
 const gameFrameContainer = document.getElementById('gameFrameContainer');
 const gameFrame = document.getElementById('gameFrame');
-const closeGame = document.getElementById('closeGame');
+const edgeSwipeZone = document.getElementById('edgeSwipeZone');
 
-function openFullscreenGame(url) {
-  gameFrame.src = url;
-  gameFrameContainer.style.display = 'block';
-
-  const elem = gameFrameContainer;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
+function updateGameFrameStyles() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  if (currentCrop) {
+    if (isLandscape) {
+      gameFrame.style.left = '-32px';
+      gameFrame.style.top = '0';
+      gameFrame.style.width = 'calc(100% + 32px)';
+      gameFrame.style.height = '100%';
+    } else {
+      gameFrame.style.top = '-32px';
+      gameFrame.style.left = '0';
+      gameFrame.style.height = 'calc(100% + 32px)';
+      gameFrame.style.width = '100%';
+    }
+  } else {
+    gameFrame.style.top = '0';
+    gameFrame.style.left = '0';
+    gameFrame.style.width = '100%';
+    gameFrame.style.height = '100%';
   }
 }
 
-closeGame.addEventListener('click', () => {
+function openFullscreenGame(url, crop) {
+  currentCrop = crop;
+  gameFrame.src = url;
+  updateGameFrameStyles();
+  gameFrameContainer.style.display = 'block';
+}
+
+function closeGameView() {
   if (document.fullscreenElement) {
     document.exitFullscreen();
   }
   gameFrame.src = '';
   gameFrameContainer.style.display = 'none';
+}
+
+let swipeStartX = null;
+let swipeStartY = null;
+const EDGE_SWIPE_MAX_START = 40;
+const EDGE_SWIPE_THRESHOLD = 80;
+const EDGE_SWIPE_MAX_VERTICAL = 50;
+
+edgeSwipeZone.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  if (touch.clientX > EDGE_SWIPE_MAX_START) return;
+  swipeStartX = touch.clientX;
+  swipeStartY = touch.clientY;
 });
+
+edgeSwipeZone.addEventListener('touchmove', (e) => {
+  if (swipeStartX === null) return;
+  const touch = e.touches[0];
+  const dx = touch.clientX - swipeStartX;
+  const dy = touch.clientY - swipeStartY;
+  if (dx > EDGE_SWIPE_THRESHOLD && Math.abs(dy) < EDGE_SWIPE_MAX_VERTICAL) {
+    closeGameView();
+    swipeStartX = null;
+    swipeStartY = null;
+  }
+});
+
+edgeSwipeZone.addEventListener('touchend', () => {
+  swipeStartX = null;
+  swipeStartY = null;
+});
+
+edgeSwipeZone.addEventListener('touchcancel', () => {
+  swipeStartX = null;
+  swipeStartY = null;
+});
+
+window.addEventListener('orientationchange', updateGameFrameStyles);
+window.addEventListener('resize', updateGameFrameStyles);
 
 
 // Safely get a URL for a game
@@ -148,7 +207,6 @@ function initCategories(){
   const cats = [...new Set(games.map(g => g.category).filter(Boolean))];
 
   createCatItem('powered by algot.fun', null, catBar);
-  cats.forEach(cat => createCatItem(cat, cat, catBar));
 }
 
 // Create individual category item
@@ -197,7 +255,7 @@ function loadMore(){
     card.appendChild(meta);
 
     card.addEventListener('click', () => {
-       openFullscreenGame(gameUrl(g));
+       openFullscreenGame(gameUrl(g), !g.customurl?.trim());
     });
 
     viewer.appendChild(card);
@@ -229,7 +287,7 @@ document.querySelector('#searchBar .fa-dice-five').addEventListener('click', () 
   if (games.length === 0) return;
   const randomIndex = Math.floor(Math.random() * games.length);
   const randomGame = games[randomIndex];
-  openFullscreenGame(gameUrl(randomGame));
+  openFullscreenGame(gameUrl(randomGame), !randomGame.customurl?.trim());
 });
 
 loadGames();

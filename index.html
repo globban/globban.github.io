@@ -15,9 +15,11 @@
 </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
   <title>Home</title>
   <link rel="stylesheet" href="/home.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="manifest" href="/manifest.json" />
  
 </head>
 <body>
@@ -66,6 +68,13 @@
 </main>
   <img src="logo.svg" id="sigil"/>
 <script type="module" src="/home.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(reg => console.log('SW registered'))
+    .catch(err => console.log('SW registration failed'));
+}
+</script>
 </body>
 <script>
   const sigil = document.getElementById("sigil");

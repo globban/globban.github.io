@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
   <title>Home</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="manifest" href="/manifest.json" />
   <style>
     body {
       margin: 0;
@@ -138,7 +140,7 @@
 
   // Register Service Worker with error handling
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
+    navigator.serviceWorker.register("/service-worker.js").catch((err) => {
       console.warn('Service worker registration failed:', err);
     });
   }
