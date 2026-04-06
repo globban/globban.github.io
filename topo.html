@@ -9,7 +9,7 @@
         margin: 0;
         height: 100%;
         overflow: hidden;
-        background: #000;
+        background: #000 url('grasslands.webp') center/cover no-repeat;
     }
 
     /* Background image */
@@ -37,72 +37,96 @@
 
 </head>
 <body>
+    <canvas id="particle-canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 150; // Increased for better screen coverage
 
-<img id="bg" src="background.png">
-
-<canvas id="snow"></canvas>
-
-<script>
-const canvas = document.getElementById("snow");
-const ctx = canvas.getContext("2d");
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resize();
-window.onresize = resize;
-
-const flakes = [];
-const flakeCount = 150;
-
-for (let i = 0; i < flakeCount; i++) {
-    flakes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2 + 1,     // size
-        d: Math.random() + 0.5,       // fall speed
-    });
-}
-
-function drawSnow() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-
-    for (let i = 0; i < flakeCount; i++) {
-        let f = flakes[i];
-        ctx.moveTo(f.x, f.y);
-        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-    }
-
-    ctx.fill();
-    updateSnow();
-}
-
-function updateSnow() {
-    for (let i = 0; i < flakeCount; i++) {
-        let f = flakes[i];
-        f.y += f.d;
-        f.x += Math.sin(f.y * 0.01) * 0.5; // slight drifting
-
-        if (f.y > canvas.height) {
-            flakes[i] = {
-                x: Math.random() * canvas.width,
-                y: -10,
-                r: f.r,
-                d: f.d
-            };
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-    }
-}
 
-function loop() {
-    drawSnow();
-    requestAnimationFrame(loop);
-}
-loop();
-</script>
+        window.addEventListener('resize', resize);
+        resize();
 
+        class Petal {
+            constructor(isInitial = false) {
+                this.init(isInitial);
+            }
+
+            init(isInitial) {
+                this.x = Math.random() * canvas.width;
+                // KEY CHANGE: If it's the first load, spread them vertically. 
+                // Otherwise, reset them to just above the screen.
+                this.y = isInitial ? Math.random() * canvas.height : -20;
+                
+                this.w = 2 + Math.random() * 3; // Even smaller for high-end feel
+                this.h = 4 + Math.random() * 3;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.flip = Math.random() * Math.PI;
+                this.flipSpeed = Math.random() * 0.02 + 0.01;
+                this.horizontalSpeed = Math.random() * 1.2 - 0.6;
+                this.verticalSpeed = Math.random() * 0.5 + 0.4;
+                this.angle = Math.random() * 360;
+                this.sway = Math.random() * 2;
+                this.swaySpeed = Math.random() * 0.02;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                
+                const flipScale = Math.abs(Math.cos(this.flip));
+                
+                // Using a more realistic petal pink/white
+                ctx.fillStyle = `rgba(255, 192, 203, ${this.opacity})`;
+                
+                // Draw delicate petal
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(this.w, -this.h * flipScale, this.w * 1.5, this.h * flipScale, 0, this.h * flipScale);
+                ctx.bezierCurveTo(-this.w * 1.5, this.h * flipScale, -this.w, -this.h * flipScale, 0, 0);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+
+            update() {
+                this.y += this.verticalSpeed;
+                this.x += this.horizontalSpeed + Math.sin(this.sway) * 0.5;
+                this.sway += this.swaySpeed;
+                this.flip += this.flipSpeed;
+                this.angle += 0.3;
+
+                // Reset logic
+                if (this.y > canvas.height + 20) {
+                    this.init(false); // Reset to top
+                }
+            }
+        }
+
+        function setup() {
+            for (let i = 0; i < particleCount; i++) {
+                // Pass 'true' so they start distributed across the screen
+                particles.push(new Petal(true));
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(render);
+        }
+
+        setup();
+        render();
+    </script>
 </body>
 </html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .half-screen {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            border-radius: 12px;
+            margin: 10px;
+        }
+
+        .half-screen:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .left {
+            background: url('/grasslands.webp') center/cover no-repeat;
+        }
+
+        .right {
+            background: url('/camo.jpg') center/cover no-repeat;
+        }
+
+        .description {
+            max-width: 90%;
+            line-height: 1.8;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .half-screen {
+                font-size: 1rem;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="https://chat-4r5m.onrender.com" class="half-screen left">
+        <div class="description">
+            MongoDB Chat<br>
+            Easy, no login needed, just join a room and start chatting!<br>
+            No military-grade security though.
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/MongoDB_Logo.svg/1280px-MongoDB_Logo.svg.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; left: 20px; width: 220px; height: auto; opacity: 1;">
+    </a>
+    <a href="https://pi-5.tail39a016.ts.net/home" class="half-screen right">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/RocketChat_Logo_1024x1024.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; right: 20px; width: 80px; height: auto; opacity: 1;">
+        <div class="description">
+            RocketChat<br>
+            Hosted on my own server, extremely secure (military-grade), feature-rich but you gotta log in first.
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cb/Raspberry_Pi_Logo.svg/960px-Raspberry_Pi_Logo.svg.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; left: 20px; width: 80px; height: auto; opacity: 1;">
+
+    </a>
+</body>
+</html>

@@ -14,7 +14,7 @@
 },
     {
     "gameid": "Quake",
-    "customurl": "https://www.netquake.io/",
+    "customurl": "https://www.netquake.io/quake",
     "thumbnail": "https://gamingbolt.com/wp-content/uploads/2021/08/quake-cover-image.jpg",
     "category": "casual",
     "blocked": false

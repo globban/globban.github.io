@@ -93,15 +93,14 @@
 				<label>Contrast</label>
 				<input id="contrast" type="range" min="-100" max="100" value="0" />
 			</div>
-
-			<div class="toolbar">
 				<button id="generate">Generate</button>
+			<div class="toolbar">
+				
 				<div class="actions">
 					<button id="copy">Copy Text</button>
 					<button id="downloadTxt">Download .txt</button>
 					<button id="downloadHtml">Download .html</button>
 					<button id="downloadPng">Download PNG</button>
-					<button id="downloadImage">Download Image</button>
 				</div>
 			</div>
 
@@ -139,7 +138,6 @@
 		const downloadTxt = document.getElementById('downloadTxt');
 		const downloadHtml = document.getElementById('downloadHtml');
 		const downloadPng = document.getElementById('downloadPng');
-		const downloadImage = document.getElementById('downloadImage');
 
 		widthRange.addEventListener('input', ()=> widthVal.textContent = widthRange.value);
 		scaleRange.addEventListener('input', ()=> scaleVal.textContent = scaleRange.value);
@@ -330,21 +328,6 @@
 			}
 
 			canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='ascii.png'; a.click(); });
-		});
-
-		downloadImage.addEventListener('click', ()=>{
-			if (!window._loadedImage) return alert('Load an image first');
-			try{
-				const src = window._loadedImage.src;
-				const a = document.createElement('a');
-				a.href = src;
-				// try to infer filename
-				const parts = (src || '').split('/');
-				let name = parts[parts.length-1] || 'image';
-				if (!name.includes('.')) name += '.png';
-				a.download = name;
-				a.click();
-			}catch(e){ alert('Could not download original image.'); }
 		});
 
 		// small helper: if user pastes an image from clipboard
