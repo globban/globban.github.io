@@ -1,4 +1,10 @@
 [   
+     {
+        "gameid": "super-monkey-ball",
+        "customurl": "https://monkeyball-online.pages.dev/",
+        "thumbnail": "https://smb.sega.com/bananamania/images/bg/hero_poster.jpg",
+        "category": "casual"
+    },
     {
         "gameid": "subway-surfers",
         "customurl": "https://azgames.io/subway-surfers.embed",
