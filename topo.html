@@ -33,6 +33,14 @@
         z-index: 1;
         pointer-events: none;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+       body {
+            background: #000 url('sphere.jpg') center/cover no-repeat;
+            #particle-canvas { display: none; }
+       }
+    }
 </style>
 
 </head>
