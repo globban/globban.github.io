@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bass Tester</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            color: #00ff41;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 90%;
+            padding: 40px;
+            background: #000000;
+            border-radius: 0;
+            box-shadow: none;
+            text-align: center;
+            border: 1px solid #00ff41;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        label {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 400;
+            color: #00ff41;
+        }
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #333333;
+            outline: none;
+            border-radius: 0;
+            transition: background 0.3s ease;
+        }
+        input[type="range"]:hover {
+            background: #555555;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #00ff41;
+            border-radius: 0;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00ff41;
+            transition: transform 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        button {
+            padding: 18px 40px;
+            font-size: 1.3em;
+            font-weight: 600;
+            background: #00ff41;
+            color: #000000;
+            border: 1px solid #00ff41;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px #00ff41;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        button:hover {
+            background: #000000;
+            color: #00ff41;
+            box-shadow: 0 0 20px #00ff41;
+        }
+        button:active {
+            background: #00ff41;
+            color: #000000;
+        }
+        canvas {
+            width: 100%;
+            max-width: 900px;
+            height: 350px;
+            background: #000000;
+            border-radius: 0;
+            box-shadow: none;
+            margin-top: 30px;
+            border: 1px solid #00ff41;
+        }
+        .info {
+            margin-top: 30px;
+            font-size: 1.1em;
+            opacity: 0.8;
+            color: #00ff41;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .controls {
+                gap: 20px;
+            }
+            button {
+                padding: 15px 30px;
+                font-size: 1.1em;
+            }
+            canvas {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bass Tester</h1>
+        <div class="controls">
+            <div class="control-group">
+                <label for="freq">Bass Frequency: <span id="freqValue">60</span> Hz</label>
+                <input type="range" id="freq" min="0" max="400" value="60" step="1">
+            </div>
+            <button id="playBtn">Play Bass</button>
+        </div>
+        <canvas id="visualizer"></canvas>
+        <div class="info">
+            <p>Adjust the frequency to test your bass. Visualizer shows frequency spectrum.</p>
+        </div>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 1024;
+        const bufferLength = analyser.fftSize;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const gainNode = audioContext.createGain();
+        gainNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        let isPlaying = false;
+        let currentOscillator = null;
+        const playBtn = document.getElementById('playBtn');
+        const freqSlider = document.getElementById('freq');
+        const freqValue = document.getElementById('freqValue');
+
+        freqSlider.addEventListener('input', () => {
+            const freq = freqSlider.value;
+            freqValue.textContent = freq;
+            if (isPlaying && currentOscillator) {
+                currentOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            }
+        });
+
+        playBtn.addEventListener('click', async () => {
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            if (isPlaying) {
+                if (currentOscillator) {
+                    currentOscillator.stop();
+                    currentOscillator = null;
+                }
+                playBtn.textContent = 'Play Bass';
+                isPlaying = false;
+            } else {
+                currentOscillator = audioContext.createOscillator();
+                currentOscillator.type = 'sine';
+                currentOscillator.frequency.setValueAtTime(freqSlider.value, audioContext.currentTime);
+                currentOscillator.connect(gainNode);
+                currentOscillator.start();
+                playBtn.textContent = 'Stop Bass';
+                isPlaying = true;
+                draw();
+            }
+        });
+
+        function draw() {
+            if (!isPlaying) return;
+            requestAnimationFrame(draw);
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+            canvasCtx.beginPath();
+            const sliceWidth = canvas.width / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+
+                if (i === 0) {
+                    canvasCtx.moveTo(x, y);
+                } else {
+                    canvasCtx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            canvasCtx.strokeStyle = '#00ff41';
+            canvasCtx.lineWidth = 3;
+            canvasCtx.shadowColor = '#00ff41';
+            canvasCtx.shadowBlur = 10;
+            canvasCtx.stroke();
+        }
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        });
+    </script>
+</body>
+</html>
