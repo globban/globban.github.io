@@ -1,140 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Snow Background</title>
+    <meta charset="UTF-8" />
+    <title>Snow Background</title>
 
-<style>
-    html, body {
-        margin: 0;
-        height: 100%;
-        overflow: hidden;
-        background: #000 url('grasslands.webp') center/cover no-repeat;
-    }
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
 
-    /* Background image */
-    #bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        z-index: 0 ;
-    }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            /* Removed the hardcoded image here so JS can handle it */
+            background-color: #001015;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 0;
+        }
 
-    /* Snow canvas */
-    #snow {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1;
-        pointer-events: none;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
-       body {
-            background: #000 url('sphere.jpg') center/cover no-repeat;
-            #particle-canvas { display: none; }
-       }
-    }
-</style>
-
+        .content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-align: center;
+            top: 40%;
+            font-family: sans-serif;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="particle-canvas"></canvas>
+
+    <div id="particles-js"></div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
     <script>
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const particleCount = 150; // Increased for better screen coverage
+        // 1. Define the pool
+        const imagePool = [
+            'balls-d_copy.jpg', 
+            'curvy-d_copy.jpg', 
+            'blender render/dreamlike-surreal-3840x2160-21336.jpg', 
+            'blender render/ios-26-apple-4000x2182-23303.jpg', 
+            'blender render/spacelogo_copy.jpg',
+            'elijah-pilchard-hodv-NKAGu4-unsplash.jpg', 
+            'lcd-rainbow-d_copy.jpg', 
+            'blender render/Shapes.png'
+        ];
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        // 2. Select a random image
+        const randomImage = imagePool[Math.floor(Math.random() * imagePool.length)];
 
-        window.addEventListener('resize', resize);
-        resize();
+        // 3. Apply it to the background
+        document.getElementById('particles-js').style.backgroundImage = `url('${randomImage}')`;
 
-        class Petal {
-            constructor(isInitial = false) {
-                this.init(isInitial);
-            }
-
-            init(isInitial) {
-                this.x = Math.random() * canvas.width;
-                // KEY CHANGE: If it's the first load, spread them vertically. 
-                // Otherwise, reset them to just above the screen.
-                this.y = isInitial ? Math.random() * canvas.height : -20;
-                
-                this.w = 2 + Math.random() * 3; // Even smaller for high-end feel
-                this.h = 4 + Math.random() * 3;
-                this.opacity = Math.random() * 0.6 + 0.2;
-                this.flip = Math.random() * Math.PI;
-                this.flipSpeed = Math.random() * 0.02 + 0.01;
-                this.horizontalSpeed = Math.random() * 1.2 - 0.6;
-                this.verticalSpeed = Math.random() * 0.5 + 0.4;
-                this.angle = Math.random() * 360;
-                this.sway = Math.random() * 2;
-                this.swaySpeed = Math.random() * 0.02;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle * Math.PI / 180);
-                
-                const flipScale = Math.abs(Math.cos(this.flip));
-                
-                // Using a more realistic petal pink/white
-                ctx.fillStyle = `rgba(255, 192, 203, ${this.opacity})`;
-                
-                // Draw delicate petal
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.bezierCurveTo(this.w, -this.h * flipScale, this.w * 1.5, this.h * flipScale, 0, this.h * flipScale);
-                ctx.bezierCurveTo(-this.w * 1.5, this.h * flipScale, -this.w, -this.h * flipScale, 0, 0);
-                ctx.fill();
-                
-                ctx.restore();
-            }
-
-            update() {
-                this.y += this.verticalSpeed;
-                this.x += this.horizontalSpeed + Math.sin(this.sway) * 0.5;
-                this.sway += this.swaySpeed;
-                this.flip += this.flipSpeed;
-                this.angle += 0.3;
-
-                // Reset logic
-                if (this.y > canvas.height + 20) {
-                    this.init(false); // Reset to top
+        // 4. Initialize Particles
+      particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 20,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle"
+                },
+                "opacity": {
+                    "value": 0, /* Changed from 0 to 0.5 so they are visible */
+                    "random": false
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 3,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false
                 }
-            }
-        }
-
-        function setup() {
-            for (let i = 0; i < particleCount; i++) {
-                // Pass 'true' so they start distributed across the screen
-                particles.push(new Petal(true));
-            }
-        }
-
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(render);
-        }
-
-        setup();
-        render();
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "repulse"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                }
+            },
+            "retina_detect": true
+        });
     </script>
 </body>
 </html>
