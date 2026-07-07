@@ -18,8 +18,8 @@
     <title>algot.fun</title>
     <style>
         :root {
-            --gw: 300px;
-            --gh: 386px;
+            --gw: min(300px, calc((100vw - 48px - 3 * var(--gap)) / 4));
+            --gh: calc(var(--gw) * 386 / 300);
             --gap: 40px;
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
@@ -39,6 +39,14 @@
             align-items: center;
             gap: var(--gap);
             z-index: 2;
+            padding: 0 24px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 1320px) {
+            :root {
+                --gap: clamp(16px, 3vw, 40px);
+            }
         }
 
         .card {
@@ -59,7 +67,7 @@
             width: 80px;
             height: 80px;
             margin-bottom: 20px;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.486));
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -182,17 +190,19 @@
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
         const PARAMS = {
-            gw: 300, gh: 386, gr: 60,
+            gr: 60,
             thick: 56, bezel: 60, ior: 5.0,
             hoverScale: 1.08
         };
 
-        const imagePool = [
-            'balls-d_copy.jpg', 'curvy-d_copy.jpg', 'blender render/dreamlike-surreal-3840x2160-21336.jpg', 'blender render/ios-26-apple-4000x2182-23303.jpg', 'blender render/spacelogo_copy.jpg',
-            'elijah-pilchard-hodv-NKAGu4-unsplash.jpg', 'lcd-rainbow-d_copy.jpg', 'blender render/Shapes.png'
-        ];
-        // Note: Replace these with valid URLs or Unsplash IDs if local files aren't available
-        const randomImage = imagePool[Math.floor(Math.random() * imagePool.length)];
+        const totalImages = 51;
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        const imageNumber = (dayOfYear % totalImages) + 1;
+        const backgroundImage = `./backgrounds/${imageNumber}.webp`;
 
         let targetHover = -1;
         let hoverValues = [0, 0, 0, 0];
@@ -208,7 +218,8 @@
             uniform vec2 uResolution;
             uniform vec2 uTextureRes;
             uniform sampler2D uBgTex;
-            uniform vec2 uSize;
+            uniform vec2 uCardCenters[4];
+            uniform vec2 uCardSizes[4];
             uniform float uRadius;
             uniform float uThickness;
             uniform float uBezel;
@@ -234,14 +245,13 @@
 
             void main() {
                 vec2 screenPx = vUv * uResolution;
-                vec2 halfSize = uSize * 0.5; 
-                float gap = uSize.x + 40.0;
                 float sd = 1e10;
                 vec2 centerUsed = vec2(0.0);
                 float hVal = 0.0;
 
                 for(int i = 0; i < 4; i++) {
-                    vec2 center = vec2(uResolution.x * 0.5 + (float(i) - 1.5) * gap, uResolution.y * 0.5);
+                    vec2 center = uCardCenters[i];
+                    vec2 halfSize = uCardSizes[i] * 0.5;
                     float currentH = (i==0)?uHoverValues[0]:(i==1)?uHoverValues[1]:(i==2)?uHoverValues[2]:uHoverValues[3];
                     float scale = mix(1.0, uHoverScale, currentH);
                     float d = sdRoundedRect(screenPx - center, halfSize * scale, uRadius * scale);
@@ -255,7 +265,7 @@
                 if (sd > 0.0) {
                     vec2 bgUV = getCoverUV(vUv, uResolution, uTextureRes);
                     vec3 bg = texture2D(uBgTex, bgUV).rgb;
-                    float shadow = (1.0 - smoothstep(0.0, mix(25.0, 75.0, hVal), sd)) * mix(0.4, 0.1, hVal);
+                    float shadow = (1.0 - smoothstep(0.0, mix(18.0, 48.0, hVal), sd)) * mix(0.18, 0.05, hVal);
                     gl_FragColor = vec4(bg * (1.0 - shadow), 1.0);
                     return;
                 }
@@ -266,13 +276,13 @@
                 float slope = (h2 - h) / 0.01 * (uThickness / uBezel);
                 float refraction = h * uThickness * (slope - (slope / uIOR));
 
-                float zoom = mix(1.0, 0.9, hVal);
+                float zoom = mix(1.0, 0.96, hVal);
                 vec2 zoomedUV = (centerUsed / uResolution) + (vUv - (centerUsed / uResolution)) * zoom;
                 vec2 grad = normalize(screenPx - centerUsed);
                 vec2 refractedUV = getCoverUV(zoomedUV - (grad * refraction / uResolution), uResolution, uTextureRes);
 
                 vec3 color = texture2D(uBgTex, refractedUV).rgb;
-                color += smoothstep(0.0, 1.0, t) * smoothstep(1.0, 0.0, t) * mix(0.0, 0.15, hVal);
+                color += smoothstep(0.0, 1.0, t) * smoothstep(1.0, 0.0, t) * mix(0.0, 0.06, hVal);
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
@@ -285,7 +295,8 @@
                 uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
                 uTextureRes: { value: new THREE.Vector2(1920, 1080) },
                 uBgTex: { value: null },
-                uSize: { value: new THREE.Vector2(PARAMS.gw, PARAMS.gh) },
+                uCardCenters: { value: Array.from({ length: 4 }, () => new THREE.Vector2()) },
+                uCardSizes: { value: Array.from({ length: 4 }, () => new THREE.Vector2()) },
                 uRadius: { value: PARAMS.gr },
                 uThickness: { value: PARAMS.thick },
                 uBezel: { value: PARAMS.bezel },
@@ -295,7 +306,7 @@
             }
         });
 
-        loader.load(randomImage, (tex) => {
+        loader.load(backgroundImage, (tex) => {
             material.uniforms.uBgTex.value = tex;
             material.uniforms.uTextureRes.value.set(tex.image.width, tex.image.height);
         });
@@ -303,11 +314,19 @@
         scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
         // Sync HTML Hover with Shader
-        const cards = document.querySelectorAll('.card');
+        const cards = Array.from(document.querySelectorAll('.card'));
         cards.forEach(card => {
             card.addEventListener('mouseenter', () => targetHover = parseInt(card.dataset.index));
             card.addEventListener('mouseleave', () => targetHover = -1);
         });
+
+        function syncCardMetrics() {
+            cards.forEach((card, index) => {
+                const rect = card.getBoundingClientRect();
+                material.uniforms.uCardCenters.value[index].set(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                material.uniforms.uCardSizes.value[index].set(rect.width, rect.height);
+            });
+        }
 
         function render() {
             for (let i = 0; i < 4; i++) {
@@ -316,11 +335,15 @@
             }
             material.uniforms.uHoverValues.value = hoverValues;
             material.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+            syncCardMetrics();
             renderer.render(scene, camera);
             requestAnimationFrame(render);
         }
 
-        window.addEventListener('resize', () => renderer.setSize(window.innerWidth, window.innerHeight));
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            syncCardMetrics();
+        });
         render();
     </script>
     <script type="module" src="/home.js"></script>

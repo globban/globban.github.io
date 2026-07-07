@@ -25,19 +25,6 @@
     "category": "casual",
     "blocked": false
   },
-    {
-     "gameid": "knife-master",
-     "customurl": "https://gamea.azgame.io/knife-master/",
-     "thumbnail": "https://geometry-games.io/cache/data/image/game/knife-master/knife-master-m320x190.webp",
-     "category": "casual",
-     "blocked": false
-      },
-  {
-    "gameid": "ice-baby-quest",
-    "customurl": "https://gamea.azgame.io/ice-baby-quest/",
-    "thumbnail": "https://geometry-games.io/data/image/game/ice-baby-quest/ice-baby-quest.png",
-    "category": "casual"
-  },
   {
     "gameid": "curve-rush",
     "customurl": "https://game.azgame.io/curve-rush/", 

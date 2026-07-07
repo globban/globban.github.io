@@ -11,18 +11,25 @@
 
 <body>
     <!-- New Tab mode toggle (top-left) -->
-     <div onclick="togglesettings()" id="settings-btn" style="position:fixed;left:8px;top:8px;z-index:3; cursor:pointer;color:#fff;padding:6px 8px;background:rgba(0,0,0,0.5);border-radius:8px;font-size:0.95rem;">
-       <i class="fas fa-ellipsis-vertical" style="font-size:32px"></i>
-       
-     </div >
-    <div id="settings-menu" style="position:fixed;left:8px;top:50px;z-index:3; display:none;">
-    <div id="newtab-control">
-      <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
-        <input type="checkbox" id="newtab-toggle"> Hide tab</label>
-        <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
-        <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url 
-        <button id="reset-btn" onclick="localStorage.clear(), location.reload()" style="display:flex;align-items:center;gap:8px;background:rgba(255, 0, 0, 0.253);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">Reset all</button></label>
-    </div>
+ 
+   <div id="settings-menu" style="position:fixed;left:8px;top:50px;z-index:3; display:none;">
+  <div id="newtab-control" style="display:flex; flex-direction:column; gap:8px;">
+    
+    <!-- 1. Hide Tab Control -->
+    <label style="display:flex;align-items:center;gap:8px;background-color: #0002;
+backdrop-filter: blur(10px);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
+      <input type="checkbox" id="newtab-toggle"> Hide tab
+    </label>
+    
+    <!-- 2. Background URL Control -->
+    <label style="display:flex;align-items:center;gap:8px;background-color: #0002;
+backdrop-filter: blur(10px);padding:6px 8px;border-radius:8px;color:#fff;font-size:0.95rem;">
+      <input type="text" id="background" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus="on"> Background-url 
+    </label>
+  
+
+  </div>
+
     </div>
     <!-- Overlay shown when returning to tab while New Tab mode is enabled -->
   <!-- Back button (reloads page) -->

@@ -44,26 +44,22 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
     <script>
-        // 1. Define the pool
-        const imagePool = [
-            'balls-d_copy.jpg', 
-            'curvy-d_copy.jpg', 
-            'blender render/dreamlike-surreal-3840x2160-21336.jpg', 
-            'blender render/ios-26-apple-4000x2182-23303.jpg', 
-            'blender render/spacelogo_copy.jpg',
-            'elijah-pilchard-hodv-NKAGu4-unsplash.jpg', 
-            'lcd-rainbow-d_copy.jpg', 
-            'blender render/Shapes.png'
-        ];
+        const totalImages = 51;
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        const imageNumber = (dayOfYear % totalImages) + 1;
+        const backgroundImage = `./backgrounds/${imageNumber}.webp`;
 
-        // 2. Select a random image
-        const randomImage = imagePool[Math.floor(Math.random() * imagePool.length)];
+        document.getElementById('particles-js').style.backgroundImage = `url('${backgroundImage}')`;
+        document.body.style.backgroundImage = `url('${backgroundImage}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundAttachment = 'fixed';
 
-        // 3. Apply it to the background
-        document.getElementById('particles-js').style.backgroundImage = `url('${randomImage}')`;
-
-        // 4. Initialize Particles
-      particlesJS("particles-js", {
+        particlesJS("particles-js", {
             "particles": {
                 "number": {
                     "value": 20,
