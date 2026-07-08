@@ -241,6 +241,12 @@
             font-weight: bold;
         }
 
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .status-container {
             display: flex;
             align-items: center;
@@ -276,10 +282,10 @@
 
     <!-- 1. Hideable Cheat Sheet -->
     <details style="margin-bottom: 20px;">
-        <summary>Toggle Cheat Sheet</summary>
+        <summary>Toggle Morse Cheat Sheet (A-Ö, 0-9)</summary>
         <div class="chart-grid" id="cheat-sheet"></div>
     </details>
-    <h3>Learn the basics, with <a style="color: #38bdf8;" href="https://morse.withgoogle.com/learn/" target="_blank"> Google</a></h3>
+
     <!-- 2. Alphabet Sequence Morse Trainer -->
     <div class="card">
         <h2>
@@ -308,16 +314,19 @@
         <div class="feedback" id="alpha-feedback"></div>
     </div>
 
-    <!-- 3. Word Arena Matcher -->
+    <!-- 3. Word Arena Matcher (With Two-Way Translation Toggle) -->
     <div class="card">
         <h2>
-            <span>2. Translate Word to Morse</span>
-            <div class="status-container">
-                <span id="status-text">Connecting</span>
-                <span class="status-dot" id="api-status"></span>
+            <span>2. Arena Matcher</span>
+            <div class="header-meta">
+                <button class="btn-sm" id="arena-mode-btn" onclick="toggleArenaMode()">Mode: Word ➔ Morse</button>
+                <div class="status-container">
+                    <span id="status-text">Connecting</span>
+                    <span class="status-dot" id="api-status"></span>
+                </div>
             </div>
         </h2>
-        <p class="hint">Type the full word. Separate letters with spaces. Press <strong>Enter</strong> to fetch the next word once complete.</p>
+        <p class="hint" id="arena-hint">Type the full word in Morse. Separate letters with spaces. Press <strong>Enter</strong> to cycle words.</p>
         <div class="word-display" id="target-word">FETCHING...</div>
         <input type="text" id="word-input" placeholder="e.g. .-. . .- -.. -.--" autocomplete="off">
         <div class="feedback" id="word-feedback"></div>
@@ -354,13 +363,11 @@
     const checkboxContainer = document.getElementById('checkbox-container');
     
     tokenOrder.forEach(ch => {
-        // Cheat Sheet element
         const div = document.createElement('div');
         div.className = 'chart-item';
         div.innerHTML = `<span>${ch}</span> ${morseDict[ch]}`;
         sheet.appendChild(div);
 
-        // Filter Checkbox item element
         const lbl = document.createElement('label');
         lbl.className = 'char-label';
         lbl.innerHTML = `<input type="checkbox" value="${ch}" checked onchange="buildTrainingSet()"> ${ch}`;
@@ -372,17 +379,11 @@
     const trackerGrid = document.getElementById('alpha-tracker');
     let alphaBoxes = {};
 
-    // Toggle filter menu visibility via Cog icon
     function toggleFilterMenu() {
         const menu = document.getElementById('filter-menu');
-        if (menu.style.display === 'block') {
-            menu.style.display = 'none';
-        } else {
-            menu.style.display = 'block';
-        }
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
 
-    // Generate training array depending on custom checked nodes
     function buildTrainingSet() {
         trackerGrid.innerHTML = '';
         alphaBoxes = {};
@@ -391,9 +392,7 @@
 
         const boxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
         boxes.forEach(box => {
-            if (box.checked) {
-                currentTrainingSet.push(box.value);
-            }
+            if (box.checked) currentTrainingSet.push(box.value);
         });
 
         currentTrainingSet.forEach(letter => {
@@ -439,7 +438,7 @@
         }
     }
 
-    // Sound Synthesis Engine
+    // Sound Engine
     let audioCtx = null;
     function beep(morseChar) {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -469,7 +468,7 @@
         });
     }
 
-    // Task 1: Sequential Sequence Trainer Input Engine via Enter
+    // Section 1: Sequential Input via Enter
     const alphaInput = document.getElementById('alpha-input');
     const alphaFeedback = document.getElementById('alpha-feedback');
 
@@ -477,7 +476,6 @@
         if (e.key === 'Enter') {
             e.preventDefault(); 
             const rawValue = alphaInput.value.trim();
-            
             if (currentAlphaIndex >= currentTrainingSet.length) return;
             
             const targetLetter = currentTrainingSet[currentAlphaIndex];
@@ -503,58 +501,105 @@
         }
     });
 
-    // Task 2: API Word Arena Fetcher
+    // Section 2: Two-way Arena Tracker
     let activeWord = "";
     let isWordComplete = false;
+    let arenaMode = "wordToMorse"; // options: "wordToMorse" or "morseToWord"
+
     const targetDisplay = document.getElementById('target-word');
     const wordInput = document.getElementById('word-input');
     const wordFeedback = document.getElementById('word-feedback');
     const apiStatus = document.getElementById('api-status');
     const statusText = document.getElementById('status-text');
+    const arenaModeBtn = document.getElementById('arena-mode-btn');
+    const arenaHint = document.getElementById('arena-hint');
+
+    function toggleArenaMode() {
+        if (arenaMode === "wordToMorse") {
+            arenaMode = "morseToWord";
+            arenaModeBtn.textContent = "Mode: Morse ➔ Word";
+            arenaHint.textContent = "Read the Morse code sequence and type the clear English word. Press Enter to cycle.";
+            wordInput.placeholder = "e.g. HELLO";
+        } else {
+            arenaMode = "wordToMorse";
+            arenaModeBtn.textContent = "Mode: Word ➔ Morse";
+            arenaHint.textContent = "Type the full word in Morse. Separate letters with spaces. Press Enter to cycle.";
+            wordInput.placeholder = "e.g. .-. . .- -.. -.--";
+        }
+        renderArenaDisplay();
+        wordInput.value = '';
+        wordFeedback.textContent = '';
+        isWordComplete = false;
+    }
+
+    function getCombinedMorseString(word) {
+        let expectedArr = [];
+        for (let char of word) {
+            if (morseDict[char]) expectedArr.push(morseDict[char]);
+        }
+        return expectedArr.join(' ');
+    }
+
+    function renderArenaDisplay() {
+        if (!activeWord || activeWord === "FETCHING...") {
+            targetDisplay.textContent = activeWord;
+            return;
+        }
+        if (arenaMode === "wordToMorse") {
+            targetDisplay.textContent = activeWord;
+        } else {
+            targetDisplay.textContent = getCombinedMorseString(activeWord);
+        }
+    }
 
     async function generateNewWord() {
-        targetDisplay.textContent = "FETCHING...";
+        activeWord = "FETCHING...";
+        renderArenaDisplay();
         wordInput.value = '';
         wordFeedback.textContent = '';
         isWordComplete = false;
         
         try {
             const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
-            if(!response.ok) throw new Error("API downstream response failure");
+            if(!response.ok) throw new Error();
             const data = await response.json();
-            activeWord = data[0].toUpperCase();
+            activeWord = data[0].toUpperCase().replace(/[^A-ZÅÄÖ]/g, '');
+            if(!activeWord) throw new Error();
             
-            activeWord = activeWord.replace(/[^A-ZÅÄÖ]/g, '');
-            if(!activeWord) throw new Error("Empty target set");
-            
-            targetDisplay.textContent = activeWord;
             apiStatus.className = "status-dot api";
             statusText.textContent = "Live API";
         } catch (err) {
-            const rand = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
-            activeWord = rand;
-            targetDisplay.textContent = rand;
+            activeWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
             apiStatus.className = "status-dot fallback";
             statusText.textContent = "Local Fallback";
         }
+        renderArenaDisplay();
     }
 
     wordInput.addEventListener('input', (e) => {
-        const userInput = e.target.value.trim();
-        let expectedArr = [];
-        for (let char of activeWord) {
-            if (morseDict[char]) expectedArr.push(morseDict[char]);
-        }
-        const expectedMorse = expectedArr.join(' ');
+        const userInput = e.target.value.trim().toUpperCase();
+        const correctMorse = getCombinedMorseString(activeWord);
 
-        if (userInput === expectedMorse) {
-            wordFeedback.textContent = "✓ Perfect Translation! Press Enter for next word.";
-            wordFeedback.className = "feedback success";
-            beep(expectedMorse); 
-            isWordComplete = true;
+        if (arenaMode === "wordToMorse") {
+            if (userInput === correctMorse) {
+                wordFeedback.textContent = "✓ Perfect Translation! Press Enter for next word.";
+                wordFeedback.className = "feedback success";
+                beep(correctMorse); 
+                isWordComplete = true;
+            } else {
+                wordFeedback.textContent = "";
+                isWordComplete = false;
+            }
         } else {
-            wordFeedback.textContent = "";
-            isWordComplete = false;
+            if (userInput === activeWord) {
+                wordFeedback.textContent = "✓ Perfect Copy Reading! Press Enter for next word.";
+                wordFeedback.className = "feedback success";
+                beep(correctMorse);
+                isWordComplete = true;
+            } else {
+                wordFeedback.textContent = "";
+                isWordComplete = false;
+            }
         }
     });
 
@@ -564,13 +609,13 @@
             if (isWordComplete) {
                 generateNewWord();
             } else {
-                wordFeedback.textContent = "Finish translating the current word correctly first!";
+                wordFeedback.textContent = "Finish translating the token block correctly first!";
                 wordFeedback.className = "feedback error";
             }
         }
     });
 
-    // Task 3: Manual Morse to Text Decoder via Enter Key
+    // Section 3: Terminal Decoder
     const decoderInput = document.getElementById('decoder-input');
     const decoderOutput = document.getElementById('decoder-output');
 
@@ -607,7 +652,7 @@
         }
     });
 
-    // Init App States
+    // Init Engine
     buildTrainingSet();
     generateNewWord();
 </script>
