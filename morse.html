@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Morse Trainer</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --text-muted: #64748b;
+            --border: #334155;
+            --green: #22c55e;
+            --yellow: #eab308;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--accent);
+            user-select: none;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            padding-top: 15px;
+        }
+
+        .chart-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 6px;
+            border-radius: 6px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 0.95rem;
+        }
+
+        .chart-item span {
+            color: var(--accent);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Character Select Options Area (Hidden by default) */
+        .selector-box {
+            background: #020617;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .selector-presets {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .char-checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 5px;
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+        }
+
+        .char-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Alphabet Grid Tracker */
+        .alpha-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alpha-box {
+            background: #020617;
+            color: #1e293b;
+            border: 1px solid var(--border);
+            text-align: center;
+            padding: 8px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 6px;
+        }
+
+        .alpha-box.active-target {
+            border-color: var(--accent);
+            color: #475569;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+        }
+
+        .alpha-box.completed {
+            background: var(--accent);
+            color: var(--bg);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        .word-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 36px;
+        }
+
+        .feedback {
+            text-align: center;
+            font-weight: 600;
+            min-height: 24px;
+            margin-top: 10px;
+        }
+
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .hint { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+        button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        button.btn-sm {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+
+        button.btn-cog {
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            padding: 4px 6px;
+            margin-top: 0;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.btn-cog:hover {
+            color: var(--accent);
+            border-color: var(--border);
+            background: var(--bg);
+        }
+        
+        .output-box {
+            background-color: #020617;
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 30px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: normal;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--text-muted);
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .status-dot.api {
+            background-color: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .status-dot.fallback {
+            background-color: var(--yellow);
+            box-shadow: 0 0 8px var(--yellow);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 1. Hideable Cheat Sheet -->
+    <details style="margin-bottom: 20px;">
+        <summary>Toggle Morse Cheat Sheet (A-Ö, 0-9)</summary>
+        <div class="chart-grid" id="cheat-sheet"></div>
+    </details>
+
+    <!-- 2. Alphabet Sequence Morse Trainer -->
+    <div class="card">
+        <h2>
+            <span>1. Sequence Trainer</span>
+            <div class="title-actions">
+                <button class="btn-cog" id="toggle-filter-btn" onclick="toggleFilterMenu()" title="Toggle Training Settings">⚙️</button>
+                <button class="btn-sm" onclick="buildTrainingSet()">Reset Loop</button>
+            </div>
+        </h2>
+        
+        <!-- Filter Controls -->
+        <div class="selector-box" id="filter-menu">
+            <div class="selector-presets">
+                <button class="btn-sm" onclick="setPreset('all')">All</button>
+                <button class="btn-sm" onclick="setPreset('none')">None</button>
+                <button class="btn-sm" onclick="setPreset('letters')">Letters Only</button>
+                <button class="btn-sm" onclick="setPreset('numbers')">Numbers Only</button>
+                <button class="btn-sm" onclick="setPreset('scandi')">ÅÄÖ Only</button>
+            </div>
+            <div class="char-checkbox-grid" id="checkbox-container"></div>
+        </div>
+
+        <p class="hint" style="margin-bottom: 15px;">Type the Morse sequence for the highlighted token, then press <strong>Enter</strong> to submit.</p>
+        <div class="alpha-grid" id="alpha-tracker"></div>
+        <input type="text" id="alpha-input" placeholder="Type dots/dashes and press Enter..." autocomplete="off">
+        <div class="feedback" id="alpha-feedback"></div>
+    </div>
+
+    <!-- 3. Word Arena Matcher -->
+    <div class="card">
+        <h2>
+            <span>2. Translate Word to Morse</span>
+            <div class="status-container">
+                <span id="status-text">Connecting</span>
+                <span class="status-dot" id="api-status"></span>
+            </div>
+        </h2>
+        <p class="hint">Type the full word. Separate letters with spaces. Press <strong>Enter</strong> to fetch the next word once complete.</p>
+        <div class="word-display" id="target-word">FETCHING...</div>
+        <input type="text" id="word-input" placeholder="e.g. .-. . .- -.. -.--" autocomplete="off">
+        <div class="feedback" id="word-feedback"></div>
+        <button onclick="generateNewWord()">Next Random Word</button>
+    </div>
+
+    <!-- 4. Morse to Text Terminal Decoder -->
+    <div class="card">
+        <h2>3. Manual Morse to Text Decoder</h2>
+        <p class="hint">Type Morse elements here. Press <strong>Enter</strong> or click Translate to execute token evaluation.</p>
+        <input type="text" id="decoder-input" placeholder=".... . .-.. .-.. --- / .-- --- .-. .-.. -.." autocomplete="off" style="margin-bottom: 10px;">
+        <button onclick="decodeMorseInput()">Translate Token</button>
+        <div class="output-box" id="decoder-output">Output text will appear here...</div>
+    </div>
+
+</div>
+
+<script>
+    const morseDict = {
+        'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+        'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+        'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+        'Y': '-.--', 'Z': '--..', 'Å': '.--.-', 'Ä': '.-.-', 'Ö': '---.',
+        '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+        '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----'
+    };
+
+    const inverseMorse = Object.fromEntries(Object.entries(morseDict).map(([k, v]) => [v, k]));
+    const fallbackWords = ["RADIO", "SIGNAL", "CIRCUIT", "TELEGRAPH", "OSCILLATOR", "SWEDEN", "PEER"];
+    const tokenOrder = Object.keys(morseDict);
+
+    // Build the Cheat Sheet & Checkbox Lists
+    const sheet = document.getElementById('cheat-sheet');
+    const checkboxContainer = document.getElementById('checkbox-container');
+    
+    tokenOrder.forEach(ch => {
+        // Cheat Sheet element
+        const div = document.createElement('div');
+        div.className = 'chart-item';
+        div.innerHTML = `<span>${ch}</span> ${morseDict[ch]}`;
+        sheet.appendChild(div);
+
+        // Filter Checkbox item element
+        const lbl = document.createElement('label');
+        lbl.className = 'char-label';
+        lbl.innerHTML = `<input type="checkbox" value="${ch}" checked onchange="buildTrainingSet()"> ${ch}`;
+        checkboxContainer.appendChild(lbl);
+    });
+
+    let currentTrainingSet = [];
+    let currentAlphaIndex = 0;
+    const trackerGrid = document.getElementById('alpha-tracker');
+    let alphaBoxes = {};
+
+    // Toggle filter menu visibility via Cog icon
+    function toggleFilterMenu() {
+        const menu = document.getElementById('filter-menu');
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'block';
+        }
+    }
+
+    // Generate training array depending on custom checked nodes
+    function buildTrainingSet() {
+        trackerGrid.innerHTML = '';
+        alphaBoxes = {};
+        currentTrainingSet = [];
+        currentAlphaIndex = 0;
+
+        const boxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+        boxes.forEach(box => {
+            if (box.checked) {
+                currentTrainingSet.push(box.value);
+            }
+        });
+
+        currentTrainingSet.forEach(letter => {
+            const div = document.createElement('div');
+            div.className = 'alpha-box';
+            div.textContent = letter;
+            trackerGrid.appendChild(div);
+            alphaBoxes[letter] = div;
+        });
+
+        document.getElementById('alpha-input').value = '';
+        const feedback = document.getElementById('alpha-feedback');
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+
+        if (currentTrainingSet.length === 0) {
+            feedback.textContent = "Select characters in settings (⚙️) to start practicing.";
+            feedback.className = "feedback hint";
+        } else {
+            updateAlphaTargetHighlight();
+        }
+    }
+
+    function setPreset(type) {
+        const boxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
+        boxes.forEach(box => {
+            const isNum = !isNaN(box.value);
+            const isScandi = ['Å', 'Ä', 'Ö'].includes(box.value);
+            
+            if (type === 'all') box.checked = true;
+            else if (type === 'none') box.checked = false;
+            else if (type === 'letters') box.checked = !isNum;
+            else if (type === 'numbers') box.checked = isNum;
+            else if (type === 'scandi') box.checked = isScandi;
+        });
+        buildTrainingSet();
+    }
+    
+    function updateAlphaTargetHighlight() {
+        currentTrainingSet.forEach(letter => alphaBoxes[letter].classList.remove('active-target'));
+        if (currentAlphaIndex < currentTrainingSet.length) {
+            alphaBoxes[currentTrainingSet[currentAlphaIndex]].classList.add('active-target');
+        }
+    }
+
+    // Sound Synthesis Engine
+    let audioCtx = null;
+    function beep(morseChar) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let time = audioCtx.currentTime;
+        const base = 0.07;
+
+        morseChar.split("").forEach(symbol => {
+            if (symbol === '.' || symbol === '-') {
+                let dur = symbol === '.' ? base : base * 3;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, time);
+                
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(0.1, time + 0.005);
+                gain.gain.setValueAtTime(0.1, time + dur - 0.005);
+                gain.gain.linearRampToValueAtTime(0, time + dur);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(time);
+                osc.stop(time + dur);
+                time += dur + base;
+            }
+        });
+    }
+
+    // Task 1: Sequential Sequence Trainer Input Engine via Enter
+    const alphaInput = document.getElementById('alpha-input');
+    const alphaFeedback = document.getElementById('alpha-feedback');
+
+    alphaInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+            const rawValue = alphaInput.value.trim();
+            
+            if (currentAlphaIndex >= currentTrainingSet.length) return;
+            
+            const targetLetter = currentTrainingSet[currentAlphaIndex];
+            const correctMorse = morseDict[targetLetter];
+
+            if (rawValue === correctMorse) {
+                beep(correctMorse);
+                alphaBoxes[targetLetter].classList.remove('active-target');
+                alphaBoxes[targetLetter].classList.add('completed');
+                alphaFeedback.textContent = `Correct! ${targetLetter} is ${correctMorse}`;
+                alphaFeedback.className = "feedback success";
+                currentAlphaIndex++;
+                updateAlphaTargetHighlight();
+                
+                if (currentAlphaIndex === currentTrainingSet.length) {
+                    alphaFeedback.textContent = "🏆 Masterful! Set Loop Complete!";
+                }
+            } else {
+                alphaFeedback.textContent = `Incorrect notation for ${targetLetter}. Try again.`;
+                alphaFeedback.className = "feedback error";
+            }
+            alphaInput.value = '';
+        }
+    });
+
+    // Task 2: API Word Arena Fetcher
+    let activeWord = "";
+    let isWordComplete = false;
+    const targetDisplay = document.getElementById('target-word');
+    const wordInput = document.getElementById('word-input');
+    const wordFeedback = document.getElementById('word-feedback');
+    const apiStatus = document.getElementById('api-status');
+    const statusText = document.getElementById('status-text');
+
+    async function generateNewWord() {
+        targetDisplay.textContent = "FETCHING...";
+        wordInput.value = '';
+        wordFeedback.textContent = '';
+        isWordComplete = false;
+        
+        try {
+            const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
+            if(!response.ok) throw new Error("API downstream response failure");
+            const data = await response.json();
+            activeWord = data[0].toUpperCase();
+            
+            activeWord = activeWord.replace(/[^A-ZÅÄÖ]/g, '');
+            if(!activeWord) throw new Error("Empty target set");
+            
+            targetDisplay.textContent = activeWord;
+            apiStatus.className = "status-dot api";
+            statusText.textContent = "Live API";
+        } catch (err) {
+            const rand = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+            activeWord = rand;
+            targetDisplay.textContent = rand;
+            apiStatus.className = "status-dot fallback";
+            statusText.textContent = "Local Fallback";
+        }
+    }
+
+    wordInput.addEventListener('input', (e) => {
+        const userInput = e.target.value.trim();
+        let expectedArr = [];
+        for (let char of activeWord) {
+            if (morseDict[char]) expectedArr.push(morseDict[char]);
+        }
+        const expectedMorse = expectedArr.join(' ');
+
+        if (userInput === expectedMorse) {
+            wordFeedback.textContent = "✓ Perfect Translation! Press Enter for next word.";
+            wordFeedback.className = "feedback success";
+            beep(expectedMorse); 
+            isWordComplete = true;
+        } else {
+            wordFeedback.textContent = "";
+            isWordComplete = false;
+        }
+    });
+
+    wordInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isWordComplete) {
+                generateNewWord();
+            } else {
+                wordFeedback.textContent = "Finish translating the current word correctly first!";
+                wordFeedback.className = "feedback error";
+            }
+        }
+    });
+
+    // Task 3: Manual Morse to Text Decoder via Enter Key
+    const decoderInput = document.getElementById('decoder-input');
+    const decoderOutput = document.getElementById('decoder-output');
+
+    function decodeMorseInput() {
+        const rawMorse = decoderInput.value.trim();
+        if (!rawMorse) {
+            decoderOutput.textContent = "Please provide data first...";
+            return;
+        }
+
+        const words = rawMorse.split(/\s*\/+\s*/);
+        let decodedSentence = [];
+
+        words.forEach(word => {
+            const tokens = word.split(/\s+/);
+            let clearWord = '';
+            tokens.forEach(token => {
+                if (inverseMorse[token]) {
+                    clearWord += inverseMorse[token];
+                } else if(token) {
+                    clearWord += '?';
+                }
+            });
+            if (clearWord) decodedSentence.push(clearWord);
+        });
+
+        decoderOutput.textContent = decodedSentence.join(' ') || "Translation failed. Check syntax notation.";
+    }
+
+    decoderInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            decodeMorseInput();
+        }
+    });
+
+    // Init App States
+    buildTrainingSet();
+    generateNewWord();
+</script>
+
+</body>
+</html>
