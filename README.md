@@ -9,4 +9,6 @@ You are free to share and adapt the code for non-commercial purposes, but you mu
 
 © Algot, 2025
 
+![Logo](https://algot.fun/logo.svg)
+
 [![License: CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc/4.0/)
