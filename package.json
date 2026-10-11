@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "live-server",
-    "start": "node server.js"
+    "start": "node server.js",
+    "check:game-embeds": "node scripts/check-game-embeds.mjs"
   },
   "author": "",
   "license": "ISC",
@@ -25,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/globban/globban.github.io/issues"
   },
-  "homepage": "https://github.com/globban/globban.github.io#readme"
+  "homepage": "https://github.com/globban/globban.github.io#readme",
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
 }

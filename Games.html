@@ -181,7 +181,7 @@ window.addEventListener("message", (event) => {
   console.log("Got safe message:", event.data);
 });
 
-function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect }) {
+function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect, direct = false }) {
   const container = document.querySelector('.library-container');
   const card = document.createElement('div');
   card.classList.add('game-card');
@@ -189,6 +189,7 @@ function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect 
   card.dataset.url = url;
   card.dataset.title = title;
   card.dataset.thumbnail = thumbnail;
+  card.dataset.direct = String(!!direct);
 
   const img = document.createElement('img');
   img.className = 'game-thumb';
@@ -225,6 +226,10 @@ function createGameCard({ title, url, thumbnail, desc, category, showPurpleRect 
 
   card.appendChild(img);
   card.addEventListener('click', () => {
+    if (card.dataset.direct === 'true') {
+      window.location.href = url;
+      return;
+    }
     window.__currentGame = { url, title, thumbnail, desc, category, showPurpleRect };
     openGame(url, showPurpleRect);
   });
@@ -368,7 +373,7 @@ function showCategory(category) {
   toShow.forEach(g => {
     const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
     const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
-    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl, direct: !!g.direct });
   });
   // Reveal library below the start area and compact the start area to top
   document.querySelector('.library-container').classList.add('visible');
@@ -388,7 +393,7 @@ function showSearchResults(query) {
   results.forEach(g => {
     const url = g.customurl ? g.customurl : `https://games.crazygames.com/en_US/${g.gameid}/index.html?skipPrerollFirstSession=true`;
     const title = g.gameid ? g.gameid.split('-').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ') : (g.title || 'Game');
-    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl });
+    createGameCard({ title, url, thumbnail: g.thumbnail, desc: g.desc, category: g.category, showPurpleRect: !g.customurl, direct: !!g.direct });
   });
   document.querySelector('.library-container').classList.add('visible');
   // keep start area visible; library displays below
@@ -419,7 +424,7 @@ function showRecents() {
     const stored = typeof r.showPurpleRect !== 'undefined' ? !!r.showPurpleRect : undefined;
     const inferred = getShowPurpleForUrl(r.url);
     const showPurple = (typeof stored !== 'undefined') ? stored : inferred;
-    createGameCard({ title: r.title, url: r.url, thumbnail: r.thumbnail, desc: '', category: r.category, showPurpleRect: showPurple });
+    createGameCard({ title: r.title, url: r.url, thumbnail: r.thumbnail, desc: '', category: r.category, showPurpleRect: showPurple, direct: !!r.direct });
   });
   document.querySelector('.library-container').classList.add('visible');
   

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<title>Choose | algot.fun</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			font-family: Arial, Helvetica, sans-serif;
+			background: #000;
+			color: #fff;
+		}
+
+		* { box-sizing: border-box; }
+
+		html, body { min-width: 320px; min-height: 100%; margin: 0; }
+
+		body {
+			min-height: 100vh;
+			min-height: 100svh;
+			overflow: hidden;
+			background: #000;
+		}
+
+		.backdrop {
+			position: fixed;
+			inset: 0;
+			background-position: center;
+			background-size: cover;
+			transform: scale(1.03);
+		}
+
+		.backdrop::after {
+			position: absolute;
+			inset: 0;
+			content: "";
+			background: rgba(0, 0, 0, 0.2);
+		}
+
+		main {
+			position: relative;
+			display: grid;
+			min-height: 100vh;
+			min-height: 100svh;
+			grid-template-columns: repeat(2, minmax(0, 300px));
+			align-items: center;
+			justify-content: center;
+			gap: clamp(20px, 6vw, 80px);
+			padding: 32px;
+		}
+
+		.choice {
+			display: flex;
+			min-height: 280px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 24px;
+			border: 1px solid rgba(255, 255, 255, 0.23);
+			border-radius: 40px;
+			background: rgba(255, 255, 255, 0.075);
+			box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.25);
+			color: #fff;
+			text-decoration: none;
+			backdrop-filter: blur(12px) saturate(120%);
+			-webkit-backdrop-filter: blur(12px) saturate(120%);
+			transition: transform 260ms ease, background-color 260ms ease, border-color 260ms ease;
+			animation: arrive 500ms both;
+		}
+
+		.choice:nth-child(2) { animation-delay: 100ms; }
+
+		.choice:hover, .choice:focus-visible {
+			transform: scale(1.045) translateY(-5px);
+			border-color: rgba(255, 255, 255, 0.55);
+			background: rgba(255, 255, 255, 0.14);
+		}
+
+		.choice:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+
+		.choice svg {
+			width: 72px;
+			height: 72px;
+			filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.55));
+			transition: transform 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		}
+
+		.choice:hover svg, .choice:focus-visible svg { transform: scale(1.12) translateY(-4px); }
+
+		.label {
+			min-width: 132px;
+			padding: 11px 25px;
+			border: 1px solid rgba(255, 255, 255, 0.28);
+			border-radius: 24px;
+			background: rgba(255, 255, 255, 0.1);
+			font-size: 12px;
+			font-weight: 600;
+			letter-spacing: 1px;
+			text-align: center;
+			text-transform: uppercase;
+		}
+
+		@keyframes arrive {
+			from { opacity: 0; transform: translateY(12px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@media (max-width: 560px) {
+			body { overflow: auto; }
+			main {
+				min-height: 100vh;
+				min-height: 100svh;
+				grid-template-columns: minmax(0, 300px);
+				align-content: center;
+				gap: 18px;
+				padding: 24px;
+			}
+			.choice { min-height: 190px; border-radius: 30px; }
+			.choice svg { width: 58px; height: 58px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<div class="backdrop" aria-hidden="true"></div>
+	<main aria-label="Choose a destination">
+		<a class="choice" href="/Games.html" aria-label="Go to games">
+			<svg viewBox="0 0 640 640" fill="currentColor" aria-hidden="true"><path d="M448 128C554 128 640 214 640 320C640 426 554 512 448 512L192 512C86 512 0 426 0 320C0 214 86 128 192 128L448 128zM192 240C178.7 240 168 250.7 168 264L168 296L136 296C122.7 296 112 306.7 112 320C112 333.3 122.7 344 136 344L168 344L168 376C168 389.3 178.7 400 192 400C205.3 400 216 389.3 216 376L216 344L248 344C261.3 344 272 333.3 272 320C272 306.7 261.3 296 248 296L216 296L216 264C216 250.7 205.3 240 192 240zM432 336C414.3 336 400 350.3 400 368C400 385.7 414.3 400 432 400C449.7 400 464 385.7 464 368C464 350.3 449.7 336 432 336zM496 240C478.3 240 464 254.3 464 272C464 289.7 478.3 304 496 304C513.7 304 528 289.7 528 272C528 254.3 513.7 240 496 240z"/></svg>
+			<span class="label">Games</span>
+		</a>
+		<a class="choice" href="/ports.html" aria-label="Go to ports">
+			<svg viewBox="0 0 640 640" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="38" aria-hidden="true"><path d="m220 180-140 140 140 140M420 180l140 140-140 140M370 120 270 520"/></svg>
+			<span class="label">Ports</span>
+		</a>
+	</main>
+	<script>
+		const totalImages = 53;
+		const now = new Date();
+		const start = new Date(now.getFullYear(), 0, 0);
+		const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+		const imageNumber = (dayOfYear % totalImages) + 1;
+		document.querySelector('.backdrop').style.backgroundImage = `url("/backgrounds/${imageNumber}.webp")`;
+	</script>
+</body>
+</html>

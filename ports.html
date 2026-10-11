@@ -1,0 +1,217 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ports://</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #000; color: #fff; }
+  body { font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  main { width: min(900px, calc(100% - 36px)); margin: 9vh auto 0; }
+  .brand { color: #777; margin-bottom: 22px; }
+  .brand b { color: #fff; font-weight: 500; }
+  .prompt { display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid #333; padding: 0 0 10px; }
+  .sigil { color: #fff; flex: 0 0 auto; }
+  .proxy-box { display: inline-flex; align-items: center; gap: 8px; color: #888; font-size: 12px; margin-left: 12px; white-space: nowrap; }
+  .proxy-box input { width: 14px; height: 14px; accent-color: #fff; }
+  input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; caret-color: #fff; padding: 0; }
+  input::placeholder { color: #555; }
+  #suggestions { margin: 8px 0 20px 25px; color: #777; }
+  .suggestion { display: block; width: 100%; text-align: left; color: #777; background: none; border: 0; padding: 1px 0; font: inherit; cursor: pointer; }
+  .suggestion strong { color: #ddd; font-weight: 400; }
+  .suggestion:hover, .suggestion.active { color: #fff; }
+  .suggestion:hover strong, .suggestion.active strong { color: #fff; }
+  #output { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 22px; }
+  .line { margin: 3px 0; }
+  .muted { color: #666; }
+  .error { color: #aaa; }
+  a { color: #fff; text-decoration: underline; text-decoration-color: #555; text-underline-offset: 3px; }
+  a:hover { text-decoration-color: #fff; }
+  .game-link { display: block; width: fit-content; max-width: 100%; }
+  .tag { color: #666; }
+  .status { color: #666; margin-top: 28px; font-size: 12px; }
+  @media (max-width: 520px) { main { margin-top: 6vh; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><b>ports://</b> <span id="count" class="muted">loading index…</span></div>
+  <form id="form" autocomplete="off">
+    <div class="prompt">
+      <span class="sigil">›</span>
+      <input id="command" autofocus spellcheck="false" placeholder="type a game or command…" aria-label="Game or command">
+      <label class="proxy-box"><input type="checkbox" id="proxy-toggle"> proxy (beta)</label>
+    </div>
+    <div id="suggestions" role="listbox" aria-label="Suggestions"></div>
+  </form>
+  <section id="output" aria-live="polite"><div class="muted">Loading ports.json…</div></section>
+  <div class="status">ENTER open · ↑↓ select · ls / list games · list --demo · list --repo</div>
+</main>
+<script>
+(() => {
+  const input = document.querySelector('#command');
+  const form = document.querySelector('#form');
+  const suggestionsEl = document.querySelector('#suggestions');
+  const output = document.querySelector('#output');
+  const countEl = document.querySelector('#count');
+  const proxyToggle = document.querySelector('#proxy-toggle');
+  const PROXY_BASE = 'https://math-25yk.onrender.com/';
+  const PROXY_KEY = 'ports_proxy_enabled';
+  let games = [];
+  let suggestions = [];
+  let selected = 0;
+
+  const isProxyEnabled = () => localStorage.getItem(PROXY_KEY) === '1';
+  const setProxyEnabled = enabled => {
+    localStorage.setItem(PROXY_KEY, enabled ? '1' : '0');
+    if (proxyToggle) proxyToggle.checked = !!enabled;
+  };
+  const parseProxyFlag = raw => {
+    const value = String(raw || '').trim();
+    const useProxy = /(^|\s)--proxy\b/i.test(value);
+    const cleaned = value.replace(/(^|\s)--proxy\b/gi, ' ').replace(/\s+/g, ' ').trim();
+    return { useProxy, cleaned };
+  };
+  const buildProxyUrl = rawUrl => {
+    const url = String(rawUrl || '').trim();
+    if (!url) return url;
+    if (url.startsWith(PROXY_BASE)) return url;
+    return `${PROXY_BASE}${url}`;
+  };
+
+  const cleanUrl = value => {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    // Also accept Markdown links like [label](https://...)
+    const markdown = value.match(/\]\((https?:\/\/[^)]+)\)/i);
+    const raw = markdown ? markdown[1] : value.trim();
+    try {
+      const url = new URL(raw);
+      return /^https?:$/.test(url.protocol) ? url.href : null;
+    } catch { return null; }
+  };
+  const normalize = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const demoUrl = game => cleanUrl(game.demo_link);
+  const repoUrl = game => cleanUrl(game.repo);
+  const destination = game => demoUrl(game) || repoUrl(game);
+  const targetLabel = game => demoUrl(game) ? 'demo' : 'repo';
+
+  async function load() {
+    try {
+      const response = await fetch('./ports.json', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('ports.json must contain a JSON array');
+      games = data.filter(g => g && typeof g.name === 'string').sort((a,b) => a.name.localeCompare(b.name));
+      countEl.textContent = `${games.length} ports`;
+      output.innerHTML = `<div class="muted">Index loaded. Type a game name, <a href="#" data-command="ls">ls</a>, or <a href="#" data-command="list --demo">list --demo</a>.</div>`;
+    } catch (e) {
+      countEl.textContent = 'index unavailable';
+      output.innerHTML = `<div class="error">Could not load ./ports.json (${esc(e.message)}).</div><div class="muted">Keep this HTML file beside ports.json. If opened as file:// and fetch is blocked, serve the folder locally, e.g. <code>python -m http.server 8000</code>.</div>`;
+    }
+  }
+
+  function renderSuggestions() {
+    const query = input.value.trim();
+    const cmd = normalize(query);
+    if (!query || /^(ls|list)(\s|$)/i.test(query)) suggestions = [];
+    else {
+      const ranked = games.map(game => {
+        const name = normalize(game.name);
+        let score = 999;
+        if (name === cmd) score = 0;
+        else if (name.startsWith(cmd)) score = 1 + name.length / 1000;
+        else if (name.includes(cmd)) score = 3 + name.indexOf(cmd) / 100;
+        else {
+          const words = cmd.split(/\s+/).filter(Boolean);
+          if (words.length && words.every(w => name.includes(w))) score = 5;
+        }
+        return { game, score };
+      }).filter(x => x.score < 999).sort((a,b) => a.score - b.score || a.game.name.localeCompare(b.game.name));
+      suggestions = ranked.slice(0, 6).map(x => x.game);
+    }
+    selected = Math.min(selected, Math.max(0, suggestions.length - 1));
+    suggestionsEl.innerHTML = suggestions.map((game, i) =>
+      `<button type="button" class="suggestion ${i === selected ? 'active' : ''}" role="option" aria-selected="${i === selected}" data-index="${i}"><strong>${esc(game.name)}</strong><span class="tag"> — ${demoUrl(game) ? 'demo' : (repoUrl(game) ? 'repo only' : 'no link')}</span></button>`
+    ).join('');
+  }
+
+  function renderList(mode) {
+    let list = games;
+    if (mode === 'demo') list = games.filter(g => demoUrl(g));
+    if (mode === 'repo') list = games.filter(g => repoUrl(g));
+    output.innerHTML = `<div class="line muted">${list.length} ${mode === 'demo' ? 'games with demos' : mode === 'repo' ? 'games with repositories' : 'games'}:</div>` +
+      list.map(game => {
+        const url = mode === 'demo' ? demoUrl(game) : mode === 'repo' ? repoUrl(game) : destination(game);
+        const label = mode === 'repo' ? 'repo' : (mode === 'demo' ? 'demo' : targetLabel(game));
+        return `<div class="line">- ${esc(game.name)}${url ? ` <span class="tag">[${label}]</span> <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a>` : ' <span class="tag">[no link]</span>'}</div>`;
+      }).join('');
+  }
+
+  function openGame(game, forceProxy = isProxyEnabled()) {
+    const url = destination(game);
+    if (!url) {
+      output.innerHTML = `<div>${esc(game.name)}</div><div class="error">No demo or repository URL found for this entry.</div>`;
+      return;
+    }
+    const finalUrl = forceProxy ? buildProxyUrl(url) : url;
+    output.innerHTML = `<div class="line">opening ${esc(game.name)} <span class="tag">(${targetLabel(game)})</span></div><div class="line"><a class="game-link" href="${esc(finalUrl)}" target="_blank" rel="noopener noreferrer">${esc(finalUrl)}</a></div><div class="line muted">If it didn't open automatically, use the link above.</div>`;
+    window.open(finalUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function runCommand(raw) {
+    const value = String(raw || '').trim();
+    if (!value) return;
+    const { useProxy, cleaned } = parseProxyFlag(value);
+    const finalValue = cleaned || value;
+    const lower = finalValue.toLowerCase();
+    const effectiveProxy = useProxy || isProxyEnabled();
+    if (lower === 'ls' || lower === 'list' || lower === 'ls --all' || lower === 'list --all') {
+      renderList('all'); return;
+    }
+    if (lower === 'list --demo' || lower === 'ls --demo') { renderList('demo'); return; }
+    if (lower === 'list --repo' || lower === 'ls --repo') { renderList('repo'); return; }
+    if (lower === 'help' || lower === '--help') {
+      output.innerHTML = '<div>Commands:</div><div class="line">ls, list — list all games (opens demo when available, otherwise repository)</div><div class="line">list --demo — list games that have a demo</div><div class="line">list --repo — list games with a repository</div><div class="line">game name — open its demo, or repository if no demo exists</div><div class="line">--proxy — use the Render proxy for the next command</div>';
+      return;
+    }
+    const query = normalize(finalValue);
+    const exact = games.find(g => normalize(g.name) === query);
+    const game = exact || suggestions[0] || games.find(g => normalize(g.name).includes(query));
+    if (game) openGame(game, effectiveProxy);
+    else output.innerHTML = `<div class="error">No matching game: ${esc(finalValue)}</div><div class="muted">Try a shorter name or type <a href="#" data-command="ls">ls</a>.</div>`;
+  }
+
+  input.addEventListener('input', () => { selected = 0; renderSuggestions(); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' && suggestions.length) { e.preventDefault(); selected = (selected + 1) % suggestions.length; renderSuggestions(); }
+    else if (e.key === 'ArrowUp' && suggestions.length) { e.preventDefault(); selected = (selected - 1 + suggestions.length) % suggestions.length; renderSuggestions(); }
+    else if (e.key === 'Tab' && suggestions.length) { e.preventDefault(); input.value = suggestions[selected].name; selected = 0; renderSuggestions(); }
+  });
+  suggestionsEl.addEventListener('click', e => {
+    const button = e.target.closest('[data-index]');
+    if (!button) return;
+    const game = suggestions[Number(button.dataset.index)];
+    if (game) {
+      const { useProxy } = parseProxyFlag(input.value);
+      input.value = game.name;
+      openGame(game, useProxy || isProxyEnabled());
+    }
+  });
+  form.addEventListener('submit', e => { e.preventDefault(); runCommand(input.value); });
+  if (proxyToggle) {
+    proxyToggle.checked = isProxyEnabled();
+    proxyToggle.addEventListener('change', () => setProxyEnabled(proxyToggle.checked));
+  }
+  output.addEventListener('click', e => {
+    const link = e.target.closest('[data-command]');
+    if (!link) return;
+    e.preventDefault(); input.value = link.dataset.command; runCommand(input.value); input.focus();
+  });
+  renderSuggestions();
+  load();
+})();
+</script>
+</body>
+</html>

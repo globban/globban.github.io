@@ -1,5 +1,12 @@
 [   
      {
+        "gameid": "cork-7",
+        "customurl": "https://cork7.com/",
+        "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzjTUFV1p622P-8UE4cfWHjKD1758meKWhMzo0EC4rHA&s=10",
+        "category": "sports",
+        "direct": true
+    },
+     {
         "gameid": "super-monkey-ball",
         "customurl": "https://monkeyball-online.pages.dev/",
         "thumbnail": "https://smb.sega.com/bananamania/images/bg/hero_poster.jpg",
@@ -54,7 +61,7 @@
   {
     "gameid": "devil-level",
     "customurl": "https://classroom-6x.org/games/level2/",
-    "thumbnail": "https://level-devil.io/cache/data/image/options/leve-devil-banner-hx375.webp",
+    "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6TZXJV8u1bYlASf5YJPXtd75nnRUKbbrBXYO2mGNvuQ&s",
     "category": "casual",
     "blocked": false
   },
@@ -128,13 +135,7 @@
     "category": "casual",
     "blocked": false
   },
-  {
-    "gameid": "slowroads",
-    "customurl": "https://slowroads.io/",
-    "thumbnail": "TN/slowroads.png",
-    "category": "driving",
-    "blocked": false
-  },
+
   {
     "gameid": "5050",
     "customurl": "5050.html",
@@ -291,12 +292,7 @@
         "category": "io",
         "blocked": false
     },
-    {
-        "gameid": "voxiom-io",
-        "thumbnail": "https://imgs.crazygames.com/games/voxiom-io/cover_16x9-1714408559317.png?metadata=none&quality=85&width=273&fit=crop",
-        "category": "io",
-        "blocked": false
-    },
+
     {
         "gameid": "worms-zone",
         "thumbnail": "https://imgs.crazygames.com/worms-zone_16x9/20241128100948/worms-zone_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -1000,12 +996,7 @@
         "category": "io",
         "blocked": false
     },
-    {
-        "gameid": "polytrack",
-        "thumbnail": "https://imgs.crazygames.com/polytrack_16x9/20250717041302/polytrack_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "driving",
-        "blocked": false
-    },
+    
     {
         "gameid": "rally-racer-dirt",
         "thumbnail": "https://imgs.crazygames.com/rally-racer-dirt_16x9/20250227034748/rally-racer-dirt_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -1078,12 +1069,7 @@
         "category": "driving",
         "blocked": false
     },
-    {
-        "gameid": "xtreme-drift-racing",
-        "thumbnail": "https://imgs.crazygames.com/xtreme-drift-racing_16x9/20250403102931/xtreme-drift-racing_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "driving",
-        "blocked": false
-    },
+    
     {
         "gameid": "team-order-racing-manager",
         "thumbnail": "https://imgs.crazygames.com/team-order-racing-manager-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -1127,12 +1113,7 @@
         "category": "driving",
         "blocked": false
     },
-    {
-        "gameid": "xtreme-city-drifting",
-        "thumbnail": "https://imgs.crazygames.com/xtreme-city-drifting_16x9/20250403103844/xtreme-city-drifting_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "driving",
-        "blocked": false
-    },
+    
     {
         "gameid": "jet-boat-racing",
         "thumbnail": "https://imgs.crazygames.com/jet-boat-racing_16x9/20241118074729/jet-boat-racing_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -3455,11 +3436,7 @@
         "thumbnail": "https://imgs.crazygames.com/defender-idle-2_16x9/20250521045712/defender-idle-2_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
         "category": "idle"
     },
-    {
-        "gameid": "firestone-idle-rpg",
-        "thumbnail": "https://imgs.crazygames.com/firestone-idle-rpg_16x9/20250529153314/firestone-idle-rpg_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "idle"
-    },
+    
     {
         "gameid": "battle-arena",
         "thumbnail": "https://imgs.crazygames.com/battle-arena_16x9/20250922080259/battle-arena_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -4845,11 +4822,7 @@
         "thumbnail": "https://imgs.crazygames.com/capture-war/20220225095825/capture-war-cover?metadata=none&quality=85&width=273&fit=crop",
         "category": "stickman"
     },
-    {
-        "gameid": "stickman-zombie-escape",
-        "thumbnail": "https://imgs.crazygames.com/stickman-zombie-escape/20230206125856/stickman-zombie-escape-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "stickman"
-    },
+    
     {
         "gameid": "grab-and-run",
         "thumbnail": "https://imgs.crazygames.com/grab-and-run/20230206165405/grab-and-run-cover?metadata=none&quality=85&width=273&fit=crop",
@@ -5370,11 +5343,7 @@
         "thumbnail": "https://imgs.crazygames.com/games/mahjong-connect-2-2/cover-1653299604735.png?metadata=none&quality=85&width=273&fit=crop",
         "category": "puzzle"
     },
-    {
-        "gameid": "star-stuff",
-        "thumbnail": "https://imgs.crazygames.com/star-stuff_16x9/20250909020603/star-stuff_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "puzzle"
-    },
+    
     {
         "gameid": "butterfly-shimai",
         "thumbnail": "https://imgs.crazygames.com/games/butterfly-shimai/cover_16x9-1746158097542.png?metadata=none&quality=85&width=273&fit=crop",
@@ -5890,11 +5859,7 @@
         "thumbnail": "https://imgs.crazygames.com/games/tap-tap-shots/cover-1655202548222.png?metadata=none&quality=85&width=273&fit=crop",
         "category": "sports"
     },
-    {
-        "gameid": "unmatched-ego---soccer-action",
-        "thumbnail": "https://imgs.crazygames.com/unmatched-ego---soccer-action_16x9/20250711023134/unmatched-ego---soccer-action_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
-        "category": "sports"
-    },
+    
     {
         "gameid": "riders-downhill-racing",
         "thumbnail": "https://imgs.crazygames.com/riders-downhill-racing_16x9/20241118075431/riders-downhill-racing_16x9-cover?metadata=none&quality=85&width=273&fit=crop",
