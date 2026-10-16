@@ -86,7 +86,7 @@
     const markdown = value.match(/\]\((https?:\/\/[^)]+)\)/i);
     const raw = markdown ? markdown[1] : value.trim();
     try {
-      const url = new URL(raw);
+      const url = new URL(raw, window.location.href);
       return /^https?:$/.test(url.protocol) ? url.href : null;
     } catch { return null; }
   };

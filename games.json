@@ -1,9 +1,22 @@
 [   
+    {
+        "gameid": "bad-piggies",
+        "customurl": "/badpiggies/bp.html",
+        "thumbnail": "https://gamesbeat.com/wp-content/uploads/2025/05/bad-piggies1-1.jpg",
+        "category": "casual"
+    },
      {
         "gameid": "cork-7",
         "customurl": "https://cork7.com/",
         "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzjTUFV1p622P-8UE4cfWHjKD1758meKWhMzo0EC4rHA&s=10",
         "category": "sports",
+        "direct": true
+    },
+    {
+        "gameid": "bad-piggies",
+        "customurl": "/badpiggies/bp.html",
+        "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzjTUFV1p622P-8UE4cfWHjKD1758meKWhMzo0EC4rHA&s=10",
+        "category": "casual",
         "direct": true
     },
      {

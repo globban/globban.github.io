@@ -1,0 +1,112 @@
+<html lang="en-us"><head>
+
+
+
+	<base href="https://gn-math.dev/s/EE0_FEFXflkxUx5iECccXCcNRB9_GDdDXysSe04OZiJTDiUZIE5fOx82VUkkFkYeERszXh5jGDUcSSIDVQQ0BX0/">
+	<link rel="shortcut icon" href="https://bit888.web.app/favicon.ico">
+	<link rel="stylesheet" href="TemplateData/style.css">
+	<script src="TemplateData/UnityProgress.js"></script>
+	<script src="Build/UnityLoader.js"></script>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		.webgl-content {
+			width: 100%;
+			height: 100%;
+		}
+
+		#gameContainer {
+			width: 100vw;
+			height: 100vh;
+		}
+
+		#gameContainer canvas {
+			display: block;
+			width: 100% !important;
+			height: 100% !important;
+		}
+
+		#loadingOverlay {
+			position: fixed;
+			inset: 0;
+			z-index: 10;
+			background: #171816;
+			opacity: 1;
+			transition: opacity 200ms ease;
+		}
+
+		#loadingOverlay.is-hidden { opacity: 0; pointer-events: none; }
+		#loadingScreen { display: block; width: 100%; height: 100%; border: 0; }
+
+		@media (prefers-reduced-motion: reduce) {
+			#loadingOverlay { transition-duration: 1ms; }
+		}
+
+		::before, ::after {
+			display: none;
+		}
+	</style>
+	<script>
+		var loadingFrameReady = false;
+		var unityGameReady = false;
+		var latestUnityProgress = 0;
+		var loadingOverlay;
+
+		function hideLoadingOverlay() {
+			if (!loadingFrameReady || !unityGameReady || !loadingOverlay) return;
+			loadingOverlay.classList.add("is-hidden");
+			window.setTimeout(function () { loadingOverlay.remove(); }, 850);
+		}
+
+		function handleUnityProgress(instance, progress) {
+			UnityProgress(instance, progress);
+			latestUnityProgress = Math.max(0, Math.min(1, Number(progress) || 0));
+			var frame = document.getElementById("loadingScreen");
+			if (frame && frame.contentWindow) {
+				frame.contentWindow.postMessage({ type: "unity-progress", progress: latestUnityProgress }, "*");
+			}
+			if (latestUnityProgress >= 1) {
+				unityGameReady = true;
+				setTimeout(hideLoadingOverlay, 3000);
+			}
+		}
+
+		var gameInstance = UnityLoader.instantiate("gameContainer", "Build/Bad Piggies.json", {
+			onProgress: handleUnityProgress,
+			compatibilityCheck: function (container, continueLoading, failLoading) {
+				if (UnityLoader.SystemInfo.mobile && UnityLoader.SystemInfo.hasWebGL) {
+					continueLoading();
+					return;
+				}
+				UnityLoader.compatibilityCheck(container, continueLoading, failLoading);
+			}
+		});
+	</script>
+</head>
+
+<body style="background-color:black;">
+	<div class="webgl-content">
+		<div id="gameContainer" style="padding: 0px; margin: 0px; border: 0px; position: relative; background: rgb(35, 31, 32);"><canvas id="#canvas" style="cursor: url(&quot;data:image/cur;base64,AAACAAEAICAAAAAAAAAoEAAAGAAAAAAAKAAAACAAAABAAAAAAQAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQAAAAAAAAAAAgAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABFLy8v6x8fH/82Njb+SEhI9xoaGtoEBASPAAAAJAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAwAAAEQCAgKLAgICewAAACoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJOIiIj/////////////////4ODg/3t7e/8ICAi9AAAATgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABrKioq/4WFhf9qamr/FxcX5AAAAHcAAAAlAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAQEBxsDAwP//////////////////////0tLS/xcXF8kAAABeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABkZGeHHx8f////////////Gxsb/XV1d/xkZGeIAAACaAAAAaAAAAEsAAABGAAAAVgAAAGEAAABXAAAAIQAAAF5BQUHw6+vr//////////////////////+VlZX/AAAAlgAAACIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANDQ09f7+/v///////v7+////////////0dHR/42Njf9fX1//RUVF/z8/P/9NTU3/WVlZ/1JSUv8kJCTnAAAA6qKiov//////////////////////3t7e/yUlJeIAAAAyAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPDw+6sbGx///////////////////////////////////////19fX/8fHx//n5+f///////////9bW1v+vr6//7Ozs//////////////////////+CgoL/AAAAhwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEwkJCT/y8vL///////////////////////////////////////////////////////////////////////+/v7/////////////////3Nzc/xISEuQAAAAyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE8ODg7YVFRU/4WFhf+Wlpb/mZmZ/5ubm/+8vLz//f39///////////////////////////////////////////////////////19fX/ZWVl/wAAAJ8AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYAAABKAAAAdwICAooFBQWPBgYGkhAQELxjY2P++Pj4///////////////////////////////////////////////////////u7u7/SkpK/wAAAGkAAAANAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAUAAAADAAAAGg8PD7m2trb///////////////////////////////////////////////////////////+qqqr/AAAAsgAAADsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAECAgIj5qamv///////////////////////////////////////////////////////////9bW1v8fHx/WAAAAcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4UFBTIzMzM////////////////////////////////////////////////////////////7Ozs/0NDQ/MGBgaeBgYGAAYGBgAGBgYABgYGAAYGBgAGBgYABgYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWVFRUfz////////////////////////////////////////////////////////////////4+Pj/V1dX/wkJCbQJCQkACQkJAAkJCQAJCQkACQkJAAkJCQAJCQkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMKCgrEubm5//////////////////////////////////////////////////////////////////n5+f9YWFj/CgoKuAoKCgAKCgoACgoKAAoKCgAKCgoACgoKAAoKCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVkZGRvX6+vr////////////9/f3//f39//////////////////7+/v//////////////////////7+/v/0dHR/cHBwekBwcHAAcHBwAHBwcABwcHAAcHBwAHBwcABwcHAAEBAQABAQEAAQEBAAEBAQABAQEAAQEBAAEBAQABAQHEurq6////////////9vb2/9bW1v/t7e3///////////////////////7+/v/////////////////T09P/GRkZ1AAAAG4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWklJSfTz8/P////////////X19f/oqKi//39/f/////////////////t7e3/8PDw//7+/v///////////5SUlP8AAACgAAAAJwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADEvr6+/////////////////5ubm/9xcXH//////////////////////39/f//ExMT////////////Pz8//FhYW4QAAADEAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYlhYWPnz8/P////////////y8vL/PDw8/zQ0NP////////////////+2trb/DQ0N9k1NTf3f39//t7e3/y4uLvcAAABeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4DAwPLxcXF/////////////////8rKyv8BAQHLAAAAp1BQUP+qqqr/gICA/xUVFeQAAABVAQEBgh8fH90TExO+AAAASwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdWlpaf/7+/v////////////9/f3/fn5+/wAAAHcAAAAAAQEBXwcHB5kEBASAAAAAKQAAAAAAAAAEAAAAFwAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB8SEhLSzs7O/////////////////+bm5v8nJyfhAAAAKAAAAAABAQEAAAAABQAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiHl5ef//////////////////////qamp/wAAAKgAAAAAAAAAAAEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADcqKirr3Nzc//////////////////b29v9PT0/yAAAAUQAAAAAAAAAAAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAk4+Pj///////////////////////09PT/w0NDdEAAAAFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADc4ODj06+vr//////////////////////+CgoL9AQEBgwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeYKCgv///////////////////////Pz8/zQ0NPEAAAAuAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQWFha8wsLC///////////////////////Gxsb/Dw8PxAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJzMzM+Xu7u7//////////////////////1paWv8AAABlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkKioq3eDg4P////////////////+goKD/CQkJwAAAABEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACPXFxc/9jY2P/d3d3/hoaG/w0NDdkAAAAuAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABADAwN8FBQUzBcXF9EEBASRAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=&quot;), default;" width="2545" height="1259"></canvas><div class="logo Dark" style="display: none;"></div><div class="progress Dark" style="display: none;"><div class="empty" style="width: 0%;"></div><div class="full" style="width: 100%;"></div></div></div>
+	</div>
+	<div id="loadingOverlay" aria-label="Loading Bad Piggies">
+		<iframe id="loadingScreen" title="Bad Piggies loading screen"></iframe>
+	</div>
+	<script>
+		loadingOverlay = document.getElementById("loadingOverlay");
+		var loadingScreen = document.getElementById("loadingScreen");
+		loadingScreen.addEventListener("load", function () {
+			loadingFrameReady = true;
+			loadingScreen.contentWindow.postMessage({ type: "unity-progress", progress: latestUnityProgress }, "*");
+			hideLoadingOverlay();
+		});
+		loadingScreen.src = new URL("./wfbp.html", window.location.href).href;
+	</script>
+
+
+</body></html>

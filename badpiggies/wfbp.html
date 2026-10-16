@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Bad Piggies | Loading</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+			background: #171816;
+			color: #f2f0e8;
+		}
+		* { box-sizing: border-box; }
+		html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+		body {
+			position: relative;
+			background:
+				repeating-linear-gradient(0deg, transparent 0 47px, #ffffff08 48px),
+				repeating-linear-gradient(90deg, transparent 0 47px, #ffffff08 48px),
+				#171816;
+		}
+		#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+		.hud {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			padding: clamp(20px, 5vw, 64px);
+			pointer-events: none;
+		}
+		.brand {
+			align-self: flex-start;
+			border-left: 3px solid #d8f04a;
+			padding-left: 12px;
+			font-size: 12px;
+			font-weight: 800;
+			line-height: 1.35;
+			letter-spacing: 0.12em;
+		}
+		.brand span { display: block; color: #a8aa9f; font-size: 9px; font-weight: 600; }
+		.status { width: min(340px, 100%); align-self: flex-start; }
+		.status-line {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 10px;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+		}
+		#progressValue { color: #d8f04a; font-variant-numeric: tabular-nums; }
+		.track { height: 3px; background: #ffffff30; }
+		#progressBar { width: 0%; height: 100%; background: #d8f04a; transition: width 250ms ease-out; }
+		#modelStatus { margin-top: 9px; color: #a8aa9f; font-size: 10px; }
+		@media (max-width: 540px) {
+			.hud { padding: 22px; }
+			.status { width: 100%; }
+		}
+	</style>
+	<script type="importmap">
+		{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+	</script>
+</head>
+<body>
+	<canvas id="scene" aria-label="A rotating wireframe Bad Piggies model"></canvas>
+	<div class="hud" aria-live="polite">
+		<div class="brand">BAD PIGGIES<span>FIELD ASSEMBLY</span></div>
+		<div class="status">
+			<div class="status-line"><span id="statusLabel">Preparing game</span><span id="progressValue">0%</span></div>
+			<div class="track"><div id="progressBar"></div></div>
+			<div id="modelStatus">Loading wireframe model...</div>
+		</div>
+	</div>
+	<script type="module">
+		import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+		import { STLLoader } from "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js";
+
+		const canvas = document.querySelector("#scene");
+		const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+			camera.position.set(0, 0.2, 5.2);
+
+		const modelStatus = document.querySelector("#modelStatus");
+		const progressValue = document.querySelector("#progressValue");
+		const progressBar = document.querySelector("#progressBar");
+		const statusLabel = document.querySelector("#statusLabel");
+		let piggie;
+
+		function resizeRenderer() {
+			const width = window.innerWidth;
+			const height = window.innerHeight;
+			renderer.setSize(width, height, false);
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+		}
+
+		new ResizeObserver(resizeRenderer).observe(document.body);
+		resizeRenderer();
+
+		new STLLoader().load(
+			new URL("./bp.stl", import.meta.url).href,
+			(geometry) => {
+				geometry.computeBoundingBox();
+				const dimensions = new THREE.Vector3();
+				geometry.boundingBox.getSize(dimensions);
+				geometry.center();
+				piggie = new THREE.Mesh(
+					geometry,
+					new THREE.MeshBasicMaterial({ color: 0x7dcd28, wireframe: true })
+				);
+				piggie.scale.setScalar(1.8 / Math.max(dimensions.x, dimensions.y, dimensions.z));
+				piggie.rotation.x = 0.5 * Math.PI;
+                piggie.rotation.y = 1 * Math.PI;
+                piggie.rotation.z = 0.7 * Math.PI;
+				scene.add(piggie);
+				modelStatus.textContent = "Wireframe model ready";
+			},
+			undefined,
+			() => { modelStatus.textContent = "Wireframe unavailable"; }
+		);
+
+		window.addEventListener("message", (event) => {
+			if (event.source !== window.parent || event.data?.type !== "unity-progress") return;
+			const percentage = Math.max(0, Math.min(100, Math.round(event.data.progress * 100)));
+			progressValue.textContent = `${percentage}%`;
+			progressBar.style.width = `${percentage}%`;
+			if (percentage >= 100) statusLabel.textContent = "Starting game";
+			else if (percentage > 0) statusLabel.textContent = "Loading game";
+		});
+
+		function animate() {
+			requestAnimationFrame(animate);
+			if (piggie) {
+				piggie.rotation.z += 0.006;
+			}
+			renderer.render(scene, camera);
+		}
+		animate();
+	</script>
+</body>
+</html>
