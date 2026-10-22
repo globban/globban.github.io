@@ -1,0 +1,3717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chromatic // SVG to 3D Studio</title>
+  
+  <!-- Font Awesome CDN for clean iconography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Import Map for Three.js & official addons -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg-black: #000000;
+      --panel-bg: rgba(10, 10, 12, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.09);
+      --panel-border-hover: rgba(255, 255, 255, 0.2);
+      --accent-cyan: #00f0ff;
+      --accent-purple: #a855f7;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --input-bg: #0d0e12;
+      --input-border: #222530;
+      --input-focus: #00f0ff;
+      --control-radius: 8px;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-black);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 13px;
+    }
+
+    /* WebGL Viewport */
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background-color: #000000;
+    }
+
+    #webgl-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      outline: none;
+    }
+
+    /* Drag and Drop Overlay */
+    #dropzone-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      border: 3px dashed var(--accent-cyan);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    #dropzone-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dropzone-icon {
+      font-size: 56px;
+      color: var(--accent-cyan);
+      filter: drop-shadow(0 0 20px var(--accent-glow));
+      animation: floatPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes floatPulse {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.05); }
+    }
+
+    .dropzone-text {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #fff;
+    }
+
+    .dropzone-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Header Nav */
+    header {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      height: 52px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .brand-pill {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 8px 16px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .brand-icon {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+    }
+
+    .ui-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .ui-btn:hover {
+      background: rgba(25, 25, 30, 0.95);
+      border-color: var(--panel-border-hover);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .ui-btn:active {
+      transform: translateY(0);
+    }
+
+    .ui-btn-primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(168, 85, 247, 0.2));
+      border-color: rgba(0, 240, 255, 0.4);
+      color: #fff;
+    }
+
+    .ui-btn-primary:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.35), rgba(168, 85, 247, 0.35));
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    /* Presets Quick Picker in Header */
+    .presets-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      padding: 4px 8px;
+      border-radius: 24px;
+    }
+
+    .preset-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0 4px;
+    }
+
+    .preset-chip {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .preset-chip:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .preset-chip.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: rgba(0, 240, 255, 0.4);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+
+    /* Main Inspector Panel (Right side) */
+    #sidebar {
+      position: absolute;
+      top: 76px;
+      right: 16px;
+      bottom: 76px;
+      width: 340px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 18px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.85);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+
+    #sidebar.hidden {
+      transform: translateX(360px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-close {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .sidebar-close:hover {
+      color: #fff;
+    }
+
+    /* Sidebar Tabs */
+    .sidebar-tabs {
+      display: flex;
+      padding: 6px 10px;
+      gap: 4px;
+      border-bottom: 1px solid var(--panel-border);
+      overflow-x: auto;
+    }
+
+    .sidebar-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 58px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 7px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn i {
+      font-size: 12px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.09);
+      border-bottom: 2px solid var(--accent-cyan);
+    }
+
+    /* Tab Content Areas */
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* Control Groups */
+    .control-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .control-value {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+    }
+
+    .advanced-settings {
+      border-top: 1px solid var(--panel-border);
+      padding-top: 10px;
+    }
+
+    .advanced-settings summary {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 0;
+    }
+
+    .advanced-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 12px;
+    }
+
+    .export-select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-main);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font: inherit;
+    }
+
+    .export-progress {
+      width: 100%;
+      height: 5px;
+      accent-color: var(--accent-cyan);
+    }
+
+    .control-row[hidden],
+    .ui-btn[hidden],
+    .export-progress[hidden] {
+      display: none;
+    }
+
+    /* Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #1f222d;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--text-main);
+      border: 2px solid #000;
+      box-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+      transition: transform 0.1s ease, background 0.1s ease;
+      cursor: pointer;
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+      transform: scale(1.15);
+      background: var(--accent-cyan);
+    }
+
+    /* Toggle Switches */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #21242d;
+      transition: 0.2s;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: 0.2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--accent-cyan);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(16px);
+      background-color: #000;
+    }
+
+    /* Color Pickers */
+    .color-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-swatch-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .color-swatch-btn input[type="color"] {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      opacity: 0;
+    }
+
+    .color-hex-input {
+      flex: 1;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-main);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      outline: none;
+    }
+
+    .color-hex-input:focus {
+      border-color: var(--input-focus);
+    }
+
+    /* Material Presets Grid */
+    .mat-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .mat-preset-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .mat-preset-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .mat-preset-card.active {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.08);
+      color: #fff;
+    }
+
+    .mat-preview-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Sidebar Footer / Stats */
+    .sidebar-footer {
+      padding: 10px 16px;
+      border-top: 1px solid var(--panel-border);
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+
+    /* Floating Bottom Dock / Camera & Quick Actions */
+    #bottom-dock {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 6px 12px;
+      border-radius: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    }
+
+    .dock-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dock-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 0 4px;
+    }
+
+    .dock-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 11px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dock-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .dock-btn.active {
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+    }
+
+    /* Modal for Pasting SVG Code */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      width: 90%;
+      max-width: 560px;
+      background: #090a0d;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-textarea {
+      width: 100%;
+      height: 180px;
+      background: #040507;
+      border: 1px solid #1e222e;
+      border-radius: 8px;
+      color: #00f0ff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 12px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .modal-textarea:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Toast Notifications */
+    #toast-container {
+      position: absolute;
+      top: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(15, 17, 23, 0.95);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 240, 255, 0.2);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1), toastOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes toastOut {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-10px); opacity: 0; }
+    }
+
+    /* Toggle UI Button (when sidebar is hidden) */
+    #toggle-sidebar-btn {
+      position: absolute;
+      top: 76px;
+      right: 16px;
+      z-index: 9;
+      display: none;
+    }
+
+    #toggle-sidebar-btn.visible {
+      display: flex;
+    }
+
+    /* Custom File Input (Hidden) */
+    #file-input {
+      display: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .presets-bar {
+        display: none;
+      }
+      #sidebar {
+        width: calc(100% - 32px);
+        left: 16px;
+        right: 16px;
+      }
+      #bottom-dock {
+        width: calc(100% - 32px);
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        left: 10px;
+        right: 10px;
+      }
+
+      .header-right {
+        gap: 6px;
+      }
+
+      .brand-pill {
+        padding: 8px 10px;
+        gap: 7px;
+      }
+
+      .brand-title {
+        font-size: 11px;
+      }
+
+      .brand-badge,
+      #btn-paste-code span,
+      #btn-toggle-inspector {
+        display: none;
+      }
+
+      #btn-upload {
+        padding: 8px 10px;
+        white-space: nowrap;
+      }
+
+      #btn-upload span {
+        font-size: 10px;
+      }
+
+      #modal-raster-preview .modal-body > div:first-child {
+        width: min(320px, 100%) !important;
+        height: auto !important;
+        aspect-ratio: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL 3D Canvas Container -->
+  <div id="canvas-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- Drag & Drop Zone Overlay -->
+  <div id="dropzone-overlay">
+    <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+    <div class="dropzone-text">Drop an SVG or PNG to Translate to 3D</div>
+    <div class="dropzone-sub">Release anywhere on the canvas</div>
+  </div>
+
+  <!-- Header Navigation Bar -->
+  <header>
+    <div class="header-left">
+      <a href="/Tools.html" class="brand-pill" title="Back to Tools">
+        <div class="brand-icon">3D</div>
+        <div class="brand-title">Chromatic</div>
+        <span class="brand-badge">SVG STUDIO</span>
+      </a>
+
+      <!-- Quick Preset Logos -->
+      <div class="presets-bar">
+        <span class="preset-label">Presets:</span>
+        <button class="preset-chip active" data-preset="threejs"><i class="fa-solid fa-cube"></i> Three.js</button>
+        <button class="preset-chip" data-preset="github"><i class="fa-brands fa-github"></i> GitHub</button>
+        <button class="preset-chip" data-preset="apple"><i class="fa-brands fa-apple"></i> Apple</button>
+        <button class="preset-chip" data-preset="react"><i class="fa-brands fa-react"></i> React</button>
+        <button class="preset-chip" data-preset="vercel"><i class="fa-solid fa-play fa-rotate-270"></i> Vercel</button>
+        <button class="preset-chip" data-preset="x"><i class="fa-brands fa-x-twitter"></i> X</button>
+        <button class="preset-chip" data-preset="dvd"><i class="fa-solid fa-compact-disc"></i> DVD</button>
+        <button class="preset-chip" data-preset="wave"><i class="fa-solid fa-water"></i> Wave</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <input type="file" id="file-input" accept=".svg,.png,image/svg+xml,image/png" />
+      <button class="ui-btn ui-btn-primary" id="btn-upload" title="Upload SVG or PNG file from computer">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        <span>Upload SVG / PNG</span>
+      </button>
+      <button class="ui-btn" id="btn-paste-code" title="Paste raw SVG code">
+        <i class="fa-solid fa-code"></i>
+        <span>Paste Code</span>
+      </button>
+      <button class="ui-btn" id="btn-toggle-inspector" title="Toggle Inspector sidebar (H)">
+        <i class="fa-solid fa-sliders"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Button to restore inspector if closed -->
+  <button class="ui-btn" id="toggle-sidebar-btn" title="Open Inspector">
+    <i class="fa-solid fa-sliders"></i> Inspector
+  </button>
+
+  <!-- Inspector Controls Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <i class="fa-solid fa-cube"></i> 3D Studio Inspector
+      </div>
+      <button class="sidebar-close" id="sidebar-close-btn" title="Hide Sidebar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar Category Tabs -->
+    <div class="sidebar-tabs">
+      <button class="tab-btn active" data-tab="tab-geometry">
+        <i class="fa-solid fa-ruler-combined"></i>
+        <span>Geometry</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-material">
+        <i class="fa-solid fa-palette"></i>
+        <span>Material</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-bloom">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Bloom/Glow</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-scene">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Scene/Env</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-export">
+        <i class="fa-solid fa-download"></i>
+        <span>Export</span>
+      </button>
+    </div>
+
+    <!-- Sidebar Tab Content Panes -->
+    <div class="sidebar-content">
+
+      <!-- TAB 1: GEOMETRY & EXTRUSION -->
+      <div class="tab-pane active" id="tab-geometry">
+
+        <!-- PNG/SVG translation controls -->
+        <div class="control-section" style="border: 1px solid rgba(0, 240, 255, 0.28); background: linear-gradient(180deg, rgba(0, 240, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);">
+          <div class="section-title" style="color: var(--accent-cyan);">
+            <span><i class="fa-solid fa-wand-magic-sparkles"></i> PNG Translating</span>
+            <span class="brand-badge" id="badge-smooth-status" style="font-size: 8px;">ORIGINAL</span>
+          </div>
+
+          <p style="color: var(--text-muted); font-size: 11px; line-height: 1.4;">
+            Convert PNG or SVG artwork into editable 3D geometry on a 500×500 canvas.
+          </p>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Smooth edges</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-smooth-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <button class="ui-btn ui-btn-primary" id="btn-run-auto-smooth" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-cube"></i> Translate / Rebuild
+          </button>
+
+          <details class="advanced-settings">
+            <summary>Advanced settings</summary>
+            <div class="advanced-controls">
+              <div class="control-row">
+                <div class="control-label-row">
+                  <span>Blur radius</span>
+                  <span class="control-value" id="val-smooth-radius">1.0px</span>
+                </div>
+                <input type="range" id="param-smooth-radius" min="0" max="16" step="0.5" value="1" />
+              </div>
+              <div class="control-row">
+                <div class="control-label-row">
+                  <span>Threshold cutoff</span>
+                  <span class="control-value" id="val-smooth-threshold">15%</span>
+                </div>
+                <input type="range" id="param-smooth-threshold" min="1" max="85" step="1" value="15" />
+              </div>
+              <div class="control-row">
+                <div class="control-label-row">
+                  <span>Curve spline tension</span>
+                  <span class="control-value" id="val-smooth-tension">0.05</span>
+                </div>
+                <input type="range" id="param-smooth-tension" min="0.05" max="0.45" step="0.01" value="0.05" />
+              </div>
+            </div>
+          </details>
+
+          <div style="display: flex; gap: 8px; margin-top: 2px;">
+            <button class="ui-btn" id="btn-view-raster-preview" style="flex: 1; justify-content: center; font-size: 11px; padding: 6px 8px;">
+              <i class="fa-solid fa-image"></i> Preview 500×500
+            </button>
+            <button class="ui-btn" id="btn-download-smoothed-svg" style="flex: 1; justify-content: center; font-size: 11px; padding: 6px 8px;" title="Download translated SVG markup">
+              <i class="fa-solid fa-file-arrow-down"></i> Save SVG
+            </button>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">
+            <span>Extrusion Parameters</span>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Extrude Depth</span>
+              <span class="control-value" id="val-depth">8</span>
+            </div>
+            <input type="range" id="param-depth" min="1" max="40" step="0.5" value="8" />
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Enable Bevel</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-bevel-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div id="bevel-controls-group" style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="control-row">
+              <div class="control-label-row">
+                <span>Bevel Thickness</span>
+                <span class="control-value" id="val-bevel-thick">1.2</span>
+              </div>
+              <input type="range" id="param-bevel-thick" min="0" max="8" step="0.1" value="1.2" />
+            </div>
+
+            <div class="control-row">
+              <div class="control-label-row">
+                <span>Bevel Size</span>
+                <span class="control-value" id="val-bevel-size">0.8</span>
+              </div>
+              <input type="range" id="param-bevel-size" min="0" max="6" step="0.1" value="0.8" />
+            </div>
+
+            <div class="control-row">
+              <div class="control-label-row">
+                <span>Bevel Segments</span>
+                <span class="control-value" id="val-bevel-seg">3</span>
+              </div>
+              <input type="range" id="param-bevel-seg" min="1" max="10" step="1" value="3" />
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Curve Smoothness</span>
+              <span class="control-value" id="val-curve-seg">24</span>
+            </div>
+            <input type="range" id="param-curve-seg" min="6" max="64" step="2" value="24" />
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">Transform & Camera Fitting</div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Auto-Fit to Camera</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-auto-fit" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <button class="ui-btn ui-btn-primary" id="btn-fit-camera-action" style="width: 100%; justify-content: center; margin: 4px 0 6px;">
+            <i class="fa-solid fa-expand"></i> Reframe Camera to Fit
+          </button>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Model Scale</span>
+              <span class="control-value" id="val-scale">1.0×</span>
+            </div>
+            <input type="range" id="param-scale" min="0.2" max="2.5" step="0.05" value="1.0" />
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Invert Front/Back</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-flip-z" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MATERIAL & SHADING -->
+      <div class="tab-pane" id="tab-material">
+        <div class="control-section">
+          <div class="section-title">Material Presets</div>
+          <div class="mat-presets-grid">
+            <div class="mat-preset-card active" data-mat="cyber">
+              <div class="mat-preview-dot" style="background: #00f0ff; box-shadow: 0 0 6px #00f0ff;"></div>
+              <span>Cyber Neon</span>
+            </div>
+            <div class="mat-preset-card" data-mat="chrome">
+              <div class="mat-preview-dot" style="background: linear-gradient(135deg, #fff, #999);"></div>
+              <span>Chrome</span>
+            </div>
+            <div class="mat-preset-card" data-mat="gold">
+              <div class="mat-preview-dot" style="background: linear-gradient(135deg, #ffe066, #b38600);"></div>
+              <span>24K Gold</span>
+            </div>
+            <div class="mat-preset-card" data-mat="glass">
+              <div class="mat-preview-dot" style="background: rgba(180, 220, 255, 0.7); backdrop-filter: blur(2px);"></div>
+              <span>Frosted Glass</span>
+            </div>
+            <div class="mat-preset-card" data-mat="obsidian">
+              <div class="mat-preview-dot" style="background: #1c1d22;"></div>
+              <span>Obsidian</span>
+            </div>
+            <div class="mat-preset-card" data-mat="clay">
+              <div class="mat-preview-dot" style="background: #eaebee;"></div>
+              <span>White Clay</span>
+            </div>
+            <div class="mat-preset-card" data-mat="ruby">
+              <div class="mat-preview-dot" style="background: #ff1a4b;"></div>
+              <span>Ruby Gloss</span>
+            </div>
+            <div class="mat-preset-card" data-mat="emerald">
+              <div class="mat-preview-dot" style="background: #00e676;"></div>
+              <span>Emerald</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">PBR Surface Properties</div>
+
+          <div class="control-row" id="custom-color-row">
+            <div class="control-label-row">
+              <span>Base Color</span>
+            </div>
+            <div class="color-picker-wrap">
+              <div class="color-swatch-btn" id="color-swatch-display" style="background-color: #00f0ff;">
+                <input type="color" id="param-color" value="#00f0ff" />
+              </div>
+              <input type="text" class="color-hex-input" id="param-color-hex" value="#00f0ff" maxlength="7" />
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Roughness</span>
+              <span class="control-value" id="val-roughness">0.20</span>
+            </div>
+            <input type="range" id="param-roughness" min="0" max="1" step="0.01" value="0.20" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Metallic</span>
+              <span class="control-value" id="val-metalness">0.15</span>
+            </div>
+            <input type="range" id="param-metalness" min="0" max="1" step="0.01" value="0.15" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Clearcoat (Varnish)</span>
+              <span class="control-value" id="val-clearcoat">0.60</span>
+            </div>
+            <input type="range" id="param-clearcoat" min="0" max="1" step="0.02" value="0.60" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Glass Transmission</span>
+              <span class="control-value" id="val-transmission">0.00</span>
+            </div>
+            <input type="range" id="param-transmission" min="0" max="1" step="0.02" value="0.00" />
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Flat Shading (Faceted)</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-flat-shading" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">Wireframe Settings</div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Pure Wireframe Mesh</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-wireframe" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Wireframe Edge Overlay</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-wireframe-overlay" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="control-row" id="wireframe-color-row">
+            <div class="control-label-row">
+              <span>Overlay Line Color</span>
+            </div>
+            <div class="color-picker-wrap">
+              <div class="color-swatch-btn" id="wireframe-swatch" style="background-color: #ffffff;">
+                <input type="color" id="param-wireframe-color" value="#ffffff" />
+              </div>
+              <input type="text" class="color-hex-input" id="param-wireframe-hex" value="#ffffff" maxlength="7" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: BLOOM & GLOW -->
+      <div class="tab-pane" id="tab-bloom">
+        <div class="control-section">
+          <div class="section-title">Unreal Bloom Pass</div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Enable Bloom Post-FX</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-bloom-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Bloom Strength</span>
+              <span class="control-value" id="val-bloom-strength">1.20</span>
+            </div>
+            <input type="range" id="param-bloom-strength" min="0" max="3" step="0.05" value="0.20" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Bloom Radius</span>
+              <span class="control-value" id="val-bloom-radius">0.50</span>
+            </div>
+            <input type="range" id="param-bloom-radius" min="0" max="1.5" step="0.02" value="0.50" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Bloom Threshold</span>
+              <span class="control-value" id="val-bloom-threshold">0.75</span>
+            </div>
+            <input type="range" id="param-bloom-threshold" min="0" max="1" step="0.02" value="0.75" />
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">Self-Illumination / Glow</div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Emissive Glow Color</span>
+            </div>
+            <div class="color-picker-wrap">
+              <div class="color-swatch-btn" id="emissive-swatch" style="background-color: #00f0ff;">
+                <input type="color" id="param-emissive-color" value="#00f0ff" />
+              </div>
+              <input type="text" class="color-hex-input" id="param-emissive-hex" value="#00f0ff" maxlength="7" />
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Glow Intensity</span>
+              <span class="control-value" id="val-emissive-intensity">1.20</span>
+            </div>
+            <input type="range" id="param-emissive-intensity" min="0" max="5" step="0.1" value="1.20" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Tone Exposure</span>
+              <span class="control-value" id="val-exposure">1.10</span>
+            </div>
+            <input type="range" id="param-exposure" min="0.4" max="2.5" step="0.05" value="1.10" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: SCENE & ENVIRONMENT -->
+      <div class="tab-pane" id="tab-scene">
+        <div class="control-section">
+          <div class="section-title">Background Style (#000 UI)</div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Background Color</span>
+            </div>
+            <div class="color-picker-wrap">
+              <div class="color-swatch-btn" id="bg-swatch" style="background-color: #000000;">
+                <input type="color" id="param-bg-color" value="#000000" />
+              </div>
+              <input type="text" class="color-hex-input" id="param-bg-hex" value="#000000" maxlength="7" />
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Transparent Background</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-bg-transparent" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">Ground & Grid Helper</div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Show Floor Grid</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-grid-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <span style="color: var(--text-muted); font-size: 11px;">Contact Shadows</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="param-shadow-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Environment Reflections</span>
+              <span class="control-value" id="val-environment-intensity">1.00</span>
+            </div>
+            <input type="range" id="param-environment-intensity" min="0" max="2" step="0.05" value="1" />
+          </div>
+
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">Studio Lighting Rig</div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Key Light Intensity</span>
+              <span class="control-value" id="val-key-light">1.8</span>
+            </div>
+            <input type="range" id="param-key-light" min="0" max="4" step="0.1" value="1.8" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Fill Light Intensity</span>
+              <span class="control-value" id="val-fill-light">0.8</span>
+            </div>
+            <input type="range" id="param-fill-light" min="0" max="3" step="0.1" value="0.8" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <span>Ambient Light</span>
+              <span class="control-value" id="val-ambient-light">0.4</span>
+            </div>
+            <input type="range" id="param-ambient-light" min="0" max="2" step="0.05" value="0.4" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: EXPORT & DOWNLOAD -->
+      <div class="tab-pane" id="tab-export">
+        <div class="control-section">
+          <div class="section-title">3D Mesh Export</div>
+          <p style="color: var(--text-muted); font-size: 11px; line-height: 1.4;">
+            Export ready-to-use 3D files for 3D printing (Bambu, Prusa), Blender, games, or WebGL applications.
+          </p>
+
+          <button class="ui-btn ui-btn-primary" id="btn-export-stl" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-cube"></i> Export STL (.stl for 3D Printing)
+          </button>
+
+          <button class="ui-btn" id="btn-export-glb" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-file-export"></i> Export GLTF/GLB (.glb standard)
+          </button>
+
+          <button class="ui-btn" id="btn-export-obj" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-layer-group"></i> Export Wavefront OBJ (.obj)
+          </button>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">High-Res 2D Snapshot</div>
+          <p style="color: var(--text-muted); font-size: 11px; line-height: 1.4;">
+            Capture high-definition image of your 3D logo with current lighting & bloom effects.
+          </p>
+
+          <button class="ui-btn" id="btn-export-png" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-camera"></i> Save Snapshot PNG (Current View)
+          </button>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">360° Turntable Video</div>
+          <p style="color: var(--text-muted); font-size: 11px; line-height: 1.4;">
+            Render one complete rotation using the current camera, scene, and lighting.
+          </p>
+
+          <div class="control-row">
+            <label class="control-label-row" for="video-format">Format</label>
+            <select class="export-select" id="video-format">
+              <option value="gif">Animated GIF</option>
+              <option value="mp4">MP4 video</option>
+            </select>
+          </div>
+
+          <div class="control-row">
+            <label class="control-label-row" for="video-duration">Length</label>
+            <select class="export-select" id="video-duration">
+              <option value="2">2 seconds</option>
+              <option value="4" selected>4 seconds</option>
+              <option value="6">6 seconds</option>
+              <option value="8">8 seconds</option>
+              <option value="10">10 seconds</option>
+            </select>
+          </div>
+
+          <div class="control-row">
+            <label class="control-label-row" for="video-fps">Frame rate</label>
+            <select class="export-select" id="video-fps">
+              <option value="12">12 FPS</option>
+              <option value="24" selected>24 FPS</option>
+              <option value="30">30 FPS</option>
+              <option value="60">60 FPS</option>
+            </select>
+          </div>
+
+          <div class="control-row">
+            <label class="control-label-row" for="video-resolution">Resolution</label>
+            <select class="export-select" id="video-resolution">
+              <option value="480">480 × 480</option>
+              <option value="720" selected>720 × 720</option>
+              <option value="1080">1080 × 1080</option>
+            </select>
+          </div>
+
+          <div class="control-row" id="gif-quality-row">
+            <label class="control-label-row" for="gif-quality">GIF quality</label>
+            <select class="export-select" id="gif-quality">
+              <option value="1">High</option>
+              <option value="10" selected>Balanced</option>
+              <option value="20">Small file</option>
+            </select>
+          </div>
+
+          <div class="control-row" id="mp4-quality-row" hidden>
+            <label class="control-label-row" for="mp4-quality">MP4 quality</label>
+            <select class="export-select" id="mp4-quality">
+              <option value="3000000">Standard (3 Mbps)</option>
+              <option value="6000000" selected>High (6 Mbps)</option>
+              <option value="12000000">Very high (12 Mbps)</option>
+            </select>
+          </div>
+
+          <progress class="export-progress" id="video-export-progress" value="0" max="1" hidden></progress>
+          <span class="control-label-row" id="video-export-status" aria-live="polite"></span>
+          <button class="ui-btn ui-btn-primary" id="btn-export-video" style="justify-content: center; width: 100%;">
+            <i class="fa-solid fa-film"></i> Export 360° Video
+          </button>
+          <button class="ui-btn" id="btn-cancel-video" style="justify-content: center; width: 100%;" hidden>
+            <i class="fa-solid fa-xmark"></i> Cancel Export
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar Footer with Real-time 3D Stats -->
+    <div class="sidebar-footer">
+      <span id="stat-triangles"><i class="fa-solid fa-shapes"></i> 0 Tris</span>
+      <span id="stat-dimensions"><i class="fa-solid fa-arrows-up-down-left-right"></i> 0×0×0 mm</span>
+    </div>
+  </aside>
+
+  <!-- Bottom Floating HUD (Camera, Views & Quick Toggles) -->
+  <div id="bottom-dock">
+    <div class="dock-group">
+      <button class="dock-btn active" id="dock-view-iso" title="Isometric 3D View">Iso</button>
+      <button class="dock-btn" id="dock-view-front" title="Front 2D View">Front</button>
+      <button class="dock-btn" id="dock-view-top" title="Top View">Top</button>
+      <button class="dock-btn" id="dock-view-side" title="Side Profile">Side</button>
+      <button class="dock-btn" id="dock-reset-cam" title="Fit to Camera (R)"><i class="fa-solid fa-expand"></i> <span>Fit</span></button>
+    </div>
+
+    <div class="dock-divider"></div>
+
+    <div class="dock-group">
+      <button class="dock-btn" id="dock-auto-rotate" title="Toggle Auto-Rotation (Space)">
+        <i class="fa-solid fa-rotate"></i> <span>Spin</span>
+      </button>
+      <button class="dock-btn" id="dock-toggle-wire" title="Toggle Wireframe (W)">
+        <i class="fa-solid fa-border-none"></i> <span>Wire</span>
+      </button>
+      <button class="dock-btn active" id="dock-toggle-bloom" title="Toggle Bloom Post-FX (B)">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Glow</span>
+      </button>
+      <button class="dock-btn" id="dock-fullscreen" title="Toggle Fullscreen">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal for Raw SVG Code Input -->
+  <div class="modal-overlay" id="modal-paste">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-code" style="color: var(--accent-cyan);"></i> Paste SVG Markup
+        </div>
+        <button class="sidebar-close" id="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 12px;">Paste valid raw SVG XML content below to generate your 3D model instantly:</p>
+        <textarea class="modal-textarea" id="svg-code-input" placeholder="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>&#10;  <circle cx='50' cy='50' r='40' fill='#00f0ff'/>&#10;</svg>"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="ui-btn" id="modal-cancel-btn">Cancel</button>
+        <button class="ui-btn ui-btn-primary" id="modal-convert-btn">
+          <i class="fa-solid fa-cube"></i> Convert to 3D
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for 500x500 PNG & Smoothed Preview -->
+  <div class="modal-overlay" id="modal-raster-preview">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-image" style="color: var(--accent-cyan);"></i> 500×500 PNG & Raster Smoothing Preview
+        </div>
+        <button class="sidebar-close" id="modal-raster-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="align-items: center; gap: 14px;">
+        <div style="width: 320px; height: 320px; background: repeating-conic-gradient(#18181b 0% 25%, #101014 0% 50%) 50% / 20px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.8);">
+          <img id="raster-preview-img" src="" alt="500x500 PNG Preview" style="width: 100%; height: 100%; object-fit: contain;" />
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 100%; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+          <span>Canvas: 500×500 px</span>
+          <span id="raster-info-radius">Blur: 5.0 px</span>
+          <span id="raster-info-status">Ready</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ui-btn" id="modal-raster-download-btn">
+          <i class="fa-solid fa-download"></i> Download 500×500 PNG
+        </button>
+        <button class="ui-btn ui-btn-primary" id="modal-raster-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.js"></script>
+
+  <!-- Application Logic (ES Module) -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+    import { OBJExporter } from 'three/addons/exporters/OBJExporter.js';
+    import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+    // Preset SVG Logos (Embedded for immediate testing)
+    const PRESETS = {
+      threejs: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+        <polygon points="250,50 90,420 410,420" fill="#00f0ff"/>
+        <polygon points="250,50 250,420 90,420" fill="#0077b6"/>
+        <polygon points="250,50 250,230 410,420" fill="#a855f7"/>
+      </svg>`,
+
+      github: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+      </svg>`,
+
+      apple: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 170">
+        <path fill="#ffffff" d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.66-7.8-11.87-14.28-5.66-8.7-10.12-18.78-13.38-30.26-3.26-11.47-4.89-22.18-4.89-32.13 0-14.13 3.63-25.96 10.89-35.48 7.27-9.52 16.5-14.37 27.71-14.56 4.7 0 10.12 1.23 16.27 3.69 6.15 2.47 10.26 3.79 12.33 3.96 1.79-.22 5.86-1.52 12.22-3.88 6.36-2.36 11.72-3.44 16.08-3.25 12.19.64 21.94 4.88 29.27 12.72-10.66 6.42-15.89 15.34-15.68 26.77.22 8.92 3.69 16.42 10.42 22.5 6.73 6.09 14.68 9.57 23.85 10.45-2.28 6.96-5.11 14.03-8.5 21.21zM119.22 33.15c0-6.73 2.45-13.15 7.35-18.26 4.9-5.1 11.02-8.35 18.36-9.75.11 1.2.16 2.18.16 2.94 0 6.63-2.6 13.15-7.8 18.57-5.2 5.43-11.28 8.65-18.24 9.67-.11-1.09-.17-2.15-.17-3.17z"/>
+      </svg>`,
+
+      react: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3">
+        <g fill="#00f0ff">
+          <ellipse cx="420.9" cy="296.5" rx="63.3" ry="63.3"/>
+          <path d="M420.9,380.8c-76.4,0-146.4-11.8-197.8-31.5c-42.5-16.3-67.6-37.7-67.6-52.8c0-15.1,25.1-36.5,67.6-52.8 c51.4-19.7,121.4-31.5,197.8-31.5c76.4,0,146.4,11.8,197.8,31.5c42.5,16.3,67.6,37.7,67.6,52.8c0,15.1-25.1,36.5-67.6,52.8 C567.3,369,497.3,380.8,420.9,380.8z M420.9,232.2c-73.4,0-139.8,11.2-188.7,29.9c-35.3,13.5-54.7,29.6-54.7,34.4 c0,4.8,19.4,20.9,54.7,34.4c48.9,18.7,115.3,29.9,188.7,29.9c73.4,0,139.8-11.2,188.7-29.9c35.3-13.5,54.7-29.6,54.7-34.4 c0-4.8-19.4-20.9-54.7-34.4C560.7,243.4,494.3,232.2,420.9,232.2z"/>
+          <path d="M493.9,338.6c-66.2,38.2-127.2,63.9-172.5,72.4c-37.5,7-64.8,3.7-72.3-9.4c-7.6-13.1,4.7-38.3,33.5-69.2 c34.8-37.3,87.6-82.5,149.7-127.4c66.2-38.2,127.2-63.9,172.5-72.4c37.5-7,64.8-3.7,72.3,9.4c7.6,13.1-4.7,38.3-33.5,69.2 C608.8,248.4,556,293.7,493.9,338.6z M472 373 C535 373 586 383 586 396 C586 409 535 420 472 420 C409 420 358 409 358 396 C358 383 409 373 472 373 Z"/>
+          <path d="M500 0 L592 260 L827 0 H725 L657 80 L590 0 Z"/>
+          <path d="M720 0 L707 58 H805 C870 58 910 84 899 131 C887 182 830 204 769 204 H746 L775 79 H673 L630 262 H775 C884 262 987 205 1005 131 C1022 57 960 0 851 0 Z"/>
+        </g>
+      </svg>`,
+
+      vercel: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <polygon points="256,48 500,464 12,464" fill="#ffffff"/>
+      </svg>`,
+
+      x: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path fill="#ffffff" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>`,
+
+      dvd: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450">
+        <g fill="#00f0ff">
+          <path d="M85 0 L72 58 H170 C235 58 275 84 264 131 C252 182 195 204 134 204 H111 L140 79 H38 L-5 262 H140 C249 262 352 205 370 131 C387 57 325 0 216 0 Z"/>
+          <path d="M490 324 C214 324 -10 356 -10 395 C-10 434 214 466 490 466 C766 466 990 434 990 395 C990 356 766 324 490 324 Z M472 373 C535 373 586 383 586 396 C586 409 535 420 472 420 C409 420 358 409 358 396 C358 383 409 373 472 373 Z"/>
+          <path d="M500 0 L592 260 L827 0 H725 L657 80 L590 0 Z"/>
+          <path d="M720 0 L707 58 H805 C870 58 910 84 899 131 C887 182 830 204 769 204 H746 L775 79 H673 L630 262 H775 C884 262 987 205 1005 131 C1022 57 960 0 851 0 Z"/>
+        </g>
+      </svg>`,
+
+      wave: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40">
+        <polygon points="10,20 20,0 30,20 50,20 60,0 70,20 65,24 55,5 45,24 25,24 15,5 5,24" fill="#00f0ff"/>
+        <polygon points="0,0 20,40 40,0 60,40 80,0 75,0 60,32 45,0 35,0 20,32 5,0" fill="#a855f7"/>
+      </svg>`
+    };
+
+    // Global State Container
+    const state = {
+      // Geometry options
+      depth: 8,
+      bevelEnabled: true,
+      bevelThickness: 1.2,
+      bevelSize: 0.8,
+      bevelOffset: 0,
+      bevelSegments: 3,
+      curveSegments: 24,
+      scale: 1.0,
+      autoFit: true,
+      flipZ: false,
+
+      // 500x500 PNG translation options
+      smoothEnabled: true,
+      smoothRadius: 1.0,
+      smoothThreshold: 15,
+      smoothTension: 0.05,
+      isSmoothed: false,
+      originalSvgString: '',
+      originalRasterDataUrl: '',
+      smoothedSvgString: '',
+      last500PngDataUrl: '',
+      currentSvgString: PRESETS.threejs,
+
+      // Material options
+      materialPreset: 'cyber',
+      colorOverride: false,
+      color: '#00f0ff',
+      roughness: 0.20,
+      metalness: 0.15,
+      clearcoat: 0.60,
+      transmission: 0.0,
+      flatShading: false,
+      wireframe: false,
+      wireframeOverlay: false,
+      wireframeColor: '#ffffff',
+
+      // Bloom / Glow options
+      bloomEnabled: true,
+      bloomStrength: 0.20,
+      bloomRadius: 0.50,
+      bloomThreshold: 0.75,
+      emissiveColor: '#00f0ff',
+      emissiveIntensity: 1.20,
+      exposure: 1.10,
+
+      // Environment & Scene options
+      bgColor: '#000000',
+      bgTransparent: false,
+      environmentIntensity: 1.0,
+      gridEnabled: true,
+      shadowEnabled: true,
+      keyLightIntensity: 1.8,
+      fillLightIntensity: 0.8,
+      ambientLightIntensity: 0.4,
+
+      // Interaction
+      autoRotate: false,
+      autoRotateSpeed: 1.5,
+      activePreset: 'threejs'
+
+    };
+
+    // Scene Graph Roots
+    let scene, camera, renderer, composer, controls;
+    let bloomPass, renderPass, outputPass;
+    let keyLight, fillLight, rimLight, ambientLight, pointLight;
+    let shadowPlane, gridHelper;
+    let logoRootGroup, logoMeshGroup, wireframeOverlayGroup;
+
+    // Toast Notification Dispatcher
+    function showToast(message, icon = 'fa-check') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 2700);
+    }
+
+    // Initialize Three.js Engine
+    function initThree() {
+      const canvas = document.getElementById('webgl-canvas');
+
+      // 1. Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(state.bgColor);
+
+      // 2. Camera
+      const aspect = window.innerWidth / window.innerHeight;
+      camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 2000);
+      camera.position.set(0, 25, 75);
+
+      // 3. Renderer with antialiasing, high performance, and preserved drawing buffer (for screenshots)
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+        powerPreference: 'default'
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = state.exposure;
+
+      // 4. OrbitControls ("pan, zoom and rotate camera with mouse as per usual")
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.rotateSpeed = 0.85;
+      controls.zoomSpeed = 1.2;
+      controls.panSpeed = 0.8;
+      controls.screenSpacePanning = true;
+      controls.minDistance = 5;
+      controls.maxDistance = 600;
+      controls.target.set(0, 0, 0);
+
+      // 5. Lighting Setup
+      ambientLight = new THREE.AmbientLight(0xffffff, state.ambientLightIntensity);
+      scene.add(ambientLight);
+
+      keyLight = new THREE.DirectionalLight(0xffffff, state.keyLightIntensity);
+      keyLight.position.set(40, 60, 50);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 2048;
+      keyLight.shadow.mapSize.height = 2048;
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 400;
+      const d = 45;
+      keyLight.shadow.camera.left = -d;
+      keyLight.shadow.camera.right = d;
+      keyLight.shadow.camera.top = d;
+      keyLight.shadow.camera.bottom = -d;
+      keyLight.shadow.bias = -0.0005;
+      scene.add(keyLight);
+
+      fillLight = new THREE.DirectionalLight(0x7090ff, state.fillLightIntensity);
+      fillLight.position.set(-45, -20, -35);
+      scene.add(fillLight);
+
+      rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      rimLight.position.set(0, 60, -45);
+      scene.add(rimLight);
+
+      pointLight = new THREE.PointLight(0x00f0ff, 1.0, 120);
+      pointLight.position.set(0, 0, 30);
+      scene.add(pointLight);
+
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      const environment = new RoomEnvironment();
+      const environmentRenderTarget = pmremGenerator.fromScene(environment, 0.04);
+      scene.environment = environmentRenderTarget.texture;
+      pmremGenerator.dispose();
+
+      // 6. Studio Ground & Grid Helper
+      const shadowPlaneGeo = new THREE.PlaneGeometry(500, 500);
+      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 1 });
+      shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
+      shadowPlane.rotation.x = -Math.PI / 2;
+      shadowPlane.position.y = -15;
+      shadowPlane.receiveShadow = true;
+      scene.add(shadowPlane);
+
+      gridHelper = new THREE.GridHelper(300, 60, 0x00f0ff, 0x1f222e);
+      gridHelper.position.y = -15.01;
+      gridHelper.material.opacity = 0.25;
+      gridHelper.material.transparent = false;
+      scene.add(gridHelper);
+
+      // 7. Post-Processing Pipeline (Unreal Bloom Pass & Tone Mapping)
+      const renderTarget = new THREE.WebGLRenderTarget(
+        window.innerWidth,
+        window.innerHeight,
+        {
+          type: THREE.HalfFloatType,
+          format: THREE.RGBAFormat,
+          samples: 4
+        }
+      );
+
+      composer = new EffectComposer(renderer, renderTarget);
+      renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        state.bloomStrength,
+        state.bloomRadius,
+        state.bloomThreshold
+      );
+      composer.addPass(bloomPass);
+
+      outputPass = new OutputPass();
+      composer.addPass(outputPass);
+
+      // 8. 3D Model Hierarchy Containers
+      logoRootGroup = new THREE.Group();
+      logoRootGroup.name = 'logoRootGroup';
+      scene.add(logoRootGroup);
+
+      logoMeshGroup = new THREE.Group();
+      logoMeshGroup.name = 'logoMeshGroup';
+      logoRootGroup.add(logoMeshGroup);
+
+      wireframeOverlayGroup = new THREE.Group();
+      wireframeOverlayGroup.name = 'wireframeOverlayGroup';
+      logoRootGroup.add(wireframeOverlayGroup);
+
+      // Window resize handler
+      window.addEventListener('resize', onWindowResize, false);
+    }
+
+    function onWindowResize() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      composer.setSize(width, height);
+      bloomPass.setSize(width, height);
+
+      if (state.autoFit) {
+        fitCameraToModel(false);
+      }
+    }
+
+    // Helper: Build Master PBR Material
+    function createMaterial(baseColorHex = null, opacity = 1) {
+      const chosenColor = state.colorOverride ? state.color : (baseColorHex || state.color);
+      
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color(chosenColor),
+        opacity,
+        transparent: opacity < 0.95,
+        depthWrite: opacity >= 0.95,
+        roughness: state.roughness,
+        metalness: state.metalness,
+        clearcoat: state.clearcoat,
+        clearcoatRoughness: 0.1,
+        transmission: state.transmission,
+        ior: 1.5,
+        thickness: 1.5,
+        emissive: new THREE.Color(state.emissiveColor),
+        emissiveIntensity: state.emissiveIntensity,
+        envMapIntensity: state.environmentIntensity,
+        flatShading: state.flatShading,
+        wireframe: state.wireframe,
+        side: THREE.DoubleSide
+      });
+      mat.userData.sourceColor = mat.color.clone();
+
+      return mat;
+    }
+
+    // Camera Animation Tween Tracker
+    let cameraTween = null;
+
+    // ==========================================
+    // 500x500 PNG AUTO-SMOOTH & VECTORIZER PIPELINE
+    // ==========================================
+
+    // Marching squares algorithm to extract closed boundary loops from binary mask
+    function traceContours(mask, W, H) {
+      function edgeKey(type, x, y) { return type + '_' + x + '_' + y; }
+      function edgePoint(type, x, y) {
+        if (type === 'h') return [x + 0.5, y];
+        return [x, y + 0.5];
+      }
+
+      const edges = new Map();
+
+      for (let y = 0; y < H - 1; y++) {
+        const row0 = y * W;
+        const row1 = (y + 1) * W;
+        for (let x = 0; x < W - 1; x++) {
+          const b0 = mask[row0 + x];
+          const b1 = mask[row0 + x + 1];
+          const b2 = mask[row1 + x + 1];
+          const b3 = mask[row1 + x];
+          const code = (b0 << 3) | (b1 << 2) | (b2 << 1) | b3;
+          if (code === 0 || code === 15) continue;
+
+          const eTop = edgeKey('h', x, y);
+          const eRight = edgeKey('v', x + 1, y);
+          const eBottom = edgeKey('h', x, y + 1);
+          const eLeft = edgeKey('v', x, y);
+
+          function addSeg(fromKey, toKey, pFrom) {
+            edges.set(fromKey, { to: toKey, p: pFrom });
+          }
+
+          switch (code) {
+            case 1:  addSeg(eLeft, eBottom, edgePoint('v', x, y)); break;
+            case 2:  addSeg(eBottom, eRight, edgePoint('h', x, y + 1)); break;
+            case 3:  addSeg(eLeft, eRight, edgePoint('v', x, y)); break;
+            case 4:  addSeg(eRight, eTop, edgePoint('v', x + 1, y)); break;
+            case 5:
+              addSeg(eLeft, eTop, edgePoint('v', x, y));
+              addSeg(eRight, eBottom, edgePoint('v', x + 1, y));
+              break;
+            case 6:  addSeg(eBottom, eTop, edgePoint('h', x, y + 1)); break;
+            case 7:  addSeg(eLeft, eTop, edgePoint('v', x, y)); break;
+            case 8:  addSeg(eTop, eLeft, edgePoint('h', x, y)); break;
+            case 9:  addSeg(eTop, eBottom, edgePoint('h', x, y)); break;
+            case 10:
+              addSeg(eTop, eRight, edgePoint('h', x, y));
+              addSeg(eBottom, eLeft, edgePoint('h', x, y + 1));
+              break;
+            case 11: addSeg(eTop, eRight, edgePoint('h', x, y)); break;
+            case 12: addSeg(eRight, eLeft, edgePoint('v', x + 1, y)); break;
+            case 13: addSeg(eRight, eBottom, edgePoint('v', x + 1, y)); break;
+            case 14: addSeg(eBottom, eLeft, edgePoint('h', x, y + 1)); break;
+          }
+        }
+      }
+
+      const visited = new Set();
+      const loops = [];
+
+      for (const [startKey] of edges) {
+        if (visited.has(startKey)) continue;
+
+        const loop = [];
+        let curr = startKey;
+        let guard = 0;
+
+        while (curr && !visited.has(curr) && guard < 60000) {
+          visited.add(curr);
+          const seg = edges.get(curr);
+          if (!seg) break;
+          loop.push(seg.p);
+          curr = seg.to;
+          guard++;
+          if (curr === startKey) break;
+        }
+
+        if (loop.length >= 4) {
+          loops.push(loop);
+        }
+      }
+
+      return loops;
+    }
+
+    // Douglas-Peucker point simplification
+    function simplifyLoop(points, tolerance = 1.2) {
+      if (points.length <= 4) return points;
+
+      function getSqSegDist(p, p1, p2) {
+        let x = p1[0], y = p1[1];
+        let dx = p2[0] - x, dy = p2[1] - y;
+        if (dx !== 0 || dy !== 0) {
+          const t = ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy);
+          if (t > 1) {
+            x = p2[0]; y = p2[1];
+          } else if (t > 0) {
+            x += dx * t; y += dy * t;
+          }
+        }
+        dx = p[0] - x; dy = p[1] - y;
+        return dx * dx + dy * dy;
+      }
+
+      function simplifyDPStep(pts, first, last, sqTol, simplified) {
+        let maxSqDist = sqTol;
+        let index = -1;
+        for (let i = first + 1; i < last; i++) {
+          const sqDist = getSqSegDist(pts[i], pts[first], pts[last]);
+          if (sqDist > maxSqDist) {
+            index = i;
+            maxSqDist = sqDist;
+          }
+        }
+        if (index !== -1) {
+          if (index - first > 1) simplifyDPStep(pts, first, index, sqTol, simplified);
+          simplified.push(pts[index]);
+          if (last - index > 1) simplifyDPStep(pts, index, last, sqTol, simplified);
+        }
+      }
+
+      const sqTol = tolerance * tolerance;
+      const simplified = [points[0]];
+      simplifyDPStep(points, 0, points.length - 1, sqTol, simplified);
+      simplified.push(points[points.length - 1]);
+      return simplified;
+    }
+
+    // Smooth spline interpolation to SVG path
+    function loopToSmoothPath(points, tension = 0.25) {
+      const n = points.length;
+      if (n < 3) return '';
+      let d = 'M ' + points[0][0].toFixed(2) + ' ' + points[0][1].toFixed(2);
+
+      for (let i = 0; i < n; i++) {
+        const p0 = points[(i - 1 + n) % n];
+        const p1 = points[i];
+        const p2 = points[(i + 1) % n];
+        const p3 = points[(i + 2) % n];
+
+        const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
+        const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
+        const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
+        const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
+
+        d += ' C ' + cp1x.toFixed(2) + ' ' + cp1y.toFixed(2) + ', ' +
+                     cp2x.toFixed(2) + ' ' + cp2y.toFixed(2) + ', ' +
+                     p2[0].toFixed(2) + ' ' + p2[0].toFixed(2);
+      }
+      d += ' Z';
+      return d;
+    }
+
+    // Translate SVG or PNG artwork into a 500x500 vector canvas.
+    async function runAutoSmoothPipeline() {
+      const sourceSvg = state.originalSvgString || state.currentSvgString;
+      if (!sourceSvg && !state.originalRasterDataUrl) {
+        showToast('Upload a PNG or SVG before translating', 'fa-triangle-exclamation');
+        return;
+      }
+
+      showToast('Translating artwork to 3D...', 'fa-wand-magic-sparkles');
+
+      try {
+        let imageUrl = state.originalRasterDataUrl;
+        let shouldRevokeUrl = false;
+        if (!imageUrl) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(sourceSvg, 'image/svg+xml');
+          const svgEl = doc.documentElement;
+          if (!svgEl.hasAttribute('viewBox')) {
+            const width = parseFloat(svgEl.getAttribute('width')) || 500;
+            const height = parseFloat(svgEl.getAttribute('height')) || 500;
+            svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
+          }
+          svgEl.setAttribute('width', '500');
+          svgEl.setAttribute('height', '500');
+          const blob = new Blob([new XMLSerializer().serializeToString(doc)], { type: 'image/svg+xml;charset=utf-8' });
+          imageUrl = URL.createObjectURL(blob);
+          shouldRevokeUrl = true;
+        }
+        const img = new Image();
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Failed to load artwork for translation'));
+          img.src = imageUrl;
+        });
+
+        const W = 500, H = 500;
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        ctx.clearRect(0, 0, W, H);
+        const drawSize = W - 48;
+        const fitScale = Math.min(drawSize / img.naturalWidth, drawSize / img.naturalHeight);
+        const drawWidth = img.naturalWidth * fitScale;
+        const drawHeight = img.naturalHeight * fitScale;
+        ctx.drawImage(img, (W - drawWidth) / 2, (H - drawHeight) / 2, drawWidth, drawHeight);
+        if (shouldRevokeUrl) URL.revokeObjectURL(imageUrl);
+
+        // Save 500x500 PNG data URL for preview and download
+        state.last500PngDataUrl = canvas.toDataURL('image/png');
+
+        // Apply optional edge smoothing before tracing.
+        const smoothCanvas = document.createElement('canvas');
+        smoothCanvas.width = W;
+        smoothCanvas.height = H;
+        const sCtx = smoothCanvas.getContext('2d', { willReadFrequently: true });
+        sCtx.filter = state.smoothEnabled ? `blur(${state.smoothRadius}px)` : 'none';
+        sCtx.drawImage(canvas, 0, 0);
+
+        // Step 4: Trace the smoothed RGBA raster into layered color paths.
+        if (!window.ImageTracer) {
+          throw new Error('The vector tracing engine did not load. Check your connection and retry.');
+        }
+        const tracedPixels = sCtx.getImageData(0, 0, W, H);
+        const alphaCutoff = Math.round((state.smoothThreshold / 100) * 255);
+        const colorBins = new Map();
+        for (let i = 0; i < tracedPixels.data.length; i += 4) {
+          if (tracedPixels.data[i + 3] < alphaCutoff) {
+            tracedPixels.data[i] = 0;
+            tracedPixels.data[i + 1] = 0;
+            tracedPixels.data[i + 2] = 0;
+            tracedPixels.data[i + 3] = 0;
+            continue;
+          }
+
+          const red = tracedPixels.data[i];
+          const green = tracedPixels.data[i + 1];
+          const blue = tracedPixels.data[i + 2];
+          const key = `${red >> 4},${green >> 4},${blue >> 4}`;
+          let bin = colorBins.get(key);
+          if (!bin) {
+            bin = { red: 0, green: 0, blue: 0, count: 0 };
+            colorBins.set(key, bin);
+          }
+          bin.red += red;
+          bin.green += green;
+          bin.blue += blue;
+          bin.count++;
+        }
+
+        const palette = [{ r: 0, g: 0, b: 0, a: 0 }];
+        const sortedBins = [...colorBins.values()].sort((a, b) => b.count - a.count);
+        const selectedColors = [];
+        const minimumColorPixels = Math.round(W * H * 0.0005);
+        for (const bin of sortedBins) {
+          if (bin.count < minimumColorPixels || selectedColors.length >= 11) continue;
+          const color = {
+            r: Math.round(bin.red / bin.count),
+            g: Math.round(bin.green / bin.count),
+            b: Math.round(bin.blue / bin.count)
+          };
+          const hasSimilarColor = selectedColors.some(selected =>
+            Math.hypot(color.r - selected.r, color.g - selected.g, color.b - selected.b) < 48
+          );
+          if (!hasSimilarColor) selectedColors.push(color);
+        }
+
+        for (const color of selectedColors) {
+          palette.push({ ...color, a: 255 });
+        }
+
+        const traceTolerance = Math.max(0.35, 1.5 - state.smoothTension);
+        const translatedSvg = ImageTracer.imagedataToSVG(tracedPixels, {
+          ltres: traceTolerance,
+          qtres: traceTolerance,
+          pathomit: 2,
+          rightangleenhance: false,
+          colorsampling: 0,
+          pal: palette,
+          colorquantcycles: 3,
+          layering: 0,
+          strokewidth: 0,
+          scale: 1,
+          roundcoords: 2,
+          viewbox: true,
+          desc: false
+        });
+
+        if (!translatedSvg.includes('<path')) {
+          showToast('No vector paths found - adjust the threshold and retry', 'fa-triangle-exclamation');
+          return;
+        }
+
+        state.isSmoothed = true;
+        state.smoothedSvgString = translatedSvg;
+
+        // Update UI status badge and reveal Revert button
+        const badge = document.getElementById('badge-smooth-status');
+        if (badge) {
+          badge.textContent = state.smoothEnabled ? 'SMOOTHED' : 'TRANSLATED';
+          badge.style.color = 'var(--accent-cyan)';
+          badge.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+          badge.style.background = 'rgba(0, 240, 255, 0.15)';
+        }
+        convertSvgTo3D(translatedSvg, true);
+        showToast(state.smoothEnabled ? 'Artwork translated and smoothed' : 'Artwork translated without smoothing', 'fa-wand-magic-sparkles');
+      } catch (err) {
+        console.error('Auto-smooth error:', err);
+        showToast('Auto-smooth error: ' + err.message, 'fa-triangle-exclamation');
+      }
+    }
+
+    function resetSmoothState(svgString = '') {
+      state.isSmoothed = false;
+      state.smoothedSvgString = '';
+      state.last500PngDataUrl = '';
+      state.originalRasterDataUrl = '';
+
+      if (svgString) {
+        state.originalSvgString = svgString;
+        state.currentSvgString = svgString;
+      }
+
+      const badge = document.getElementById('badge-smooth-status');
+      if (badge) {
+        badge.textContent = 'ORIGINAL';
+        badge.style.color = 'var(--text-dim)';
+        badge.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        badge.style.background = 'rgba(255, 255, 255, 0.05)';
+      }
+
+    }
+
+    // SVG Parsing & 3D Extrusion Core with Automatic Camera Fitting
+    function convertSvgTo3D(svgString, shouldFitCamera = true) {
+      if (!state.isSmoothed) {
+        state.originalSvgString = svgString;
+      }
+      // Clear previous meshes
+      while (logoMeshGroup.children.length > 0) {
+        const obj = logoMeshGroup.children[0];
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+          else obj.material.dispose();
+        }
+        logoMeshGroup.remove(obj);
+      }
+
+      while (wireframeOverlayGroup.children.length > 0) {
+        const obj = wireframeOverlayGroup.children[0];
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+        wireframeOverlayGroup.remove(obj);
+      }
+
+      state.currentSvgString = svgString;
+
+      const loader = new SVGLoader();
+      let svgData;
+      try {
+        svgData = loader.parse(svgString);
+      } catch (err) {
+        console.error('SVG Parsing Error:', err);
+        showToast('Invalid SVG structure', 'fa-triangle-exclamation');
+        return;
+      }
+
+      if (!svgData || !svgData.paths || svgData.paths.length === 0) {
+        showToast('No paths found in SVG', 'fa-circle-exclamation');
+        return;
+      }
+
+      // Step 1: Collect all shapes and compute raw 2D bounds
+      const allShapeData = [];
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      for (let i = 0; i < svgData.paths.length; i++) {
+        const path = svgData.paths[i];
+        let shapeColor = null;
+        let shapeOpacity = 1;
+
+        if (path.userData && path.userData.style) {
+          const style = path.userData.style;
+          if (style.fill && style.fill !== 'none' && style.fill !== 'transparent') {
+            shapeColor = style.fill;
+            shapeOpacity = Number(style.opacity ?? 1) * Number(style.fillOpacity ?? 1);
+            if (shapeOpacity <= 0.1) continue;
+          } else if (style.stroke && style.stroke !== 'none' && style.stroke !== 'transparent') {
+            shapeColor = style.stroke;
+            shapeOpacity = Number(style.opacity ?? 1) * Number(style.strokeOpacity ?? 1);
+          }
+        }
+        if (!shapeColor && path.color) {
+          shapeColor = `#${path.color.getHexString()}`;
+        }
+
+        // Try standard SVGLoader shape creation (handles fill and holes)
+        let shapes = SVGLoader.createShapes(path);
+
+        // Fallback: If no filled shapes produced (e.g. Stroke-only SVG or polylines)
+        if (shapes.length === 0 && path.subPaths && path.subPaths.length > 0) {
+          for (let s = 0; s < path.subPaths.length; s++) {
+            const sub = path.subPaths[s];
+            const pts = sub.getPoints();
+            if (pts.length >= 3) {
+              const closedShape = new THREE.Shape(pts);
+              shapes.push(closedShape);
+            }
+          }
+        }
+
+        for (let j = 0; j < shapes.length; j++) {
+          const shape = shapes[j];
+          allShapeData.push({ shape, color: shapeColor, opacity: shapeOpacity });
+          const pts = shape.getPoints();
+          for (let p = 0; p < pts.length; p++) {
+            const pt = pts[p];
+            if (pt.x < minX) minX = pt.x;
+            if (pt.y < minY) minY = pt.y;
+            if (pt.x > maxX) maxX = pt.x;
+            if (pt.y > maxY) maxY = pt.y;
+          }
+        }
+      }
+
+      if (allShapeData.length === 0) {
+        showToast('Could not extrude SVG paths', 'fa-triangle-exclamation');
+        return;
+      }
+
+      const rawWidth = Math.max(maxX - minX, 0.001);
+      const rawHeight = Math.max(maxY - minY, 0.001);
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      // Step 2: Calculate automatic scale factor to fit camera viewport
+      // Reference camera frustum at distance 75 with camera FOV and aspect ratio
+      const vFovRad = (camera.fov * Math.PI) / 180;
+      const frustumHeight = 2 * Math.tan(vFovRad / 2) * 75;
+      const frustumWidth = frustumHeight * camera.aspect;
+
+      // Target bounds: 62% of visible screen to ensure optimal margin and breathing room
+      const targetWidth = frustumWidth * 0.62;
+      const targetHeight = frustumHeight * 0.62;
+
+      const autoScaleX = targetWidth / rawWidth;
+      const autoScaleY = targetHeight / rawHeight;
+      const baseFitScale = Math.min(autoScaleX, autoScaleY);
+
+      const scaleMultiplier = (typeof state.scale === 'number' && state.scale > 0) ? state.scale : 1.0;
+      const finalScale = state.autoFit ? (baseFitScale * scaleMultiplier) : (scaleMultiplier * (35 / Math.max(rawWidth, rawHeight)));
+
+      // Step 3: Extrude depth and bevels normalized so depth slider produces consistent real-world 3D thickness
+      const effectiveDepth = Math.max(state.depth / finalScale, 0.05);
+      const effectiveBevelThickness = state.bevelEnabled ? Math.max(state.bevelThickness / finalScale, 0.01) : 0;
+      const effectiveBevelSize = state.bevelEnabled ? Math.max(state.bevelSize / finalScale, 0.01) : 0;
+
+      const extrudeSettings = {
+        depth: effectiveDepth,
+        bevelEnabled: state.bevelEnabled,
+        bevelThickness: effectiveBevelThickness,
+        bevelSize: effectiveBevelSize,
+        bevelOffset: 0,
+        bevelSegments: state.bevelSegments,
+        curveSegments: state.curveSegments,
+        steps: 1
+      };
+
+      let totalTriangles = 0;
+      let meshCount = 0;
+
+      for (let i = 0; i < allShapeData.length; i++) {
+        const item = allShapeData[i];
+        let geometry;
+        try {
+          geometry = new THREE.ExtrudeGeometry(item.shape, extrudeSettings);
+        } catch (e) {
+          console.warn('Extrude failure on sub-shape:', e);
+          continue;
+        }
+
+        geometry.computeVertexNormals();
+
+        const material = createMaterial(item.color, item.opacity);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        logoMeshGroup.add(mesh);
+          mesh.userData.origSvgColor = item.color || state.color;
+        meshCount++;
+
+        if (geometry.index) {
+          totalTriangles += geometry.index.count / 3;
+        } else if (geometry.attributes.position) {
+          totalTriangles += geometry.attributes.position.count / 3;
+        }
+
+        // Build Wireframe Edge Overlay if requested
+        if (state.wireframeOverlay) {
+          const wireGeo = new THREE.WireframeGeometry(geometry);
+          const wireMat = new THREE.LineBasicMaterial({
+            color: new THREE.Color(state.wireframeColor),
+            transparent: false,
+            opacity: 1,
+            depthTest: true
+          });
+          const wireLines = new THREE.LineSegments(wireGeo, wireMat);
+          wireframeOverlayGroup.add(wireLines);
+        }
+      }
+
+      // Step 4: Center the mesh group so pivot (0,0,0) is at the exact 3D volumetric center
+      logoMeshGroup.position.set(-centerX, -centerY, -effectiveDepth / 2);
+      wireframeOverlayGroup.position.copy(logoMeshGroup.position);
+
+      // Invert SVG Y downward coordinates and scale up/down to fit camera
+      const zSign = state.flipZ ? -1 : 1;
+      logoRootGroup.scale.set(finalScale, -finalScale, finalScale * zSign);
+
+      // Step 5: Dynamically align ground floor and shadow plane directly below scaled model
+      const box = new THREE.Box3().setFromObject(logoRootGroup);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const floorY = - (size.y / 2) - 1.5;
+      shadowPlane.position.y = floorY;
+      gridHelper.position.y = floorY - 0.01;
+
+      // Update Real-time Stats in UI
+      const dimX = Math.round(size.x);
+      const dimY = Math.round(size.y);
+      const dimZ = Math.round(state.depth);
+      document.getElementById('stat-triangles').innerHTML = `<i class="fa-solid fa-shapes"></i> ${Math.round(totalTriangles).toLocaleString()} Tris`;
+      document.getElementById('stat-dimensions').innerHTML = `<i class="fa-solid fa-arrows-up-down-left-right"></i> ${dimX}×${dimY}×${dimZ} mm`;
+
+      // Step 6: Automatically fit camera if enabled
+      if (shouldFitCamera && state.autoFit) {
+        fitCameraToModel(true);
+      }
+    }
+
+    // Refresh Materials Across All Model Meshes without Re-extruding
+    function updateMaterials() {
+      logoMeshGroup.traverse(child => {
+        if (child.isMesh) {
+          child.material.color.copy(state.colorOverride ? new THREE.Color(state.color) : child.material.userData.sourceColor);
+          child.material.roughness = state.roughness;
+          child.material.metalness = state.metalness;
+          child.material.clearcoat = state.clearcoat;
+          child.material.transmission = state.transmission;
+          child.material.emissive.set(state.emissiveColor);
+          child.material.emissiveIntensity = state.emissiveIntensity;
+          child.material.envMapIntensity = state.environmentIntensity;
+          child.material.flatShading = state.flatShading;
+          child.material.wireframe = state.wireframe;
+          child.material.needsUpdate = true;
+        }
+      });
+
+      // Update wireframe overlay visibility
+      wireframeOverlayGroup.visible = state.wireframeOverlay;
+      wireframeOverlayGroup.traverse(child => {
+        if (child.isLineSegments) {
+          child.material.color.set(state.wireframeColor);
+          child.material.needsUpdate = true;
+        }
+      });
+    }
+
+    // Smooth Camera Transition Tween
+    function animateCameraTo(targetPos, targetLookAt, duration = 450) {
+      const startPos = camera.position.clone();
+      const startTarget = controls.target.clone();
+      const startTime = performance.now();
+
+      cameraTween = {
+        update(now) {
+          const elapsed = now - startTime;
+          const t = Math.min(elapsed / duration, 1);
+          const ease = 1 - Math.pow(1 - t, 3); // Cubic ease-out
+
+          camera.position.lerpVectors(startPos, targetPos, ease);
+          controls.target.lerpVectors(startTarget, targetLookAt, ease);
+          controls.update();
+
+          if (t >= 1) {
+            cameraTween = null;
+          }
+        }
+      };
+    }
+
+    // Reset Camera Framing to Automatically Fit the Model
+    function fitCameraToModel(smooth = true) {
+      const box = new THREE.Box3().setFromObject(logoRootGroup);
+      if (box.isEmpty()) return;
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      const vFov = (camera.fov * Math.PI) / 180;
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+
+      const distY = (size.y / 2) / Math.tan(vFov / 2);
+      const distX = (size.x / 2) / Math.tan(hFov / 2);
+      let targetDist = Math.max(distX, distY) + (size.z / 2);
+      targetDist *= 1.35; // Comfortable padding
+      targetDist = Math.max(targetDist, 15);
+
+      const dir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+      if (dir.lengthSq() < 0.001) dir.set(0, 0.35, 1).normalize();
+
+      const targetPos = dir.multiplyScalar(targetDist);
+      const targetLookAt = new THREE.Vector3(0, 0, 0);
+
+      if (smooth) {
+        animateCameraTo(targetPos, targetLookAt, 450);
+      } else {
+        camera.position.copy(targetPos);
+        controls.target.copy(targetLookAt);
+        camera.lookAt(targetLookAt);
+        controls.update();
+      }
+    }
+
+    // Preset View Angles at Optimal Distance
+    function setCameraView(view) {
+      const box = new THREE.Box3().setFromObject(logoRootGroup);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      const vFov = (camera.fov * Math.PI) / 180;
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+      const distY = (size.y / 2) / Math.tan(vFov / 2);
+      const distX = (size.x / 2) / Math.tan(hFov / 2);
+      let dist = (Math.max(distX, distY) + (size.z / 2)) * 1.35;
+      dist = Math.max(dist, 15);
+
+      let targetPos;
+      switch (view) {
+        case 'iso':
+          targetPos = new THREE.Vector3(dist * 0.65, dist * 0.55, dist * 0.65);
+          break;
+        case 'front':
+          targetPos = new THREE.Vector3(0, 0, dist);
+          break;
+        case 'top':
+          targetPos = new THREE.Vector3(0, dist, 0.001);
+          break;
+        case 'side':
+          targetPos = new THREE.Vector3(dist, 0, 0);
+          break;
+      }
+      animateCameraTo(targetPos, new THREE.Vector3(0, 0, 0), 450);
+    }
+
+    // Material Style Preset Configurations
+    function applyMaterialPreset(presetName) {
+      state.materialPreset = presetName;
+      state.colorOverride = true;
+      document.querySelectorAll('.mat-preset-card').forEach(el => {
+        el.classList.toggle('active', el.dataset.mat === presetName);
+      });
+
+      switch (presetName) {
+        case 'cyber':
+          state.color = '#00f0ff';
+          state.roughness = 0.20;
+          state.metalness = 0.15;
+          state.clearcoat = 0.60;
+          state.transmission = 0.0;
+          state.emissiveColor = '#00f0ff';
+          state.emissiveIntensity = 1.2;
+          state.bloomEnabled = true;
+          state.bloomStrength = 1.2;
+          break;
+        case 'chrome':
+          state.color = '#ffffff';
+          state.roughness = 0.05;
+          state.metalness = 1.0;
+          state.clearcoat = 1.0;
+          state.transmission = 0.0;
+          state.emissiveIntensity = 0.0;
+          break;
+        case 'gold':
+          state.color = '#ffd700';
+          state.roughness = 0.18;
+          state.metalness = 0.95;
+          state.clearcoat = 0.50;
+          state.transmission = 0.0;
+          state.emissiveColor = '#221100';
+          state.emissiveIntensity = 0.1;
+          break;
+        case 'glass':
+          state.color = '#e0f7ff';
+          state.roughness = 0.12;
+          state.metalness = 0.05;
+          state.clearcoat = 0.80;
+          state.transmission = 0.90;
+          state.emissiveIntensity = 0.0;
+          break;
+        case 'obsidian':
+          state.color = '#111215';
+          state.roughness = 0.70;
+          state.metalness = 0.35;
+          state.clearcoat = 0.25;
+          state.transmission = 0.0;
+          state.emissiveIntensity = 0.0;
+          break;
+        case 'clay':
+          state.color = '#f5f5f7';
+          state.roughness = 0.95;
+          state.metalness = 0.0;
+          state.clearcoat = 0.0;
+          state.transmission = 0.0;
+          state.emissiveIntensity = 0.0;
+          break;
+        case 'ruby':
+          state.color = '#ff1a4b';
+          state.roughness = 0.12;
+          state.metalness = 0.15;
+          state.clearcoat = 1.0;
+          state.transmission = 0.1;
+          state.emissiveColor = '#440011';
+          state.emissiveIntensity = 0.2;
+          break;
+        case 'emerald':
+          state.color = '#00e676';
+          state.roughness = 0.15;
+          state.metalness = 0.20;
+          state.clearcoat = 0.8;
+          state.transmission = 0.0;
+          state.emissiveColor = '#00e676';
+          state.emissiveIntensity = 0.8;
+          break;
+      }
+
+      syncUIWithState();
+      updateMaterials();
+      showToast(`Applied ${presetName.toUpperCase()} preset`, 'fa-wand-magic-sparkles');
+    }
+
+    // Sync Inspector Sliders and Color Inputs with State
+    function syncUIWithState() {
+      document.getElementById('param-depth').value = state.depth;
+      document.getElementById('val-depth').textContent = state.depth;
+
+      document.getElementById('param-bevel-enabled').checked = state.bevelEnabled;
+      document.getElementById('param-bevel-thick').value = state.bevelThickness;
+      document.getElementById('val-bevel-thick').textContent = state.bevelThickness;
+
+      document.getElementById('param-bevel-size').value = state.bevelSize;
+      document.getElementById('val-bevel-size').textContent = state.bevelSize;
+
+      document.getElementById('param-bevel-seg').value = state.bevelSegments;
+      document.getElementById('val-bevel-seg').textContent = state.bevelSegments;
+
+      document.getElementById('param-curve-seg').value = state.curveSegments;
+      document.getElementById('val-curve-seg').textContent = state.curveSegments;
+
+      document.getElementById('param-smooth-radius').value = state.smoothRadius;
+      document.getElementById('val-smooth-radius').textContent = `${Number(state.smoothRadius).toFixed(1)}px`;
+      document.getElementById('param-smooth-enabled').checked = state.smoothEnabled;
+
+      document.getElementById('param-smooth-threshold').value = state.smoothThreshold;
+      document.getElementById('val-smooth-threshold').textContent = `${state.smoothThreshold}%`;
+
+      document.getElementById('param-smooth-tension').value = state.smoothTension;
+      document.getElementById('val-smooth-tension').textContent = Number(state.smoothTension).toFixed(2);
+
+      document.getElementById('param-auto-fit').checked = state.autoFit;
+      document.getElementById('param-scale').value = state.scale;
+      document.getElementById('val-scale').textContent = `${Number(state.scale).toFixed(1)}×`;
+
+      document.getElementById('param-flip-z').checked = state.flipZ;
+
+      document.getElementById('param-color').value = state.color;
+      document.getElementById('param-color-hex').value = state.color;
+      document.getElementById('color-swatch-display').style.backgroundColor = state.color;
+
+      document.getElementById('param-roughness').value = state.roughness;
+      document.getElementById('val-roughness').textContent = Number(state.roughness).toFixed(2);
+
+      document.getElementById('param-metalness').value = state.metalness;
+      document.getElementById('val-metalness').textContent = Number(state.metalness).toFixed(2);
+
+      document.getElementById('param-clearcoat').value = state.clearcoat;
+      document.getElementById('val-clearcoat').textContent = Number(state.clearcoat).toFixed(2);
+
+      document.getElementById('param-transmission').value = state.transmission;
+      document.getElementById('val-transmission').textContent = Number(state.transmission).toFixed(2);
+
+      document.getElementById('param-flat-shading').checked = state.flatShading;
+      document.getElementById('param-wireframe').checked = state.wireframe;
+      document.getElementById('param-wireframe-overlay').checked = state.wireframeOverlay;
+
+      document.getElementById('param-bloom-enabled').checked = state.bloomEnabled;
+      document.getElementById('dock-toggle-bloom').classList.toggle('active', state.bloomEnabled);
+      document.getElementById('param-bloom-strength').value = state.bloomStrength;
+      document.getElementById('val-bloom-strength').textContent = Number(state.bloomStrength).toFixed(2);
+      document.getElementById('param-bloom-radius').value = state.bloomRadius;
+      document.getElementById('val-bloom-radius').textContent = Number(state.bloomRadius).toFixed(2);
+      document.getElementById('param-bloom-threshold').value = state.bloomThreshold;
+      document.getElementById('val-bloom-threshold').textContent = Number(state.bloomThreshold).toFixed(2);
+
+      document.getElementById('param-emissive-color').value = state.emissiveColor;
+      document.getElementById('param-emissive-hex').value = state.emissiveColor;
+      document.getElementById('emissive-swatch').style.backgroundColor = state.emissiveColor;
+
+      document.getElementById('param-emissive-intensity').value = state.emissiveIntensity;
+      document.getElementById('val-emissive-intensity').textContent = Number(state.emissiveIntensity).toFixed(2);
+
+      document.getElementById('param-exposure').value = state.exposure;
+      document.getElementById('val-exposure').textContent = Number(state.exposure).toFixed(2);
+
+      document.getElementById('param-bg-color').value = state.bgColor;
+      document.getElementById('param-bg-hex').value = state.bgColor;
+      document.getElementById('bg-swatch').style.backgroundColor = state.bgColor;
+      document.getElementById('param-bg-transparent').checked = state.bgTransparent;
+
+      document.getElementById('param-grid-enabled').checked = state.gridEnabled;
+      document.getElementById('param-shadow-enabled').checked = state.shadowEnabled;
+      document.getElementById('param-environment-intensity').value = state.environmentIntensity;
+      document.getElementById('val-environment-intensity').textContent = Number(state.environmentIntensity).toFixed(2);
+
+      document.getElementById('param-key-light').value = state.keyLightIntensity;
+      document.getElementById('val-key-light').textContent = state.keyLightIntensity;
+      document.getElementById('param-fill-light').value = state.fillLightIntensity;
+      document.getElementById('val-fill-light').textContent = state.fillLightIntensity;
+      document.getElementById('param-ambient-light').value = state.ambientLightIntensity;
+      document.getElementById('val-ambient-light').textContent = state.ambientLightIntensity;
+    }
+
+    // Bind All User Interface Events
+    function bindEvents() {
+      // Sidebar Tab Switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.add('active');
+        });
+      });
+
+      // Sidebar Collapse / Toggle
+      const sidebar = document.getElementById('sidebar');
+      const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+      const btnToggleInspector = document.getElementById('btn-toggle-inspector');
+      const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+
+      function toggleSidebar() {
+        sidebar.classList.toggle('hidden');
+        const isHidden = sidebar.classList.contains('hidden');
+        toggleSidebarBtn.classList.toggle('visible', isHidden);
+      }
+
+      btnToggleInspector.addEventListener('click', toggleSidebar);
+      sidebarCloseBtn.addEventListener('click', toggleSidebar);
+      toggleSidebarBtn.addEventListener('click', toggleSidebar);
+
+      // Preset Logo Buttons
+      document.querySelectorAll('.preset-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.preset-chip').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const presetId = btn.dataset.preset;
+          if (PRESETS[presetId]) {
+            state.activePreset = presetId;
+            resetSmoothState(PRESETS[presetId]);
+            convertSvgTo3D(PRESETS[presetId], true);
+            showToast(`Loaded ${btn.textContent.trim()} preset`, 'fa-cube');
+          }
+        });
+      });
+
+      // Material Preset Cards
+      document.querySelectorAll('.mat-preset-card').forEach(card => {
+        card.addEventListener('click', () => {
+          applyMaterialPreset(card.dataset.mat);
+        });
+      });
+
+      // ==========================================
+      // 500x500 translation controls
+      // ==========================================
+      document.getElementById('btn-run-auto-smooth').addEventListener('click', runAutoSmoothPipeline);
+
+      let smoothDebounceTimer = null;
+      const debouncedAutoSmooth = () => {
+        if (smoothDebounceTimer) clearTimeout(smoothDebounceTimer);
+        smoothDebounceTimer = setTimeout(() => {
+          if (state.isSmoothed) runAutoSmoothPipeline();
+        }, 180);
+      };
+
+      document.getElementById('param-smooth-enabled').addEventListener('change', e => {
+        state.smoothEnabled = e.target.checked;
+        if (state.isSmoothed) runAutoSmoothPipeline();
+      });
+
+      document.getElementById('param-smooth-radius').addEventListener('input', e => {
+        state.smoothRadius = parseFloat(e.target.value);
+        document.getElementById('val-smooth-radius').textContent = `${state.smoothRadius.toFixed(1)}px`;
+        debouncedAutoSmooth();
+      });
+
+      document.getElementById('param-smooth-threshold').addEventListener('input', e => {
+        state.smoothThreshold = parseInt(e.target.value, 10);
+        document.getElementById('val-smooth-threshold').textContent = `${state.smoothThreshold}%`;
+        debouncedAutoSmooth();
+      });
+
+      document.getElementById('param-smooth-tension').addEventListener('input', e => {
+        state.smoothTension = parseFloat(e.target.value);
+        document.getElementById('val-smooth-tension').textContent = state.smoothTension.toFixed(2);
+        debouncedAutoSmooth();
+      });
+
+      // 500x500 PNG Preview Modal Handlers
+      const modalRaster = document.getElementById('modal-raster-preview');
+      const rasterImg = document.getElementById('raster-preview-img');
+      const openRasterModal = async () => {
+        if (!state.last500PngDataUrl) {
+          await runAutoSmoothPipeline();
+        }
+        if (state.last500PngDataUrl) {
+          rasterImg.src = state.last500PngDataUrl;
+          document.getElementById('raster-info-radius').textContent = `Blur: ${state.smoothRadius.toFixed(1)}px`;
+          document.getElementById('raster-info-status').textContent = state.smoothEnabled ? 'Smoothed' : 'Original';
+          modalRaster.classList.add('open');
+        }
+      };
+
+      const closeRasterModal = () => modalRaster.classList.remove('open');
+      document.getElementById('btn-view-raster-preview').addEventListener('click', openRasterModal);
+      document.getElementById('modal-raster-close-btn').addEventListener('click', closeRasterModal);
+      document.getElementById('modal-raster-done-btn').addEventListener('click', closeRasterModal);
+
+      document.getElementById('modal-raster-download-btn').addEventListener('click', () => {
+        if (state.last500PngDataUrl) {
+          const a = document.createElement('a');
+          a.href = state.last500PngDataUrl;
+          a.download = 'raster-500x500.png';
+          a.click();
+          showToast('Downloaded raster-500x500.png', 'fa-download');
+        }
+      });
+
+      document.getElementById('btn-download-smoothed-svg').addEventListener('click', () => {
+        const svgContent = state.smoothedSvgString || state.currentSvgString;
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        triggerDownload(blob, 'smoothed-logo.svg');
+      });
+
+      // Geometry Parameter Inputs (Debounced / Live Extrusion Update)
+      const reExtrude = (shouldRefit = false) => convertSvgTo3D(state.currentSvgString, shouldRefit);
+
+      document.getElementById('param-auto-fit').addEventListener('change', e => {
+        state.autoFit = e.target.checked;
+        if (state.autoFit) {
+          state.scale = 1.0;
+          document.getElementById('param-scale').value = 1.0;
+          document.getElementById('val-scale').textContent = '1.0×';
+          reExtrude(true);
+        }
+      });
+
+      document.getElementById('btn-fit-camera-action').addEventListener('click', () => {
+        fitCameraToModel(true);
+        showToast('Camera reframed to fit', 'fa-expand');
+      });
+
+      document.getElementById('param-depth').addEventListener('input', e => {
+        state.depth = parseFloat(e.target.value);
+        document.getElementById('val-depth').textContent = state.depth;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-bevel-enabled').addEventListener('change', e => {
+        state.bevelEnabled = e.target.checked;
+        document.getElementById('bevel-controls-group').style.display = state.bevelEnabled ? 'flex' : 'none';
+        reExtrude(false);
+      });
+
+      document.getElementById('param-bevel-thick').addEventListener('input', e => {
+        state.bevelThickness = parseFloat(e.target.value);
+        document.getElementById('val-bevel-thick').textContent = state.bevelThickness;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-bevel-size').addEventListener('input', e => {
+        state.bevelSize = parseFloat(e.target.value);
+        document.getElementById('val-bevel-size').textContent = state.bevelSize;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-bevel-seg').addEventListener('input', e => {
+        state.bevelSegments = parseInt(e.target.value, 10);
+        document.getElementById('val-bevel-seg').textContent = state.bevelSegments;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-curve-seg').addEventListener('input', e => {
+        state.curveSegments = parseInt(e.target.value, 10);
+        document.getElementById('val-curve-seg').textContent = state.curveSegments;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-scale').addEventListener('input', e => {
+        state.scale = parseFloat(e.target.value);
+        document.getElementById('val-scale').textContent = `${state.scale.toFixed(1)}×`;
+        reExtrude(false);
+      });
+
+      document.getElementById('param-flip-z').addEventListener('change', e => {
+        state.flipZ = e.target.checked;
+        reExtrude(false);
+      });
+
+      // Material Surface Controls
+      const handleColorChange = (hex) => {
+        state.color = hex;
+        state.colorOverride = true;
+        document.getElementById('param-color').value = hex;
+        document.getElementById('param-color-hex').value = hex;
+        document.getElementById('color-swatch-display').style.backgroundColor = hex;
+        updateMaterials();
+      };
+
+      document.getElementById('param-color').addEventListener('input', e => handleColorChange(e.target.value));
+      document.getElementById('param-color-hex').addEventListener('change', e => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) handleColorChange(val);
+      });
+
+      document.getElementById('param-roughness').addEventListener('input', e => {
+        state.roughness = parseFloat(e.target.value);
+        document.getElementById('val-roughness').textContent = state.roughness.toFixed(2);
+        updateMaterials();
+      });
+
+      document.getElementById('param-metalness').addEventListener('input', e => {
+        state.metalness = parseFloat(e.target.value);
+        document.getElementById('val-metalness').textContent = state.metalness.toFixed(2);
+        updateMaterials();
+      });
+
+      document.getElementById('param-clearcoat').addEventListener('input', e => {
+        state.clearcoat = parseFloat(e.target.value);
+        document.getElementById('val-clearcoat').textContent = state.clearcoat.toFixed(2);
+        updateMaterials();
+      });
+
+      document.getElementById('param-transmission').addEventListener('input', e => {
+        state.transmission = parseFloat(e.target.value);
+        document.getElementById('val-transmission').textContent = state.transmission.toFixed(2);
+        updateMaterials();
+      });
+
+      document.getElementById('param-flat-shading').addEventListener('change', e => {
+        state.flatShading = e.target.checked;
+        updateMaterials();
+      });
+
+      document.getElementById('param-wireframe').addEventListener('change', e => {
+        state.wireframe = e.target.checked;
+        document.getElementById('dock-toggle-wire').classList.toggle('active', state.wireframe || state.wireframeOverlay);
+        updateMaterials();
+      });
+
+      document.getElementById('param-wireframe-overlay').addEventListener('change', e => {
+        state.wireframeOverlay = e.target.checked;
+        document.getElementById('dock-toggle-wire').classList.toggle('active', state.wireframe || state.wireframeOverlay);
+        reExtrude();
+      });
+
+      const handleWireColorChange = (hex) => {
+        state.wireframeColor = hex;
+        document.getElementById('param-wireframe-color').value = hex;
+        document.getElementById('param-wireframe-hex').value = hex;
+        document.getElementById('wireframe-swatch').style.backgroundColor = hex;
+        updateMaterials();
+      };
+
+      document.getElementById('param-wireframe-color').addEventListener('input', e => handleWireColorChange(e.target.value));
+      document.getElementById('param-wireframe-hex').addEventListener('change', e => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) handleWireColorChange(val);
+      });
+
+      // Bloom & Glow Controls
+      document.getElementById('param-bloom-enabled').addEventListener('change', e => {
+        state.bloomEnabled = e.target.checked;
+        document.getElementById('dock-toggle-bloom').classList.toggle('active', state.bloomEnabled);
+      });
+
+      document.getElementById('param-bloom-strength').addEventListener('input', e => {
+        state.bloomStrength = parseFloat(e.target.value);
+        bloomPass.strength = state.bloomStrength;
+        document.getElementById('val-bloom-strength').textContent = state.bloomStrength.toFixed(2);
+      });
+
+      document.getElementById('param-bloom-radius').addEventListener('input', e => {
+        state.bloomRadius = parseFloat(e.target.value);
+        bloomPass.radius = state.bloomRadius;
+        document.getElementById('val-bloom-radius').textContent = state.bloomRadius.toFixed(2);
+      });
+
+      document.getElementById('param-bloom-threshold').addEventListener('input', e => {
+        state.bloomThreshold = parseFloat(e.target.value);
+        bloomPass.threshold = state.bloomThreshold;
+        document.getElementById('val-bloom-threshold').textContent = state.bloomThreshold.toFixed(2);
+      });
+
+      const handleEmissiveColorChange = (hex) => {
+        state.emissiveColor = hex;
+        document.getElementById('param-emissive-color').value = hex;
+        document.getElementById('param-emissive-hex').value = hex;
+        document.getElementById('emissive-swatch').style.backgroundColor = hex;
+        updateMaterials();
+      };
+
+      document.getElementById('param-emissive-color').addEventListener('input', e => handleEmissiveColorChange(e.target.value));
+      document.getElementById('param-emissive-hex').addEventListener('change', e => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) handleEmissiveColorChange(val);
+      });
+
+      document.getElementById('param-emissive-intensity').addEventListener('input', e => {
+        state.emissiveIntensity = parseFloat(e.target.value);
+        document.getElementById('val-emissive-intensity').textContent = state.emissiveIntensity.toFixed(2);
+        updateMaterials();
+      });
+
+      document.getElementById('param-exposure').addEventListener('input', e => {
+        state.exposure = parseFloat(e.target.value);
+        renderer.toneMappingExposure = state.exposure;
+        document.getElementById('val-exposure').textContent = state.exposure.toFixed(2);
+      });
+
+      // Scene & Background Controls
+      const handleBgColorChange = (hex) => {
+        state.bgColor = hex;
+        document.getElementById('param-bg-color').value = hex;
+        document.getElementById('param-bg-hex').value = hex;
+        document.getElementById('bg-swatch').style.backgroundColor = hex;
+        if (!state.bgTransparent) {
+          scene.background = new THREE.Color(hex);
+        }
+      };
+
+      document.getElementById('param-bg-color').addEventListener('input', e => handleBgColorChange(e.target.value));
+      document.getElementById('param-bg-hex').addEventListener('change', e => {
+        let val = e.target.value.trim();
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) handleBgColorChange(val);
+      });
+
+      document.getElementById('param-bg-transparent').addEventListener('change', e => {
+        state.bgTransparent = e.target.checked;
+        scene.background = state.bgTransparent ? null : new THREE.Color(state.bgColor);
+      });
+
+      document.getElementById('param-grid-enabled').addEventListener('change', e => {
+        state.gridEnabled = e.target.checked;
+        gridHelper.visible = state.gridEnabled;
+      });
+
+      document.getElementById('param-shadow-enabled').addEventListener('change', e => {
+        state.shadowEnabled = e.target.checked;
+        shadowPlane.visible = state.shadowEnabled;
+      });
+
+      document.getElementById('param-environment-intensity').addEventListener('input', e => {
+        state.environmentIntensity = parseFloat(e.target.value);
+        document.getElementById('val-environment-intensity').textContent = state.environmentIntensity.toFixed(2);
+        updateMaterials();
+      });
+
+      // Lighting Rig Controls
+      document.getElementById('param-key-light').addEventListener('input', e => {
+        state.keyLightIntensity = parseFloat(e.target.value);
+        keyLight.intensity = state.keyLightIntensity;
+        document.getElementById('val-key-light').textContent = state.keyLightIntensity;
+      });
+
+      document.getElementById('param-fill-light').addEventListener('input', e => {
+        state.fillLightIntensity = parseFloat(e.target.value);
+        fillLight.intensity = state.fillLightIntensity;
+        document.getElementById('val-fill-light').textContent = state.fillLightIntensity;
+      });
+
+      document.getElementById('param-ambient-light').addEventListener('input', e => {
+        state.ambientLightIntensity = parseFloat(e.target.value);
+        ambientLight.intensity = state.ambientLightIntensity;
+        document.getElementById('val-ambient-light').textContent = state.ambientLightIntensity;
+      });
+
+      // Bottom Dock View Actions
+      document.getElementById('dock-view-iso').addEventListener('click', () => setCameraView('iso'));
+      document.getElementById('dock-view-front').addEventListener('click', () => setCameraView('front'));
+      document.getElementById('dock-view-top').addEventListener('click', () => setCameraView('top'));
+      document.getElementById('dock-view-side').addEventListener('click', () => setCameraView('side'));
+      document.getElementById('dock-reset-cam').addEventListener('click', fitCameraToModel);
+
+      // Dock Quick Toggles
+      const btnAutoRotate = document.getElementById('dock-auto-rotate');
+      btnAutoRotate.addEventListener('click', () => {
+        state.autoRotate = !state.autoRotate;
+        btnAutoRotate.classList.toggle('active', state.autoRotate);
+        showToast(state.autoRotate ? 'Auto-rotation active' : 'Auto-rotation paused', 'fa-rotate');
+      });
+
+      const btnDockWire = document.getElementById('dock-toggle-wire');
+      btnDockWire.addEventListener('click', () => {
+        state.wireframeOverlay = !state.wireframeOverlay;
+        btnDockWire.classList.toggle('active', state.wireframeOverlay);
+        document.getElementById('param-wireframe-overlay').checked = state.wireframeOverlay;
+        reExtrude();
+      });
+
+      const btnDockBloom = document.getElementById('dock-toggle-bloom');
+      btnDockBloom.addEventListener('click', () => {
+        state.bloomEnabled = !state.bloomEnabled;
+        btnDockBloom.classList.toggle('active', state.bloomEnabled);
+        document.getElementById('param-bloom-enabled').checked = state.bloomEnabled;
+      });
+
+      document.getElementById('dock-fullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // Shared SVG and PNG upload handler
+      const fileInput = document.getElementById('file-input');
+      document.getElementById('btn-upload').addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) loadArtworkFromFile(file);
+        fileInput.value = '';
+      });
+
+      function loadArtworkFromFile(file) {
+        const extension = file.name.toLowerCase().split('.').pop();
+        const isSvg = extension === 'svg' || file.type === 'image/svg+xml';
+        const isPng = extension === 'png' || file.type === 'image/png';
+        if (!isSvg && !isPng) {
+          showToast('Choose an SVG or PNG file', 'fa-triangle-exclamation');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = evt => {
+          resetSmoothState();
+          if (isSvg) {
+            const svgContent = evt.target.result;
+            resetSmoothState(svgContent);
+            convertSvgTo3D(svgContent, true);
+          } else {
+            state.originalSvgString = '';
+            state.currentSvgString = '';
+            state.originalRasterDataUrl = evt.target.result;
+            runAutoSmoothPipeline();
+          }
+          showToast(`Loaded ${file.name}`, isSvg ? 'fa-file-svg' : 'fa-file-image');
+        };
+        reader.onerror = () => showToast('Could not read the selected file', 'fa-triangle-exclamation');
+        if (isSvg) reader.readAsText(file);
+        else reader.readAsDataURL(file);
+      }
+
+      // Drag and Drop Zone Handling
+      const dropzone = document.getElementById('dropzone-overlay');
+      window.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropzone.classList.add('active');
+      });
+
+      window.addEventListener('dragleave', e => {
+        if (e.relatedTarget === null) {
+          dropzone.classList.remove('active');
+        }
+      });
+
+      window.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('active');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          loadArtworkFromFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      // Raw SVG Paste Modal Handlers
+      const modalPaste = document.getElementById('modal-paste');
+      const pasteCodeInput = document.getElementById('svg-code-input');
+      const openModal = () => {
+        pasteCodeInput.value = state.originalSvgString || state.currentSvgString;
+        modalPaste.classList.add('open');
+      };
+      const closeModal = () => modalPaste.classList.remove('open');
+
+      document.getElementById('btn-paste-code').addEventListener('click', openModal);
+      document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+      document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+
+      document.getElementById('modal-convert-btn').addEventListener('click', () => {
+        const code = pasteCodeInput.value.trim();
+        if (code) {
+          resetSmoothState(code);
+          convertSvgTo3D(code, true);
+          closeModal();
+          showToast('Custom SVG converted to 3D', 'fa-check');
+        }
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener('keydown', e => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        switch (e.key.toLowerCase()) {
+          case 'h':
+            toggleSidebar();
+            break;
+          case ' ':
+            e.preventDefault();
+            btnAutoRotate.click();
+            break;
+          case 'r':
+            fitCameraToModel();
+            break;
+          case 'w':
+            btnDockWire.click();
+            break;
+          case 'b':
+            btnDockBloom.click();
+            break;
+        }
+      });
+
+      // Export Buttons: STL, GLTF, OBJ, PNG
+      setupExporters();
+    }
+
+    // Helper: Build a Clean, Non-Inverted Geometry Clone for Slicers & 3D Software
+    function getCleanExportGroup() {
+      const exportGroup = new THREE.Group();
+      
+      logoMeshGroup.traverse(child => {
+        if (child.isMesh && child.geometry) {
+          const cloneGeo = child.geometry.clone();
+          // Apply local matrix transform
+          cloneGeo.applyMatrix4(child.matrixWorld);
+          cloneGeo.computeVertexNormals();
+
+          const cloneMesh = new THREE.Mesh(cloneGeo, child.material);
+          exportGroup.add(cloneMesh);
+        }
+      });
+
+      return exportGroup;
+    }
+
+    // Helper: Trigger Download of Blob / File
+    function triggerDownload(blob, filename) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      showToast(`Exported ${filename}`, 'fa-download');
+    }
+
+    let activeVideoExport = null;
+
+    function renderExportFrame() {
+      if (state.bloomEnabled) composer.render();
+      else renderer.render(scene, camera);
+    }
+
+    function yieldToEventLoop() {
+      return new Promise(resolve => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = () => {
+          channel.port1.close();
+          channel.port2.close();
+          resolve();
+        };
+        channel.port2.postMessage(null);
+      });
+    }
+
+    function waitForExportSetup(promise, exportJob) {
+      return new Promise((resolve, reject) => {
+        const checkCancellation = () => {
+          if (exportJob.cancelled) {
+            reject(new Error('Export cancelled'));
+            return;
+          }
+          exportJob.cancelCheck = setTimeout(checkCancellation, 100);
+        };
+        checkCancellation();
+        promise.then(resolve, reject).finally(() => clearTimeout(exportJob.cancelCheck));
+      });
+    }
+
+    async function exportTurntableVideo() {
+      if (activeVideoExport) return;
+
+      const format = document.getElementById('video-format').value;
+      const duration = Number(document.getElementById('video-duration').value);
+      const fps = Number(document.getElementById('video-fps').value);
+      const dimension = Number(document.getElementById('video-resolution').value);
+      const frameCount = duration * fps;
+      const width = dimension;
+      const height = dimension;
+      const progress = document.getElementById('video-export-progress');
+      const status = document.getElementById('video-export-status');
+      const exportButton = document.getElementById('btn-export-video');
+      const cancelButton = document.getElementById('btn-cancel-video');
+
+      if (format === 'gif' && frameCount * width * height > 100_000_000) {
+        showToast('GIF settings are too large for browser memory. Reduce length, FPS, or resolution.', 'fa-triangle-exclamation');
+        return;
+      }
+
+      if (format === 'mp4' && typeof VideoEncoder === 'undefined') {
+        status.textContent = 'MP4 needs a browser with WebCodecs support.';
+        showToast('MP4 encoding is not supported in this browser', 'fa-triangle-exclamation');
+        return;
+      }
+
+      const exportJob = { cancelled: false, encoder: null, gif: null };
+      activeVideoExport = exportJob;
+      exportButton.hidden = true;
+      cancelButton.hidden = false;
+      progress.hidden = false;
+      progress.value = 0;
+      status.textContent = `Preparing ${frameCount} frames...`;
+
+      const originalSize = renderer.getSize(new THREE.Vector2());
+      const originalPixelRatio = renderer.getPixelRatio();
+      const originalAspect = camera.aspect;
+      const originalRotation = logoRootGroup.rotation.y;
+      const wasAutoRotating = state.autoRotate;
+      const setProgress = (value, label) => {
+        progress.value = value;
+        status.textContent = label;
+      };
+
+      try {
+        let gif;
+        let muxer;
+        let muxerTarget;
+        if (format === 'gif') {
+          if (typeof window.GIF !== 'function') throw new Error('GIF encoder did not load. Check your connection and retry.');
+          const workerBootstrap = new Blob([
+            `importScripts('${new URL('https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.worker.js')}');`
+          ], { type: 'text/javascript' });
+          exportJob.workerBootstrap = URL.createObjectURL(workerBootstrap);
+          gif = new window.GIF({
+            workers: 2,
+            quality: Number(document.getElementById('gif-quality').value),
+            width,
+            height,
+            workerScript: exportJob.workerBootstrap
+          });
+          exportJob.gif = gif;
+        } else {
+          const { Muxer, ArrayBufferTarget } = await waitForExportSetup(
+            import('https://esm.sh/mp4-muxer@5.2.2'), exportJob
+          );
+          muxerTarget = new ArrayBufferTarget();
+          muxer = new Muxer({
+            target: muxerTarget,
+            video: { codec: 'avc', width, height },
+            fastStart: 'in-memory'
+          });
+          const bitrate = Number(document.getElementById('mp4-quality').value);
+          const encoderConfig = { codec: 'avc1.42001f', width, height, bitrate, framerate: fps };
+          const support = await VideoEncoder.isConfigSupported(encoderConfig);
+          if (!support.supported) throw new Error('This browser cannot encode MP4 at the selected settings.');
+          exportJob.encoder = new VideoEncoder({
+            output: (chunk, metadata) => muxer.addVideoChunk(chunk, metadata),
+            error: error => { exportJob.error = error; }
+          });
+          exportJob.encoder.configure(support.config);
+        }
+
+        state.autoRotate = false;
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        composer.setPixelRatio(1);
+        composer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        const frameCanvas = format === 'gif' ? document.createElement('canvas') : null;
+        const frameContext = frameCanvas?.getContext('2d', { willReadFrequently: false });
+        if (frameCanvas) {
+          frameCanvas.width = width;
+          frameCanvas.height = height;
+        }
+
+        for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
+          if (exportJob.cancelled) throw new Error('Export cancelled');
+          logoRootGroup.rotation.y = originalRotation + (Math.PI * 2 * frameIndex / frameCount);
+          renderExportFrame();
+
+          if (format === 'gif') {
+            frameContext.drawImage(renderer.domElement, 0, 0, width, height);
+            gif.addFrame(frameCanvas, { copy: true, delay: 1000 / fps });
+          } else {
+            const timestamp = Math.round(frameIndex * 1_000_000 / fps);
+            const frame = new VideoFrame(renderer.domElement, {
+              timestamp,
+              duration: Math.round(1_000_000 / fps)
+            });
+            exportJob.encoder.encode(frame, { keyFrame: frameIndex === 0 });
+            frame.close();
+          }
+
+          setProgress(0.8 * ((frameIndex + 1) / frameCount), `Rendering ${frameIndex + 1} / ${frameCount}`);
+          await yieldToEventLoop();
+          if (format === 'mp4' && exportJob.encoder.encodeQueueSize > 4) {
+            await exportJob.encoder.flush();
+          }
+        }
+
+        if (exportJob.cancelled) throw new Error('Export cancelled');
+        if (format === 'gif') {
+          setProgress(0.85, 'Encoding GIF...');
+          const blob = await new Promise((resolve, reject) => {
+            gif.on('progress', value => setProgress(0.85 + value * 0.15, `Encoding GIF ${Math.round(value * 100)}%`));
+            gif.on('finished', resolve);
+            gif.on('abort', () => reject(new Error('Export cancelled')));
+            gif.render();
+          });
+          if (exportJob.cancelled) throw new Error('Export cancelled');
+          triggerDownload(blob, 'logo-turntable.gif');
+        } else {
+          setProgress(0.9, 'Finalizing MP4...');
+          await exportJob.encoder.flush();
+          if (exportJob.error) throw exportJob.error;
+          exportJob.encoder.close();
+          muxer.finalize();
+          triggerDownload(new Blob([muxerTarget.buffer], { type: 'video/mp4' }), 'logo-turntable.mp4');
+        }
+        setProgress(1, 'Export complete');
+      } catch (error) {
+        if (error.message === 'Export cancelled') {
+          status.textContent = 'Export cancelled';
+        } else {
+          console.error('Turntable export error:', error);
+          status.textContent = error.message || 'Video export failed';
+          showToast(status.textContent, 'fa-triangle-exclamation');
+        }
+      } finally {
+        if (exportJob.cancelCheck) clearTimeout(exportJob.cancelCheck);
+        if (exportJob.encoder && exportJob.encoder.state !== 'closed') exportJob.encoder.close();
+        if (exportJob.cancelled && exportJob.gif) exportJob.gif.abort();
+        if (exportJob.workerBootstrap) URL.revokeObjectURL(exportJob.workerBootstrap);
+        state.autoRotate = wasAutoRotating;
+        logoRootGroup.rotation.y = originalRotation;
+        camera.aspect = originalAspect;
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(originalPixelRatio);
+        renderer.setSize(originalSize.x, originalSize.y, false);
+        composer.setPixelRatio(originalPixelRatio);
+        composer.setSize(originalSize.x, originalSize.y);
+        activeVideoExport = null;
+        exportButton.hidden = false;
+        cancelButton.hidden = true;
+        if (status.textContent === 'Export complete' || status.textContent === 'Export cancelled') {
+          setTimeout(() => {
+            if (!activeVideoExport) {
+              progress.hidden = true;
+              status.textContent = '';
+            }
+          }, 4000);
+        }
+      }
+    }
+
+    // Setup Exporters
+    function setupExporters() {
+      const videoFormat = document.getElementById('video-format');
+      const updateVideoFormatControls = () => {
+        const isGif = videoFormat.value === 'gif';
+        document.getElementById('gif-quality-row').hidden = !isGif;
+        document.getElementById('mp4-quality-row').hidden = isGif;
+        document.getElementById('video-export-status').textContent = !isGif && typeof VideoEncoder === 'undefined'
+          ? 'MP4 is unavailable in this browser. Choose GIF instead.'
+          : '';
+      };
+      videoFormat.addEventListener('change', updateVideoFormatControls);
+      updateVideoFormatControls();
+      document.getElementById('btn-export-video').addEventListener('click', exportTurntableVideo);
+      document.getElementById('btn-cancel-video').addEventListener('click', () => {
+        if (!activeVideoExport) return;
+        activeVideoExport.cancelled = true;
+        if (activeVideoExport.gif) activeVideoExport.gif.abort();
+        if (activeVideoExport.encoder && activeVideoExport.encoder.state !== 'closed') activeVideoExport.encoder.close();
+      });
+
+      // 1. STL Export (for 3D Printing)
+      document.getElementById('btn-export-stl').addEventListener('click', () => {
+        try {
+          const exporter = new STLExporter();
+          const cleanGroup = getCleanExportGroup();
+          const stlData = exporter.parse(cleanGroup, { binary: true });
+          const blob = new Blob([stlData], { type: 'application/octet-stream' });
+          triggerDownload(blob, 'logo-3d.stl');
+        } catch (err) {
+          console.error('STL Export Error:', err);
+          showToast('Failed to export STL', 'fa-triangle-exclamation');
+        }
+      });
+
+      // 2. GLTF / GLB Export (Modern standard for Web & Blender)
+      document.getElementById('btn-export-glb').addEventListener('click', () => {
+        try {
+          const exporter = new GLTFExporter();
+          const cleanGroup = getCleanExportGroup();
+          exporter.parse(
+            cleanGroup,
+            (gltf) => {
+              const blob = new Blob([gltf], { type: 'application/octet-stream' });
+              triggerDownload(blob, 'logo-3d.glb');
+            },
+            (error) => {
+              console.error('GLTF Export Error:', error);
+              showToast('GLTF export failed', 'fa-triangle-exclamation');
+            },
+            { binary: true }
+          );
+        } catch (err) {
+          console.error('GLTF Export Error:', err);
+          showToast('Failed to export GLB', 'fa-triangle-exclamation');
+        }
+      });
+
+      // 3. OBJ Export
+      document.getElementById('btn-export-obj').addEventListener('click', () => {
+        try {
+          const exporter = new OBJExporter();
+          const cleanGroup = getCleanExportGroup();
+          const objData = exporter.parse(cleanGroup);
+          const blob = new Blob([objData], { type: 'text/plain' });
+          triggerDownload(blob, 'logo-3d.obj');
+        } catch (err) {
+          console.error('OBJ Export Error:', err);
+          showToast('Failed to export OBJ', 'fa-triangle-exclamation');
+        }
+      });
+
+      // 4. PNG Snapshot Export
+      document.getElementById('btn-export-png').addEventListener('click', () => {
+        try {
+          // Render one frame cleanly
+          if (state.bloomEnabled) composer.render();
+          else renderer.render(scene, camera);
+
+          const canvas = renderer.domElement;
+          canvas.toBlob(blob => {
+            if (blob) triggerDownload(blob, 'logo-3d-render.png');
+          }, 'image/png');
+        } catch (err) {
+          console.error('PNG Snapshot Error:', err);
+          showToast('Snapshot capture failed', 'fa-triangle-exclamation');
+        }
+      });
+    }
+
+    // Animation & Render Loop
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Smooth camera transition tween
+      if (cameraTween) {
+        cameraTween.update(performance.now());
+      }
+
+      // Smooth auto-rotation
+      if (state.autoRotate) {
+        logoRootGroup.rotation.y += state.autoRotateSpeed * 0.008;
+      }
+
+      // Smooth damping controls update
+      controls.update();
+
+      // Render with or without post-processing bloom
+      if (state.bloomEnabled) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
+    }
+
+    // Application Launch Sequence
+    initThree();
+    bindEvents();
+    syncUIWithState();
+
+    // Initial Conversion with Default Three.js Preset
+    convertSvgTo3D(PRESETS.threejs);
+    fitCameraToModel();
+
+    // Begin Animation Loop
+    animate();
+  </script>
+</body>
+</html>
