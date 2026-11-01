@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Settings | algot.fun</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			font-family: "Trebuchet MS", sans-serif;
+			background: #10191b;
+			color: #f3f5f2;
+			font-synthesis: none;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			min-width: 320px;
+			min-height: 100vh;
+			margin: 0;
+			background:
+				radial-gradient(ellipse at 12% 0%, #32604d66, transparent 38rem),
+				linear-gradient(145deg, #182423, #111718 60%, #1a211e);
+		}
+
+		header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			padding: 22px clamp(20px, 5vw, 72px);
+			border-bottom: 1px solid #ffffff20;
+			background: #101718aa;
+			backdrop-filter: blur(14px);
+		}
+
+		.brand {
+			color: #fff;
+			font-size: 15px;
+			font-weight: 700;
+			text-decoration: none;
+		}
+
+		header a:last-child {
+			color: #b7d6c6;
+			font-size: 14px;
+			text-decoration: none;
+		}
+
+		main {
+			width: min(1240px, 100%);
+			margin: 0 auto;
+			padding: 38px clamp(20px, 5vw, 72px) 72px;
+		}
+
+		h1 {
+			margin: 0 0 8px;
+			font-size: 30px;
+			font-weight: 600;
+		}
+
+		.intro, .section-note { color: #aab8b1; }
+		.intro { margin: 0 0 36px; }
+
+		section + section { margin-top: 42px; }
+
+		.section-heading {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		h2 { margin: 0; font-size: 19px; font-weight: 600; }
+		.section-note { margin: 0; font-size: 13px; }
+
+		.page-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+			gap: 14px;
+		}
+
+		.page-option {
+			position: relative;
+			display: block;
+			min-width: 0;
+			padding: 10px;
+			border: 1px solid #ffffff28;
+			border-radius: 10px;
+			background: #0c1110aa;
+			cursor: pointer;
+			transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+		}
+
+		.page-option:hover { transform: translateY(-2px); }
+
+		.page-option:has(input:checked) {
+			border-color: #9ce0b7;
+			background: #31524155;
+			box-shadow: 0 0 0 1px #9ce0b744;
+		}
+
+		.page-option input {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			opacity: 0;
+		}
+
+		.page-option input:focus-visible + .page-content {
+			outline: 2px solid #d5f5df;
+			outline-offset: 3px;
+		}
+
+		.page-content { display: block; border-radius: 5px; }
+
+		.page-title {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			margin: 1px 2px 9px;
+			font-size: 14px;
+			font-weight: 600;
+		}
+
+		.selection-mark { color: #9ce0b7; font-size: 12px; }
+
+		.page-preview {
+			position: absolute;
+			top: 0;
+			left: 0;
+			display: block;
+			width: 1280px;
+			height: 720px;
+			border: 0;
+			background: #151c1c;
+			pointer-events: none;
+			transform-origin: top left;
+		}
+
+		.preview-window {
+			position: relative;
+			display: block;
+			width: 100%;
+			aspect-ratio: 16 / 9;
+			overflow: hidden;
+			border-radius: 5px;
+			background: #151c1c;
+		}
+
+		.background-tools {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 18px;
+		}
+
+		.upload-button, .clear-button {
+			display: inline-flex;
+			min-height: 40px;
+			align-items: center;
+			justify-content: center;
+			padding: 0 15px;
+			border: 1px solid #ffffff36;
+			border-radius: 6px;
+			background: #ffffff10;
+			color: #f3f5f2;
+			font: inherit;
+			font-size: 13px;
+			cursor: pointer;
+		}
+
+		.upload-button:hover, .clear-button:hover { background: #ffffff1d; }
+		.clear-button[hidden] { display: none; }
+		#image-upload { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+		#upload-name { color: #aab8b1; font-size: 13px; }
+
+		.background-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+			gap: 10px;
+		}
+
+		.background-choice {
+			position: relative;
+			display: block;
+			overflow: hidden;
+			aspect-ratio: 16 / 10;
+			padding: 0;
+			border: 2px solid #ffffff30;
+			border-radius: 6px;
+			background: #1b2422;
+			cursor: pointer;
+		}
+
+		.background-choice.daily-choice {
+			grid-column: 1 / -1;
+			aspect-ratio: 16 / 5;
+			min-height: 100px;
+		}
+
+		.daily-choice img { object-position: center 45%; }
+
+		.daily-choice span {
+			right: 12px;
+			bottom: 12px;
+			padding: 7px 10px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+
+		.background-choice img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 180ms ease;
+		}
+
+		.background-choice:hover img { transform: scale(1.06); }
+
+		.background-choice[aria-pressed="true"] {
+			border-color: #9ce0b7;
+			box-shadow: 0 0 0 1px #9ce0b744;
+		}
+
+		.background-choice span {
+			position: absolute;
+			right: 5px;
+			bottom: 5px;
+			padding: 3px 6px;
+			border-radius: 3px;
+			background: #08100dcc;
+			color: #fff;
+			font-size: 11px;
+		}
+
+		.status {
+			min-height: 20px;
+			margin: 16px 0 0;
+			color: #a9e3be;
+			font-size: 13px;
+		}
+
+		.status[data-error="true"] { color: #ffb6a8; }
+
+		@media (max-width: 560px) {
+			header { padding-block: 17px; }
+			main { padding-top: 28px; }
+			.section-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+			.page-grid { grid-template-columns: 1fr; }
+			.background-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { transition-duration: 0.01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<a class="brand" href="/index.html">ALGOT.FUN</a>
+		<a href="/index.html">Back to home</a>
+	</header>
+
+	<main>
+		<h1>Settings</h1>
+		<p class="intro">Choose a homepage style and topo background.</p>
+
+		<section aria-labelledby="page-heading">
+			<div class="section-heading">
+				<h2 id="page-heading">Homepage style</h2>
+				<p class="section-note">Your choice opens after the home splash is dismissed.</p>
+			</div>
+			<div class="page-grid" id="page-grid">
+				<label class="page-option">
+					<input type="radio" name="homepage" value="index.html" data-label="Liquid glass (Default)">
+					<span class="page-content">
+						<span class="page-title">Liquid glass (Default) <span class="selection-mark"></span></span>
+						<span class="preview-window"><iframe class="page-preview" data-src="/index.html?preview=1" title="Preview of Liquid glass" loading="lazy"></iframe></span>
+					</span>
+				</label>
+				<label class="page-option">
+					<input type="radio" name="homepage" value="index1.html" data-label="Frosted glass">
+					<span class="page-content">
+						<span class="page-title">Frosted glass <span class="selection-mark"></span></span>
+						<span class="preview-window"><iframe class="page-preview" data-src="/index1.html?preview=1" title="Preview of Frosted glass" loading="lazy"></iframe></span>
+					</span>
+				</label>
+				<label class="page-option">
+					<input type="radio" name="homepage" value="index2.html" data-label="neon">
+					<span class="page-content">
+						<span class="page-title">neon <span class="selection-mark"></span></span>
+						<span class="preview-window"><iframe class="page-preview" data-src="/index2.html?preview=1" title="Preview of neon" loading="lazy"></iframe></span>
+					</span>
+				</label>
+				<label class="page-option">
+					<input type="radio" name="homepage" value="index3.html" data-label="Legacy">
+					<span class="page-content">
+						<span class="page-title">Legacy <span class="selection-mark"></span></span>
+						<span class="preview-window"><iframe class="page-preview" data-src="/index3.html?preview=1" title="Preview of Legacy" loading="lazy"></iframe></span>
+					</span>
+				</label>
+				<label class="page-option">
+					<input type="radio" name="homepage" value="index4.html" data-label="commandline">
+					<span class="page-content">
+						<span class="page-title">commandline <span class="selection-mark"></span></span>
+						<span class="preview-window"><iframe class="page-preview" data-src="/index4.html?preview=1" title="Preview of commandline" loading="lazy"></iframe></span>
+					</span>
+				</label>
+			</div>
+		</section>
+
+		<section aria-labelledby="background-heading">
+			<div class="section-heading">
+				<h2 id="background-heading">Topo background</h2>
+				<p class="section-note">Choose a bundled image or upload one from your device.</p>
+			</div>
+			<div class="background-tools">
+				<label class="upload-button" for="image-upload">Upload image</label>
+				<input id="image-upload" type="file" accept="image/*">
+				<span id="upload-name">Using the daily image</span>
+			</div>
+			<div class="background-grid" id="background-grid" aria-label="Bundled background images"></div>
+		</section>
+
+		<p class="status" id="status" role="status" aria-live="polite"></p>
+	</main>
+
+	<script>
+		const PAGE_KEY = 'algot.indexPage';
+		const BACKGROUND_KEY = 'algot.topoBackground';
+		const pageInputs = [...document.querySelectorAll('input[name="homepage"]')];
+		const backgroundGrid = document.getElementById('background-grid');
+		const uploadInput = document.getElementById('image-upload');
+		const uploadName = document.getElementById('upload-name');
+		const dailyChoice = document.createElement('button');
+		const status = document.getElementById('status');
+
+		function setStatus(message, isError = false) {
+			status.textContent = message;
+			status.dataset.error = String(isError);
+		}
+
+		function getDailyImage() {
+			const start = new Date(new Date().getFullYear(), 0, 0);
+			const day = Math.floor((Date.now() - start) / 86400000);
+			return `/backgrounds/${(day % 53) + 1}.webp`;
+		}
+
+		function selectBackground(background, name) {
+			try {
+				localStorage.setItem(BACKGROUND_KEY, background);
+				document.querySelectorAll('.background-choice').forEach((choice) => {
+					choice.setAttribute('aria-pressed', String(choice.dataset.background === background));
+				});
+				uploadName.textContent = name;
+				setStatus('Topo background saved.');
+			} catch {
+				setStatus('Could not save this image. Try a smaller file.', true);
+			}
+		}
+
+		pageInputs.forEach((input) => {
+			input.checked = (localStorage.getItem(PAGE_KEY) || 'index.html') === input.value;
+			input.addEventListener('change', () => {
+				try {
+					localStorage.setItem(PAGE_KEY, input.value);
+					activatePreview(input.closest('.page-option').querySelector('.page-preview'));
+					document.querySelectorAll('.selection-mark').forEach((mark) => {
+						mark.textContent = mark.closest('.page-option').querySelector('input').checked ? 'Selected' : '';
+					});
+					setStatus(`${input.dataset.label} selected as homepage.`);
+				} catch {
+					setStatus('Could not save the homepage choice.', true);
+				}
+			});
+		});
+
+		document.querySelectorAll('.selection-mark').forEach((mark) => {
+			mark.textContent = mark.closest('.page-option').querySelector('input').checked ? 'Selected' : '';
+		});
+
+		const previewFrames = [...document.querySelectorAll('.page-preview')];
+		let activePreviewFrame = null;
+
+		function activatePreview(frame) {
+			activePreviewFrame = frame;
+			updatePreviewFrames();
+		}
+
+		function updatePreviewFrames() {
+			previewFrames.forEach((frame) => {
+				const wrapper = frame.parentElement;
+				const bounds = wrapper.getBoundingClientRect();
+				frame.style.transform = `scale(${wrapper.clientWidth / 1280})`;
+				const isVisible = bounds.bottom > 0 && bounds.top < window.innerHeight && bounds.right > 0 && bounds.left < window.innerWidth;
+				const shouldLoad = frame === activePreviewFrame && isVisible;
+
+				if (shouldLoad && !frame.dataset.loaded) {
+					frame.src = frame.dataset.src;
+					frame.dataset.loaded = 'true';
+				} else if (!shouldLoad && frame.dataset.loaded) {
+					frame.src = 'about:blank';
+					delete frame.dataset.loaded;
+				}
+			});
+		}
+
+		document.querySelectorAll('.page-option').forEach((option) => {
+			const frame = option.querySelector('.page-preview');
+			option.addEventListener('pointerenter', () => activatePreview(frame));
+			option.addEventListener('focusin', () => activatePreview(frame));
+			option.addEventListener('pointerleave', () => {
+				if (!option.contains(document.activeElement)) {
+					activatePreview(null);
+				}
+			});
+		});
+
+		updatePreviewFrames();
+		window.addEventListener('scroll', updatePreviewFrames, { passive: true });
+		window.addEventListener('resize', updatePreviewFrames);
+
+		for (let imageNumber = 1; imageNumber <= 53; imageNumber++) {
+			const imagePath = `/backgrounds/${imageNumber}.webp`;
+			const choice = document.createElement('button');
+			choice.className = 'background-choice';
+			choice.type = 'button';
+			choice.dataset.background = imagePath;
+			choice.setAttribute('aria-label', `Use background image ${imageNumber}`);
+			choice.setAttribute('aria-pressed', 'false');
+			choice.innerHTML = `<img data-src="${imagePath}" alt=""><span>${imageNumber}</span>`;
+			choice.addEventListener('click', () => selectBackground(imagePath, `Background ${imageNumber}`));
+			backgroundGrid.append(choice);
+		}
+
+		dailyChoice.className = 'background-choice daily-choice';
+		dailyChoice.type = 'button';
+		dailyChoice.setAttribute('aria-label', 'Use daily background rotation');
+		dailyChoice.innerHTML = `<img data-src="${getDailyImage()}" alt=""><span>Daily rotation</span>`;
+		dailyChoice.addEventListener('click', () => {
+			localStorage.removeItem(BACKGROUND_KEY);
+			updateBackgroundSelection();
+			setStatus('Daily topo background rotation enabled.');
+		});
+		backgroundGrid.prepend(dailyChoice);
+
+		function loadVisibleBackgrounds() {
+			backgroundGrid.querySelectorAll('img[data-src]').forEach((image) => {
+				const bounds = image.getBoundingClientRect();
+				const nearViewport = bounds.bottom >= -200 && bounds.top <= window.innerHeight + 200
+					&& bounds.right >= -200 && bounds.left <= window.innerWidth + 200;
+				if (nearViewport) {
+					image.src = image.dataset.src;
+					delete image.dataset.src;
+				}
+			});
+		}
+
+		loadVisibleBackgrounds();
+		window.addEventListener('scroll', loadVisibleBackgrounds, { passive: true });
+		window.addEventListener('resize', loadVisibleBackgrounds);
+
+		function updateBackgroundSelection() {
+			const savedBackground = localStorage.getItem(BACKGROUND_KEY);
+			const currentBackground = savedBackground || getDailyImage();
+			dailyChoice.setAttribute('aria-pressed', String(!savedBackground));
+			document.querySelectorAll('.background-choice').forEach((choice) => {
+				if (choice !== dailyChoice) {
+					choice.setAttribute('aria-pressed', String(choice.dataset.background === currentBackground));
+				}
+			});
+			const isBundled = currentBackground.startsWith('/backgrounds/');
+			uploadName.textContent = isBundled
+				? (savedBackground ? `Background ${currentBackground.match(/\d+/)?.[0]}` : 'Daily rotation')
+				: 'Custom uploaded image';
+		}
+
+		updateBackgroundSelection();
+
+		uploadInput.addEventListener('change', async () => {
+			const file = uploadInput.files?.[0];
+			if (!file) return;
+			if (!file.type.startsWith('image/')) {
+				setStatus('Choose an image file.', true);
+				return;
+			}
+			if (file.size > 25 * 1024 * 1024) {
+				setStatus('That file is over 25 MB. Choose a smaller image.', true);
+				uploadInput.value = '';
+				return;
+			}
+
+			try {
+				const image = await createImageBitmap(file);
+				const scale = Math.min(1, 1920 / Math.max(image.width, image.height));
+				const canvas = document.createElement('canvas');
+				canvas.width = Math.round(image.width * scale);
+				canvas.height = Math.round(image.height * scale);
+				canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+				image.close();
+
+				let imageData = canvas.toDataURL('image/webp', 0.82);
+				if (imageData.length > 2_800_000) imageData = canvas.toDataURL('image/webp', 0.62);
+				if (imageData.length > 2_800_000) {
+					setStatus('This image is too large to store in browser settings.', true);
+					return;
+				}
+
+				selectBackground(imageData, file.name);
+				updateBackgroundSelection();
+			} catch {
+				setStatus('Could not read or save that image.', true);
+			} finally {
+				uploadInput.value = '';
+			}
+		});
+
+		window.addEventListener('storage', (event) => {
+			if (event.key === PAGE_KEY) {
+				const chosenPage = event.newValue || 'index.html';
+				pageInputs.forEach((input) => { input.checked = input.value === chosenPage; });
+				document.querySelectorAll('.selection-mark').forEach((mark) => {
+					mark.textContent = mark.closest('.page-option').querySelector('input').checked ? 'Selected' : '';
+				});
+				const selectedInput = pageInputs.find((input) => input.checked);
+				if (selectedInput) activatePreview(selectedInput.closest('.page-option').querySelector('.page-preview'));
+			}
+			if (event.key === BACKGROUND_KEY) updateBackgroundSelection();
+		});
+	</script>
+</body>
+</html>

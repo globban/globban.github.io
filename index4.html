@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>_</title>
+
+  <script>
+    (function() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const isMobile = /android|iphone|ipad|ipod|windows phone|blackberry|mobile/i.test(ua);
+
+      if (isMobile) {
+        window.location.replace("/mobile.html");
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      --text-color: #b5ffbe;
+      --selected-bg: var(--text-color);
+      --selected-text: #000000;
+    }
+
+    body {
+      background: #000000;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #banner-stack {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    #daily-banner {
+      display: inline-block;
+      position: relative;
+      line-height: 0;
+      max-width: min(32vw, 660px);
+      background-color: var(--text-color);
+      -webkit-mask-image: var(--banner-mask);
+      mask-image: var(--banner-mask);
+      -webkit-mask-mode: luminance;
+      mask-mode: luminance;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+      opacity: 0.92;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #daily-banner-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      opacity: 0;
+    }
+
+    .shell-panel,
+    .settings-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      color: var(--text-color);
+      font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+    }
+
+    .prompt-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      color: var(--text-color);
+      font: inherit;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .prompt-label,
+    .prompt-symbol {
+      color: var(--text-color);
+      display: inline-flex;
+      align-items: center;
+    }
+
+    #shell-input,
+    .settings-input,
+    .settings-select {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text-color);
+      font: inherit;
+      width: min(300px, 48vw);
+      min-width: 150px;
+      padding: 0;
+      margin: 0;
+      line-height: 1;
+      vertical-align: middle;
+      caret-color: var(--text-color);
+    }
+
+    #shell-input::selection,
+    .settings-input::selection {
+      background: rgba(255, 255, 255, 0.8);
+      color: #000000;
+    }
+
+    .shell-options,
+    .settings-options {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    .shell-option,
+    .settings-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      color: var(--text-color);
+      cursor: pointer;
+      text-align: left;
+      opacity: 0.9;
+    }
+
+    .shell-option.selected, .shell-option:hover {
+      background: var(--selected-bg);
+      color: var(--selected-text);
+      padding: 0 4px;
+      opacity: 1;
+    }
+
+    .selector {
+      width: 10px;
+      display: inline-block;
+      opacity: 0;
+      color: inherit;
+    }
+
+    .shell-panel.nav-used .selector,
+    .shell-option.selected .selector {
+      opacity: 1;
+    }
+
+    .shell-option .command,
+    .settings-option .command {
+      color: inherit;
+      font-weight: 700;
+    }
+
+    .shell-option .meta,
+    .settings-option .meta {
+      color: rgba(--text-color);
+      opacity: 0.7;
+    }
+
+    .shell-option.selected .meta,
+    .settings-option.selected .meta {
+      color: rgba(0, 0, 0, 0.75);
+    }
+
+    .settings-panel {
+      display: none;
+      min-width: min(440px, 72vw);
+    }
+
+    .settings-panel.visible {
+      display: flex;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 24px;
+      color: var(--text-color);
+    }
+
+    .settings-row label {
+      color: var(--text-color);
+      min-width: 110px;
+    }
+
+    .settings-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-toggle {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--text-color);
+      background: transparent;
+      margin: 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .settings-toggle:checked::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      background: var(--text-color);
+    }
+
+    .settings-select {
+      width: auto;
+      min-width: 70px;
+      border: 0;
+      background: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    .settings-slider {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+      width: 130px;
+      cursor: pointer;
+    }
+
+    .settings-slider::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: var(--text-color);
+      border: 1px solid #000;
+      cursor: pointer;
+    }
+
+    .settings-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: var(--text-color);
+      border: 1px solid #000;
+      cursor: pointer;
+    }
+
+    .settings-val {
+      font-size: 13px;
+      min-width: 44px;
+      color: var(--text-color);
+      font-family: inherit;
+    }
+
+    .bg-toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .bg-mode-choice {
+      cursor: pointer;
+      transition: opacity 0.15s ease, font-weight 0.15s ease;
+      color: var(--text-color);
+    }
+
+    #bg-frame {
+      position: fixed;
+      inset: -30px;
+      width: calc(100% + 60px);
+      height: calc(100% + 60px);
+      border: none;
+      z-index: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    .logo-mask {
+      position: relative;
+      display: inline-block;
+      width: 500px;
+      height: 500px;
+      -webkit-mask-image: var(--logo);
+      mask-image: var(--logo);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-position: center;
+      mask-position: center;
+    }
+
+    .logo {
+      width: 100%;
+      height: 100%;
+      filter: brightness(0);
+    }
+
+    .logo-mask::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.7) 50%,
+        transparent 80%
+      );
+      transform: translateX(-150%) skewX(-20deg);
+      animation: shimmer 3s ease-out forwards;
+    }
+
+    @keyframes shimmer {
+      to {
+        transform: translateX(150%) skewX(-20deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <iframe id="bg-frame" src="/topo.html" title="Topographic background" aria-hidden="true" tabindex="-1"></iframe>
+  
+  <div id="banner-stack">
+    <div id="daily-banner" role="img" aria-label="Daily ASCII art banner">
+      <img id="daily-banner-image" alt="" />
+    </div>
+
+    <div class="shell-panel" aria-label="runk shell menu">
+      <div class="prompt-row">
+        <span class="prompt-label">root@fun</span>
+        <span class="prompt-symbol">:~$</span>
+        <input id="shell-input" type="text" aria-label="Command input" spellcheck="false" autocomplete="off" />
+      </div>
+
+      <div class="shell-options">
+        <button class="shell-option" data-command="./Games" data-url="/pickgame.html" aria-selected="false">
+          <span class="selector">&gt;</span>
+          <span class="command">./Games</span>
+          <span class="meta">[play]</span>
+        </button>
+
+        <button class="shell-option" data-command="./Tools" data-url="/Tools.html" aria-selected="false">
+          <span class="selector">&gt;</span>
+          <span class="command">./Tools</span>
+          <span class="meta">[make]</span>
+        </button>
+        <button class="shell-option" data-command="./Chat" data-url="/chat.html" aria-selected="false">
+          <span class="selector">&gt;</span>
+          <span class="command">./Chat</span>
+          <span class="meta">[communicate]</span>
+        </button>
+        <button class="shell-option" data-command="./Extras" data-url="/extras.html" aria-selected="false">
+          <span class="selector">&gt;</span>
+          <span class="command">./Extras</span>
+          <span class="meta">[additional]</span>
+        </button>
+        <button class="shell-option" data-command="./settings" data-url="settings" aria-selected="false">
+          <span class="selector">&gt;</span>
+          <span class="command">./settings</span>
+          <span class="meta">[config]</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-panel" id="settings-panel" aria-label="Settings menu">
+      <div class="editor-row"><span class="prompt-label">root@runk</span><span class="prompt-symbol">:~$</span><span class="command">settings</span></div>
+
+      <div class="settings-row">
+        <label for="banner-select">banner</label>
+        <select id="banner-select" class="settings-select" aria-label="Select banner number">
+          <option value="0">1</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <label for="text-color">text color</label>
+        <input id="text-color" class="settings-input" type="color" value="#b5ffbe" />
+      </div>
+
+      <div class="settings-row">
+        <label for="topo-toggle">background</label>
+        <div class="settings-inline bg-toggle-switch" id="bg-toggle-wrapper">
+          <span class="bg-mode-choice" id="bg-opt-black">black</span>
+          <input id="topo-toggle" class="settings-toggle" type="checkbox" aria-label="Toggle topo.html background" />
+          <span class="bg-mode-choice" id="bg-opt-topo">topo.html</span>
+        </div>
+      </div>
+
+      <div class="settings-row" id="bg-blur-row" style="display: none;">
+        <label for="bg-blur">bg blur</label>
+        <div class="settings-inline">
+          <input id="bg-blur" class="settings-slider" type="range" min="0" max="25" step="1" value="0" aria-label="Background blur 0 to 25" />
+          <span class="settings-val" id="bg-blur-val">0px</span>
+        </div>
+      </div>
+
+      <div class="settings-row" id="bg-darkness-row" style="display: none;">
+        <label for="bg-darkness">bg darkness</label>
+        <div class="settings-inline">
+          <input id="bg-darkness" class="settings-slider" type="range" min="0" max="100" step="1" value="0" aria-label="Background darkness 0 to 100" />
+          <span class="settings-val" id="bg-darkness-val">0%</span>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <button class="settings-option" data-close="true" type="button">
+          <span class="selector">&gt;</span>
+          <span class="command">save & exit</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const bannerFiles = [
+        "banners/ascii-art (0).png",
+        "banners/ascii-art (1).png",
+        "banners/ascii-art (2).png",
+        "banners/ascii-art (3).png",
+        "banners/ascii-art (4).png",
+        "banners/ascii-art (5).png",
+        "banners/ascii-art (6).png",
+        "banners/ascii-art (7).png",
+        "banners/ascii-art (8).png",
+        "banners/ascii-art (9).png",
+        "banners/ascii-art (10).png",
+        "banners/ascii-art (11).png",
+        "banners/ascii-art (12).png",
+        "banners/ascii-art (13).png",
+        "banners/ascii-art (14).png",
+        "banners/ascii-art (15).png",
+        "banners/ascii-art (16).png",
+        "banners/ascii-art (17).png",
+        "banners/ascii-art (18).png",
+        "banners/ascii-art (19).png",
+        "banners/ascii-art (20).png",
+        "banners/ascii-art (21).png",
+        "banners/ascii-art (22).png",
+        "banners/ascii-art (23).png",
+        "banners/ascii-art (24).png",
+        "banners/ascii-art (25).png",
+        "banners/ascii-art (26).png",
+        "banners/ascii-art (27).png",
+        "banners/ascii-art (28).png",
+        "banners/ascii-art (29).png",
+        "banners/ascii-art (30).png"
+      ];
+
+      function getDailyBanner() {
+        const today = new Date();
+        const seed = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+        const index = Math.abs(Math.floor(seed / 86400000)) % bannerFiles.length;
+        return bannerFiles[index];
+      }
+
+      const banner = document.getElementById("daily-banner");
+      const bannerImage = document.getElementById("daily-banner-image");
+      if (banner && bannerImage) {
+        const bannerSource = getDailyBanner();
+        bannerImage.src = bannerSource;
+        banner.style.setProperty("--banner-mask", `url("${bannerSource}")`);
+      }
+    })();
+
+    const shellInput = document.getElementById("shell-input");
+    const shellPanel = document.querySelector(".shell-panel");
+    const settingsPanel = document.getElementById("settings-panel");
+    const bannerSelect = document.getElementById("banner-select");
+    const textColorInput = document.getElementById("text-color");
+    const topoToggle = document.getElementById("topo-toggle");
+    const bgBlurInput = document.getElementById("bg-blur");
+    const bgDarknessInput = document.getElementById("bg-darkness");
+    const bgBlurRow = document.getElementById("bg-blur-row");
+    const bgDarknessRow = document.getElementById("bg-darkness-row");
+    const bgBlurVal = document.getElementById("bg-blur-val");
+    const bgDarknessVal = document.getElementById("bg-darkness-val");
+    const bgOptBlack = document.getElementById("bg-opt-black");
+    const bgOptTopo = document.getElementById("bg-opt-topo");
+    const bgFrame = document.getElementById("bg-frame");
+    const options = Array.from(document.querySelectorAll(".shell-option"));
+    let selectedIndex = -1;
+
+    const bannerFiles = [
+      "banners/ascii-art (0).png",
+      "banners/ascii-art (1).png",
+      "banners/ascii-art (2).png",
+      "banners/ascii-art (3).png",
+      "banners/ascii-art (4).png",
+      "banners/ascii-art (5).png",
+      "banners/ascii-art (6).png",
+      "banners/ascii-art (7).png",
+      "banners/ascii-art (8).png",
+      "banners/ascii-art (9).png",
+      "banners/ascii-art (10).png",
+      "banners/ascii-art (11).png",
+      "banners/ascii-art (12).png",
+      "banners/ascii-art (13).png",
+      "banners/ascii-art (14).png",
+      "banners/ascii-art (15).png",
+      "banners/ascii-art (16).png",
+      "banners/ascii-art (17).png",
+      "banners/ascii-art (18).png",
+      "banners/ascii-art (19).png",
+      "banners/ascii-art (20).png",
+      "banners/ascii-art (21).png",
+      "banners/ascii-art (22).png",
+      "banners/ascii-art (23).png",
+      "banners/ascii-art (24).png",
+      "banners/ascii-art (25).png",
+      "banners/ascii-art (26).png",
+      "banners/ascii-art (27).png",
+      "banners/ascii-art (28).png",
+      "banners/ascii-art (29).png",
+      "banners/ascii-art (30).png"
+    ];
+
+    function getDefaultSettings() {
+      return {
+        bannerIndex: 0,
+        textColor: "#b5ffbe",
+        topoBg: false,
+        bgBlur: 0,
+        bgDarkness: 0
+      };
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem("runk-shell-settings");
+        return raw ? { ...getDefaultSettings(), ...JSON.parse(raw) } : getDefaultSettings();
+      } catch (error) {
+        return getDefaultSettings();
+      }
+    }
+
+    function saveSettings() {
+      const settings = {
+        bannerIndex: Number(bannerSelect ? bannerSelect.value : 0),
+        textColor: textColorInput ? textColorInput.value : "#b5ffbe",
+        topoBg: Boolean(topoToggle && topoToggle.checked),
+        bgBlur: Number(bgBlurInput ? bgBlurInput.value : 0),
+        bgDarkness: Number(bgDarknessInput ? bgDarknessInput.value : 0)
+      };
+      localStorage.setItem("runk-shell-settings", JSON.stringify(settings));
+    }
+
+    function updateBackgroundState() {
+      const isTopo = Boolean(topoToggle && topoToggle.checked);
+      const blur = Math.max(0, Math.min(25, Number(bgBlurInput ? bgBlurInput.value : 0)));
+      const darkness = Math.max(0, Math.min(100, Number(bgDarknessInput ? bgDarknessInput.value : 0)));
+
+      if (bgOptBlack && bgOptTopo) {
+        bgOptBlack.style.opacity = isTopo ? "0.45" : "1";
+        bgOptBlack.style.fontWeight = isTopo ? "400" : "700";
+        bgOptTopo.style.opacity = isTopo ? "1" : "0.45";
+        bgOptTopo.style.fontWeight = isTopo ? "700" : "400";
+      }
+
+      if (bgBlurRow) bgBlurRow.style.display = isTopo ? "flex" : "none";
+      if (bgDarknessRow) bgDarknessRow.style.display = isTopo ? "flex" : "none";
+
+      if (bgBlurVal) bgBlurVal.textContent = `${blur}px`;
+      if (bgDarknessVal) bgDarknessVal.textContent = `${darkness}%`;
+
+      if (bgFrame) {
+        if (isTopo) {
+          bgFrame.style.display = "block";
+          const brightness = Math.max(0, Math.min(1, (100 - darkness) / 100));
+          bgFrame.style.filter = `blur(${blur}px) brightness(${brightness})`;
+        } else {
+          bgFrame.style.display = "none";
+        }
+      }
+    }
+
+    function applySettings() {
+      const settings = loadSettings();
+
+      if (bannerSelect) {
+        bannerSelect.innerHTML = bannerFiles
+          .map((_, index) => `<option value="${index}">${index + 1}</option>`)
+          .join("");
+        bannerSelect.value = String(settings.bannerIndex);
+      }
+
+      if (textColorInput) {
+        textColorInput.value = settings.textColor || "#b5ffbe";
+      }
+
+      document.documentElement.style.setProperty("--text-color", settings.textColor || "#b5ffbe");
+      document.documentElement.style.setProperty("--selected-bg", settings.textColor || "#b5ffbe");
+      document.documentElement.style.setProperty("--selected-text", "#000000");
+
+      updateBannerDisplay(Number(settings.bannerIndex || 0));
+
+      if (topoToggle) {
+        topoToggle.checked = Boolean(settings.topoBg);
+      }
+      if (bgBlurInput) {
+        bgBlurInput.value = settings.bgBlur ?? 0;
+      }
+      if (bgDarknessInput) {
+        bgDarknessInput.value = settings.bgDarkness ?? 0;
+      }
+
+      updateBackgroundState();
+    }
+
+    function updateBannerDisplay(index) {
+      const safeIndex = Math.max(0, Math.min(index, bannerFiles.length - 1));
+      const banner = document.getElementById("daily-banner");
+      const bannerImage = document.getElementById("daily-banner-image");
+      if (banner && bannerImage) {
+        const bannerSource = bannerFiles[safeIndex];
+        bannerImage.src = bannerSource;
+        banner.style.setProperty("--banner-mask", `url("${bannerSource}")`);
+      }
+    }
+
+    function showSettingsPanel() {
+      if (settingsPanel) {
+        settingsPanel.classList.add("visible");
+      }
+      if (shellPanel) {
+        shellPanel.style.display = "none";
+      }
+      if (shellInput) {
+        shellInput.blur();
+      }
+    }
+
+    function hideSettingsPanel() {
+      if (settingsPanel) {
+        settingsPanel.classList.remove("visible");
+      }
+      if (shellPanel) {
+        shellPanel.style.display = "flex";
+      }
+      if (shellInput) {
+        shellInput.focus();
+      }
+    }
+
+    function updateSelection(nextIndex) {
+      selectedIndex = (nextIndex + options.length) % options.length;
+      options.forEach((button, index) => {
+        const isSelected = index === selectedIndex;
+        button.classList.toggle("selected", isSelected);
+        button.setAttribute("aria-selected", String(isSelected));
+      });
+
+      if (shellPanel) {
+        shellPanel.classList.add("nav-used");
+      }
+
+      const selectedCommand = options[selectedIndex].dataset.command;
+      if (shellInput && shellInput.value.trim() === "") {
+        shellInput.value = selectedCommand;
+      }
+    }
+
+    function openSelected() {
+      const selected = options[selectedIndex];
+      if (!selected) return;
+
+      const url = selected.getAttribute("data-url");
+      if (url === "settings") {
+        showSettingsPanel();
+        return;
+      }
+
+      if (url) {
+        window.open(url, "_current", "noopener,noreferrer");
+      }
+    }
+
+    function normalizeCommand(value) {
+      return String(value || "")
+        .trim()
+        .replace(/^\.?\/+/, "")
+        .replace(/^\.+/, "")
+        .toLowerCase();
+    }
+
+    function applyAutocomplete() {
+      const typed = normalizeCommand(shellInput.value);
+      const match = options.find((button) =>
+        normalizeCommand(button.dataset.command).startsWith(typed)
+      );
+
+      if (match) {
+        const matchIndex = options.indexOf(match);
+        updateSelection(matchIndex);
+        shellInput.value = match.dataset.command;
+      }
+    }
+
+    options.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        updateSelection(index);
+        shellInput.value = button.dataset.command;
+        openSelected();
+      });
+    });
+
+    shellInput.addEventListener("focus", () => {
+      if (selectedIndex === -1 && shellInput.value.trim() === "") {
+        shellInput.value = "";
+      }
+    });
+
+    shellInput.addEventListener("input", () => {
+      const typed = normalizeCommand(shellInput.value);
+      if (!typed) {
+        shellInput.value = "";
+        return;
+      }
+
+      const matchIndex = options.findIndex((button) =>
+        normalizeCommand(button.dataset.command).startsWith(typed)
+      );
+
+      if (matchIndex >= 0) {
+        updateSelection(matchIndex);
+      }
+    });
+
+    shellInput.addEventListener("keydown", (event) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        applyAutocomplete();
+      }
+    });
+
+    if (bannerSelect) {
+      bannerSelect.addEventListener("change", () => {
+        const index = Number(bannerSelect.value);
+        updateBannerDisplay(index);
+        saveSettings();
+      });
+    }
+
+    if (textColorInput) {
+      textColorInput.addEventListener("input", () => {
+        const color = textColorInput.value;
+        document.documentElement.style.setProperty("--text-color", color);
+        document.documentElement.style.setProperty("--selected-bg", color);
+        saveSettings();
+      });
+    }
+
+    if (topoToggle) {
+      topoToggle.addEventListener("change", () => {
+        updateBackgroundState();
+        saveSettings();
+      });
+    }
+
+    if (bgOptBlack) {
+      bgOptBlack.addEventListener("click", () => {
+        if (topoToggle && topoToggle.checked) {
+          topoToggle.checked = false;
+          updateBackgroundState();
+          saveSettings();
+        }
+      });
+    }
+
+    if (bgOptTopo) {
+      bgOptTopo.addEventListener("click", () => {
+        if (topoToggle && !topoToggle.checked) {
+          topoToggle.checked = true;
+          updateBackgroundState();
+          saveSettings();
+        }
+      });
+    }
+
+    if (bgBlurInput) {
+      bgBlurInput.addEventListener("input", () => {
+        updateBackgroundState();
+        saveSettings();
+      });
+    }
+
+    if (bgDarknessInput) {
+      bgDarknessInput.addEventListener("input", () => {
+        updateBackgroundState();
+        saveSettings();
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (settingsPanel && settingsPanel.classList.contains("visible")) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          hideSettingsPanel();
+          saveSettings();
+        }
+        return;
+      }
+
+      if (event.key === "ArrowDown" || event.key === "j") {
+        event.preventDefault();
+        updateSelection(selectedIndex + 1);
+        shellInput.value = options[selectedIndex].dataset.command;
+      }
+
+      if (event.key === "ArrowUp" || event.key === "k") {
+        event.preventDefault();
+        updateSelection(selectedIndex - 1);
+        shellInput.value = options[selectedIndex].dataset.command;
+      }
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openSelected();
+      }
+    });
+
+    const closeSettingsButton = document.querySelector("[data-close='true']");
+    if (closeSettingsButton) {
+      closeSettingsButton.addEventListener("click", () => {
+        saveSettings();
+        hideSettingsPanel();
+      });
+    }
+
+    applySettings();
+
+    if (shellInput) {
+      shellInput.focus();
+      shellInput.setSelectionRange(shellInput.value.length, shellInput.value.length);
+    };
+  </script>
+  
+</body>
+</html>

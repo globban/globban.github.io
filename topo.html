@@ -51,13 +51,22 @@
         const oneDay = 1000 * 60 * 60 * 24;
         const dayOfYear = Math.floor(diff / oneDay);
         const imageNumber = (dayOfYear % totalImages) + 1;
-        const backgroundImage = `./backgrounds/${imageNumber}.webp`;
+        const defaultBackground = `./backgrounds/${imageNumber}.webp`;
+        const backgroundKey = 'algot.topoBackground';
 
-        document.getElementById('particles-js').style.backgroundImage = `url('${backgroundImage}')`;
-        document.body.style.backgroundImage = `url('${backgroundImage}')`;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-        document.body.style.backgroundAttachment = 'fixed';
+        function applyBackground(background) {
+            const imageUrl = `url("${background || defaultBackground}")`;
+            document.getElementById('particles-js').style.backgroundImage = imageUrl;
+            document.body.style.backgroundImage = imageUrl;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
+        }
+
+        applyBackground(localStorage.getItem(backgroundKey));
+        window.addEventListener('storage', (event) => {
+            if (event.key === backgroundKey) applyBackground(event.newValue);
+        });
 
         particlesJS("particles-js", {
             "particles": {

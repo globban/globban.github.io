@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Background Removal</title>
+  <script type="module" crossorigin src="/removebg/assets/index-E_M5nW8h.js"></script>
+  <link rel="stylesheet" crossorigin href="/removebg/assets/index-SojaDS6z.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Trebuchet MS", sans-serif;
+      background: #101716;
+      color: #eef4f0;
+    }
+
+    body {
+      min-height: 100vh;
+      gap: 12px;
+      padding: 32px 20px;
+      background: transparent;
+      isolation: isolate;
+    }
+
+    #topo-background, .topo-tint {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      pointer-events: none;
+    }
+
+    #topo-background { z-index: 0; }
+    .topo-tint { z-index: 1; background: rgba(5, 12, 9, 0.42); }
+    body > :not(#topo-background):not(.topo-tint) { position: relative; z-index: 2; }
+
+    h1 { font-size: clamp(22px, 3vw, 34px); }
+    h1 a, h4 a { color: #a6e0bd; }
+    h4 { max-width: 700px; color: #aab9b1; line-height: 1.5; }
+
+    #container {
+      border: 1px dashed rgba(231, 248, 238, 0.58);
+      border-radius: 18px;
+      background: rgba(231, 248, 238, 0.105);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.2), 0 14px 36px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(15px) saturate(135%);
+      -webkit-backdrop-filter: blur(15px) saturate(135%);
+      transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    #container.is-dragging {
+      border-color: #d3f5dd;
+      background: rgba(170, 229, 190, 0.22);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.35), 0 0 0 4px rgba(211, 245, 221, 0.12);
+    }
+
+    #upload-button { gap: 10px; padding: 20px; color: #f3fbf6; text-align: center; }
+    #upload-button svg path { fill: #d4f1de; }
+    #example { color: #d4f1de; }
+    #status { color: #f0f7f2; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7); }
+
+    #download-result, .result-button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 18px;
+      border: 1px solid rgba(238, 250, 242, 0.56);
+      border-radius: 8px;
+      background: rgba(224, 245, 231, 0.2);
+      color: #fff;
+      backdrop-filter: blur(12px) saturate(135%);
+      -webkit-backdrop-filter: blur(12px) saturate(135%);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #make-another, #copy-result { cursor: pointer; }
+    #make-another {
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid rgba(238, 250, 242, 0.35);
+      border-radius: 8px;
+      background: rgba(15, 25, 20, 0.4);
+      color: #f1f8f3;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    #download-result:hover, .result-button:hover, #make-another:hover { background-color: rgba(224, 245, 231, 0.32); }
+
+    #download-result[hidden], #make-another[hidden], #copy-result[hidden] { display: none; }
+
+    #batch-results {
+      display: grid;
+      width: min(720px, 100%);
+      gap: 8px;
+    }
+
+    #batch-results[hidden] { display: none; }
+
+    #image-history {
+      display: grid;
+      width: min(720px, 100%);
+      gap: 8px;
+    }
+
+    #image-history h2 {
+      margin: 12px 0 2px;
+      color: #eef4f0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .batch-result, .history-result {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 12px;
+      border: 1px solid rgba(238, 250, 242, 0.2);
+      border-radius: 10px;
+      background: rgba(15, 25, 20, 0.44);
+      color: #f0f7f2;
+      font-size: 13px;
+      backdrop-filter: blur(12px) saturate(125%);
+      -webkit-backdrop-filter: blur(12px) saturate(125%);
+    }
+
+    .batch-result a, .history-result a { color: #d3f5dd; white-space: nowrap; }
+    .row-actions { display: flex; align-items: center; gap: 12px; }
+    .row-actions button { padding: 6px 9px; border: 1px solid rgba(238, 250, 242, 0.32); border-radius: 6px; background: rgba(231, 248, 238, 0.1); color: #f2f8f4; cursor: pointer; backdrop-filter: blur(8px); }
+    .history-name { min-width: 0; overflow-wrap: anywhere; border: 0; padding: 0; background: transparent; color: #f0f7f2; font: inherit; text-align: left; cursor: pointer; }
+    .history-name:hover, .history-name:focus-visible { color: #d3f5dd; text-decoration: underline; }
+    #container .history-preview { display: block; width: 100%; height: 100%; object-fit: contain; cursor: pointer; }
+    .history-empty { color: #d2ded6; font-size: 13px; }
+
+    @media (max-width: 560px) {
+      body { padding: 24px 16px; }
+      #container { min-height: 280px; }
+      #upload-button { font-size: 16px; }
+    }
+  </style>
+</head>
+
+<body>
+  <iframe id="topo-background" src="/topo.html" title="Topographic background" aria-hidden="true" tabindex="-1"></iframe>
+  <div class="topo-tint" aria-hidden="true"></div>
+  <h1>Image Background Remover</a>
+  </h1>
+  <h4>Runs locally in your browser, powered by the <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank">RMBG V1.4 model</a> from <a
+      href="https://bria.ai/" target="_blank">BRIA AI</a>, OPSEC is very potent, no data is sent to any server, and the model runs entirely in your browser
+  </h4>
+  <div id="container">
+    <label id="upload-button" for="upload" >
+      <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#000"
+          d="M3.5 24.3a3 3 0 0 1-1.9-.8c-.5-.5-.8-1.2-.8-1.9V2.9c0-.7.3-1.3.8-1.9.6-.5 1.2-.7 2-.7h18.6c.7 0 1.3.2 1.9.7.5.6.7 1.2.7 2v18.6c0 .7-.2 1.4-.7 1.9a3 3 0 0 1-2 .8H3.6Zm0-2.7h18.7V2.9H3.5v18.7Zm2.7-2.7h13.3c.3 0 .5 0 .6-.3v-.7l-3.7-5a.6.6 0 0 0-.6-.2c-.2 0-.4 0-.5.3l-3.5 4.6-2.4-3.3a.6.6 0 0 0-.6-.3c-.2 0-.4.1-.5.3l-2.7 3.6c-.1.2-.2.4 0 .7.1.2.3.3.6.3Z">
+        </path>
+      </svg>
+      <span>Choose images or drop them here</span>
+      <span id="example" style="display:none;">Try an example image</span>
+    </label>
+  </div>
+  <label id="status"></label>
+  <input id="upload" type="file" accept="image/*" multiple />
+  <div id="result-actions">
+    <a id="download-result" href="#" download="background-removed.png" hidden>Download PNG</a>
+    <button id="copy-result" class="result-button" type="button" hidden>Copy PNG</button>
+    <button id="make-another" type="button" hidden>Make another</button>
+  </div>
+  <div id="batch-results" aria-live="polite" hidden></div>
+  <section id="image-history" aria-labelledby="history-heading">
+    <h2 id="history-heading">Recent results</h2>
+    <div id="history-list" aria-live="polite"><span class="history-empty">No processed images yet.</span></div>
+  </section>
+
+  <script>
+    const uploadInput = document.getElementById('upload');
+    const resultContainer = document.getElementById('container');
+    const uploadPrompt = document.getElementById('upload-button');
+    const downloadResult = document.getElementById('download-result');
+    const copyResult = document.getElementById('copy-result');
+    const makeAnother = document.getElementById('make-another');
+    const batchResults = document.getElementById('batch-results');
+    const historyList = document.getElementById('history-list');
+    const status = document.getElementById('status');
+    let resultFilename = 'background-removed.png';
+    const wiredCanvases = new WeakSet();
+    const batchObjectUrls = [];
+    const historyObjectUrls = [];
+    const recordedCanvases = new WeakSet();
+    let activeHistoryPreviewUrl = null;
+    let batchRunning = false;
+    const modelReady = waitForStatus((text) => text === 'Ready' || text === 'Done!', 600000);
+
+    function openHistoryDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('background-removal-history', 1);
+        request.onupgradeneeded = () => {
+          request.result.createObjectStore('results', { keyPath: 'id' });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function getHistory() {
+      const database = await openHistoryDatabase();
+      return new Promise((resolve, reject) => {
+        const request = database.transaction('results', 'readonly').objectStore('results').getAll();
+        request.onsuccess = () => resolve(request.result.sort((a, b) => b.createdAt - a.createdAt));
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function saveHistory(filename, blob) {
+      const database = await openHistoryDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction('results', 'readwrite');
+        const store = transaction.objectStore('results');
+        store.add({ id: crypto.randomUUID(), filename, blob, createdAt: Date.now() });
+        const request = store.getAll();
+        request.onsuccess = () => {
+          request.result.sort((a, b) => b.createdAt - a.createdAt)
+            .slice(12)
+            .forEach((item) => store.delete(item.id));
+        };
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+      database.close();
+      renderHistory(await getHistory());
+    }
+
+    function copyPng(blob) {
+      if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+        status.textContent = 'PNG clipboard copy is not supported in this browser.';
+        return;
+      }
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+        .then(() => { status.textContent = 'PNG copied to clipboard.'; })
+        .catch(() => { status.textContent = 'Clipboard access was denied. Allow clipboard access and try again.'; });
+    }
+
+    function renderHistory(records) {
+      historyObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+      historyObjectUrls.length = 0;
+      historyList.replaceChildren();
+      if (!records.length) {
+        const empty = document.createElement('span');
+        empty.className = 'history-empty';
+        empty.textContent = 'No processed images yet.';
+        historyList.append(empty);
+        return;
+      }
+
+      records.forEach((record) => {
+        const row = document.createElement('div');
+        row.className = 'history-result';
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'history-name';
+        label.textContent = record.filename;
+        label.setAttribute('aria-label', `Preview ${record.filename}`);
+        label.addEventListener('click', () => showHistoryPreview(record));
+        const actions = document.createElement('span');
+        actions.className = 'row-actions';
+        const url = URL.createObjectURL(record.blob);
+        historyObjectUrls.push(url);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = record.filename;
+        link.textContent = 'Download';
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.textContent = 'Copy PNG';
+        copy.addEventListener('click', () => copyPng(record.blob));
+        actions.append(link, copy);
+        row.append(label, actions);
+        historyList.append(row);
+      });
+    }
+
+    function showHistoryPreview(record) {
+      if (activeHistoryPreviewUrl) URL.revokeObjectURL(activeHistoryPreviewUrl);
+      activeHistoryPreviewUrl = URL.createObjectURL(record.blob);
+      const preview = document.createElement('img');
+      preview.className = 'history-preview';
+      preview.src = activeHistoryPreviewUrl;
+      preview.alt = `Preview of ${record.filename}`;
+      preview.title = 'Click to choose another image';
+      resultFilename = record.filename;
+      resultContainer.replaceChildren(preview);
+      resultContainer.style.width = '';
+      resultContainer.style.height = '';
+      resultContainer.style.background = 'repeating-conic-gradient(rgba(255,255,255,.12) 0% 25%, rgba(0,0,0,.12) 0% 50%) 50% / 24px 24px';
+      downloadResult.hidden = true;
+      copyResult.hidden = true;
+      makeAnother.hidden = false;
+      status.textContent = `Previewing ${record.filename}`;
+    }
+
+    function waitForStatus(predicate, timeout = 300000) {
+      if (predicate(status.textContent)) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const observer = new MutationObserver(() => {
+          if (!predicate(status.textContent)) return;
+          clearTimeout(timer);
+          observer.disconnect();
+          resolve();
+        });
+        const timer = setTimeout(() => {
+          observer.disconnect();
+          reject(new Error('Processing took too long.'));
+        }, timeout);
+        observer.observe(status, { childList: true, characterData: true, subtree: true });
+      });
+    }
+
+    function addBatchResult(file, blob) {
+      const filename = `${file.name.replace(/\.[^.]+$/, '')}-no-background.png`;
+      const url = URL.createObjectURL(blob);
+      batchObjectUrls.push(url);
+      const row = document.createElement('div');
+      row.className = 'batch-result';
+      const label = document.createElement('span');
+      label.textContent = filename;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.textContent = 'Download PNG';
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.textContent = 'Copy PNG';
+      copy.addEventListener('click', () => copyPng(blob));
+      const actions = document.createElement('span');
+      actions.className = 'row-actions';
+      actions.append(link, copy);
+      row.append(label, actions);
+      batchResults.append(row);
+      batchResults.hidden = false;
+    }
+
+    getHistory().then(renderHistory).catch(() => {
+      historyList.textContent = 'History storage is unavailable in this browser.';
+    });
+
+    async function processBatch(files) {
+      batchRunning = true;
+      batchResults.replaceChildren();
+      batchResults.hidden = true;
+      batchObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+      batchObjectUrls.length = 0;
+      makeAnother.disabled = true;
+
+      try {
+        await modelReady;
+        let completed = 0;
+        for (const [index, file] of files.entries()) {
+          resultFilename = `${file.name.replace(/\.[^.]+$/, '')}-no-background.png`;
+          uploadInput.value = '';
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          uploadInput.files = transfer.files;
+          status.textContent = `Preparing ${index + 1} of ${files.length}...`;
+          const analysing = waitForStatus((text) => text === 'Analysing...');
+          uploadInput.dispatchEvent(new Event('change', { bubbles: true }));
+          try {
+            await analysing;
+            await waitForStatus((text) => text === 'Done!');
+            const canvas = resultContainer.querySelector('canvas');
+            const blob = canvas && await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) throw new Error('Could not export the processed image.');
+            addBatchResult(file, blob);
+            completed++;
+          } catch (error) {
+            const row = document.createElement('div');
+            row.className = 'batch-result';
+            row.textContent = `${file.name}: ${error.message}`;
+            batchResults.append(row);
+            batchResults.hidden = false;
+          }
+        }
+        status.textContent = `Finished ${completed} of ${files.length} images.`;
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        batchRunning = false;
+        makeAnother.disabled = false;
+      }
+    }
+
+    uploadInput.addEventListener('change', (event) => {
+      const files = [...uploadInput.files].filter((file) => file.type.startsWith('image/'));
+      if (batchRunning || files.length < 2) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      processBatch(files);
+    }, true);
+
+    function uploadFiles(files) {
+      const images = [...files].filter((file) => file.type.startsWith('image/'));
+      if (!images.length) {
+        status.textContent = 'Choose or paste an image file.';
+        return;
+      }
+      const transfer = new DataTransfer();
+      images.forEach((file) => transfer.items.add(file));
+      uploadInput.files = transfer.files;
+      uploadInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    uploadInput.addEventListener('change', () => {
+      const file = uploadInput.files?.[0];
+      if (file) resultFilename = `${file.name.replace(/\.[^.]+$/, '')}-no-background.png`;
+    }, true);
+
+    resultContainer.addEventListener('click', (event) => {
+      if (event.target.closest('#upload-button')) return;
+      uploadInput.value = '';
+      uploadInput.click();
+    });
+
+    const dropTargets = [document.body];
+    dropTargets.forEach((target) => {
+      target.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        resultContainer.classList.add('is-dragging');
+      });
+      target.addEventListener('dragleave', (event) => {
+        if (!event.relatedTarget || !target.contains(event.relatedTarget)) {
+          resultContainer.classList.remove('is-dragging');
+        }
+      });
+      target.addEventListener('drop', (event) => {
+        event.preventDefault();
+        resultContainer.classList.remove('is-dragging');
+        const files = [...(event.dataTransfer?.files || [])].filter((item) => item.type.startsWith('image/'));
+        if (files.length) uploadFiles(files);
+      });
+    });
+
+    document.getElementById('example').addEventListener('click', () => {
+      resultFilename = 'example-no-background.png';
+    }, true);
+
+    new MutationObserver(() => {
+      const resultCanvas = resultContainer.querySelector('canvas');
+      const historyPreview = resultContainer.querySelector('.history-preview');
+      downloadResult.hidden = !resultCanvas;
+      copyResult.hidden = !resultCanvas;
+      makeAnother.hidden = !resultCanvas && !historyPreview;
+      if (resultCanvas && !wiredCanvases.has(resultCanvas)) {
+        wiredCanvases.add(resultCanvas);
+        resultCanvas.draggable = true;
+        resultCanvas.style.cursor = 'grab';
+        resultCanvas.addEventListener('dragstart', (event) => {
+          if (!event.dataTransfer) {
+            event.preventDefault();
+            return;
+          }
+          const imageData = resultCanvas.toDataURL('image/png');
+          event.dataTransfer.setData('DownloadURL', `image/png:${resultFilename}:${imageData}`);
+          event.dataTransfer.setData('text/uri-list', imageData);
+        });
+      }
+      if (resultCanvas && !recordedCanvases.has(resultCanvas)) {
+        recordedCanvases.add(resultCanvas);
+        resultCanvas.toBlob((blob) => {
+          if (blob) saveHistory(resultFilename, blob).catch(() => {
+            status.textContent = 'Could not save this image to history.';
+          });
+        }, 'image/png');
+      }
+    }).observe(resultContainer, { childList: true });
+
+    copyResult.addEventListener('click', async () => {
+      const resultCanvas = resultContainer.querySelector('canvas');
+      if (!resultCanvas || !navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+        status.textContent = 'PNG clipboard copy is not supported in this browser.';
+        return;
+      }
+      const blob = await new Promise((resolve) => resultCanvas.toBlob(resolve, 'image/png'));
+      if (!blob) {
+        status.textContent = 'Could not create the PNG image.';
+        return;
+      }
+      copyPng(blob);
+    });
+
+    document.addEventListener('paste', async (event) => {
+      const pastedFiles = [...(event.clipboardData?.items || [])]
+        .filter((item) => item.type.startsWith('image/'))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (pastedFiles.length) {
+        event.preventDefault();
+        uploadFiles(pastedFiles);
+        return;
+      }
+
+      const pastedText = event.clipboardData?.getData('text/plain')?.trim();
+      if (!pastedText) return;
+      let imageUrl;
+      try {
+        imageUrl = new URL(pastedText);
+      } catch {
+        return;
+      }
+      if (!['http:', 'https:'].includes(imageUrl.protocol)) return;
+
+      event.preventDefault();
+      status.textContent = 'Loading image link...';
+      try {
+        const response = await fetch(imageUrl.href);
+        if (!response.ok) throw new Error('Image link could not be loaded.');
+        const blob = await response.blob();
+        if (!blob.type.startsWith('image/')) throw new Error('That link does not return an image.');
+        const fileName = decodeURIComponent(imageUrl.pathname.split('/').pop() || 'pasted-image')
+          .replace(/[^a-zA-Z0-9._-]/g, '_');
+        uploadFiles([new File([blob], fileName, { type: blob.type })]);
+      } catch (error) {
+        status.textContent = error instanceof TypeError
+          ? 'Could not load that link. The image host may block browser access.'
+          : error.message;
+      }
+    });
+
+    makeAnother.addEventListener('click', () => {
+      batchObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+      batchObjectUrls.length = 0;
+      batchResults.replaceChildren();
+      batchResults.hidden = true;
+      uploadInput.value = '';
+      if (activeHistoryPreviewUrl) {
+        URL.revokeObjectURL(activeHistoryPreviewUrl);
+        activeHistoryPreviewUrl = null;
+      }
+      resultContainer.replaceChildren(uploadPrompt);
+      resultContainer.style.removeProperty('width');
+      resultContainer.style.removeProperty('height');
+      resultContainer.style.removeProperty('background');
+      resultContainer.style.removeProperty('background-image');
+      resultContainer.classList.remove('is-dragging');
+      downloadResult.hidden = true;
+      copyResult.hidden = true;
+      makeAnother.hidden = true;
+      status.textContent = 'Ready';
+    });
+
+    downloadResult.addEventListener('click', (event) => {
+      const resultCanvas = resultContainer.querySelector('canvas');
+      if (!resultCanvas) {
+        event.preventDefault();
+        return;
+      }
+      event.preventDefault();
+      resultCanvas.toBlob((blob) => {
+        if (!blob) return;
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = resultFilename;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      }, 'image/png');
+    });
+  </script>
+
+
+</body>
+
+</html>

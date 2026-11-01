@@ -12,6 +12,12 @@
         "category": "casual"
     },
     {
+        "gameid": "larp-market",
+        "customurl": "/larpmarket.html",
+        "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWrmLx2HwJhAKAHVex6KAq8OQDNJXhRKvXlnkGfSnPug&s=10",
+        "category": "casual"
+    },
+    {
         "gameid": "cork-7",
         "customurl": "https://cork7.com/",
         "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzjTUFV1p622P-8UE4cfWHjKD1758meKWhMzo0EC4rHA&s=10",

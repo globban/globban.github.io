@@ -25,7 +25,7 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
         
         /* The Background Iframe */
-        #bg-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: -1; }
+        #bg-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 0; }
         
         /* The Refractive Glass Layer */
         canvas { display: block; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; }
@@ -181,9 +181,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        const isPreviewMode = new URLSearchParams(window.location.search).has('preview');
         const canvas = document.getElementById('gl');
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(isPreviewMode ? 1 : window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         const scene = new THREE.Scene();
@@ -202,7 +203,8 @@
         const oneDay = 1000 * 60 * 60 * 24;
         const dayOfYear = Math.floor(diff / oneDay);
         const imageNumber = (dayOfYear % totalImages) + 1;
-        const backgroundImage = `./backgrounds/${imageNumber}.webp`;
+        const defaultBackground = `./backgrounds/${imageNumber}.webp`;
+        const backgroundKey = 'algot.topoBackground';
 
         let targetHover = -1;
         let hoverValues = [0, 0, 0, 0];
@@ -263,10 +265,7 @@
                 }
 
                 if (sd > 0.0) {
-                    vec2 bgUV = getCoverUV(vUv, uResolution, uTextureRes);
-                    vec3 bg = texture2D(uBgTex, bgUV).rgb;
-                    float shadow = (1.0 - smoothstep(0.0, mix(18.0, 48.0, hVal), sd)) * mix(0.18, 0.05, hVal);
-                    gl_FragColor = vec4(bg * (1.0 - shadow), 1.0);
+                    gl_FragColor = vec4(0.0);
                     return;
                 }
 
@@ -291,6 +290,7 @@
         const material = new THREE.ShaderMaterial({
             vertexShader,
             fragmentShader,
+            transparent: true,
             uniforms: {
                 uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
                 uTextureRes: { value: new THREE.Vector2(1920, 1080) },
@@ -306,9 +306,22 @@
             }
         });
 
-        loader.load(backgroundImage, (tex) => {
-            material.uniforms.uBgTex.value = tex;
-            material.uniforms.uTextureRes.value.set(tex.image.width, tex.image.height);
+        let currentBackgroundTexture = null;
+
+        function loadBackgroundTexture() {
+            const background = localStorage.getItem(backgroundKey) || defaultBackground;
+            loader.load(background, (texture) => {
+                currentBackgroundTexture?.dispose();
+                currentBackgroundTexture = texture;
+                material.uniforms.uBgTex.value = texture;
+                material.uniforms.uTextureRes.value.set(texture.image.width, texture.image.height);
+                renderer.render(scene, camera);
+            });
+        }
+
+        loadBackgroundTexture();
+        window.addEventListener('storage', (event) => {
+            if (event.key === backgroundKey) loadBackgroundTexture();
         });
 
         scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
@@ -337,7 +350,9 @@
             material.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
             syncCardMetrics();
             renderer.render(scene, camera);
-            requestAnimationFrame(render);
+            if (!isPreviewMode || targetHover >= 0 || hoverValues.some(value => value > 0.001)) {
+                requestAnimationFrame(render);
+            }
         }
 
         window.addEventListener('resize', () => {
@@ -356,22 +371,28 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 <script>
+    const isPreview = new URLSearchParams(window.location.search).has("preview");
+    const splash = document.getElementById("splash");
 
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      const splash = document.getElementById("splash");
-      splash.style.opacity = "0";
-      
-      // Remove it from DOM after fade-out
-      setTimeout(() => splash.remove(), 600);
-    }, 1000); // matches shimmer duration
-  
-  });
+    if (isPreview) {
+        splash.remove();
+    } else {
+        window.addEventListener("load", () => {
+            setTimeout(hide, 1000);
+        });
+    }
 
+    function hide() {
+        const selectedPage = localStorage.getItem("algot.indexPage") || "index.html";
+        if (/^index[1-4]?\.html$/.test(selectedPage) && selectedPage !== "index.html") {
+            window.location.replace(`/${selectedPage}`);
+            return;
+        }
 
-  function hide() {
-    document.getElementById("splash").style.display = "none"
-  }
+        if (!splash) return;
+        splash.style.opacity = "0";
+        setTimeout(() => splash.remove(), 600);
+    }
 </script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9LNEMG4G5"></script>

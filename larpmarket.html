@@ -1,0 +1,1285 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#101619">
+	<title>LarPIT | Paper Market</title>
+	<style>
+		@font-face {
+			font-family: Orbitron;
+			src: url("/orbitron.ttf") format("truetype");
+			font-display: swap;
+		}
+
+		:root {
+			color-scheme: dark;
+			--bg: #000;
+			--surface: #11191d;
+			--surface-2: #162126;
+			--line: #25343a;
+			--muted: #91a2a5;
+			--text: #e7eff0;
+			--green: #81e0b0;
+			--red: #ff7f79;
+			--cyan: #66d8df;
+			--amber: #e9c576;
+			--mono: "SFMono-Regular", Consolas, monospace;
+			font-family: "Trebuchet MS", sans-serif;
+			color: var(--text);
+			background: var(--bg);
+			font-synthesis: none;
+		}
+
+		* { box-sizing: border-box; }
+		body { min-width: 340px; min-height: 100vh; margin: 0; background: var(--bg); }
+		button, input { font: inherit; }
+		button { color: inherit; }
+
+		.topbar {
+			position: sticky;
+			top: 0;
+			z-index: 3;
+			display: flex;
+			min-height: 58px;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			padding: 0 24px;
+			border-bottom: 1px solid var(--line);
+			background: #0c1215f5;
+			backdrop-filter: blur(12px);
+		}
+
+		.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--text); }
+		.brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #65d8df88; border-radius: 8px; color: var(--cyan); font-family: Orbitron, sans-serif; font-size: 15px; }
+		.brand-name { font-family: Orbitron, sans-serif; font-size: 13px; letter-spacing: 1px; }
+		.brand-name b { color: var(--cyan); font-weight: 500; }
+		.top-meta { display: flex; align-items: center; gap: 18px; color: var(--muted); font: 11px var(--mono); }
+		.paper-label { padding: 6px 9px; border: 1px solid #e9c57666; border-radius: 4px; color: var(--amber); text-transform: uppercase; letter-spacing: .5px; }
+		.game-launch { min-height: 34px; padding: 0 11px; border: 1px solid #72eb6577; border-radius: 4px; background: #72eb6510; color: #a6ff9a; font: 10px var(--mono); cursor: pointer; }
+		.game-launch:hover { background: #72eb6524; }
+
+		.workspace { width: min(1540px, 100%); margin: 0 auto; padding: 16px 20px 36px; }
+		.ticker-strip { display: grid; grid-auto-columns: minmax(140px, 1fr); grid-auto-flow: column; overflow-x: auto; border: 1px solid var(--line); background: #0d1417; }
+		.ticker { min-width: 0; padding: 11px 15px; border-right: 1px solid var(--line); }
+		.ticker:last-child { border-right: 0; }
+		.ticker-symbol { display: block; overflow: hidden; color: var(--muted); font: 10px var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+		.ticker-bottom { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 6px; }
+		.ticker-price { font: 13px var(--mono); white-space: nowrap; }
+		.ticker-change { font: 10px var(--mono); white-space: nowrap; }
+
+		.statbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 13px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+		.stat { padding: 12px 16px 12px 0; }
+		.stat + .stat { padding-left: 16px; border-left: 1px solid var(--line); }
+		.stat-label { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .9px; }
+		.stat-value { display: block; margin-top: 6px; font: 18px Orbitron, var(--mono); }
+		.stat-sub { display: block; margin-top: 4px; color: var(--muted); font: 10px var(--mono); }
+
+		.market-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 14px; margin-top: 14px; align-items: start; }
+		.left-column { min-width: 0; }
+		.market-panel, .trade-panel, .lower-panel { border: 1px solid var(--line); background: #0e1518; }
+		.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 49px; padding: 0 15px; border-bottom: 1px solid var(--line); }
+		.instrument-heading { display: flex; min-width: 0; align-items: center; gap: 10px; }
+		.asset-icon { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--cyan); font: 11px Orbitron, sans-serif; }
+		.instrument-name { overflow: hidden; font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+		.instrument-symbol { margin-top: 3px; color: var(--muted); font: 10px var(--mono); }
+		.market-price-wrap { text-align: right; }
+		.market-price { font: 17px var(--mono); }
+		.market-change { margin-top: 3px; font: 10px var(--mono); }
+		.chart-tools { display: flex; align-items: center; gap: 3px; }
+		.chart-tools button { min-width: 34px; padding: 6px 7px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font: 10px var(--mono); cursor: pointer; }
+		.chart-tools button.active, .chart-tools button:hover { background: var(--surface-2); color: var(--text); }
+		.chart-area { position: relative; height: 330px; padding: 8px 10px 4px; background: #0a1013; }
+		#price-chart { display: block; width: 100%; height: 100%; }
+		.chart-tooltip { position: absolute; top: 12px; left: 18px; display: flex; gap: 9px; color: var(--muted); font: 10px var(--mono); pointer-events: none; }
+		.chart-legend { display: none; }
+		.market-footer { display: flex; justify-content: space-between; gap: 12px; padding: 10px 15px; border-top: 1px solid var(--line); color: var(--muted); font: 10px var(--mono); }
+		.instrument-tabs { display: flex; gap: 5px; padding: 10px 12px; border-top: 1px solid var(--line); overflow-x: auto; }
+		.instrument-tab { flex: 0 0 auto; padding: 6px 9px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; text-align: left; }
+		.instrument-tab:hover { background: var(--surface-2); }
+		.instrument-tab.selected { border-color: #66d8df55; background: #66d8df12; color: var(--text); }
+		.instrument-tab strong { display: block; font: 10px var(--mono); }
+		.instrument-tab span { display: block; margin-top: 4px; font-size: 9px; }
+
+		.trade-panel { position: sticky; top: 72px; }
+		.trade-panel .panel-head { font-size: 12px; font-weight: 700; }
+		.trade-body { padding: 14px; }
+		.side-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+		.side-button { height: 37px; border: 1px solid var(--line); border-radius: 4px; background: #141c20; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
+		.side-button.selected.long { border-color: #81e0b077; background: #81e0b018; color: var(--green); }
+		.side-button.selected.short { border-color: #ff7f7977; background: #ff7f7918; color: var(--red); }
+		.field { margin-top: 15px; }
+		.field-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; }
+		.field-value { color: var(--text); font: 11px var(--mono); text-transform: none; letter-spacing: 0; }
+		.leverage-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+		.leverage-custom { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 7px; margin-top: 7px; }
+		.leverage-custom input { width: 100%; height: 32px; padding: 0 8px; border: 1px solid var(--line); border-radius: 3px; outline: 0; background: #0d1417; color: var(--text); font: 11px var(--mono); }
+		.leverage-custom span { color: var(--muted); font: 10px var(--mono); }
+		.leverage-button { min-height: 29px; border: 1px solid var(--line); border-radius: 3px; background: #141c20; color: var(--muted); font: 10px var(--mono); cursor: pointer; }
+		.leverage-button.selected { border-color: var(--cyan); background: #66d8df18; color: var(--cyan); }
+		.margin-control { display: grid; grid-template-columns: 1fr 86px; gap: 8px; align-items: center; }
+		input[type="range"] { width: 100%; accent-color: var(--cyan); }
+		.margin-input { width: 100%; height: 33px; padding: 0 8px; border: 1px solid var(--line); border-radius: 3px; outline: 0; background: #11191c; color: var(--text); font: 12px var(--mono); }
+		.margin-allocations { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-top: 7px; }
+		.allocation-button { min-height: 27px; border: 1px solid var(--line); border-radius: 3px; background: #0d1417; color: var(--muted); font: 10px var(--mono); cursor: pointer; }
+		.allocation-button:hover, .allocation-button.selected { border-color: var(--cyan); color: var(--cyan); background: #66d8df12; }
+		.order-estimate { display: grid; gap: 8px; margin-top: 15px; padding: 11px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+		.estimate-row { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; }
+		.estimate-row b { color: var(--text); font: 10px var(--mono); }
+		.risk-note { margin: 12px 0 0; color: var(--amber); font-size: 10px; line-height: 1.5; }
+		.open-trade { width: 100%; min-height: 42px; margin-top: 14px; border: 1px solid #81e0b055; border-radius: 4px; background: #81e0b01a; color: var(--green); font-size: 12px; font-weight: 700; cursor: pointer; }
+		.open-trade:hover:not(:disabled) { background: #81e0b02d; }
+		.open-trade.short-order { border-color: #ff7f7955; background: #ff7f7918; color: var(--red); }
+		.open-trade:disabled { opacity: .42; cursor: not-allowed; }
+		.close-selected { width: 100%; min-height: 36px; margin-top: 7px; border: 1px solid #ff7f7960; border-radius: 4px; background: #ff7f790d; color: var(--red); font-size: 11px; font-weight: 700; cursor: pointer; }
+		.close-selected:hover:not(:disabled), .close-all:hover:not(:disabled) { background: #ff7f7920; }
+		.close-selected:disabled, .close-all:disabled { opacity: .38; cursor: not-allowed; }
+
+		.lower-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .8fr); gap: 14px; margin-top: 14px; }
+		.lower-panel { min-width: 0; }
+		.lower-panel .panel-head { min-height: 43px; font-size: 11px; font-weight: 700; }
+		.position-table { width: 100%; border-collapse: collapse; }
+		.position-table th, .position-table td { padding: 10px 12px; border-bottom: 1px solid #202c31; text-align: left; white-space: nowrap; }
+		.position-table th { color: var(--muted); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+		.position-table td { font: 10px var(--mono); }
+		.position-table tr:last-child td { border-bottom: 0; }
+		.empty-state { padding: 19px 12px; color: var(--muted); font-size: 11px; }
+		.position-name { font-family: "Trebuchet MS", sans-serif !important; font-weight: 700; }
+		.close-button { padding: 5px 8px; border: 1px solid #536a70; border-radius: 3px; background: transparent; color: var(--text); font: 10px var(--mono); cursor: pointer; }
+		.feed { max-height: 225px; overflow: auto; }
+		.feed-item { display: grid; grid-template-columns: 48px 1fr; gap: 9px; padding: 10px 12px; border-bottom: 1px solid #202c31; }
+		.feed-item:last-child { border-bottom: 0; }
+		.feed-time { color: var(--muted); font: 9px var(--mono); }
+		.feed-text { color: #c8d3d5; font-size: 10px; line-height: 1.45; }
+		.feed-text b { color: var(--cyan); font-weight: 600; }
+		.feed-item.event .feed-text b { color: var(--amber); }
+		.speed-controls { display: flex; align-items: center; gap: 5px; }
+		.speed-label { margin-right: 3px; color: var(--muted); font-size: 9px; text-transform: uppercase; }
+		.speed-button { min-width: 37px; height: 27px; padding: 0 5px; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--muted); font: 9px var(--mono); cursor: pointer; }
+		.speed-button.selected { border-color: var(--amber); color: var(--amber); }
+		.position-head-actions { display: flex; align-items: center; gap: 10px; }
+		.close-all { padding: 5px 9px; border: 1px solid #ff7f7955; border-radius: 3px; background: #ff7f790c; color: var(--red); font: 9px var(--mono); cursor: pointer; }
+		.clock { color: var(--cyan); font: 11px var(--mono); }
+		.disclaimer { margin: 15px 0 0; color: #77888c; font-size: 9px; text-align: center; }
+		.toast { position: fixed; right: 20px; bottom: 20px; z-index: 5; max-width: min(380px, calc(100vw - 40px)); padding: 12px 15px; border: 1px solid var(--line); border-radius: 5px; background: #1a2529; color: var(--text); font-size: 12px; box-shadow: 0 12px 36px #0008; opacity: 0; transform: translateY(8px); pointer-events: none; transition: 180ms ease; }
+		.toast.show { opacity: 1; transform: translateY(0); }
+		#trade-effects { position: fixed; inset: 0; z-index: 20; overflow: hidden; pointer-events: none; }
+		.trade-effect { position: absolute; z-index: 1; top: 42%; left: 50%; color: var(--green); font: 700 clamp(28px, 6vw, 58px) Orbitron, var(--mono); text-shadow: 0 0 12px currentColor, 0 0 34px currentColor; white-space: nowrap; animation: profit-float 1.5s cubic-bezier(.15,.7,.25,1) forwards; }
+		.trade-effect.loss { color: var(--red); }
+		.liquidation-flash { position: fixed; inset: 0; z-index: 0; background: rgba(255, 22, 38, .44); pointer-events: none; animation: red-flash 460ms ease-out forwards; }
+		#flappy-game { position: fixed; inset: 0; z-index: 50; display: none; overflow: hidden; background: #000; color: #eaffea; font-family: var(--mono); }
+		#flappy-game.active { display: grid; grid-template-rows: auto 1fr auto; }
+		.flappy-topbar, .flappy-footer { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: max(14px, env(safe-area-inset-top)) 20px 12px; border-bottom: 1px solid #224522; background: #000; }
+		.flappy-footer { justify-content: center; padding: 12px 20px max(14px, env(safe-area-inset-bottom)); border-top: 1px solid #224522; border-bottom: 0; color: #8dbb8a; font-size: 11px; text-align: center; }
+		.flappy-title { color: #9dff88; font: 14px Orbitron, var(--mono); letter-spacing: 1px; }
+		.flappy-hud { display: flex; align-items: center; gap: clamp(12px, 4vw, 36px); color: #9db69b; font-size: 11px; }
+		.flappy-hud strong { color: #eaffea; font-size: 15px; }
+		.flappy-action { min-height: 34px; padding: 0 12px; border: 1px solid #386638; border-radius: 3px; background: #0b150b; color: #c9ffc1; cursor: pointer; font: 11px var(--mono); }
+		.flappy-action:hover { border-color: #9dff88; }
+		.flappy-stage { position: relative; display: grid; min-height: 0; place-items: center; overflow: hidden; background: #000; }
+		#flappy-canvas { display: block; width: min(100vw, calc((100vh - 112px) * .6)); height: min(calc(100vh - 112px), calc(100vw / .6)); max-width: 100%; max-height: 100%; background: #000; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
+		.flappy-message { position: absolute; top: 50%; left: 50%; width: min(300px, calc(100% - 40px)); padding: 18px; transform: translate(-50%, -50%); border: 1px solid #39713b; background: #000e; color: #cbffc5; font: 12px/1.6 var(--mono); text-align: center; pointer-events: none; }
+		.flappy-message strong { display: block; margin-bottom: 7px; color: #9dff88; font: 16px Orbitron, var(--mono); }
+		@keyframes profit-float { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.82); } 14% { opacity: 1; transform: translate(-50%, 0) scale(1.04); } 26% { transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -68px) scale(1.03); } }
+		@keyframes red-flash { 0% { opacity: 0; } 16% { opacity: .8; } 42% { opacity: .25; } 100% { opacity: 0; } }
+
+		.green { color: var(--green) !important; }
+		.red { color: var(--red) !important; }
+		.amber { color: var(--amber) !important; }
+		.muted { color: var(--muted) !important; }
+
+		@media (max-width: 1050px) {
+			.market-layout { grid-template-columns: minmax(0, 1fr) 280px; }
+			.chart-area { height: 290px; }
+			.instrument-tab { padding-inline: 7px; }
+		}
+
+		@media (max-width: 760px) {
+			.topbar { padding-inline: 14px; }
+			.top-meta { gap: 8px; }
+			.workspace { padding: 12px 12px 28px; }
+			.ticker-strip { grid-auto-columns: 120px; overflow-x: auto; }
+			.ticker { padding-inline: 10px; }
+			.statbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+			.stat { padding: 10px 8px 10px 0; }
+			.stat + .stat { padding-left: 10px; }
+			.stat:nth-child(3) { border-left: 0; padding-left: 0; }
+			.stat-value { font-size: 15px; }
+			.market-layout { grid-template-columns: 1fr; }
+			.trade-panel { position: static; }
+			.chart-area { height: 275px; }
+			.lower-grid { grid-template-columns: 1fr; }
+			.position-table { min-width: 620px; }
+			.positions-scroll { overflow-x: auto; }
+		}
+
+		@media (max-width: 440px) {
+			.brand-name { font-size: 11px; }
+			.paper-label { font-size: 9px; }
+			.top-meta { font-size: 9px; }
+			.panel-head { padding-inline: 10px; }
+			.chart-tools button { min-width: 29px; padding-inline: 5px; }
+			.chart-area { height: 235px; padding-inline: 5px; }
+			.instrument-tabs { padding-inline: 6px; }
+			.instrument-tab { padding-inline: 6px; }
+			.instrument-name { font-size: 12px; }
+			.market-price { font-size: 14px; }
+			.market-footer { font-size: 9px; }
+			.stat-label { font-size: 9px; }
+		}
+
+		@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<a class="brand" href="/index.html" aria-label="LarPIT home">
+			<span class="brand-mark">L</span><span class="brand-name">LAR<b>PIT</b></span>
+		</a>
+		<div class="top-meta"><span class="paper-label">Paper market / no real money</span><button class="game-launch" id="open-flappy" type="button">FLAP · +$1 / PIPE</button><span id="session-id">SIM-0001</span></div>
+	</header>
+
+	<main class="workspace">
+		<section class="ticker-strip" id="ticker-strip" aria-label="Market ticker"></section>
+
+		<section class="statbar" aria-label="Account summary">
+			<div class="stat"><span class="stat-label">Net liquidation</span><strong class="stat-value" id="equity-value">$10.0</strong><span class="stat-sub" id="equity-change">Starting capital</span></div>
+			<div class="stat"><span class="stat-label">Available cash</span><strong class="stat-value" id="cash-value">$10.0</strong><span class="stat-sub">Free collateral</span></div>
+			<div class="stat"><span class="stat-label">Unrealized P&amp;L</span><strong class="stat-value" id="pnl-value">$0.00</strong><span class="stat-sub" id="open-count">No open positions</span></div>
+			<div class="stat"><span class="stat-label">Simulated time</span><strong class="stat-value clock" id="sim-clock">DAY 01 · 09:30</strong><span class="stat-sub" id="speed-readout">Clock paused</span></div>
+		</section>
+
+		<div class="market-layout">
+			<div class="left-column">
+				<section class="market-panel" aria-label="Selected market chart">
+					<div class="panel-head">
+						<div class="instrument-heading">
+							<span class="asset-icon" id="asset-icon">A</span>
+							<div><div class="instrument-name" id="asset-name">Apex Systems</div><div class="instrument-symbol" id="asset-symbol">APX · STOCK</div></div>
+						</div>
+						<div class="market-price-wrap"><div class="market-price" id="market-price">$142.80</div><div class="market-change" id="market-change">+0.00%</div></div>
+						<div class="chart-tools" aria-label="Chart range">
+							<button type="button" data-range="30" class="active">30m</button>
+							<button type="button" data-range="90">90m</button>
+							<button type="button" data-range="240">4h</button>
+							<button type="button" data-range="1440">1d</button>
+						</div>
+					</div>
+					<div class="chart-area">
+						<canvas id="price-chart" aria-label="Simulated asset price chart"></canvas>
+						<div class="chart-tooltip"><span id="chart-open">O --</span><span id="chart-high">H --</span><span id="chart-low">L --</span><span id="chart-vol">VOL --</span></div>
+						<span class="chart-legend" id="chart-legend">SIMULATED MID · USD</span>
+					</div>
+					<div class="market-footer"><span id="market-status">MARKET OPEN · SIMULATED TAPE</span><span id="last-update">Last update --</span></div>
+					<div class="instrument-tabs" id="instrument-tabs" aria-label="Choose market"></div>
+				</section>
+
+				<div class="lower-grid">
+					<section class="lower-panel">
+						<div class="panel-head"><span>Open positions</span><div class="position-head-actions"><span class="muted" id="position-summary">0 active</span><button class="close-all" id="close-all" type="button" disabled>Close all</button></div></div>
+						<div class="positions-scroll">
+							<table class="position-table">
+								<thead><tr><th>Market / side</th><th>Size</th><th>Entry</th><th>Mark</th><th>Unrealized</th><th>Liquidation</th><th></th></tr></thead>
+								<tbody id="positions-body"><tr><td class="empty-state" colspan="7">No positions yet. Pick a market and place a paper trade.</td></tr></tbody>
+							</table>
+						</div>
+					</section>
+					<section class="lower-panel">
+						<div class="panel-head"><span>Market tape</span><div class="speed-controls" aria-label="Simulation speed"><span class="speed-label">Speed</span><button class="speed-button" data-speed="0">Pause</button><button class="speed-button selected" data-speed="1">1×</button><button class="speed-button" data-speed="2">2×</button><button class="speed-button" data-speed="5">5×</button><button class="speed-button" data-speed="7">7×</button><button class="speed-button" data-speed="10">10×</button></div></div>
+						<div class="feed" id="event-feed" aria-live="polite"></div>
+					</section>
+				</div>
+			</div>
+
+			<aside class="trade-panel" aria-label="Trade ticket">
+				<div class="panel-head"><span>Order ticket</span><span class="muted">MARKET · ISOLATED</span></div>
+				<div class="trade-body">
+					<div class="side-toggle"><button class="side-button long selected" data-side="long">↗ &nbsp; Long</button><button class="side-button short" data-side="short">↘ &nbsp; Short</button></div>
+					<div class="field">
+						<div class="field-head"><span>Leverage</span><span class="field-value" id="selected-leverage">10×</span></div>
+						<div class="leverage-grid" id="leverage-grid"></div>
+						<label class="leverage-custom"><input id="custom-leverage" type="number" min="1" step="any" value="10" inputmode="decimal" aria-label="Custom leverage multiplier"><span>× custom</span></label>
+					</div>
+					<div class="field">
+						<div class="field-head"><label for="margin-range">Margin / collateral</label><span class="field-value" id="margin-percent">100.0% of cash</span></div>
+						<div class="margin-control"><input id="margin-range" type="range" min="0" max="100" step="0.1" value="100" aria-label="Percent of available cash to allocate"><input class="margin-input" id="margin-input" type="number" min="0.000001" step="any" value="2" aria-label="Margin amount in dollars"></div>
+						<div class="margin-allocations" aria-label="Quick cash allocation"><button class="allocation-button" type="button" data-allocation="25">25%</button><button class="allocation-button" type="button" data-allocation="50">50%</button><button class="allocation-button" type="button" data-allocation="75">75%</button><button class="allocation-button selected" type="button" data-allocation="100">100%</button></div>
+					</div>
+					<div class="order-estimate">
+						<div class="estimate-row"><span>Position notional</span><b id="notional-value">$20.00</b></div>
+						<div class="estimate-row"><span>Entry fee <span title="Simulated taker fee: 0.08% of notional">ⓘ</span></span><b id="fee-value">$0.02</b></div>
+						<div class="estimate-row"><span>Est. liquidation price</span><b class="amber" id="liquidation-value">$--</b></div>
+						<div class="estimate-row"><span>Maintenance margin</span><b>10% of notional</b></div>
+					</div>
+					<p class="risk-note">At high leverage, a small move against you can wipe out your margin. Positions are isolated; losses are capped at collateral.</p>
+					<button class="open-trade" id="open-trade" type="button">Open long · 10×</button>
+					<button class="close-selected" id="close-selected" type="button" disabled>Close selected position</button>
+				</div>
+			</aside>
+		</div>
+		<p class="disclaimer">SIMULATION ONLY. Fictional order book, fictional assets, fictional money. Volatility, fees and liquidation are game mechanics, not investment guidance.</p>
+	</main>
+	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+	<div id="trade-effects" aria-live="assertive"></div>
+	<section id="flappy-game" aria-label="Flappy cash minigame" aria-hidden="true">
+		<header class="flappy-topbar"><span class="flappy-title">FLAPPY CASH</span><div class="flappy-hud"><span>SCORE <strong id="flappy-score">0</strong></span><span>EARNED <strong id="flappy-earned">$0</strong></span></div><div><button class="flappy-action" id="flappy-restart" type="button">Restart</button> <button class="flappy-action" id="close-flappy" type="button">Exit</button></div></header>
+		<div class="flappy-stage"><canvas id="flappy-canvas" width="240" height="400" aria-label="Pixel flappy game. Tap, click, or press Space to flap."></canvas><div class="flappy-message" id="flappy-message"><strong>FLAPPY CASH</strong>Tap, click, or press Space to flap.<br>Clear each pipe to earn $1.</div></div>
+		<footer class="flappy-footer">Avoid the pipes. One pipe cleared = +$1 paper cash.</footer>
+	</section>
+
+	<script>
+		const assets = [
+			{ id: 'APX', name: 'Apex Systems', category: 'STOCK', icon: 'A', price: 142.80, sigma: 0.0014, drift: 0.00004, color: '#81e0b0', open: 142.80, marketOpen: true, high: 144.10, low: 141.90, volume: 28400 },
+			{ id: 'NOVA', name: 'Nova Robotics', category: 'STOCK', icon: 'N', price: 68.24, sigma: 0.0020, drift: 0.00003, color: '#66d8df', open: 68.24, marketOpen: true, high: 69.12, low: 67.80, volume: 17800 },
+			{ id: 'BTC', name: 'Bitcoin', category: 'CRYPTO', icon: '₿', price: 67420, sigma: 0.0052, drift: 0.00002, color: '#e9c576', open: 67420, marketOpen: true, high: 68110, low: 66980, volume: 910000 },
+			{ id: 'ETH', name: 'Ether', category: 'CRYPTO', icon: 'Ξ', price: 3528.60, sigma: 0.0062, drift: 0.00002, color: '#a9a0ff', open: 3528.60, marketOpen: true, high: 3594, low: 3489, volume: 420000 },
+			{ id: 'SOL', name: 'Solana', category: 'CRYPTO', icon: 'S', price: 184.35, sigma: 0.0105, drift: 0.00006, color: '#92e7cd', open: 184.35, marketOpen: true, high: 191.20, low: 177.80, volume: 680000 },
+			{ id: 'XRP', name: 'Ripple', category: 'CRYPTO', icon: 'X', price: 0.624, sigma: 0.0085, drift: -0.00001, color: '#b7c8d6', open: 0.624, marketOpen: true, high: 0.647, low: 0.602, volume: 310000 },
+			{ id: 'AVAX', name: 'Avalanche', category: 'CRYPTO', icon: '▲', price: 38.72, sigma: 0.013, drift: 0.00003, color: '#ff8585', open: 38.72, marketOpen: true, high: 40.80, low: 36.20, volume: 190000 },
+			{ id: 'GOLD', name: 'Gold Futures', category: 'COMMODITY', icon: 'Au', price: 2388.40, sigma: 0.0008, drift: 0.00001, color: '#e9c576', open: 2388.40, marketOpen: true, high: 2396, low: 2381, volume: 64000 },
+			{ id: 'OIL', name: 'Crude Oil', category: 'COMMODITY', icon: 'O', price: 78.16, sigma: 0.0028, drift: -0.00002, color: '#d1a26d', open: 78.16, marketOpen: true, high: 79.40, low: 76.90, volume: 82000 },
+			{ id: 'VOLT', name: 'Volt Motors', category: 'STOCK', icon: 'V', price: 24.62, sigma: 0.0048, drift: 0.00002, color: '#84cbff', open: 24.62, marketOpen: true, high: 26.10, low: 23.40, volume: 35000 },
+			{ id: 'CLOUD', name: 'Cloud Nine', category: 'STOCK', icon: 'C', price: 311.72, sigma: 0.0026, drift: 0.00005, color: '#95c5ff', open: 311.72, marketOpen: true, high: 315, low: 306, volume: 26700 },
+			{ id: 'MOON', name: 'MoonPup', category: 'MEMECOIN', icon: '🐕', price: 0.0000428, sigma: 0.035, drift: 0.00008, rugRisk: 0.00004, color: '#f1a4c4', open: 0.0000428, marketOpen: true, high: 0.0000491, low: 0.0000395, volume: 7200000 },
+			{ id: 'PEPE2', name: 'Pepe 2: The Reckoning', category: 'MEMECOIN', icon: 'P', price: 0.00000126, sigma: 0.062, drift: 0.00014, rugRisk: 0.00012, color: '#b5e66e', open: 0.00000126, marketOpen: true, high: 0.00000158, low: 0.00000094, volume: 14800000 },
+			{ id: 'BAG', name: 'Bagholder Inu', category: 'MEMECOIN', icon: '袋', price: 0.00862, sigma: 0.052, drift: -0.00004, rugRisk: 0.000075, color: '#ff9c73', open: 0.00862, marketOpen: true, high: 0.00981, low: 0.00795, volume: 1800000 },
+			{ id: 'RUG', name: 'DefinitelyNotARug', category: 'MEMECOIN', icon: '!', price: 0.0000067, sigma: 0.085, drift: 0.00012, rugRisk: 0.00015, color: '#df82ff', open: 0.0000067, marketOpen: true, high: 0.0000088, low: 0.0000052, volume: 9500000 }
+		];
+		assets.forEach((asset) => {
+			asset.visualFrom = asset.price;
+			asset.visualAt = performance.now();
+		});
+		const leverageOptions = [2, 5, 10, 20, 50, 75, 100];
+		const SAVE_KEY = 'larpit-paper-game-v1';
+		const state = {
+			cash: 10,
+			startingCash: 10,
+			selectedAsset: 'APX',
+			side: 'long',
+			leverage: 10,
+			margin: 2,
+			speed: 1,
+			gameMinutes: 0,
+			chartRange: 30,
+			lastTickAt: Date.now(),
+			positions: [],
+			history: [],
+			feesPaid: 0,
+			tickCount: 0,
+			sessionDay: 1,
+			fundingMinutes: 0,
+			newsMinutes: 0,
+			catalysts: []
+		};
+
+		const $ = (selector) => document.querySelector(selector);
+		const $$ = (selector) => [...document.querySelectorAll(selector)];
+		const tickerStrip = $('#ticker-strip');
+		const feed = $('#event-feed');
+		const canvas = $('#price-chart');
+		const ctx = canvas.getContext('2d');
+		let toastTimer;
+		let saveTimer = null;
+		let chartCandles = Object.fromEntries(assets.map((asset) => {
+			let previous = asset.price;
+			const candles = Array.from({ length: 59 }, (_, index) => {
+				const open = previous;
+				const close = open * Math.exp(normalRandom() * asset.sigma * .6);
+				const wick = Math.abs(normalRandom()) * asset.sigma * open * .3;
+				previous = close;
+				return { time: index - 59, open, high: Math.max(open, close) + wick, low: Math.max(.0000000001, Math.min(open, close) - wick), close };
+			});
+			const scale = asset.price / previous;
+			candles.forEach((candle) => {
+				candle.open *= scale;
+				candle.high *= scale;
+				candle.low *= scale;
+				candle.close *= scale;
+			});
+			candles.push({ time: 0, open: asset.price, high: asset.price, low: asset.price, close: asset.price });
+			return [asset.id, candles];
+		}));
+
+		const money = (value, digits = 2) => {
+			let minimumPrecision = digits;
+			let maximumPrecision = digits;
+			if (digits === 2 && Math.abs(value) > 0 && Math.abs(value) < .01) {
+				minimumPrecision = 6;
+				maximumPrecision = 12;
+			} else if (digits === 2 && Math.abs(value * 100 - Math.round(value * 100)) > 1e-7) {
+				minimumPrecision = 4;
+				maximumPrecision = 8;
+			}
+			return `${value < 0 ? '-$' : '$'}${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: minimumPrecision, maximumFractionDigits: maximumPrecision })}`;
+		};
+		function writeGameSave() {
+			const snapshot = {
+				state: { cash: state.cash, startingCash: state.startingCash, selectedAsset: state.selectedAsset, side: state.side, leverage: state.leverage, margin: state.margin, speed: state.speed, gameMinutes: state.gameMinutes, chartRange: state.chartRange, positions: state.positions, history: state.history.slice(0, 100), feesPaid: state.feesPaid, tickCount: state.tickCount, sessionDay: state.sessionDay, fundingMinutes: state.fundingMinutes, newsMinutes: state.newsMinutes, catalysts: state.catalysts.map((catalyst) => ({ assetId: catalyst.assetId, totalLog: catalyst.totalLog, elapsedMs: performance.now() - catalyst.startAt, delayMs: catalyst.delayMs, duration: catalyst.duration, easedProgress: catalyst.easedProgress })) },
+				assets: assets.map(({ id, price, open, high, low, volume, drift, rugRisk }) => ({ id, price, open, high, low, volume, drift, rugRisk })),
+				candles: Object.fromEntries(assets.map((asset) => [asset.id, chartCandles[asset.id].slice(-240)]))
+			};
+			localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+		}
+		function saveGame() {
+			if (saveTimer !== null) return;
+			saveTimer = setTimeout(() => {
+				saveTimer = null;
+				try {
+					writeGameSave();
+				} catch (error) {
+					console.warn('Could not save LarPIT paper-game state.', error);
+				}
+			}, 1000);
+		}
+		function restoreGame() {
+			try {
+				const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+				if (!saved?.state) return;
+				const validNumber = (value, fallback) => Number.isFinite(value) ? value : fallback;
+				const stored = saved.state;
+				state.cash = Math.max(0, validNumber(stored.cash, 10));
+				state.startingCash = Math.max(0, validNumber(stored.startingCash, 10));
+				state.selectedAsset = assets.some((asset) => asset.id === stored.selectedAsset) ? stored.selectedAsset : 'APX';
+				state.side = stored.side === 'short' ? 'short' : 'long';
+				state.leverage = Math.max(1, validNumber(stored.leverage, 10));
+				state.margin = Math.max(0, validNumber(stored.margin, 2));
+				state.speed = [0, 1, 2, 5, 7, 10].includes(stored.speed) ? stored.speed : 1;
+				state.gameMinutes = Math.max(0, validNumber(stored.gameMinutes, 0));
+				state.chartRange = [30, 90, 240, 1440].includes(stored.chartRange) ? stored.chartRange : 30;
+				state.positions = Array.isArray(stored.positions) ? stored.positions.filter((position) => assets.some((asset) => asset.id === position.assetId) && Number.isFinite(position.entry) && Number.isFinite(position.margin) && Number.isFinite(position.notional) && Number.isFinite(position.leverage)) : [];
+				state.history = Array.isArray(stored.history) ? stored.history.slice(0, 100) : [];
+				state.feesPaid = Math.max(0, validNumber(stored.feesPaid, 0));
+				state.tickCount = Math.max(0, validNumber(stored.tickCount, 0));
+				state.sessionDay = Math.max(1, validNumber(stored.sessionDay, 1));
+				state.fundingMinutes = Math.max(0, validNumber(stored.fundingMinutes, 0));
+				state.newsMinutes = Math.max(0, validNumber(stored.newsMinutes, 0));
+				state.catalysts = Array.isArray(stored.catalysts) ? stored.catalysts.filter((item) => assets.some((asset) => asset.id === item.assetId) && Number.isFinite(item.totalLog) && Number.isFinite(item.duration) && item.duration > 0).map((item) => ({ assetId: item.assetId, totalLog: item.totalLog, delayMs: Math.max(0, validNumber(item.delayMs, 0)), duration: item.duration, startAt: performance.now() - Math.max(0, Math.min(item.duration + Math.max(0, validNumber(item.delayMs, 0)), validNumber(item.elapsedMs, 0))), easedProgress: Math.max(0, Math.min(1, validNumber(item.easedProgress, 0))) })) : [];
+				(saved.assets || []).forEach((savedAsset) => {
+					const asset = assets.find((candidate) => candidate.id === savedAsset.id);
+					if (!asset) return;
+					['price', 'open', 'high', 'low', 'volume', 'drift', 'rugRisk'].forEach((key) => {
+						if (Number.isFinite(savedAsset[key])) asset[key] = savedAsset[key];
+					});
+					asset.visualFrom = asset.price;
+					asset.visualAt = performance.now();
+				});
+				assets.forEach((asset) => {
+					const savedCandles = saved.candles?.[asset.id];
+					if (Array.isArray(savedCandles) && savedCandles.length > 1 && savedCandles.every((candle) => ['time', 'open', 'high', 'low', 'close'].every((key) => Number.isFinite(candle[key])))) {
+						chartCandles[asset.id] = savedCandles.slice(-1441);
+					}
+				});
+				state.lastTickAt = Date.now();
+			} catch (error) {
+				console.warn('Could not restore LarPIT paper-game state.', error);
+			}
+		}
+		const signedMoney = (value) => `${value >= 0 ? '+' : '-'}$${Math.abs(value).toFixed(2)}`;
+		function formatPrice(value) {
+			if (value >= 1000) return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+			if (value >= 1) return `$${value.toFixed(2)}`;
+			if (value >= .01) return `$${value.toFixed(4)}`;
+			if (value >= .0001) return `$${value.toFixed(6)}`;
+			return `$${value.toFixed(8)}`;
+		}
+		function currentAsset() { return assets.find((asset) => asset.id === state.selectedAsset); }
+		function showToast(message, type = 'normal') {
+			const toast = $('#toast');
+			toast.textContent = message;
+			toast.style.borderColor = type === 'bad' ? '#ff7f7980' : type === 'good' ? '#81e0b080' : '';
+			toast.classList.add('show');
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+		}
+		function showTradeEffect(amount, liquidated = false) {
+			const effects = $('#trade-effects');
+			const effect = document.createElement('div');
+			const won = amount > 0;
+			effect.className = `trade-effect${won ? '' : ' loss'}`;
+			effect.textContent = `${won ? '+' : '-'}${money(Math.abs(amount))}`;
+			effects.append(effect);
+			setTimeout(() => effect.remove(), 1550);
+			if (liquidated) {
+				const flash = document.createElement('div');
+				flash.className = 'liquidation-flash';
+				effects.append(flash);
+				setTimeout(() => flash.remove(), 480);
+			}
+		}
+		function addFeed(message, event = false) {
+			const item = document.createElement('div');
+			item.className = `feed-item${event ? ' event' : ''}`;
+			const time = document.createElement('span');
+			time.className = 'feed-time';
+			time.textContent = clockText();
+			const text = document.createElement('span');
+			text.className = 'feed-text';
+			text.innerHTML = message;
+			feed.prepend(item);
+			item.append(time, text);
+			while (feed.children.length > 35) feed.lastElementChild.remove();
+		}
+		function clockText() {
+			const minuteOfDay = Math.floor((9 * 60 + 30 + state.gameMinutes) % (24 * 60));
+			const day = Math.floor(state.gameMinutes / (24 * 60)) + 1;
+			return `D${String(day).padStart(2, '0')} ${String(Math.floor(minuteOfDay / 60)).padStart(2, '0')}:${String(minuteOfDay % 60).padStart(2, '0')}`;
+		}
+		function renderLeverage() {
+			$('#leverage-grid').innerHTML = leverageOptions.map((leverage) => `<button type="button" class="leverage-button${state.leverage === leverage ? ' selected' : ''}" data-leverage="${leverage}">${leverage}×</button>`).join('');
+			$('#custom-leverage').value = state.leverage;
+			$$('.leverage-button').forEach((button) => button.addEventListener('click', () => {
+				state.leverage = Number(button.dataset.leverage);
+				renderLeverage();
+				renderTicket();
+			}));
+		}
+		function renderAssets() {
+			tickerStrip.innerHTML = '';
+			assets.forEach((asset) => {
+				const change = asset.price / asset.open - 1;
+				const item = document.createElement('div');
+				item.className = 'ticker';
+				item.innerHTML = `<span class="ticker-symbol">${asset.id} · ${asset.category}</span><div class="ticker-bottom"><span class="ticker-price">${formatPrice(asset.price)}</span><span class="ticker-change ${change >= 0 ? 'green' : 'red'}">${change >= 0 ? '+' : ''}${(change * 100).toFixed(2)}%</span></div>`;
+				item.addEventListener('click', () => selectAsset(asset.id));
+				item.style.cursor = 'pointer';
+				tickerStrip.append(item);
+			});
+			$('#instrument-tabs').innerHTML = assets.map((asset) => `<button type="button" class="instrument-tab${state.selectedAsset === asset.id ? ' selected' : ''}" data-asset="${asset.id}"><strong>${asset.id}</strong><span>${asset.category}</span></button>`).join('');
+			$$('.instrument-tab').forEach((button) => button.addEventListener('click', () => selectAsset(button.dataset.asset)));
+		}
+		function selectAsset(id) {
+			state.selectedAsset = id;
+			const asset = currentAsset();
+			$('#asset-icon').textContent = asset.icon;
+			$('#asset-icon').style.color = asset.color;
+			$('#asset-name').textContent = asset.name;
+			$('#asset-symbol').textContent = `${asset.id} · ${asset.category}`;
+			$('#chart-legend').textContent = `${asset.id} SIMULATED MID · USD`;
+			renderAssets();
+			renderTicket();
+			drawChart();
+		}
+		function unrealized(position) {
+			const asset = assets.find((item) => item.id === position.assetId);
+			const direction = position.side === 'long' ? 1 : -1;
+			return position.notional * (asset.price / position.entry - 1) * direction;
+		}
+		function equity() {
+			return state.cash + state.positions.reduce((sum, position) => sum + position.margin + unrealized(position), 0);
+		}
+		function totalUnrealized() { return state.positions.reduce((sum, position) => sum + unrealized(position), 0); }
+		function renderAccount() {
+			const net = equity();
+			const totalPnl = net - state.startingCash;
+			$('#equity-value').textContent = money(net, 1);
+			$('#equity-change').textContent = `${signedMoney(totalPnl)} since start · fees ${money(state.feesPaid)}`;
+			$('#equity-change').className = `stat-sub ${totalPnl >= 0 ? 'green' : 'red'}`;
+			$('#cash-value').textContent = money(state.cash, 1);
+			$('#pnl-value').textContent = signedMoney(totalUnrealized());
+			$('#pnl-value').className = `stat-value ${totalUnrealized() >= 0 ? 'green' : 'red'}`;
+			$('#open-count').textContent = `${state.positions.length} open · ${state.history.length} closed`;
+			$('#sim-clock').textContent = `DAY ${String(Math.floor(state.gameMinutes / 1440) + 1).padStart(2, '0')} · ${clockText().split(' ')[1]}`;
+			$('#speed-readout').textContent = state.speed ? `${state.speed} simulated minute${state.speed === 1 ? '' : 's'} / second` : 'Clock paused';
+			$('#position-summary').textContent = `${state.positions.length} active`;
+		}
+		function estimateLiqPrice(asset, side, leverage, entry) {
+			const lossBuffer = (1 - 0.1) / leverage;
+			return entry * (side === 'long' ? 1 - lossBuffer : 1 + lossBuffer);
+		}
+		function maxAffordableMargin(leverage = state.leverage) {
+			return state.cash / (1 + leverage * .0008) * (1 - 1e-6);
+		}
+		function setAllocationPercent(percent) {
+			const clampedPercent = Math.max(0, Math.min(100, Number(percent) || 0));
+			$('#margin-input').value = (maxAffordableMargin() * clampedPercent / 100).toPrecision(8);
+			renderTicket();
+			saveGame();
+		}
+		function renderTicket() {
+			const asset = currentAsset();
+			const feeAdjustedMaxMargin = maxAffordableMargin();
+			const minimumMargin = Math.min(.000001, feeAdjustedMaxMargin);
+			const requestedMargin = Number($('#margin-input').value);
+			const margin = state.cash > 0 && Number.isFinite(requestedMargin) && requestedMargin === 0
+				? 0
+				: state.cash > 0
+					? Math.max(minimumMargin, Math.min(Number.isFinite(requestedMargin) && requestedMargin > 0 ? requestedMargin : state.margin, feeAdjustedMaxMargin))
+					: 0;
+			const notional = margin * state.leverage;
+			const fee = notional * .0008;
+			const allocationPercent = state.cash > 0 ? Math.max(0, Math.min(100, (margin + fee) / state.cash * 100)) : 0;
+			state.margin = margin;
+			$('#margin-input').min = minimumMargin.toString();
+			$('#margin-input').max = feeAdjustedMaxMargin.toString();
+			$('#margin-input').value = margin.toPrecision(8);
+			$('#margin-range').min = '0';
+			$('#margin-range').max = '100';
+			$('#margin-range').value = allocationPercent.toFixed(1);
+			$('#margin-percent').textContent = `${allocationPercent.toFixed(1)}% of cash`;
+			$$('.allocation-button').forEach((button) => button.classList.toggle('selected', Math.abs(allocationPercent - Number(button.dataset.allocation)) < .06));
+			$('#margin-range').disabled = state.cash === 0;
+			$('#margin-input').disabled = state.cash === 0;
+			$('#selected-leverage').textContent = `${state.leverage}×`;
+			$('#notional-value').textContent = Number.isFinite(notional) ? money(notional) : 'Too large';
+			$('#fee-value').textContent = Number.isFinite(fee) ? money(fee) : 'Too large';
+			$('#liquidation-value').textContent = formatPrice(estimateLiqPrice(asset, state.side, state.leverage, asset.price));
+			$$('.side-button').forEach((button) => button.classList.toggle('selected', button.dataset.side === state.side));
+			$$('.leverage-button').forEach((button) => button.classList.toggle('selected', Number(button.dataset.leverage) === state.leverage));
+			const orderButton = $('#open-trade');
+			orderButton.classList.toggle('short-order', state.side === 'short');
+			orderButton.textContent = `Open ${state.side} · ${state.leverage}×`;
+			orderButton.disabled = margin <= 0 || !Number.isFinite(notional) || !Number.isFinite(fee) || state.cash + 1e-8 < margin + fee;
+			const selectedPositions = state.positions.filter((position) => position.assetId === asset.id);
+			const closeButton = $('#close-selected');
+			closeButton.disabled = selectedPositions.length === 0;
+			closeButton.textContent = selectedPositions.length ? `Close ${asset.id} position` : 'Close selected position';
+		}
+		function renderPositions() {
+			$('#close-all').disabled = state.positions.length === 0;
+			const body = $('#positions-body');
+			if (!state.positions.length) {
+				body.innerHTML = '<tr><td class="empty-state" colspan="7">No positions yet. Pick a market and place a paper trade.</td></tr>';
+				return;
+			}
+			body.innerHTML = state.positions.map((position) => {
+				const asset = assets.find((item) => item.id === position.assetId);
+				const pnl = unrealized(position);
+				const liquidation = estimateLiqPrice(asset, position.side, position.leverage, position.entry);
+				return `<tr><td class="position-name">${asset.id} <span class="${position.side === 'long' ? 'green' : 'red'}">${position.side.toUpperCase()} ${position.leverage}×</span></td><td>${money(position.notional)}</td><td>${formatPrice(position.entry)}</td><td>${formatPrice(asset.price)}</td><td class="${pnl >= 0 ? 'green' : 'red'}">${signedMoney(pnl)}</td><td class="amber">${formatPrice(liquidation)}</td><td><button class="close-button" data-close="${position.id}">Close</button></td></tr>`;
+			}).join('');
+			$$('.close-button').forEach((button) => button.addEventListener('click', () => closePosition(button.dataset.close)));
+		}
+		function renderMarket() {
+			assets.forEach((asset) => {
+				asset.high = Math.max(asset.high, asset.price);
+				asset.low = Math.min(asset.low, asset.price);
+			});
+			const asset = currentAsset();
+			const change = asset.price / asset.open - 1;
+			$('#market-price').textContent = formatPrice(asset.price);
+			$('#market-change').textContent = `${change >= 0 ? '+' : ''}${(change * 100).toFixed(2)}% session`;
+			$('#market-change').className = `market-change ${change >= 0 ? 'green' : 'red'}`;
+			$('#chart-open').textContent = `O ${formatPrice(asset.open)}`;
+			$('#chart-high').textContent = `H ${formatPrice(asset.high)}`;
+			$('#chart-low').textContent = `L ${formatPrice(asset.low)}`;
+			$('#chart-vol').textContent = `VOL ${compact(asset.volume)}`;
+			$('#last-update').textContent = `Last update ${clockText()}`;
+			assets.forEach((item) => {
+				const changePct = ((item.price / item.open) - 1) * 100;
+				const tab = document.querySelector(`.instrument-tab[data-asset="${item.id}"]`);
+				if (tab) tab.title = `${item.name}: ${formatPrice(item.price)} (${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%)`;
+			});
+		}
+		function compact(value) {
+			return value >= 1e6 ? `${(value / 1e6).toFixed(1)}M` : value >= 1e3 ? `${(value / 1e3).toFixed(1)}K` : `${value}`;
+		}
+		function resizeCanvas() {
+			const rect = canvas.getBoundingClientRect();
+			const ratio = Math.min(window.devicePixelRatio || 1, 2);
+			canvas.width = Math.round(rect.width * ratio);
+			canvas.height = Math.round(rect.height * ratio);
+			ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+			drawChart();
+		}
+		function drawChart(priceOverride) {
+			if (!canvas.clientWidth || !canvas.clientHeight) return;
+			const width = canvas.clientWidth;
+			const height = canvas.clientHeight;
+			ctx.clearRect(0, 0, width, height);
+			const asset = currentAsset();
+			const candles = (chartCandles[asset.id] || []).slice(-state.chartRange).map((candle) => ({ ...candle }));
+			if (candles.length < 2) return;
+			const animationProgress = Math.max(0, Math.min(1, (performance.now() - asset.visualAt) / 300));
+			const livePrice = priceOverride ?? asset.visualFrom + (asset.price - asset.visualFrom) * animationProgress;
+			const latestCandle = candles[candles.length - 1];
+			latestCandle.close = livePrice;
+			latestCandle.high = Math.max(latestCandle.high, livePrice);
+			latestCandle.low = Math.min(latestCandle.low, livePrice);
+			const entryPositions = state.positions.filter((position) => position.assetId === asset.id);
+			const liquidationPrices = entryPositions.map((position) => estimateLiqPrice(asset, position.side, position.leverage, position.entry));
+			const pad = { top: 28, right: asset.price < .01 ? 118 : 76, bottom: 26, left: 8 };
+			const chartW = width - pad.left - pad.right;
+			const chartH = height - pad.top - pad.bottom;
+			const min = Math.min(...candles.map((candle) => candle.low), ...entryPositions.map((position) => position.entry), ...liquidationPrices) * .9992;
+			const max = Math.max(...candles.map((candle) => candle.high), ...entryPositions.map((position) => position.entry), ...liquidationPrices) * 1.0008;
+			const range = max - min || max * .01;
+			const y = (value) => pad.top + chartH - ((value - min) / range) * chartH;
+			const candleStep = chartW / candles.length;
+			const candleWidth = Math.max(1.5, Math.min(10, candleStep * .62));
+			const x = (index) => pad.left + candleStep * (index + .5);
+			const last = livePrice;
+			const currentY = y(last);
+
+			ctx.font = '10px monospace';
+			ctx.textBaseline = 'middle';
+			for (let i = 0; i <= 4; i++) {
+				const gy = pad.top + (chartH / 4) * i;
+				const value = max - (range / 4) * i;
+				ctx.strokeStyle = '#26363b';
+				ctx.lineWidth = 1;
+				ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(width - pad.right + 4, gy); ctx.stroke();
+				if (Math.abs(gy - currentY) > 11) {
+					ctx.fillStyle = '#91a2a5';
+					ctx.fillText(formatAxis(value), width - pad.right + 11, gy);
+				}
+			}
+			for (let i = 0; i <= 4; i++) {
+				const gx = pad.left + chartW * (i / 4);
+				ctx.strokeStyle = '#202e33';
+				ctx.beginPath(); ctx.moveTo(gx, pad.top); ctx.lineTo(gx, height - pad.bottom); ctx.stroke();
+				ctx.fillStyle = '#748589';
+				ctx.fillText(`${Math.round((i / 4) * state.chartRange)}m`, gx - 9, height - 11);
+			}
+
+			candles.forEach((candle, index) => {
+				const centerX = x(index);
+				const up = candle.close >= candle.open;
+				const color = up ? '#81e0b0' : '#ff7f79';
+				const bodyTop = y(Math.max(candle.open, candle.close));
+				const bodyBottom = y(Math.min(candle.open, candle.close));
+				ctx.strokeStyle = color;
+				ctx.lineWidth = Math.max(1, candleWidth * .16);
+				ctx.beginPath();
+				ctx.moveTo(centerX, y(candle.high));
+				ctx.lineTo(centerX, y(candle.low));
+				ctx.stroke();
+				ctx.fillStyle = color;
+				ctx.fillRect(centerX - candleWidth / 2, bodyTop, candleWidth, Math.max(1.5, bodyBottom - bodyTop));
+			});
+			entryPositions.forEach((position) => {
+				const entryY = y(position.entry);
+				ctx.setLineDash([6, 4]);
+				ctx.strokeStyle = 'rgba(255,255,255,.82)';
+				ctx.lineWidth = 1;
+				ctx.beginPath(); ctx.moveTo(pad.left, entryY); ctx.lineTo(width - pad.right + 3, entryY); ctx.stroke();
+				const liquidationY = y(estimateLiqPrice(asset, position.side, position.leverage, position.entry));
+				ctx.setLineDash([3, 4]);
+				ctx.strokeStyle = '#58aaff';
+				ctx.lineWidth = 1.2;
+				ctx.beginPath(); ctx.moveTo(pad.left, liquidationY); ctx.lineTo(width - pad.right + 3, liquidationY); ctx.stroke();
+				ctx.setLineDash([]);
+				ctx.fillStyle = '#58aaff';
+				ctx.fillRect(pad.left + 4, liquidationY - 8, 39, 15);
+				ctx.fillStyle = '#071019';
+				ctx.font = '9px monospace';
+				ctx.fillText('LIQ', pad.left + 9, liquidationY);
+			});
+			const referenceEntry = entryPositions.length ? entryPositions[entryPositions.length - 1].entry : null;
+			const markerColor = referenceEntry === null ? asset.color : livePrice >= referenceEntry ? '#81e0b0' : '#ff7f79';
+
+			ctx.setLineDash([4, 4]);
+			ctx.strokeStyle = `${markerColor}aa`;
+			ctx.beginPath(); ctx.moveTo(pad.left, currentY); ctx.lineTo(width - pad.right + 2, currentY); ctx.stroke();
+			ctx.setLineDash([]);
+			ctx.fillStyle = markerColor;
+			const priceLabelWidth = Math.max(58, ctx.measureText(formatPrice(last)).width + 8);
+			ctx.fillRect(width - pad.right + 8, currentY - 9, priceLabelWidth, 18);
+			ctx.fillStyle = '#101619';
+			ctx.fillText(formatPrice(last), width - pad.right + 11, currentY);
+			ctx.beginPath(); ctx.arc(x(candles.length - 1), currentY, 3.2, 0, Math.PI * 2); ctx.fillStyle = markerColor; ctx.fill();
+		}
+		function advanceCatalysts(now) {
+			let changed = false;
+			for (let index = state.catalysts.length - 1; index >= 0; index--) {
+				const catalyst = state.catalysts[index];
+				const asset = assets.find((item) => item.id === catalyst.assetId);
+				if (!asset) {
+					state.catalysts.splice(index, 1);
+					continue;
+				}
+				const progress = Math.max(0, Math.min(1, (now - catalyst.startAt - catalyst.delayMs) / catalyst.duration));
+				const easedProgress = progress * progress * (3 - 2 * progress);
+				const deltaProgress = easedProgress - catalyst.easedProgress;
+				if (deltaProgress > 0) {
+					const previousPrice = asset.price;
+					asset.price = Math.max(previousPrice * .000001, previousPrice * Math.exp(catalyst.totalLog * deltaProgress));
+					updateCandles(asset, previousPrice, asset.price, state.gameMinutes, state.gameMinutes);
+					catalyst.easedProgress = easedProgress;
+					checkLiquidations(asset);
+					changed = true;
+				}
+				if (now >= catalyst.startAt + catalyst.delayMs + catalyst.duration) state.catalysts.splice(index, 1);
+			}
+			return changed;
+		}
+		function animateChart() {
+			if (advanceCatalysts(performance.now())) {
+				renderMarket();
+				renderAccount();
+				renderPositions();
+				renderTicket();
+				saveGame();
+			}
+			const asset = currentAsset();
+			if (performance.now() - asset.visualAt < 300) drawChart();
+			requestAnimationFrame(animateChart);
+		}
+		function formatAxis(value) {
+			if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
+			if (value >= 1) return `$${value.toFixed(2)}`;
+			if (value >= .01) return `$${value.toFixed(3)}`;
+			if (value >= .0001) return `$${value.toFixed(5)}`;
+			if (value >= .000001) return `$${value.toFixed(7)}`;
+			return `$${value.toExponential(1)}`;
+		}
+		function normalRandom() {
+			let a = 0; let b = 0;
+			while (a === 0) a = Math.random();
+			while (b === 0) b = Math.random();
+			return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b);
+		}
+		function updateCandles(asset, fromPrice, toPrice, fromMinute, toMinute) {
+			const series = chartCandles[asset.id];
+			const startBucket = Math.floor(fromMinute);
+			const endBucket = Math.floor(toMinute);
+			const duration = Math.max(.000001, toMinute - fromMinute);
+			const at = (minute) => fromPrice + (toPrice - fromPrice) * Math.max(0, Math.min(1, (minute - fromMinute) / duration));
+			let active = series[series.length - 1];
+			if (active.time !== startBucket) {
+				active = { time: startBucket, open: fromPrice, high: fromPrice, low: fromPrice, close: fromPrice };
+				series.push(active);
+			}
+			const firstClose = at(Math.min(toMinute, startBucket + 1));
+			active.high = Math.max(active.high, fromPrice, firstClose);
+			active.low = Math.max(.0000000001, Math.min(active.low, fromPrice, firstClose));
+			active.close = firstClose;
+			for (let bucket = startBucket + 1; bucket <= endBucket; bucket++) {
+				const open = at(bucket);
+				const close = at(Math.min(toMinute, bucket + 1));
+				const wick = Math.abs(normalRandom()) * asset.sigma * open * .3;
+				series.push({
+					time: bucket,
+					open,
+					high: Math.max(open, close) + wick,
+					low: Math.max(.0000000001, Math.min(open, close) - wick),
+					close
+				});
+			}
+			const finalCandle = series[series.length - 1];
+			finalCandle.high = Math.max(finalCandle.high, toPrice);
+			finalCandle.low = Math.max(.0000000001, Math.min(finalCandle.low, toPrice));
+			finalCandle.close = toPrice;
+			if (series.length > 1441) series.splice(0, series.length - 1441);
+		}
+		function tick() {
+			if (!state.speed) return;
+			const elapsed = Math.max(.01, Math.min(600, (Date.now() - state.lastTickAt) / 1000 * state.speed));
+			state.lastTickAt = Date.now();
+			assets.forEach((asset) => {
+				asset.visualFrom = asset.price;
+				asset.visualAt = performance.now();
+			});
+			state.tickCount += 1;
+			let remainingMinutes = elapsed;
+			while (remainingMinutes > 1e-8) {
+				const stepMinutes = Math.min(1, remainingMinutes);
+				const previousGameMinute = state.gameMinutes;
+				state.gameMinutes += stepMinutes;
+				assets.forEach((asset) => {
+					if (!asset.marketOpen) return;
+					const oldPrice = asset.price;
+					const shock = normalRandom() * asset.sigma * Math.sqrt(stepMinutes);
+					const drift = asset.drift * stepMinutes;
+					asset.price = Math.max(asset.price * .00001, asset.price * Math.exp(drift + shock - .5 * asset.sigma * asset.sigma * stepMinutes));
+					asset.volume += Math.max(1, Math.round(Math.random() * asset.volume * .001 * stepMinutes));
+					updateCandles(asset, oldPrice, asset.price, previousGameMinute, state.gameMinutes);
+					if (asset.rugRisk && Math.random() < 1 - Math.pow(1 - asset.rugRisk, stepMinutes)) rugPull(asset);
+					else if (asset.rugRisk && Math.random() < 1 - Math.pow(1 - .0008, stepMinutes)) memeSurge(asset);
+					if (oldPrice > 0) checkLiquidations(asset);
+				});
+				accrueFunding(stepMinutes);
+				state.newsMinutes += stepMinutes;
+				while (state.newsMinutes >= 8) {
+					state.newsMinutes -= 8;
+					if (Math.random() < .25) maybeNews();
+				}
+				const currentDay = Math.floor(state.gameMinutes / 1440) + 1;
+				if (currentDay > state.sessionDay) {
+					state.sessionDay = currentDay;
+					rollMarketDay();
+				}
+				remainingMinutes -= stepMinutes;
+			}
+			renderAll();
+		}
+		function checkLiquidations(asset) {
+			for (const position of [...state.positions]) {
+				if (position.assetId !== asset.id) continue;
+				const pnl = unrealized(position);
+				if (pnl <= -position.margin * .9) {
+					state.positions = state.positions.filter((item) => item.id !== position.id);
+					state.history.unshift({ ...position, closePrice: asset.price, realized: -position.margin, reason: 'LIQUIDATED', closedAt: clockText() });
+					showTradeEffect(-position.margin, true);
+					addFeed(`<b>${asset.id} ${position.side.toUpperCase()} ${position.leverage}× liquidated.</b> Collateral lost: ${money(position.margin)}.`, true);
+					showToast(`${asset.id} position liquidated · ${money(position.margin)} margin lost`, 'bad');
+				}
+			}
+		}
+		function accrueFunding(minutes) {
+			state.fundingMinutes += minutes;
+			const hours = Math.floor(state.fundingMinutes / 60);
+			if (!hours) return;
+			state.fundingMinutes -= hours * 60;
+			state.positions.forEach((position) => {
+				const payment = position.notional * .00001 * hours;
+				position.margin -= payment;
+				position.fundingPaid += payment;
+				state.feesPaid += payment;
+			});
+		}
+		function rugPull(asset) {
+			const old = asset.price;
+			asset.price *= .035 + Math.random() * .06;
+			asset.rugRisk = Math.max(.000005, asset.rugRisk * .35);
+			updateCandles(asset, old, asset.price, state.gameMinutes, state.gameMinutes);
+			addFeed(`<b>RUG ALERT:</b> ${asset.name} liquidity vanished. ${(100 - asset.price / old * 100).toFixed(0)}% wick down.`, true);
+			showToast(`${asset.name}: rug pull. Your ${asset.side || 'market'} moved hard.`, 'bad');
+			checkLiquidations(asset);
+		}
+		function memeSurge(asset) {
+			const old = asset.price;
+			const bump = 1.12 + Math.random() * .48;
+			asset.price *= bump;
+			updateCandles(asset, old, asset.price, state.gameMinutes, state.gameMinutes);
+			addFeed(`<b>${asset.id} meme spike:</b> ${(bump - 1) * 100 | 0}% candle on thin liquidity.`, true);
+			checkLiquidations(asset);
+		}
+		function maybeNews() {
+			const news = [
+				() => { const asset = assets[Math.floor(Math.random() * 4)]; asset.drift += (Math.random() - .5) * .00008; addFeed(`<b>Macro wire:</b> ${asset.name} catches a sector flow headline.`); },
+				() => { const asset = assets[4 + Math.floor(Math.random() * 3)]; addFeed(`<b>Social pulse:</b> ${asset.id} mentions spike. Volatility remains elevated.`, true); },
+				() => addFeed(`<b>Funding update:</b> Perpetual funding assessed on eligible open positions.`),
+				() => addFeed(`<b>Market note:</b> The paper order book is simulated. Spreads widen during fast moves.`)
+			];
+			news[Math.floor(Math.random() * news.length)]();
+		}
+		function rollMarketDay() {
+			assets.forEach((asset) => { asset.open = asset.price; asset.high = asset.price; asset.low = asset.price; });
+			addFeed(`<b>Session roll:</b> Day ${Math.floor(state.gameMinutes / 1440) + 1} opens. Prices carry forward.`);
+		}
+		function openPosition() {
+			const asset = currentAsset();
+			const margin = Number($('#margin-input').value);
+			const notional = margin * state.leverage;
+			const fee = notional * .0008;
+			if (!(margin > 0) || !Number.isFinite(state.leverage) || state.leverage < 1 || !Number.isFinite(notional) || !Number.isFinite(fee) || state.cash + 1e-8 < margin + fee) {
+				showToast('Not enough free collateral for margin and entry fee.', 'bad');
+				return;
+			}
+			const position = { id: crypto.randomUUID(), assetId: asset.id, side: state.side, entry: asset.price, leverage: state.leverage, margin, notional, fee, fundingPaid: 0, openedAt: clockText() };
+			state.cash -= margin + fee;
+			state.feesPaid += fee;
+			state.positions.push(position);
+			addFeed(`<b>Opened ${position.side.toUpperCase()} ${asset.id} ${position.leverage}×</b> · ${money(margin)} collateral · ${money(notional)} notional.`);
+			if (asset.category === 'STOCK' && Math.random() < .5) {
+				const move = .01 + Math.random() * .01;
+				const direction = position.side === 'long' ? 1 : -1;
+				const delayMs = 2000 + Math.random() * 3000;
+				state.catalysts.push({ assetId: asset.id, totalLog: direction > 0 ? Math.log(1 + move) : Math.log(1 - move), startAt: performance.now(), delayMs, duration: 3000, easedProgress: 0 });
+				addFeed(`<b>Stock catalyst:</b> ${asset.id} has a ${(move * 100).toFixed(1)}% ${direction > 0 ? 'upward' : 'downward'} drift queued in ${ (delayMs / 1000).toFixed(1) }s.`);
+				showToast(`${asset.name} catalyst · starts in ${(delayMs / 1000).toFixed(1)}s`, direction > 0 ? 'good' : 'bad');
+			}
+			showToast(`${position.side.toUpperCase()} ${asset.id} ${position.leverage}× opened`, 'good');
+			renderAll();
+		}
+		function closePosition(id) {
+			const position = state.positions.find((item) => item.id === id);
+			if (!position) return;
+			const asset = assets.find((item) => item.id === position.assetId);
+			const pnl = unrealized(position);
+			const closeFee = position.notional * (asset.category === 'MEMECOIN' ? .002 : .0008);
+			const recovered = Math.max(0, position.margin + pnl - closeFee);
+			const realizedPnl = pnl - position.fee - closeFee - position.fundingPaid;
+			state.cash += recovered;
+			state.feesPaid += closeFee;
+			state.positions = state.positions.filter((item) => item.id !== id);
+			state.history.unshift({ ...position, closePrice: asset.price, realized: realizedPnl, reason: 'CLOSED', closedAt: clockText() });
+			addFeed(`<b>Closed ${asset.id} ${position.side.toUpperCase()}.</b> Realized ${signedMoney(realizedPnl)} after fees.`);
+			showTradeEffect(realizedPnl);
+			showToast(`Position closed · ${signedMoney(realizedPnl)}`, realizedPnl >= 0 ? 'good' : 'bad');
+			renderAll();
+		}
+		function closeSelectedPosition() {
+			const selected = state.positions.filter((position) => position.assetId === state.selectedAsset);
+			if (selected.length) closePosition(selected[selected.length - 1].id);
+		}
+		function closeAllPositions() {
+			const openIds = state.positions.map((position) => position.id);
+			openIds.forEach((id) => closePosition(id));
+			if (openIds.length) showToast(`Closed ${openIds.length} position${openIds.length === 1 ? '' : 's'}.`);
+		}
+		const flappy = {
+			width: 240,
+			height: 400,
+			birdX: 60,
+			birdY: 190,
+			birdVelocity: 0,
+			gravity: 900,
+			flapVelocity: -310,
+			pipeSpeed: 92,
+			pipeWidth: 34,
+			pipeGap: 112,
+			pipeSpacing: 128,
+			groundHeight: 28,
+			score: 0,
+			earned: 0,
+			pipes: [],
+			started: false,
+			gameOver: false,
+			lastFrame: 0,
+			accumulator: 0,
+			frameRequest: 0
+		};
+		const flappyCanvas = $('#flappy-canvas');
+		const flappyContext = flappyCanvas.getContext('2d');
+		function resetFlappy() {
+			flappy.birdY = 190;
+			flappy.birdVelocity = 0;
+			flappy.score = 0;
+			flappy.earned = 0;
+			flappy.pipes = [{ x: 275, gapY: 175, scored: false }, { x: 415, gapY: 245, scored: false }];
+			flappy.started = false;
+			flappy.gameOver = false;
+			flappy.lastFrame = 0;
+			flappy.accumulator = 0;
+			$('#flappy-score').textContent = '0';
+			$('#flappy-earned').textContent = '$0';
+			$('#flappy-message').innerHTML = '<strong>FLAPPY CASH</strong>Tap, click, or press Space to flap.<br>Clear each pipe to earn $1.';
+			drawFlappy();
+		}
+		function openFlappy() {
+			const game = $('#flappy-game');
+			game.classList.add('active');
+			game.setAttribute('aria-hidden', 'false');
+			document.body.style.overflow = 'hidden';
+			resetFlappy();
+			$('#close-flappy').focus();
+		}
+		function exitFlappy() {
+			$('#flappy-game').classList.remove('active');
+			$('#flappy-game').setAttribute('aria-hidden', 'true');
+			document.body.style.overflow = '';
+			cancelAnimationFrame(flappy.frameRequest);
+			$('#open-flappy').focus();
+		}
+		function flap() {
+			if (!$('#flappy-game').classList.contains('active')) return;
+			if (flappy.gameOver) {
+				resetFlappy();
+				return;
+			}
+			if (!flappy.started) {
+				flappy.started = true;
+				$('#flappy-message').hidden = true;
+				flappy.lastFrame = performance.now();
+				flappy.frameRequest = requestAnimationFrame(flappyFrame);
+			}
+			flappy.birdVelocity = flappy.flapVelocity;
+		}
+		function endFlappy() {
+			if (flappy.gameOver) return;
+			flappy.gameOver = true;
+			$('#flappy-message').hidden = false;
+			$('#flappy-message').innerHTML = `<strong>WIPEOUT</strong>${flappy.score} pipe${flappy.score === 1 ? '' : 's'} cleared · ${money(flappy.earned)} earned<br>Tap, click, or press Space to try again.`;
+			drawFlappy();
+		}
+		function flappyStep(dt) {
+			flappy.birdVelocity += flappy.gravity * dt;
+			flappy.birdY += flappy.birdVelocity * dt;
+			flappy.pipes.forEach((pipe) => {
+				pipe.x -= flappy.pipeSpeed * dt;
+				if (!pipe.scored && pipe.x + flappy.pipeWidth < flappy.birdX) {
+					pipe.scored = true;
+					flappy.score++;
+					flappy.earned++;
+					state.cash += 1;
+					$('#flappy-score').textContent = String(flappy.score);
+					$('#flappy-earned').textContent = money(flappy.earned, 0);
+					renderAll();
+					showToast('Flappy Cash · +$1.0', 'good');
+					saveGame();
+				}
+			});
+			if (flappy.pipes.length && flappy.pipes[0].x + flappy.pipeWidth < -2) flappy.pipes.shift();
+			const lastPipe = flappy.pipes[flappy.pipes.length - 1];
+			if (!lastPipe || lastPipe.x < flappy.width - flappy.pipeSpacing) {
+				flappy.pipes.push({ x: flappy.width + 2, gapY: 95 + Math.random() * 190, scored: false });
+			}
+			const birdLeft = flappy.birdX - 7;
+			const birdRight = flappy.birdX + 7;
+			const birdTop = flappy.birdY - 6;
+			const birdBottom = flappy.birdY + 6;
+			if (birdTop < 0 || birdBottom > flappy.height - flappy.groundHeight) {
+				endFlappy();
+				return;
+			}
+			for (const pipe of flappy.pipes) {
+				if (birdRight > pipe.x && birdLeft < pipe.x + flappy.pipeWidth) {
+					const gapTop = pipe.gapY - flappy.pipeGap / 2;
+					const gapBottom = pipe.gapY + flappy.pipeGap / 2;
+					if (birdTop < gapTop || birdBottom > gapBottom) {
+						endFlappy();
+						return;
+					}
+				}
+			}
+		}
+		function drawFlappy() {
+			const context = flappyContext;
+			context.fillStyle = '#000';
+			context.fillRect(0, 0, flappy.width, flappy.height);
+			context.fillStyle = '#071007';
+			for (let x = 14; x < flappy.width; x += 38) {
+				const y = 38 + ((x * 17) % 115);
+				context.fillRect(x, y, 2, 2);
+			}
+			for (const pipe of flappy.pipes) {
+				const gapTop = Math.round(pipe.gapY - flappy.pipeGap / 2);
+				const gapBottom = Math.round(pipe.gapY + flappy.pipeGap / 2);
+				const x = Math.round(pipe.x);
+				context.fillStyle = '#167a28';
+				context.fillRect(x, 0, flappy.pipeWidth, gapTop);
+				context.fillRect(x, gapBottom, flappy.pipeWidth, flappy.height - flappy.groundHeight - gapBottom);
+				context.fillStyle = '#32c344';
+				context.fillRect(x + 4, 0, 5, gapTop);
+				context.fillRect(x + 4, gapBottom, 5, flappy.height - flappy.groundHeight - gapBottom);
+				context.fillStyle = '#258d34';
+				context.fillRect(x - 3, gapTop - 8, flappy.pipeWidth + 6, 8);
+				context.fillRect(x - 3, gapBottom, flappy.pipeWidth + 6, 8);
+				context.fillStyle = '#49e45b';
+				context.fillRect(x - 2, gapTop - 8, flappy.pipeWidth + 4, 2);
+				context.fillRect(x - 2, gapBottom, flappy.pipeWidth + 4, 2);
+			}
+			context.fillStyle = '#09230b';
+			context.fillRect(0, flappy.height - flappy.groundHeight, flappy.width, flappy.groundHeight);
+			context.fillStyle = '#27943a';
+			context.fillRect(0, flappy.height - flappy.groundHeight, flappy.width, 4);
+			for (let x = 0; x < flappy.width; x += 12) {
+				context.fillStyle = x % 24 ? '#12541d' : '#1c6b28';
+				context.fillRect(x, flappy.height - 18, 7, 3);
+			}
+			const birdY = Math.round(flappy.birdY);
+			context.fillStyle = '#7dff4e';
+			context.fillRect(flappy.birdX - 7, birdY - 5, 14, 11);
+			context.fillRect(flappy.birdX - 4, birdY - 7, 8, 15);
+			context.fillStyle = '#c4ff7a';
+			context.fillRect(flappy.birdX - 3, birdY - 4, 6, 5);
+			context.fillStyle = '#fff';
+			context.fillRect(flappy.birdX + 3, birdY - 4, 3, 3);
+			context.fillStyle = '#000';
+			context.fillRect(flappy.birdX + 5, birdY - 3, 1, 1);
+			context.fillStyle = '#d6ff67';
+			context.fillRect(flappy.birdX + 6, birdY + 1, 6, 3);
+		}
+		function flappyFrame(now) {
+			if (!$('#flappy-game').classList.contains('active') || flappy.gameOver) return;
+			const elapsed = Math.min(.05, Math.max(0, (now - flappy.lastFrame) / 1000));
+			flappy.lastFrame = now;
+			flappy.accumulator += elapsed;
+			const fixedStep = 1 / 120;
+			while (flappy.accumulator >= fixedStep && !flappy.gameOver) {
+				flappyStep(fixedStep);
+				flappy.accumulator -= fixedStep;
+			}
+			drawFlappy();
+			if (!flappy.gameOver) flappy.frameRequest = requestAnimationFrame(flappyFrame);
+		}
+		function renderAll() {
+			renderAccount();
+			renderPositions();
+			renderMarket();
+			renderTicket();
+			drawChart();
+			saveGame();
+		}
+		$('#open-flappy').addEventListener('click', openFlappy);
+		$('#close-flappy').addEventListener('click', exitFlappy);
+		$('#flappy-restart').addEventListener('click', () => {
+			resetFlappy();
+			flap();
+		});
+		$('#flappy-canvas').addEventListener('pointerdown', (event) => {
+			event.preventDefault();
+			flap();
+		});
+		document.addEventListener('keydown', (event) => {
+			if (!$('#flappy-game').classList.contains('active')) return;
+			if (event.key === 'Escape') {
+				exitFlappy();
+				return;
+			}
+			if (event.code === 'Space' || event.key === 'ArrowUp') {
+				event.preventDefault();
+				if (!event.repeat) flap();
+			}
+		});
+
+		$$('.side-button').forEach((button) => button.addEventListener('click', () => {
+			state.side = button.dataset.side;
+			renderTicket();
+			saveGame();
+		}));
+		$('#open-trade').addEventListener('click', openPosition);
+		$('#close-selected').addEventListener('click', closeSelectedPosition);
+		$('#close-all').addEventListener('click', closeAllPositions);
+		$$('.allocation-button').forEach((button) => button.addEventListener('click', () => setAllocationPercent(button.dataset.allocation)));
+		$('#custom-leverage').addEventListener('input', (event) => {
+			const leverage = Number(event.target.value);
+			if (Number.isFinite(leverage) && leverage >= 1) {
+				state.leverage = leverage;
+				renderTicket();
+				saveGame();
+			}
+		});
+		$('#custom-leverage').addEventListener('change', (event) => {
+			const leverage = Number(event.target.value);
+			if (!Number.isFinite(leverage) || leverage < 1) {
+				state.leverage = 10;
+				renderLeverage();
+				renderTicket();
+			}
+		});
+		$('#margin-range').addEventListener('input', (event) => setAllocationPercent(event.target.value));
+		$('#margin-input').addEventListener('input', () => { renderTicket(); saveGame(); });
+		$('#margin-input').addEventListener('change', () => {
+			const maxMargin = maxAffordableMargin();
+			const requested = Number($('#margin-input').value);
+			$('#margin-input').value = (Number.isFinite(requested) ? Math.max(0, Math.min(maxMargin, requested)) : maxMargin).toPrecision(8);
+			renderTicket();
+			saveGame();
+		});
+		$$('.speed-button').forEach((button) => button.addEventListener('click', () => {
+			state.speed = Number(button.dataset.speed);
+			state.lastTickAt = Date.now();
+			$$('.speed-button').forEach((item) => item.classList.toggle('selected', item === button));
+			renderAccount();
+			saveGame();
+		}));
+		$$('.chart-tools button').forEach((button) => button.addEventListener('click', () => {
+			state.chartRange = Number(button.dataset.range);
+			$$('.chart-tools button').forEach((item) => item.classList.toggle('active', item === button));
+			drawChart();
+			saveGame();
+		}));
+		window.addEventListener('resize', resizeCanvas);
+		document.addEventListener('visibilitychange', () => { state.lastTickAt = Date.now(); });
+		window.addEventListener('beforeunload', () => {
+			clearTimeout(saveTimer);
+			try { writeGameSave(); } catch {}
+		});
+		restoreGame();
+		$$('.speed-button').forEach((button) => button.classList.toggle('selected', Number(button.dataset.speed) === state.speed));
+		$$('.chart-tools button').forEach((button) => button.classList.toggle('active', Number(button.dataset.range) === state.chartRange));
+		renderLeverage();
+		renderAssets();
+		selectAsset(state.selectedAsset);
+		addFeed('<b>Welcome to LarPIT.</b> You have $10.00 in paper collateral. Choose an asset, set leverage, then long or short.');
+		addFeed('<b>Risk desk:</b> Meme assets can rug. 100× liquidation is roughly a 0.9% adverse move before fees.');
+		renderAll();
+		resizeCanvas();
+		requestAnimationFrame(animateChart);
+		setInterval(tick, 300);
+	</script>
+</body>
+</html>
