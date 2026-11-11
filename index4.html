@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
+<!-- saved from url=(0033)http://127.0.0.1:8080/index4.html -->
+<html lang="en" style="--text-color: #ffffff; --selected-bg: #ffffff; --selected-text: #000000;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
   <title>_</title>
 
@@ -351,18 +351,18 @@
   </style>
 </head>
 <body>
-  <iframe id="bg-frame" src="/topo.html" title="Topographic background" aria-hidden="true" tabindex="-1"></iframe>
+  <iframe id="bg-frame" src="./topo.html" title="Topographic background" aria-hidden="true" tabindex="-1"></iframe>
   
   <div id="banner-stack">
-    <div id="daily-banner" role="img" aria-label="Daily ASCII art banner">
-      <img id="daily-banner-image" alt="" />
+    <div id="daily-banner" role="img" aria-label="Daily ASCII art banner" style="--banner-mask: url(&quot;banners/ascii-art (12).png&quot;);">
+      <img id="daily-banner-image" alt="" src="./index4_files/ascii-art (12).png">
     </div>
 
-    <div class="shell-panel" aria-label="runk shell menu">
+    <div class="shell-panel nav-used" aria-label="runk shell menu" style="display: none;">
       <div class="prompt-row">
         <span class="prompt-label">root@fun</span>
         <span class="prompt-symbol">:~$</span>
-        <input id="shell-input" type="text" aria-label="Command input" spellcheck="false" autocomplete="off" />
+        <input id="shell-input" type="text" aria-label="Command input" spellcheck="false" autocomplete="off">
       </div>
 
       <div class="shell-options">
@@ -387,58 +387,56 @@
           <span class="command">./Extras</span>
           <span class="meta">[additional]</span>
         </button>
-        <button class="shell-option" data-command="./settings" data-url="settings" aria-selected="false">
+        <button class="shell-option selected" data-command="./settings" data-url="settings" aria-selected="true">
           <span class="selector">&gt;</span>
-          <span class="command">./settings</span>
-          <span class="meta">[config]</span>
+          <span class="command">./config</span>
+          <span class="meta">[options]</span>
         </button>
       </div>
     </div>
 
-    <div class="settings-panel" id="settings-panel" aria-label="Settings menu">
+    <div class="settings-panel visible" id="settings-panel" aria-label="Settings menu">
       <div class="editor-row"><span class="prompt-label">root@runk</span><span class="prompt-symbol">:~$</span><span class="command">settings</span></div>
 
       <div class="settings-row">
         <label for="banner-select">banner</label>
-        <select id="banner-select" class="settings-select" aria-label="Select banner number">
-          <option value="0">1</option>
-        </select>
+        <select id="banner-select" class="settings-select" aria-label="Select banner number"></select>
       </div>
 
       <div class="settings-row">
         <label for="text-color">text color</label>
-        <input id="text-color" class="settings-input" type="color" value="#b5ffbe" />
+        <input id="text-color" class="settings-input" type="color" value="#b5ffbe">
       </div>
 
       <div class="settings-row">
         <label for="topo-toggle">background</label>
         <div class="settings-inline bg-toggle-switch" id="bg-toggle-wrapper">
           <span class="bg-mode-choice" id="bg-opt-black">black</span>
-          <input id="topo-toggle" class="settings-toggle" type="checkbox" aria-label="Toggle topo.html background" />
+          <input id="topo-toggle" class="settings-toggle" type="checkbox" aria-label="Toggle topo.html background">
           <span class="bg-mode-choice" id="bg-opt-topo">topo.html</span>
         </div>
       </div>
 
-      <div class="settings-row" id="bg-blur-row" style="display: none;">
+      <div class="settings-row" id="bg-blur-row">
         <label for="bg-blur">bg blur</label>
         <div class="settings-inline">
-          <input id="bg-blur" class="settings-slider" type="range" min="0" max="25" step="1" value="0" aria-label="Background blur 0 to 25" />
-          <span class="settings-val" id="bg-blur-val">0px</span>
+          <input id="bg-blur" class="settings-slider" type="range" min="0" max="25" step="1" value="4" aria-label="Background blur 0 to 25">
+          <span class="settings-val" id="bg-blur-val">4px</span>
         </div>
       </div>
 
-      <div class="settings-row" id="bg-darkness-row" style="display: none;">
+      <div class="settings-row" id="bg-darkness-row">
         <label for="bg-darkness">bg darkness</label>
         <div class="settings-inline">
-          <input id="bg-darkness" class="settings-slider" type="range" min="0" max="100" step="1" value="0" aria-label="Background darkness 0 to 100" />
-          <span class="settings-val" id="bg-darkness-val">0%</span>
+          <input id="bg-darkness" class="settings-slider" type="range" min="0" max="100" step="1" value="47" aria-label="Background darkness 0 to 100">
+          <span class="settings-val" id="bg-darkness-val">47%</span>
         </div>
       </div>
 
       <div class="settings-row">
         <button class="settings-option" data-close="true" type="button">
           <span class="selector">&gt;</span>
-          <span class="command">save & exit</span>
+          <span class="command">save &amp; exit</span>
         </button>
       </div>
     </div>
@@ -552,9 +550,9 @@
       return {
         bannerIndex: 0,
         textColor: "#b5ffbe",
-        topoBg: false,
-        bgBlur: 0,
-        bgDarkness: 0
+        topoBg: true,
+        bgBlur: 4,
+        bgDarkness: 47
       };
     }
 
@@ -572,16 +570,16 @@
         bannerIndex: Number(bannerSelect ? bannerSelect.value : 0),
         textColor: textColorInput ? textColorInput.value : "#b5ffbe",
         topoBg: Boolean(topoToggle && topoToggle.checked),
-        bgBlur: Number(bgBlurInput ? bgBlurInput.value : 0),
-        bgDarkness: Number(bgDarknessInput ? bgDarknessInput.value : 0)
+        bgBlur: Number(bgBlurInput ? bgBlurInput.value : 4),
+        bgDarkness: Number(bgDarknessInput ? bgDarknessInput.value : 47)
       };
       localStorage.setItem("runk-shell-settings", JSON.stringify(settings));
     }
 
     function updateBackgroundState() {
       const isTopo = Boolean(topoToggle && topoToggle.checked);
-      const blur = Math.max(0, Math.min(25, Number(bgBlurInput ? bgBlurInput.value : 0)));
-      const darkness = Math.max(0, Math.min(100, Number(bgDarknessInput ? bgDarknessInput.value : 0)));
+      const blur = Math.max(0, Math.min(25, Number(bgBlurInput ? bgBlurInput.value : 4)));
+      const darkness = Math.max(0, Math.min(100, Number(bgDarknessInput ? bgDarknessInput.value : 47)));
 
       if (bgOptBlack && bgOptTopo) {
         bgOptBlack.style.opacity = isTopo ? "0.45" : "1";
@@ -631,10 +629,10 @@
         topoToggle.checked = Boolean(settings.topoBg);
       }
       if (bgBlurInput) {
-        bgBlurInput.value = settings.bgBlur ?? 0;
+        bgBlurInput.value = settings.bgBlur ?? 4;
       }
       if (bgDarknessInput) {
-        bgDarknessInput.value = settings.bgDarkness ?? 0;
+        bgDarknessInput.value = settings.bgDarkness ?? 47;
       }
 
       updateBackgroundState();
@@ -868,5 +866,36 @@
     };
   </script>
   
-</body>
-</html>
+<!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function() {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					head.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					head.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function(msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			console.log('Live reload enabled.');
+		})();
+	}
+	// ]]>
+</script>
+
+</body></html>
