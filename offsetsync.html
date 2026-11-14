@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS2 Offset Sync Checker</title>
+  <style>
+    :root {
+      --bg: #0f0f11;
+      --card: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    button {
+      background: #27272a;
+      color: var(--text);
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      padding: 0.35rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button:hover {
+      background: #3f3f46;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .row {
+      margin-bottom: 1rem;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .value {
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+    }
+
+    .banner {
+      margin-top: 1.25rem;
+      padding: 0.85rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+      background: #27272a;
+      color: var(--muted);
+    }
+
+    .ok {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: var(--green);
+    }
+
+    .outdated {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h2>CS2 Offset Sync Checker</h2>
+    <button id="refresh-btn" onclick="checkSync()">Refresh</button>
+  </div>
+
+  <div class="row">
+    <div class="label">a2x/cs2-dumper (info.json)</div>
+    <div class="value" id="repo-time">Fetching...</div>
+    <div class="sub" id="repo-build">Build: --</div>
+  </div>
+
+  <div class="row">
+    <div class="label">Latest CS2 Game Update (SteamDB Tracker)</div>
+    <div class="value" id="steam-time">Fetching...</div>
+    <div class="sub" id="steam-commit">Checking commit...</div>
+  </div>
+
+  <div class="banner" id="status-banner">Checking sync status...</div>
+</div>
+
+<script>
+  const REPO_URL = 'https://raw.githubusercontent.com/a2x/cs2-dumper/main/output/info.json';
+  const GITHUB_COMMITS_URL = 'https://api.github.com/repos/SteamDatabase/GameTracking-CS2/commits?path=game/sys/steam.inf&per_page=1';
+
+  function formatTime(dateObj) {
+    return dateObj.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  async function checkSync() {
+    const repoTimeEl = document.getElementById('repo-time');
+    const repoBuildEl = document.getElementById('repo-build');
+    const steamTimeEl = document.getElementById('steam-time');
+    const steamCommitEl = document.getElementById('steam-commit');
+    const bannerEl = document.getElementById('status-banner');
+    const btn = document.getElementById('refresh-btn');
+
+    btn.disabled = true;
+    bannerEl.className = 'banner';
+    bannerEl.textContent = 'Checking update dates...';
+
+    try {
+      const [repoRes, commitRes] = await Promise.all([
+        fetch(`${REPO_URL}?t=${Date.now()}`),
+        fetch(`https://api.github.com/repos/SteamDatabase/GameTracking-CS2/commits?path=game/csgo/steam.inf&per_page=1&t=${Date.now()}`)
+      ]);
+
+      if (!repoRes.ok) throw new Error(`GitHub dumper HTTP ${repoRes.status}`);
+      if (!commitRes.ok) throw new Error(`GitHub API HTTP ${commitRes.status}`);
+
+      const repoData = await repoRes.json();
+      const commits = await commitRes.json();
+
+      if (!commits || commits.length === 0) throw new Error('No commit history found');
+
+      const repoDate = new Date(repoData.timestamp);
+      const steamUpdateDate = new Date(commits[0].commit.committer.date);
+      
+      // Extract just the first part of the commit message (e.g., "2000943")
+      const fullMsg = commits[0].commit.message;
+      const cleanBuildId = fullMsg.split('|')[0].trim();
+
+      repoTimeEl.textContent = formatTime(repoDate);
+      repoBuildEl.textContent = `Build: ${repoData.build_number}`;
+
+      steamTimeEl.textContent = formatTime(steamUpdateDate);
+      steamCommitEl.textContent = `Steam Build: ${cleanBuildId}`;
+
+      const diffHours = ((repoDate - steamUpdateDate) / (1000 * 60 * 60)).toFixed(1);
+
+      if (repoDate >= steamUpdateDate) {
+        bannerEl.className = 'banner ok';
+        bannerEl.textContent = `UP TO DATE (Dumper is +${diffHours}h newer than last game update)`;
+      } else {
+        bannerEl.className = 'banner outdated';
+        bannerEl.textContent = `OUTDATED (Dumper is ${Math.abs(diffHours)}h older than latest game update)`;
+      }
+
+    } catch (err) {
+      bannerEl.className = 'banner outdated';
+      bannerEl.textContent = `Error: ${err.message}`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  checkSync();
+</script>
+
+</body>
+</html>
