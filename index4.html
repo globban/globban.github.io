@@ -354,11 +354,11 @@
   <iframe id="bg-frame" src="./topo.html" title="Topographic background" aria-hidden="true" tabindex="-1"></iframe>
   
   <div id="banner-stack">
-    <div id="daily-banner" role="img" aria-label="Daily ASCII art banner" style="--banner-mask: url(&quot;banners/ascii-art (12).png&quot;);">
-      <img id="daily-banner-image" alt="" src="./index4_files/ascii-art (12).png">
+    <div id="daily-banner" role="img" aria-label="Daily ASCII art banner">
+      <img id="daily-banner-image" alt="" />
     </div>
 
-    <div class="shell-panel nav-used" aria-label="runk shell menu" style="display: none;">
+    <div class="shell-panel" aria-label="runk shell menu">
       <div class="prompt-row">
         <span class="prompt-label">root@fun</span>
         <span class="prompt-symbol">:~$</span>
@@ -387,7 +387,7 @@
           <span class="command">./Extras</span>
           <span class="meta">[additional]</span>
         </button>
-        <button class="shell-option selected" data-command="./settings" data-url="settings" aria-selected="true">
+        <button class="shell-option" data-command="./config" data-url="settings" aria-selected="false">
           <span class="selector">&gt;</span>
           <span class="command">./config</span>
           <span class="meta">[options]</span>
@@ -395,7 +395,7 @@
       </div>
     </div>
 
-    <div class="settings-panel visible" id="settings-panel" aria-label="Settings menu">
+    <div class="settings-panel" id="settings-panel" aria-label="Settings menu">
       <div class="editor-row"><span class="prompt-label">root@runk</span><span class="prompt-symbol">:~$</span><span class="command">settings</span></div>
 
       <div class="settings-row">
@@ -714,11 +714,16 @@
         .toLowerCase();
     }
 
+    function findMatchingOption(typed) {
+      return options.find((button) => {
+        const cmd = normalizeCommand(button.dataset.command);
+        return cmd.startsWith(typed) || (button.getAttribute("data-url") === "settings" && "settings".startsWith(typed));
+      });
+    }
+
     function applyAutocomplete() {
       const typed = normalizeCommand(shellInput.value);
-      const match = options.find((button) =>
-        normalizeCommand(button.dataset.command).startsWith(typed)
-      );
+      const match = findMatchingOption(typed);
 
       if (match) {
         const matchIndex = options.indexOf(match);
@@ -748,11 +753,9 @@
         return;
       }
 
-      const matchIndex = options.findIndex((button) =>
-        normalizeCommand(button.dataset.command).startsWith(typed)
-      );
-
-      if (matchIndex >= 0) {
+      const match = findMatchingOption(typed);
+      if (match) {
+        const matchIndex = options.indexOf(match);
         updateSelection(matchIndex);
       }
     });
@@ -859,43 +862,12 @@
     }
 
     applySettings();
+    hideSettingsPanel();
 
     if (shellInput) {
       shellInput.focus();
       shellInput.setSelectionRange(shellInput.value.length, shellInput.value.length);
     };
   </script>
-  
-<!-- Code injected by live-server -->
-<script type="text/javascript">
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function() {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					head.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					head.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function(msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			console.log('Live reload enabled.');
-		})();
-	}
-	// ]]>
-</script>
-
-</body></html>
+</body>
+</html>

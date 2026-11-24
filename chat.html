@@ -1,88 +1,327 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workspaces</title>
+
+    <!-- Typography: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                    },
+                },
+            },
+        };
+    </script>
+
     <style>
-        body {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Roboto', sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
+        /* Restrained frosted glass surface with subtle top hairline highlight */
+        .frosted-panel {
+            background-color: rgba(18, 21, 26, 0.58);
+            backdrop-filter: blur(20px) saturate(135%);
+            -webkit-backdrop-filter: blur(20px) saturate(135%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
         }
 
-        .half-screen {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            color: #ffffff;
-            font-size: 1.2rem;
-            font-weight: bold;
-            transition: transform 0.3s, box-shadow 0.3s;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-            border-radius: 12px;
-            margin: 10px;
+        .frosted-panel:hover {
+            background-color: rgba(24, 28, 34, 0.66);
+            border-color: rgba(255, 255, 255, 0.22);
         }
 
-        .half-screen:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        .frosted-pill {
+            background-color: rgba(18, 21, 26, 0.52);
+            backdrop-filter: blur(16px) saturate(130%);
+            -webkit-backdrop-filter: blur(16px) saturate(130%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
         }
 
-        .left {
-            background: url('/grasslands.webp') center/cover no-repeat;
-        }
-
-        .right {
-            background: url('/camo.jpg') center/cover no-repeat;
-        }
-
-        .description {
-            max-width: 90%;
-            line-height: 1.8;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .half-screen {
-                font-size: 1rem;
-                margin: 5px;
-            }
+        /* Background iframe slightly scaled to avoid edge blur artifacts */
+        .topo-frame {
+            transform: scale(1.03);
+            filter: blur(4px) brightness(0.72) contrast(0.95);
         }
     </style>
 </head>
-<body>
-    <a href="https://chat-4r5m.onrender.com" class="half-screen left">
-        <div class="description">
-            MongoDB Chat<br>
-            Easy, no login needed, just join a room and start chatting!<br>
-            No military-grade security though.
-        </div>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/MongoDB_Logo.svg/1280px-MongoDB_Logo.svg.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; left: 20px; width: 220px; height: auto; opacity: 1;">
-    </a>
-     <a href="https://pi-5.tail39a016.ts.net/home" class="half-screen right">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/RocketChat_Logo_1024x1024.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; right: 20px; width: 80px; height: auto; opacity: 1;">
-        <div class="description">
-            RocketChat<br>
-            Hosted on my own server, extremely secure (military-grade), feature-rich but you gotta log in first.
-        </div>
-        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cb/Raspberry_Pi_Logo.svg/960px-Raspberry_Pi_Logo.svg.png" alt="Raspberry Pi Logo" style="position: relative; bottom: 20px; left: 20px; width: 80px; height: auto; opacity: 1;">
+<body class="bg-[#0b0d10] text-zinc-100 min-h-screen w-full overflow-x-hidden flex flex-col justify-between font-sans antialiased selection:bg-white/15 selection:text-white">
 
-    </a>
+    <!-- Background Topographic Contour Fallback (only shown if /topo.html is unavailable) -->
+    <canvas
+        id="topo-fallback-canvas"
+        aria-hidden="true"
+        class="fixed inset-0 w-full h-full z-0 pointer-events-none opacity-0 transition-opacity duration-500"
+    ></canvas>
+
+    <!-- Primary Topographic Background Layer (/topo.html) -->
+    <div aria-hidden="true" class="fixed inset-0 w-full h-full z-[1] overflow-hidden pointer-events-none">
+        <iframe
+            id="topo-iframe"
+            src="/topo.html"
+            title="Topographic background"
+            tabindex="-1"
+            class="topo-frame w-full h-full border-0 select-none pointer-events-none transition-opacity duration-500"
+        ></iframe>
+    </div>
+
+    <!-- Soft Edge Vignette for Legibility -->
+    <div
+        aria-hidden="true"
+        class="fixed inset-0 z-[2] pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(11,13,16,0.18)_0%,rgba(11,13,16,0.68)_100%)]"
+    ></div>
+
+    <!-- Header -->
+    <header class="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 pt-8 sm:pt-12 flex items-center justify-between">
+        <span class="text-xs font-mono tracking-wide text-zinc-400">
+            chat gateway
+        </span>
+        <span class="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-zinc-500">
+            <span>keys</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-zinc-300">1</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-zinc-300">2</kbd>
+        </span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 my-auto py-14 sm:py-20">
+        <div class="max-w-xl mb-10 sm:mb-12">
+            <h1 class="text-2xl sm:text-3xl font-medium tracking-tight text-zinc-100">
+                Choose a chat instance
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-zinc-400 leading-relaxed">
+                Direct links to your cloud and self-hosted messaging spaces.
+            </p>
+        </div>
+
+        <!-- Two Destination Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            <!-- Option 1: MongoDB Chat -->
+            <a
+                id="dest-mongodb"
+                href="https://chat-4r5m.onrender.com/"
+                data-key="1"
+                class="frosted-panel group rounded-2xl p-6 sm:p-7 flex flex-col justify-between gap-8 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-200/70"
+            >
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-medium tracking-tight text-zinc-100">
+                            MongoDB Chat
+                        </h2>
+                        <span class="text-xs font-mono text-zinc-500">01</span>
+                    </div>
+                    <p class="text-sm text-zinc-400 leading-relaxed">
+                        Hosted web chat backed by MongoDB.
+                    </p>
+                </div>
+
+                <div class="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
+                    <span class="text-xs font-mono text-zinc-400 truncate">
+                        chat-4r5m.onrender.com
+                    </span>
+                    <span
+                        aria-hidden="true"
+                        class="text-zinc-400 group-hover:text-zinc-100 group-hover:translate-x-1 transition-all duration-200 shrink-0"
+                    >
+                        &rarr;
+                    </span>
+                </div>
+            </a>
+
+            <!-- Option 2: Rocket.Chat -->
+            <a
+                id="dest-rocketchat"
+                href="https://pi-5.tail39a016.ts.net/"
+                data-key="2"
+                class="frosted-panel group rounded-2xl p-6 sm:p-7 flex flex-col justify-between gap-8 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-200/70"
+            >
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-medium tracking-tight text-zinc-100">
+                            Rocket.Chat
+                        </h2>
+                        <span class="text-xs font-mono text-zinc-500">02</span>
+                    </div>
+                    <p class="text-sm text-zinc-400 leading-relaxed">
+                        Self-hosted instance on Pi 5 over Tailscale.
+                    </p>
+                </div>
+
+                <div class="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
+                    <span class="text-xs font-mono text-zinc-400 truncate">
+                        pi-5.tail39a016.ts.net
+                    </span>
+                    <span
+                        aria-hidden="true"
+                        class="text-zinc-400 group-hover:text-zinc-100 group-hover:translate-x-1 transition-all duration-200 shrink-0"
+                    >
+                        &rarr;
+                    </span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 pb-8 sm:pb-10 flex items-center justify-between text-xs font-mono text-zinc-500">
+        <span>/topo.html</span>
+        <span id="status-note" class="text-zinc-400 opacity-0 transition-opacity duration-200"></span>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const statusNote = document.getElementById('status-note');
+            const links = Array.from(document.querySelectorAll('a[data-key]'));
+
+            function navigateTo(anchor) {
+                if (!anchor || !anchor.href) return;
+                const label = anchor.querySelector('h2')?.textContent?.trim() || anchor.href;
+                if (statusNote) {
+                    statusNote.textContent = `Opening ${label}...`;
+                    statusNote.classList.remove('opacity-0');
+                    statusNote.classList.add('opacity-100');
+                }
+                window.location.assign(anchor.href);
+            }
+
+            links.forEach((anchor) => {
+                anchor.addEventListener('click', (event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+                        return;
+                    }
+                    event.preventDefault();
+                    navigateTo(anchor);
+                });
+            });
+
+            window.addEventListener('keydown', (event) => {
+                if (event.metaKey || event.ctrlKey || event.altKey) return;
+                const activeTag = document.activeElement?.tagName;
+                if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable) {
+                    return;
+                }
+                const target = links.find((el) => el.dataset.key === event.key);
+                if (target) {
+                    event.preventDefault();
+                    target.focus();
+                    navigateTo(target);
+                }
+            });
+
+            // Quiet fallback topographic lines only if /topo.html cannot be loaded
+            const iframe = document.getElementById('topo-iframe');
+            const canvas = document.getElementById('topo-fallback-canvas');
+            let fallbackStarted = false;
+
+            function renderQuietFallback() {
+                if (fallbackStarted || !canvas) return;
+                fallbackStarted = true;
+
+                if (iframe) {
+                    iframe.classList.add('opacity-0');
+                }
+                canvas.classList.remove('opacity-0');
+                canvas.classList.add('opacity-60');
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                function draw() {
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const w = window.innerWidth;
+                    const h = window.innerHeight;
+                    canvas.width = Math.floor(w * dpr);
+                    canvas.height = Math.floor(h * dpr);
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    ctx.clearRect(0, 0, w, h);
+
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.lineWidth = 1;
+
+                    const step = 36;
+                    const cols = Math.ceil(w / step) + 1;
+                    const rows = Math.ceil(h / step) + 1;
+                    const field = new Float32Array(cols * rows);
+
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            const x = c * step * 0.003;
+                            const y = r * step * 0.003;
+                            field[r * cols + c] =
+                                Math.sin(x * 2.4 + 0.4) * Math.cos(y * 2.1 - 0.3) +
+                                0.45 * Math.cos((x - y) * 3.1);
+                        }
+                    }
+
+                    const levels = [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75];
+                    ctx.beginPath();
+
+                    for (const level of levels) {
+                        for (let r = 0; r < rows - 1; r++) {
+                            for (let c = 0; c < cols - 1; c++) {
+                                const x0 = c * step;
+                                const y0 = r * step;
+                                const v0 = field[r * cols + c];
+                                const v1 = field[r * cols + c + 1];
+                                const v2 = field[(r + 1) * cols + c + 1];
+                                const v3 = field[(r + 1) * cols + c];
+
+                                const pts = [];
+                                if ((v0 < level) !== (v1 < level)) {
+                                    pts.push([x0 + ((level - v0) / (v1 - v0)) * step, y0]);
+                                }
+                                if ((v1 < level) !== (v2 < level)) {
+                                    pts.push([x0 + step, y0 + ((level - v1) / (v2 - v1)) * step]);
+                                }
+                                if ((v2 < level) !== (v3 < level)) {
+                                    pts.push([x0 + (1 - (level - v2) / (v3 - v2)) * step, y0 + step]);
+                                }
+                                if ((v3 < level) !== (v0 < level)) {
+                                    pts.push([x0, y0 + (1 - (level - v3) / (v0 - v3)) * step]);
+                                }
+
+                                if (pts.length === 2) {
+                                    ctx.moveTo(pts[0][0], pts[0][1]);
+                                    ctx.lineTo(pts[1][0], pts[1][1]);
+                                }
+                            }
+                        }
+                    }
+
+                    ctx.stroke();
+                }
+
+                draw();
+                window.addEventListener('resize', draw);
+            }
+
+            if (iframe) {
+                iframe.addEventListener('error', renderQuietFallback);
+                iframe.addEventListener('load', () => {
+                    try {
+                        const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                        if (doc && (!doc.body || doc.body.innerHTML.trim() === '' || /404|not found/i.test(doc.title))) {
+                            renderQuietFallback();
+                        }
+                    } catch (_) {
+                        // Cross-origin frame loaded
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
