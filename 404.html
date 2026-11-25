@@ -61,29 +61,20 @@
 
     <aside class="illustration" aria-hidden="true">
       <video class="scene" autoplay muted loop playsinline>
-        <source src="/logo.mp4" type="video/mp4" />
+        <source src="/Logo.mp4" type="video/mp4" />
       </video>
     </aside>
   </main>
 
   <script>
-    const repoUrl = null; // e.g. 'https://github.com/Globban/globban.github.io'
     const homeBtn = document.getElementById('homeBtn');
-    const repoBtn = document.getElementById('repoBtn');
     const pathInfo = document.getElementById('pathInfo');
 
     pathInfo.textContent = 'What did you even think you\'d find at ' + location.pathname + location.search + location.hash + '?';
 
-    homeBtn.addEventListener('click', ()=>{
-        location.href = location.origin + '/';
+    homeBtn.addEventListener('click', () => {
+      location.href = location.origin + '/';
     });
-
-    if(repoUrl){
-      repoBtn.addEventListener('click', ()=> location.href = repoUrl);
-    } else {
-      repoBtn.textContent = 'Open site root';
-      repoBtn.addEventListener('click', ()=> location.href = location.origin + '/');
-    }
   </script>
 </body>
 </html>

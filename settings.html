@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0035)http://127.0.0.1:8080/settings.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Settings | algot.fun</title>
 	<style>
@@ -89,7 +89,18 @@
 			font-size: 13px;
 			font-weight: 600;
 			cursor: pointer;
-			transition: background 160s ease, transform 160s ease;
+			transition: background 160ms ease, transform 160ms ease;
+			text-decoration: none;
+		}
+
+		.back-home {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			z-index: 20;
+			background: rgba(16, 23, 24, 0.8);
+			backdrop-filter: blur(12px);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 		}
 
 		.carousel-btn:hover {
@@ -125,7 +136,7 @@
 			z-index: 20;
 			pointer-events: none;
 			opacity: 0;
-			transition: opacity 200s ease;
+			transition: opacity 200ms ease;
 		}
 
 		.status.visible {
@@ -145,6 +156,8 @@
 	<div class="preview-container" id="preview-container">
 		<iframe class="page-preview" id="active-preview" title="Homepage Preview" src="about:blank"></iframe>
 	</div>
+
+	<a class="carousel-btn back-home" href="/">← Home</a>
 
 	<!-- Overlay UI Controls (Stacked at bottom middle) -->
 	<div class="overlay-ui">
@@ -170,7 +183,7 @@
 
 		// Define Homepage Options
 		const pages = [
-			{ value: 'index.html', label: 'Liquid glass (Default)', src: '/index.html' },
+			{ value: 'index.html', label: 'Liquid glass (Default)', src: '/index.html?preview' },
 			{ value: 'index1.html', label: 'Frosted glass', src: '/index1.html' },
 			{ value: 'index2.html', label: 'neon', src: '/index2.html' },
 			{ value: 'index3.html', label: 'Legacy', src: '/index3.html' },
@@ -276,6 +289,14 @@
 		dailyBgBtn.addEventListener('click', () => {
 			currentBgIndex = 0; // Daily is the first item
 			updateBackground();
+		});
+
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft') prevBgBtn.click();
+			else if (e.key === 'ArrowRight') nextBgBtn.click();
+			else if (e.key === 'ArrowUp') prevPageBtn.click();
+			else if (e.key === 'ArrowDown') nextPageBtn.click();
+			else if (e.key === 'Escape') window.location.href = '/';
 		});
 
 		// Initial Sync from localStorage
