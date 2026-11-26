@@ -153,6 +153,13 @@
     "category": "casual",
     "blocked": false
   },
+  {
+    "gameid": "flappy-bird",
+    "customurl": "flappy.html",
+    "thumbnail": "TN/flappy.png",
+    "category": "casual",
+    "blocked": false
+  },
 
   {
     "gameid": "5050",

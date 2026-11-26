@@ -72,10 +72,15 @@
         "gameid": "paper-io-2",
         "thumbnail": "https://imgs.crazygames.com/paper-io-2_16x9/20250214024143/paper-io-2_16x9-cover?metadata=none&quality=85&width=273&fit=crop"
     },
-      {
+  {
     "gameid": "ski",
     "customurl": "ski.html",
     "thumbnail": "TN/ski.png"
+  },
+  {
+    "gameid": "flappy-bird",
+    "customurl": "flappy.html",
+    "thumbnail": "TN/flappy.png"
   },
     {
         "gameid": "bloxdhop-io",
