@@ -82,6 +82,11 @@
     "customurl": "flappy.html",
     "thumbnail": "TN/flappy.png"
   },
+  {
+    "gameid": "low-poly-ski",
+    "customurl": "ski3d.html",
+    "thumbnail": "TN/ski3d.png"
+  },
     {
         "gameid": "bloxdhop-io",
         "thumbnail": "https://imgs.crazygames.com/bloxdhop-io_16x9/20250829023851/bloxdhop-io_16x9-cover?metadata=none&quality=85&width=273&fit=crop"

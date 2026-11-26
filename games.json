@@ -160,6 +160,13 @@
     "category": "casual",
     "blocked": false
   },
+  {
+    "gameid": "low-poly-ski",
+    "customurl": "ski3d.html",
+    "thumbnail": "TN/ski3d.png",
+    "category": "sports",
+    "blocked": false
+  },
 
   {
     "gameid": "5050",
