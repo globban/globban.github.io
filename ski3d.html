@@ -34,9 +34,124 @@
 
     .ui-hideable { transition: opacity 0.2s ease; }
     body.ragdoll-mode .ui-hideable,
-    body.menu-mode .ingame-only {
+    body.menu-mode .ingame-only,
+    body.ui-hidden .ui-hideable {
       opacity: 0 !important;
       pointer-events: none !important;
+    }
+
+    /* Crash / Wipeout Overlay */
+    #crashOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 16;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 24px 20px max(40px, 8vh);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.28s ease;
+    }
+    body.ragdoll-mode #crashOverlay {
+      opacity: 1;
+    }
+    .crash-card {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 26px;
+      border-radius: 20px;
+      background: rgba(10, 20, 34, 0.74);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45);
+      text-align: center;
+    }
+    .crash-badge {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #fde047;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(253, 224, 71, 0.16);
+      border: 1px solid rgba(253, 224, 71, 0.42);
+    }
+    .crash-scores {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+    .crash-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .crash-stat span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.62);
+    }
+    .crash-stat strong {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      color: #ffffff;
+    }
+    .crash-stat.best strong {
+      color: #38bdf8;
+    }
+    .crash-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .crash-restart-hint {
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.92);
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.12s ease;
+    }
+    .crash-restart-hint:hover { background: rgba(255, 255, 255, 0.2); }
+    .crash-restart-hint:active { transform: scale(0.97); }
+    .crash-restart-hint b { color: #fde047; }
+
+    .menu-highscore {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(10, 20, 34, 0.38);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      padding: 6px 16px;
+      text-shadow: 0 2px 10px rgba(8, 18, 32, 0.45);
+      font-variant-numeric: tabular-nums;
+    }
+    .menu-highscore strong {
+      color: #fde047;
+      margin-left: 6px;
+      font-weight: 900;
     }
 
     /* Ultra-minimal in-game HUD */
@@ -406,8 +521,8 @@
     .skin-swatch:hover { transform: scale(1.12); border-color: #fff; }
     .skin-swatch.active { border-color: #38bdf8; transform: scale(1.14); }
 
-    /* Keybinds Modal */
-    #keybindsPanel {
+    /* Keybinds & Peak Gen Modals */
+    #keybindsPanel, #peakGenPanel {
       position: fixed;
       inset: 0;
       z-index: 28;
@@ -419,7 +534,40 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
-    #keybindsPanel.open { display: flex; }
+    #keybindsPanel.open, #peakGenPanel.open { display: flex; }
+    .peakgen-box {
+      width: min(460px, 95vw);
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(12, 22, 36, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+    .peakgen-toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .peakgen-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .peakgen-slider-row input[type="range"] {
+      width: 100%;
+      height: 5px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+    .peakgen-slider-row.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
     .keybinds-box {
       width: min(440px, 95vw);
       max-height: 88vh;
@@ -565,6 +713,27 @@
 
   <div id="popupFeed" class="ui-hideable ingame-only"></div>
 
+  <!-- Crash / Wipeout Score Overlay -->
+  <div id="crashOverlay">
+    <div class="crash-card">
+      <div class="crash-badge" id="crashNewBest" style="display:none;">NEW HIGHSCORE!</div>
+      <div class="crash-scores">
+        <div class="crash-stat">
+          <span>SCORE</span>
+          <strong id="crashScoreVal">0</strong>
+        </div>
+        <div class="crash-divider"></div>
+        <div class="crash-stat best">
+          <span>HIGHSCORE</span>
+          <strong id="crashBestVal">0</strong>
+        </div>
+      </div>
+      <button class="crash-restart-hint" id="crashRestartBtn" type="button">
+        PRESS <b id="crashRestartKey">R</b> TO RESTART
+      </button>
+    </div>
+  </div>
+
   <div class="mobile-controls ui-hideable ingame-only">
     <div class="touch-cluster">
       <button class="touch-btn" id="touchLeft" type="button" aria-label="Left">◀</button>
@@ -583,6 +752,7 @@
       <div class="menu-sub">Endless Alpine Free-Ski</div>
     </div>
     <div class="menu-actions">
+      <div class="menu-highscore" id="menuHighscore">HIGHSCORE <strong id="menuHighscoreVal">0</strong></div>
       <button class="menu-btn primary" id="playBtn" type="button">PLAY</button>
       <button class="menu-btn secondary" id="menuCustomBtn" type="button">CUSTOMIZE</button>
       <button class="menu-btn secondary" id="menuSettingsBtn" type="button">SETTINGS</button>
@@ -604,10 +774,13 @@
         <button class="mini-btn" id="muteBtn" type="button">SFX: ON</button>
         <button class="mini-btn" id="blurBtn" type="button">BLUR: ON</button>
         <button class="mini-btn" id="timeBtn" type="button">TIME: DAY</button>
+        <button class="mini-btn" id="fpvLockBtn" type="button">FPV LOCK: OFF</button>
+        <button class="mini-btn" id="uiToggleBtn" type="button" style="grid-column: 1 / -1;">HUD / UI: ON</button>
       </div>
       <div class="setting-btn-row">
         <button class="mini-btn" id="settingsCustomBtn" type="button">CUSTOMIZE</button>
         <button class="mini-btn" id="openKeybindsBtn" type="button">KEYBINDS</button>
+        <button class="mini-btn" id="openPeakGenBtn" type="button">PEAK GEN</button>
         <button class="mini-btn" id="newSeedBtn" type="button">NEW PEAK</button>
       </div>
       <div class="controls-mini" id="controlsHint">
@@ -626,6 +799,67 @@
       <div class="setting-btn-row" style="margin-top:6px;">
         <button class="mini-btn" id="resetKeybindsBtn" type="button">RESET DEFAULTS</button>
         <button class="menu-btn primary" id="closeKeybindsBtn" type="button" style="padding:10px;">DONE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peak Generation Settings Modal (Saved to localStorage) -->
+  <div id="peakGenPanel">
+    <div class="peakgen-box">
+      <div class="settings-title">PEAK GENERATION</div>
+
+      <div class="custom-section-title">Features &amp; Obstacles</div>
+      <div class="peakgen-toggles">
+        <button class="toggle-btn" id="pgToggleTrees" type="button">TREES: ON</button>
+        <button class="toggle-btn" id="pgToggleRocks" type="button">ROCKS: ON</button>
+        <button class="toggle-btn" id="pgToggleJumps" type="button">JUMPS: ON</button>
+        <button class="toggle-btn" id="pgToggleFlags" type="button">FLAGS: ON</button>
+      </div>
+      <button class="toggle-btn" id="pgToggleAlternating" type="button">ALTERNATING SPAWN: ON</button>
+
+      <div class="custom-section-title">Spawn Rates</div>
+      <div class="peakgen-slider-row" id="pgRowTreeRate">
+        <div class="setting-label"><span>Tree Spawnrate</span><strong id="pgTreeRateVal">100%</strong></div>
+        <input id="pgTreeRate" type="range" min="10" max="300" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row" id="pgRowRockRate">
+        <div class="setting-label"><span>Rock Spawnrate</span><strong id="pgRockRateVal">100%</strong></div>
+        <input id="pgRockRate" type="range" min="10" max="300" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row" id="pgRowJumpRate">
+        <div class="setting-label"><span>Jump Spawnrate</span><strong id="pgJumpRateVal">100%</strong></div>
+        <input id="pgJumpRate" type="range" min="25" max="300" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row" id="pgRowFlagRate">
+        <div class="setting-label"><span>Flag Spawnrate</span><strong id="pgFlagRateVal">100%</strong></div>
+        <input id="pgFlagRate" type="range" min="25" max="300" step="5" value="100" />
+      </div>
+
+      <div class="custom-section-title">Slope &amp; Terrain Shaping</div>
+      <div class="peakgen-slider-row">
+        <div class="setting-label"><span>Slope Width</span><strong id="pgSlopeWidthVal">100%</strong></div>
+        <input id="pgSlopeWidth" type="range" min="50" max="200" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row">
+        <div class="setting-label"><span>Slope Steepness</span><strong id="pgSteepnessVal">100%</strong></div>
+        <input id="pgSteepness" type="range" min="60" max="170" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row">
+        <div class="setting-label"><span>Moguls &amp; Rollers</span><strong id="pgBumpinessVal">100%</strong></div>
+        <input id="pgBumpiness" type="range" min="0" max="200" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row">
+        <div class="setting-label"><span>Valley Windiness</span><strong id="pgWindinessVal">100%</strong></div>
+        <input id="pgWindiness" type="range" min="0" max="180" step="5" value="100" />
+      </div>
+      <div class="peakgen-slider-row" id="pgRowJumpSize">
+        <div class="setting-label"><span>Jump Size</span><strong id="pgJumpSizeVal">100%</strong></div>
+        <input id="pgJumpSize" type="range" min="60" max="180" step="5" value="100" />
+      </div>
+
+      <div class="setting-btn-row" style="margin-top:6px;">
+        <button class="mini-btn" id="resetPeakGenBtn" type="button">RESET DEFAULTS</button>
+        <button class="menu-btn primary" id="closePeakGenBtn" type="button" style="padding:10px;">DONE</button>
       </div>
     </div>
   </div>
@@ -776,6 +1010,82 @@
       const BLUR_KEY = 'algot_ski3d_blur_v1';
       const MUTE_KEY = 'algot_ski3d_muted_v1';
       const CAM_ZOOM_KEY = 'algot_ski3d_cam_zoom_v1';
+      const FPV_LOCK_KEY = 'algot_ski3d_fpv_lock_v1';
+      const UI_VISIBLE_KEY = 'algot_ski3d_ui_v1';
+      const HIGHSCORE_KEY = 'algot_ski3d_highscore_v1';
+      const PEAK_GEN_KEY = 'algot_ski3d_peak_gen_v1';
+      const fpvLockBtn = document.getElementById('fpvLockBtn');
+      let fpvLockEnabled = lsGet(FPV_LOCK_KEY) === '1';
+      if (fpvLockBtn) {
+        fpvLockBtn.textContent = fpvLockEnabled ? 'FPV LOCK: ON' : 'FPV LOCK: OFF';
+        fpvLockBtn.addEventListener('click', () => {
+          fpvLockEnabled = !fpvLockEnabled;
+          fpvLockBtn.textContent = fpvLockEnabled ? 'FPV LOCK: ON' : 'FPV LOCK: OFF';
+          lsSet(FPV_LOCK_KEY, fpvLockEnabled ? '1' : '0');
+        });
+      }
+
+      const uiToggleBtn = document.getElementById('uiToggleBtn');
+      let uiVisible = lsGet(UI_VISIBLE_KEY) !== '0';
+      function applyUiVisibility(save = false) {
+        document.body.classList.toggle('ui-hidden', !uiVisible);
+        if (uiToggleBtn) uiToggleBtn.textContent = uiVisible ? 'HUD / UI: ON' : 'HUD / UI: OFF';
+        if (save) lsSet(UI_VISIBLE_KEY, uiVisible ? '1' : '0');
+      }
+      if (uiToggleBtn) {
+        uiToggleBtn.addEventListener('click', () => {
+          uiVisible = !uiVisible;
+          applyUiVisibility(true);
+        });
+      }
+      applyUiVisibility(false);
+
+      const menuHighscoreVal = document.getElementById('menuHighscoreVal');
+      const crashScoreVal = document.getElementById('crashScoreVal');
+      const crashBestVal = document.getElementById('crashBestVal');
+      const crashNewBest = document.getElementById('crashNewBest');
+      const crashRestartKey = document.getElementById('crashRestartKey');
+      const crashRestartBtn = document.getElementById('crashRestartBtn');
+      const savedHighRaw = lsGet(HIGHSCORE_KEY);
+      let highScore = Math.max(0, parseInt(savedHighRaw || '0', 10) || 0);
+      let runBeatHighScore = false;
+      function syncHighScoreUI() {
+        if (menuHighscoreVal) menuHighscoreVal.textContent = highScore.toLocaleString('en-US');
+      }
+      function checkAndSaveHighScore(scoreNum) {
+        const rounded = Math.max(0, Math.round(scoreNum));
+        if (rounded > highScore) {
+          highScore = rounded;
+          runBeatHighScore = true;
+          lsSet(HIGHSCORE_KEY, String(highScore));
+          syncHighScoreUI();
+        }
+        return rounded;
+      }
+      syncHighScoreUI();
+
+      const DEFAULT_PEAK_GEN = {
+        trees: true,
+        rocks: true,
+        jumps: true,
+        flags: true,
+        alternatingSpawn: true,
+        treeRate: 100,
+        rockRate: 100,
+        jumpRate: 100,
+        flagRate: 100,
+        slopeWidth: 100,
+        steepness: 100,
+        bumpiness: 100,
+        windiness: 100,
+        jumpSize: 100
+      };
+      let peakGen = { ...DEFAULT_PEAK_GEN };
+      try {
+        const savedPg = JSON.parse(lsGet(PEAK_GEN_KEY) || 'null');
+        if (savedPg && typeof savedPg === 'object') peakGen = { ...DEFAULT_PEAK_GEN, ...savedPg };
+      } catch {}
+      let peakGenOpen = false;
       let motionBlurEnabled = lsGet(BLUR_KEY) !== '0';
       blurBtn.textContent = motionBlurEnabled ? 'BLUR: ON' : 'BLUR: OFF';
       blurBtn.addEventListener('click', () => {
@@ -1191,8 +1501,9 @@
       randomizeMountainParams();
 
       function getValleyCenter(z) {
-        return Math.sin(z * mGen.vFreq1 + mGen.vPhase1) * mGen.vAmp1 +
-               Math.cos(z * mGen.vFreq2 + mGen.vPhase2) * mGen.vAmp2;
+        const windScale = (peakGen.windiness ?? 100) / 100;
+        return (Math.sin(z * mGen.vFreq1 + mGen.vPhase1) * mGen.vAmp1 +
+                Math.cos(z * mGen.vFreq2 + mGen.vPhase2) * mGen.vAmp2) * windScale;
       }
 
       // Deterministic PRNG per chunk
@@ -1207,19 +1518,29 @@
       // Deterministic snow-sculpted kickers per chunk (baked directly into deformable snow mesh!)
       const kickerCache = new Map();
       function getChunkKickers(chunkIdx) {
-        if (chunkIdx < 0) return [];
+        if (chunkIdx < 0 || !peakGen.jumps) return [];
         if (kickerCache.has(chunkIdx)) return kickerCache.get(chunkIdx);
         const rand = makeChunkRand(chunkIdx + 50000);
         const zStart = chunkIdx * CHUNK_LEN;
         const list = [];
-        const count = rand() < 0.5 ? 2 : 1;
+        const baseCount = rand() < 0.5 ? 2 : 1;
+        const rate = (peakGen.jumpRate ?? 100) / 100;
+        let count = baseCount;
+        if (peakGen.jumpRate !== 100 || !peakGen.alternatingSpawn) {
+          const wave = peakGen.alternatingSpawn ? (0.75 + 0.5 * Math.sin(chunkIdx * 0.9 + mGen.vPhase2)) : 1.0;
+          const expected = (peakGen.alternatingSpawn ? baseCount : 1.5) * rate * wave;
+          count = Math.min(8, Math.floor(expected) + (rand() < (expected - Math.floor(expected)) ? 1 : 0));
+        }
+        const widthScale = (peakGen.slopeWidth ?? 100) / 100;
+        const spreadX = Math.min(MAP_W * 0.42, 20 * widthScale);
+        const sizeMult = (peakGen.jumpSize ?? 100) / 100;
         for (let i = 0; i < count; i++) {
           const kz = zStart + 26 + rand() * (CHUNK_LEN - 48);
           if (chunkIdx === 0 && kz < 46) continue;
           const vc = getValleyCenter(kz);
-          const kx = vc + (rand() - 0.5) * 20;
-          // Random kicker sizes: small rollers (0.58x) -> medium (1.0x) -> mega booters (1.55x)
-          const sizeScale = 0.58 + rand() * 0.97;
+          const kx = Math.max(-(MAP_W / 2 - 10), Math.min(MAP_W / 2 - 10, vc + (rand() - 0.5) * spreadX));
+          // Random kicker sizes: small rollers (0.58x) -> medium (1.0x) -> mega booters (1.55x), scaled by Jump Size
+          const sizeScale = (0.58 + rand() * 0.97) * sizeMult;
           list.push({
             x: kx,
             z: kz,
@@ -1262,16 +1583,20 @@
 
       // Continuous infinite downhill heightfield (includes snow-sculpted kickers!)
       function baseMountainHeight(x, z) {
-        let y = 300 - z * mGen.slopeRate;
+        const steepScale = (peakGen.steepness ?? 100) / 100;
+        const widthScale = (peakGen.slopeWidth ?? 100) / 100;
+        const bumpScale = (peakGen.bumpiness ?? 100) / 100;
+        let y = 300 - z * (mGen.slopeRate * steepScale);
         const valleyCenter = getValleyCenter(z);
         const distFromCenter = x - valleyCenter;
-        const edgeRatio = Math.max(0, (Math.abs(distFromCenter) - mGen.canyonW) / 48);
+        const effCanyonW = mGen.canyonW * widthScale;
+        const edgeRatio = Math.max(0, (Math.abs(distFromCenter) - effCanyonW) / (48 * Math.max(0.65, widthScale)));
         y += edgeRatio * edgeRatio * mGen.wallSteep;
 
-        y += Math.sin(x * mGen.mFreqX1 + z * mGen.mFreqZ1 + mGen.mPhase1) * mGen.mAmp1;
-        y += Math.cos(x * mGen.mFreqX2 - z * mGen.mFreqZ2 + mGen.mPhase2) * mGen.mAmp2;
-        y += Math.sin(z * mGen.rollerFreq + mGen.rollerPhase) * mGen.rollerAmp;
-        y += Math.sin(x * 0.25 + z * 0.2 + mGen.mPhase1) * 0.14;
+        y += Math.sin(x * mGen.mFreqX1 + z * mGen.mFreqZ1 + mGen.mPhase1) * mGen.mAmp1 * bumpScale;
+        y += Math.cos(x * mGen.mFreqX2 - z * mGen.mFreqZ2 + mGen.mPhase2) * mGen.mAmp2 * bumpScale;
+        y += Math.sin(z * mGen.rollerFreq + mGen.rollerPhase) * mGen.rollerAmp * bumpScale;
+        y += Math.sin(x * 0.25 + z * 0.2 + mGen.mPhase1) * 0.14 * bumpScale;
         y += kickerBoostAt(x, z);
         return y;
       }
@@ -1429,8 +1754,9 @@
 
           const valleyCenter = getValleyCenter(vz);
           const sideDist = Math.abs(vx - valleyCenter);
-          if (sideDist > 58) {
-            const rockT = Math.min(1, (sideDist - 58) / 26);
+          const rockStart = 58 * Math.max(0.6, (peakGen.slopeWidth ?? 100) / 100);
+          if (sideDist > rockStart) {
+            const rockT = Math.min(1, (sideDist - rockStart) / 26);
             tmpCol.copy(colShade).lerp(colRock, rockT);
           } else {
             const jitter = ((Math.sin(vx * 1.7 + vz * 1.3) + 1) * 0.5) * 0.3;
@@ -1463,35 +1789,40 @@
 
         // 2-3 Slalom gates per chunk (flexible breakaway poles that bend around you!)
         if (chunkIdx >= 0) {
-          for (let gz = zStart + (chunkIdx === 0 ? 42 : 26); gz < zStart + CHUNK_LEN - 16; gz += 46) {
-            const vc = getValleyCenter(gz);
-            const gx = vc + (rand() - 0.5) * 20;
-            const width = 10.5;
-            const flagMat = Math.floor(gz / 46) % 2 === 0 ? redFlagMat : blueFlagMat;
-            [-width / 2, width / 2].forEach((side) => {
-              const px = gx + side;
-              const py = baseMountainHeight(px, gz);
-              const pivot = new THREE.Group();
-              pivot.position.set(px, py, gz);
+          const widthScale = (peakGen.slopeWidth ?? 100) / 100;
+          if (peakGen.flags) {
+            const gateStep = Math.max(15, 46 / Math.max(0.25, (peakGen.flagRate ?? 100) / 100));
+            const gateSpread = Math.min(MAP_W * 0.42, 20 * widthScale);
+            for (let gz = zStart + (chunkIdx === 0 ? 42 : 26); gz < zStart + CHUNK_LEN - 16; gz += gateStep) {
+              const vc = getValleyCenter(gz);
+              const gx = Math.max(-(MAP_W / 2 - 12), Math.min(MAP_W / 2 - 12, vc + (rand() - 0.5) * gateSpread));
+              const width = 10.5;
+              const flagMat = Math.floor(gz / gateStep) % 2 === 0 ? redFlagMat : blueFlagMat;
+              [-width / 2, width / 2].forEach((side) => {
+                const px = gx + side;
+                const py = baseMountainHeight(px, gz);
+                const pivot = new THREE.Group();
+                pivot.position.set(px, py, gz);
 
-              const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4.2, 5), poleMat);
-              pole.position.y = 2.0;
-              pole.castShadow = true;
-              pivot.add(pole);
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4.2, 5), poleMat);
+                pole.position.y = 2.0;
+                pole.castShadow = true;
+                pivot.add(pole);
 
-              const flag = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.85, 0.08), flagMat);
-              flag.position.set(side < 0 ? 0.7 : -0.7, 3.6, 0);
-              pivot.add(flag);
+                const flag = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.85, 0.08), flagMat);
+                flag.position.set(side < 0 ? 0.7 : -0.7, 3.6, 0);
+                pivot.add(flag);
 
-              group.add(pivot);
-              chunkPoles.push({
-                x: px, y: py, z: gz, r: 0.72, h: 4.1,
-                pivot,
-                bend: { ax: 0, az: 0, velX: 0, velZ: 0 },
-                lastHit: 0
+                group.add(pivot);
+                chunkPoles.push({
+                  x: px, y: py, z: gz, r: 0.72, h: 4.1,
+                  pivot,
+                  bend: { ax: 0, az: 0, velX: 0, velZ: 0 },
+                  lastHit: 0
+                });
               });
-            });
-            chunkGates.push({ x: gx, z: gz, width, passed: false });
+              chunkGates.push({ x: gx, z: gz, width, passed: false });
+            }
           }
 
           // Snow-sculpted kickers (terrain itself forms the snow ramp — add orange lip markers!)
@@ -1509,50 +1840,59 @@
             chunkKickers.push({ x: k.x, z: k.z, halfW: k.halfW, len: k.len, lipZ });
           }
 
-          // Dynamic per-chunk tree & rock density wave (oscillates + randomizes every chunk!)
-          const densityWave = 0.55 + 0.55 * Math.sin(chunkIdx * 0.85 + mGen.vPhase1) + (rand() - 0.5) * 0.75;
-          const propCount = Math.max(12, Math.min(95, Math.round(46 * Math.max(0.22, densityWave))));
-          const treeRatio = 0.55 + rand() * 0.35; // some chunks rockier, some dense pine glades
+          // Dynamic per-chunk tree & rock density wave (alternating wave by default, or steady if toggled off)
+          if (peakGen.trees || peakGen.rocks) {
+            const densityWave = peakGen.alternatingSpawn
+              ? (0.55 + 0.55 * Math.sin(chunkIdx * 0.85 + mGen.vPhase1) + (rand() - 0.5) * 0.75)
+              : 1.0;
+            const basePropCount = Math.max(12, Math.min(95, Math.round(46 * Math.max(0.22, densityWave))));
+            const baseTreeRatio = 0.55 + rand() * 0.35; // some chunks rockier, some dense pine glades
+            const treeCount = peakGen.trees ? Math.min(180, Math.round(basePropCount * baseTreeRatio * ((peakGen.treeRate ?? 100) / 100))) : 0;
+            const rockCount = peakGen.rocks ? Math.min(140, Math.round(basePropCount * (1 - baseTreeRatio) * ((peakGen.rockRate ?? 100) / 100))) : 0;
 
-          for (let i = 0; i < propCount; i++) {
-            const z = zStart + rand() * CHUNK_LEN;
-            if (chunkIdx === 0 && z < 26) continue;
-            const vc = getValleyCenter(z);
-            const onRun = rand() < (0.24 + Math.max(0, densityWave - 0.5) * 0.16);
-            const x = onRun
-              ? vc + (rand() - 0.5) * 48
-              : vc + (rand() < 0.5 ? -1 : 1) * (24 + rand() * 52);
+            const spawnProp = (kind) => {
+              const z = zStart + rand() * CHUNK_LEN;
+              if (chunkIdx === 0 && z < 26) return;
+              const vc = getValleyCenter(z);
+              const onRun = rand() < (0.24 + Math.max(0, densityWave - 0.5) * 0.16);
+              const x = onRun
+                ? vc + (rand() - 0.5) * (48 * widthScale)
+                : vc + (rand() < 0.5 ? -1 : 1) * (24 * widthScale + rand() * 52);
 
-            if (Math.abs(x) > MAP_W / 2 - 6) continue;
-            if (chunkGates.some(g => Math.abs(g.z - z) < 11 && Math.abs(g.x - x) < 10)) continue;
-            if (chunkKickers.some(k => Math.abs(k.z - z) < 15 && Math.abs(k.x - x) < 12)) continue;
+              if (Math.abs(x) > MAP_W / 2 - 6) return;
+              if (chunkGates.some(g => Math.abs(g.z - z) < 11 && Math.abs(g.x - x) < 10)) return;
+              if (chunkKickers.some(k => Math.abs(k.z - z) < 15 && Math.abs(k.x - x) < 12)) return;
 
-            const y = baseMountainHeight(x, z);
-            if (rand() < treeRatio) {
-              const scale = 0.85 + rand() * 0.9;
-              const tree = makePineTree(scale);
-              tree.position.set(x, y - 0.3, z);
-              tree.rotation.y = rand() * Math.PI * 2;
-              group.add(tree);
-              chunkObstacles.push({
-                kind: 'tree', x, y: y - 0.3, z,
-                trunkR: 0.34 * scale, trunkH: 2.2 * scale,
-                canopyBaseY: (y - 0.3) + 1.9 * scale,
-                canopyTopY: (y - 0.3) + 7.6 * scale,
-                canopyMaxR: 1.45 * scale,
-                canopy: tree.userData.canopy,
-                jiggle: { ax: 0, az: 0, velX: 0, velZ: 0 }
-              });
-            } else {
-              const scale = 0.8 + rand() * 1.1;
-              const rock = makeBoulder(scale, rand);
-              rock.position.set(x, y + 0.35 * scale, z);
-              group.add(rock);
-              chunkObstacles.push({
-                kind: 'rock', x, y: y + 0.35 * scale, z,
-                rx: 1.18 * scale * 1.25, ry: 1.18 * scale * 0.75, rz: 1.18 * scale
-              });
-            }
+              const y = baseMountainHeight(x, z);
+              if (kind === 'tree') {
+                const scale = 0.85 + rand() * 0.9;
+                const tree = makePineTree(scale);
+                tree.position.set(x, y - 0.3, z);
+                tree.rotation.y = rand() * Math.PI * 2;
+                group.add(tree);
+                chunkObstacles.push({
+                  kind: 'tree', x, y: y - 0.3, z,
+                  trunkR: 0.34 * scale, trunkH: 2.2 * scale,
+                  canopyBaseY: (y - 0.3) + 1.9 * scale,
+                  canopyTopY: (y - 0.3) + 7.6 * scale,
+                  canopyMaxR: 1.45 * scale,
+                  canopy: tree.userData.canopy,
+                  jiggle: { ax: 0, az: 0, velX: 0, velZ: 0 }
+                });
+              } else {
+                const scale = 0.8 + rand() * 1.1;
+                const rock = makeBoulder(scale, rand);
+                rock.position.set(x, y + 0.35 * scale, z);
+                group.add(rock);
+                chunkObstacles.push({
+                  kind: 'rock', x, y: y + 0.35 * scale, z,
+                  rx: 1.18 * scale * 1.25, ry: 1.18 * scale * 0.75, rz: 1.18 * scale
+                });
+              }
+            };
+
+            for (let i = 0; i < treeCount; i++) spawnProp('tree');
+            for (let i = 0; i < rockCount; i++) spawnProp('rock');
           }
         }
 
@@ -3032,6 +3372,7 @@
         skier.landingStickTimer = 0;
         skier.onRamp = false;
         skier.score = 0;
+        runBeatHighScore = false;
         resetTrickState(false);
         rig.leanPivot.rotation.set(0, 0, 0);
         rig.root.position.set(skier.x, skier.y - skier.sinkVisual, skier.z);
@@ -3041,6 +3382,10 @@
       function triggerRagdollCrash() {
         if (state === 'ragdoll') return;
         state = 'ragdoll';
+        const finalScore = checkAndSaveHighScore(skier.score);
+        if (crashScoreVal) crashScoreVal.textContent = finalScore.toLocaleString('en-US');
+        if (crashBestVal) crashBestVal.textContent = highScore.toLocaleString('en-US');
+        if (crashNewBest) crashNewBest.style.display = (runBeatHighScore && finalScore > 0) ? 'inline-block' : 'none';
         trickBanner.classList.remove('active');
         popupFeed.innerHTML = '';
         if (carveGain && audioCtx) carveGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.06);
@@ -3049,9 +3394,19 @@
         spawnRagdoll(skier.vx, skier.vy, skier.vz);
       }
 
+      if (crashRestartBtn) {
+        crashRestartBtn.addEventListener('click', () => {
+          if (state === 'ragdoll') {
+            resetRun(false);
+            state = 'playing';
+          }
+        });
+      }
+
       function updateHud() {
         speedVal.textContent = String(Math.round(Math.hypot(skier.vx, skier.vz) * 2.8));
-        scoreVal.textContent = Math.round(skier.score).toLocaleString('en-US');
+        const curScore = checkAndSaveHighScore(skier.score);
+        scoreVal.textContent = curScore.toLocaleString('en-US');
       }
 
       function openSettings() {
@@ -3095,7 +3450,7 @@
       }
 
       window.addEventListener('wheel', (e) => {
-        if (settingsOpen) return;
+        if (settingsOpen || customizerOpen || keybindsOpen || peakGenOpen || fpvLockEnabled) return;
         e.preventDefault();
         // Scroll all the way in (0.0) for First-Person View, or out up to 2.6
         camZoomTarget = Math.max(0.0, Math.min(2.6, camZoomTarget + e.deltaY * 0.0012));
@@ -3103,6 +3458,153 @@
         camZoomSaveTimer = setTimeout(saveCamZoomNow, 150);
       }, { passive: false });
       window.addEventListener('pagehide', saveCamZoomNow);
+
+      // =====================================================================
+      // PEAK GENERATION SETTINGS MODAL (SAVED TO LOCALSTORAGE)
+      // =====================================================================
+      const peakGenPanel = document.getElementById('peakGenPanel');
+      const pgToggleTrees = document.getElementById('pgToggleTrees');
+      const pgToggleRocks = document.getElementById('pgToggleRocks');
+      const pgToggleJumps = document.getElementById('pgToggleJumps');
+      const pgToggleFlags = document.getElementById('pgToggleFlags');
+      const pgToggleAlternating = document.getElementById('pgToggleAlternating');
+      const pgSliders = [
+        ['treeRate', 'pgTreeRate', 'pgTreeRateVal'],
+        ['rockRate', 'pgRockRate', 'pgRockRateVal'],
+        ['jumpRate', 'pgJumpRate', 'pgJumpRateVal'],
+        ['flagRate', 'pgFlagRate', 'pgFlagRateVal'],
+        ['slopeWidth', 'pgSlopeWidth', 'pgSlopeWidthVal'],
+        ['steepness', 'pgSteepness', 'pgSteepnessVal'],
+        ['bumpiness', 'pgBumpiness', 'pgBumpinessVal'],
+        ['windiness', 'pgWindiness', 'pgWindinessVal'],
+        ['jumpSize', 'pgJumpSize', 'pgJumpSizeVal']
+      ];
+      const resetPeakGenBtn = document.getElementById('resetPeakGenBtn');
+      let resetPeakGenConfirmTimer = null;
+
+      function clearResetPeakGenConfirm() {
+        if (resetPeakGenConfirmTimer) { clearTimeout(resetPeakGenConfirmTimer); resetPeakGenConfirmTimer = null; }
+        if (!resetPeakGenBtn) return;
+        resetPeakGenBtn.dataset.confirming = '0';
+        resetPeakGenBtn.textContent = 'RESET DEFAULTS';
+        resetPeakGenBtn.style.background = '';
+        resetPeakGenBtn.style.borderColor = '';
+      }
+
+      function savePeakGen() {
+        lsSet(PEAK_GEN_KEY, JSON.stringify(peakGen));
+      }
+
+      function syncPeakGenUI() {
+        const setToggle = (btn, label, on) => {
+          if (!btn) return;
+          btn.textContent = `${label}: ${on ? 'ON' : 'OFF'}`;
+          btn.classList.toggle('off', !on);
+        };
+        setToggle(pgToggleTrees, 'TREES', !!peakGen.trees);
+        setToggle(pgToggleRocks, 'ROCKS', !!peakGen.rocks);
+        setToggle(pgToggleJumps, 'JUMPS', !!peakGen.jumps);
+        setToggle(pgToggleFlags, 'FLAGS', !!peakGen.flags);
+        setToggle(pgToggleAlternating, 'ALTERNATING SPAWN', !!peakGen.alternatingSpawn);
+
+        for (const [key, inpId, valId] of pgSliders) {
+          const inp = document.getElementById(inpId);
+          const lbl = document.getElementById(valId);
+          const v = Number(peakGen[key] ?? DEFAULT_PEAK_GEN[key]);
+          if (inp) inp.value = String(v);
+          if (lbl) lbl.textContent = `${v}%`;
+        }
+        const rowTree = document.getElementById('pgRowTreeRate');
+        const rowRock = document.getElementById('pgRowRockRate');
+        const rowJump = document.getElementById('pgRowJumpRate');
+        const rowFlag = document.getElementById('pgRowFlagRate');
+        const rowJumpSize = document.getElementById('pgRowJumpSize');
+        if (rowTree) rowTree.classList.toggle('disabled', !peakGen.trees);
+        if (rowRock) rowRock.classList.toggle('disabled', !peakGen.rocks);
+        if (rowJump) rowJump.classList.toggle('disabled', !peakGen.jumps);
+        if (rowFlag) rowFlag.classList.toggle('disabled', !peakGen.flags);
+        if (rowJumpSize) rowJumpSize.classList.toggle('disabled', !peakGen.jumps);
+      }
+
+      function rebuildPeakForSettings() {
+        kickerCache.clear();
+        clearAllChunks();
+        ensureChunksAround(skier.z);
+        const groundY = sampleTerrainHeight(skier.x, skier.z);
+        if (state === 'menu' || skier.grounded || skier.y < groundY) {
+          skier.y = groundY;
+          if (rig && rig.root) rig.root.position.set(skier.x, skier.y - skier.sinkVisual, skier.z);
+        }
+      }
+
+      const bindPgToggle = (btn, key) => {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          peakGen[key] = !peakGen[key];
+          savePeakGen();
+          syncPeakGenUI();
+          rebuildPeakForSettings();
+        });
+      };
+      bindPgToggle(pgToggleTrees, 'trees');
+      bindPgToggle(pgToggleRocks, 'rocks');
+      bindPgToggle(pgToggleJumps, 'jumps');
+      bindPgToggle(pgToggleFlags, 'flags');
+      bindPgToggle(pgToggleAlternating, 'alternatingSpawn');
+
+      for (const [key, inpId, valId] of pgSliders) {
+        const inp = document.getElementById(inpId);
+        const lbl = document.getElementById(valId);
+        if (!inp) continue;
+        inp.addEventListener('input', () => {
+          const v = Number(inp.value);
+          peakGen[key] = v;
+          if (lbl) lbl.textContent = `${v}%`;
+          savePeakGen();
+        });
+        inp.addEventListener('change', () => {
+          peakGen[key] = Number(inp.value);
+          savePeakGen();
+          rebuildPeakForSettings();
+          inp.blur();
+        });
+      }
+
+      if (resetPeakGenBtn) {
+        resetPeakGenBtn.addEventListener('click', () => {
+          if (resetPeakGenBtn.dataset.confirming !== '1') {
+            resetPeakGenBtn.dataset.confirming = '1';
+            resetPeakGenBtn.textContent = 'ARE YOU SURE?';
+            resetPeakGenBtn.style.background = 'rgba(239, 68, 68, 0.36)';
+            resetPeakGenBtn.style.borderColor = '#ef4444';
+            resetPeakGenConfirmTimer = setTimeout(clearResetPeakGenConfirm, 3500);
+            return;
+          }
+          clearResetPeakGenConfirm();
+          peakGen = { ...DEFAULT_PEAK_GEN };
+          savePeakGen();
+          syncPeakGenUI();
+          rebuildPeakForSettings();
+        });
+      }
+
+      function openPeakGen() {
+        closeSettings();
+        closeCustomizer();
+        closeKeybinds();
+        clearResetPeakGenConfirm();
+        syncPeakGenUI();
+        peakGenOpen = true;
+        peakGenPanel.classList.add('open');
+      }
+      function closePeakGen() {
+        clearResetPeakGenConfirm();
+        peakGenOpen = false;
+        peakGenPanel.classList.remove('open');
+      }
+      document.getElementById('openPeakGenBtn').addEventListener('click', openPeakGen);
+      document.getElementById('closePeakGenBtn').addEventListener('click', closePeakGen);
+      syncPeakGenUI();
 
       // =====================================================================
       // REBINDABLE KEYBINDS SYSTEM (SAVED TO LOCALSTORAGE)
@@ -3172,6 +3674,7 @@
       }
 
       function updateControlsHint() {
+        if (crashRestartKey) crashRestartKey.textContent = formatKeyCode(keybinds.restart);
         if (!controlsHintEl) return;
         controlsHintEl.innerHTML =
           `<b>${formatKeyCode(keybinds.left)}/${formatKeyCode(keybinds.right)}</b> Carve &amp; Spin · ` +
@@ -3265,6 +3768,7 @@
           return;
         }
         if (e.code === 'Escape') {
+          if (peakGenOpen) { closePeakGen(); return; }
           if (keybindsOpen) { closeKeybinds(); return; }
           if (customizerOpen) { closeCustomizer(); return; }
           if (settingsOpen) { closeSettings(); return; }
@@ -3282,7 +3786,7 @@
             return;
           }
         }
-        if (state === 'ragdoll' || settingsOpen || customizerOpen || keybindsOpen) return;
+        if (state === 'ragdoll' || settingsOpen || customizerOpen || keybindsOpen || peakGenOpen) return;
 
         if (matchesBind(e.code, 'left')) keys.left = true;
         if (matchesBind(e.code, 'right')) keys.right = true;
@@ -4084,7 +4588,7 @@
           const zoomLerp = 1 - Math.exp(-9.5 * dt);
           camZoom += (camZoomTarget - camZoom) * zoomLerp;
 
-          const isFirstPerson = state === 'playing' && camZoom < 0.14;
+          const isFirstPerson = state === 'playing' && (fpvLockEnabled || camZoom < 0.14);
           for (const part of rig.fpHiddenParts) part.visible = !isFirstPerson;
           if (!isFirstPerson) rig.packGroup.visible = skierSkin.backpack !== false;
 
